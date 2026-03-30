@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food Delivery - Order Online</title>
+  <meta name="description" content="Food Delivery System with M-Pesa Payments">
+  <meta name="theme-color" content="#ff6600">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Food Delivery">
+  <link rel="manifest" href="pwa/manifest.json">
+  <link rel="apple-touch-icon" href="pwa/icons/icon-192x192.png">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
+    .header { background: #ff6600; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+    .header h1 { font-size: 24px; }
+    .cart-icon { position: relative; cursor: pointer; }
+    .cart-count { position: absolute; top: -8px; right: -8px; background: #f44336; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+    .search-bar { padding: 16px 24px; background: white; border-bottom: 1px solid #eee; }
+    .search-bar input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+    .restaurant-filters { padding: 16px 24px; display: flex; gap: 8px; overflow-x: auto; }
+    .filter-chip { padding: 8px 16px; background: white; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; white-space: nowrap; }
+    .filter-chip.active { background: #ff6600; color: white; border-color: #ff6600; }
+    .restaurants-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 24px; }
+    .restaurant-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; }
+    .restaurant-card:hover { transform: translateY(-4px); }
+    .restaurant-image { height: 200px; background: linear-gradient(45deg, #ff6600, #ff8800); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px; }
+    .restaurant-info { padding: 16px; }
+    .restaurant-name { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
+    .restaurant-category { color: #666; font-size: 14px; margin-bottom: 8px; }
+    .restaurant-meta { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+    .rating { color: #ff6600; }
+    .delivery-time { color: #666; }
+    .delivery-fee { font-weight: bold; color: #333; }
+    .menu-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1000; }
+    .menu-content { background: white; height: 90vh; overflow-y: auto; margin-top: 10vh; border-radius: 20px 20px 0 0; }
+    .menu-header { padding: 20px; border-bottom: 1px solid #eee; position: sticky; top: 0; background: white; z-index: 10; }
+    .menu-items { padding: 20px; }
+    .menu-item { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid #eee; }
+    .item-image { width: 80px; height: 80px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; }
+    .item-details { flex: 1; }
+    .item-name { font-weight: bold; margin-bottom: 4px; }
+    .item-desc { color: #666; font-size: 14px; margin-bottom: 8px; }
+    .item-price { color: #ff6600; font-weight: bold; }
+    .add-to-cart { padding: 8px 16px; background: #ff6600; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    .cart-sidebar { position: fixed; right: -400px; top: 0; bottom: 0; width: 400px; background: white; box-shadow: -2px 0 8px rgba(0,0,0,0.1); transition: right 0.3s; z-index: 1001; }
+    .cart-sidebar.open { right: 0; }
+    .cart-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    .cart-items { padding: 20px; flex: 1; overflow-y: auto; }
+    .cart-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #eee; }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-weight: bold; margin-bottom: 4px; }
+    .cart-item-price { color: #666; }
+    .quantity-controls { display: flex; align-items: center; gap: 8px; }
+    .quantity-btn { width: 24px; height: 24px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; }
+    .cart-footer { padding: 20px; border-top: 1px solid #eee; }
+    .checkout-btn { width: 100%; padding: 16px; background: #ff6600; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .checkout-form { padding: 20px; display: none; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 4px; font-weight: bold; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
+    .promo-section { background: #f9f9f9; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
+    .loyalty-info { background: #fff3e0; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+    .order-scheduling { margin-bottom: 16px; }
+    .payment-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .payment-option { padding: 16px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: center; }
+    .payment-option.selected { border-color: #ff6600; background: #fff8f0; }
+    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; }
+    .back-btn { background: none; border: none; font-size: 20px; cursor: pointer; margin-right: 16px; }
+    .order-history { padding: 20px; }
+    .history-item { background: white; padding: 20px; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .order-id { font-weight: bold; color: #ff6600; }
+    .order-date { color: #666; font-size: 14px; }
+    .order-items { margin-bottom: 12px; }
+    .order-item { display: flex; justify-content: space-between; padding: 4px 0; }
+    .order-total { font-weight: bold; font-size: 18px; color: #333; }
+    .repeat-order-btn { background: #ff6600; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+    .recommendations { background: #fff3e0; padding: 16px; border-radius: 8px; margin: 16px 0; }
+    .recommendation-item { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .recommendation-item img { width: 40px; height: 40px; border-radius: 8px; background: #f0f0f0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div style="display: flex; align-items: center;">
+      <button class="back-btn" onclick="closeMenu()" style="display:none;" id="backBtn">←</button>
+      <h1>Food Delivery</h1>
+    </div>
+    <div class="cart-icon" onclick="toggleCart()">
+      🛒 <span class="cart-count" id="cartCount">0</span>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" placeholder="Search restaurants or dishes..." id="searchInput" onkeyup="filterRestaurants()">
+  </div>
+
+  <div class="restaurant-filters" id="filters">
+    <div class="filter-chip active" onclick="filterByCategory('all')">All</div>
+    <div class="filter-chip" onclick="filterByCategory('Fast Food')">Fast Food</div>
+    <div class="filter-chip" onclick="filterByCategory('Cafe')">Cafe</div>
+    <div class="filter-chip" onclick="filterByCategory('Restaurant')">Restaurant</div>
+    <div class="filter-chip" onclick="filterByCategory('Bakery')">Bakery</div>
+    <div class="filter-chip" onclick="showOrderHistory()">📋 Order History</div>
+  </div>
+
+  <div class="restaurants-grid" id="restaurantsGrid"></div>
+
+  <!-- Menu Modal -->
+  <div class="menu-modal" id="menuModal">
+    <div class="menu-content">
+      <div class="menu-header">
+        <div style="display: flex; align-items: center;">
+          <button class="back-btn" onclick="closeMenu()">←</button>
+          <h2 id="restaurantName">Restaurant Name</h2>
+        </div>
+        <div class="restaurant-meta">
+          <span class="rating" id="restaurantRating">⭐ 4.5</span>
+          <span class="delivery-time" id="restaurantTime">30-40 min</span>
+          <span class="delivery-fee" id="restaurantFee">TZS 2000</span>
+        </div>
+      </div>
+      <div class="menu-items" id="menuItems"></div>
+    </div>
+  </div>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h3>Your Cart</h3>
+      <button class="close-btn" onclick="toggleCart()">×</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+        <span>Total:</span>
+        <span id="cartTotal" style="font-weight: bold; font-size: 18px;">TZS 0</span>
+      </div>
+      <button class="checkout-btn" onclick="showCheckout()">Checkout</button>
+    </div>
+  </div>
+
+  <!-- Checkout Form -->
+  <div class="checkout-form" id="checkoutForm">
+    <h3>Delivery Information</h3>
+    
+    <div class="form-group">
+      <label>Name</label>
+      <input type="text" id="customerName" placeholder="Your name">
+    </div>
+    
+    <div class="form-group">
+      <label>Phone</label>
+      <input type="tel" id="customerPhone" placeholder="Your phone number">
+    </div>
+    
+    <div class="form-group">
+      <label>Delivery Address</label>
+      <textarea id="deliveryAddress" placeholder="Enter your delivery address" rows="3"></textarea>
+    </div>
+
+    <div class="order-scheduling">
+      <div class="form-group">
+        <label>Order Type</label>
+        <select id="orderType">
+          <option value="now">Deliver Now</option>
+          <option value="scheduled">Schedule Later</option>
+        </select>
+      </div>
+      <div class="form-group" id="scheduleGroup" style="display:none;">
+        <label>Delivery Time</label>
+        <input type="datetime-local" id="scheduledTime">
+      </div>
+    </div>
+
+    <div class="promo-section">
+      <div class="form-group">
+        <label>Promo Code</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="promoCode" placeholder="Enter promo code">
+          <button class="add-to-cart" onclick="applyPromo()">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="loyalty-info" id="loyaltyInfo">
+      🎯 You'll earn <span id="loyaltyPoints">0</span> points with this order!
+    </div>
+
+    <div class="form-group">
+      <label>Payment Method</label>
+      <div class="payment-methods">
+        <div class="payment-option selected" onclick="selectPayment('cash')">
+          💵 Cash on Delivery
+        </div>
+        <div class="payment-option" onclick="selectPayment('card')">
+          💳 Card Payment
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Special Instructions</label>
+      <textarea id="specialInstructions" placeholder="Any special requests?" rows="2"></textarea>
+    </div>
+
+    <button class="checkout-btn" onclick="placeOrder()">Place Order</button>
+    <button class="checkout-btn" style="background: #666; margin-top: 8px;" onclick="hideCheckout()">Back to Cart</button>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBKliW4sQwBFEYMptJ8VuWYHTJ73DbHoE",
+      authDomain: "fooddelievry-dce15.firebaseapp.com",
+      projectId: "fooddelievry-dce15",
+      storageBucket: "fooddelievry-dce15.firebasestorage.app",
+      messagingSenderId: "727819507148",
+      appId: "1:727819507148:web:372bee2608d5c7a9587969"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let restaurants = [];
+    let menuItems = [];
+    let cart = [];
+    let currentRestaurant = null;
+    let selectedPayment = 'cash';
+    let appliedPromo = null;
+    let orderHistory = [];
+    let customerPhone = localStorage.getItem('customerPhone') || '';
+
+    // Load data
+    function loadData() {
+      loadRestaurants();
+      loadMenuItems();
+      loadOrderHistory();
+    }
+
+    function loadRestaurants() {
+      db.collection('restaurants').where('isOpen', '==', true).onSnapshot((snapshot) => {
+        restaurants = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderRestaurants();
+      });
+    }
+
+    function loadOrderHistory() {
+      if (!customerPhone) return;
+      
+      db.collection('orders')
+        .where('customerPhone', '==', customerPhone)
+        .orderBy('createdAt', 'desc')
+        .limit(20)
+        .onSnapshot((snapshot) => {
+          orderHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        });
+    }
+
+    function showOrderHistory() {
+      if (!customerPhone) {
+        const phone = prompt('Please enter your phone number to view order history:');
+        if (phone) {
+          customerPhone = phone;
+          localStorage.setItem('customerPhone', phone);
+          loadOrderHistory();
+        } else {
+          return;
+        }
+      }
+
+      const grid = document.getElementById('restaurantsGrid');
+      grid.innerHTML = `
+        <div class="order-history">
+          <h2>Order History</h2>
+          ${orderHistory.length === 0 ? '<p>No orders found</p>' : orderHistory.map(order => `
+            <div class="history-item">
+              <div class="history-header">
+                <div>
+                  <div class="order-id">Order #${order.id.substring(0, 8)}</div>
+                  <div class="order-date">${order.createdAt ? order.createdAt.toDate().toLocaleDateString() + ' ' + order.createdAt.toDate().toLocaleTimeString() : 'N/A'}</div>
+                </div>
+                <div>
+                  <span class="status ${order.status}">${order.status || 'pending'}</span>
+                </div>
+              </div>
+              <div class="order-items">
+                ${order.items ? order.items.map(item => `
+                  <div class="order-item">
+                    <span>${item.name} x${item.quantity}</span>
+                    <span>TZS ${(item.price * item.quantity).toLocaleString()}</span>
+                  </div>
+                `).join('') : ''}
+              </div>
+              <div class="order-total">Total: TZS ${(order.total || 0).toLocaleString()}</div>
+              ${order.status === 'delivered' ? `<button class="repeat-order-btn" onclick="repeatOrder('${order.id}')">🔄 Repeat Order</button>` : ''}
+            </div>
+          `).join('')}
+          ${getRecommendations()}
+        </div>
+      `;
+    }
+
+    function repeatOrder(orderId) {
+      const order = orderHistory.find(o => o.id === orderId);
+      if (!order) return;
+
+      cart = [];
+      order.items.forEach(orderItem => {
+        const menuItem = menuItems.find(m => m.id === orderItem.id);
+        if (menuItem && menuItem.isAvailable) {
+          cart.push({
+            ...menuItem,
+            quantity: orderItem.quantity
+          });
+        }
+      });
+
+      if (cart.length > 0) {
+        updateCart();
+        showNotification('Order added to cart! Some items may not be available.');
+        // Find the restaurant and open it
+        const restaurant = restaurants.find(r => r.id === order.restaurantId);
+        if (restaurant) {
+          openRestaurant(restaurant.id);
+        }
+      } else {
+        showNotification('No items from this order are currently available');
+      }
+    }
+
+    function getRecommendations() {
+      if (orderHistory.length === 0) return '';
+
+      // Get most ordered items
+      const itemCounts = {};
+      orderHistory.forEach(order => {
+        if (order.items) {
+          order.items.forEach(item => {
+            itemCounts[item.name] = (itemCounts[item.name] || 0) + item.quantity;
+          });
+        }
+      });
+
+      const topItems = Object.entries(itemCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3);
+
+      if (topItems.length === 0) return '';
+
+      return `
+        <div class="recommendations">
+          <h3>🌟 Recommended for you</h3>
+          ${topItems.map(([itemName, count]) => {
+            const menuItem = menuItems.find(m => m.name === itemName);
+            if (!menuItem || !menuItem.isAvailable) return '';
+            
+            return `
+              <div class="recommendation-item">
+                <div style="width: 40px; height: 40px; border-radius: 8px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">🍽️</div>
+                <div style="flex: 1;">
+                  <div style="font-weight: bold;">${menuItem.name}</div>
+                  <div style="font-size: 12px; color: #666;">Ordered ${count} times before</div>
+                </div>
+                <button class="add-to-cart" onclick="addToCart('${menuItem.id}')">Add</button>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function renderRestaurants() {
+      const grid = document.getElementById('restaurantsGrid');
+      grid.innerHTML = restaurants.map(restaurant => `
+        <div class="restaurant-card" onclick="openRestaurant('${restaurant.id}')">
+          <div class="restaurant-image">🍔</div>
+          <div class="restaurant-info">
+            <div class="restaurant-name">${restaurant.name}</div>
+            <div class="restaurant-category">${restaurant.category || 'Restaurant'}</div>
+            <div class="restaurant-meta">
+              <span class="rating">⭐ ${restaurant.rating || '4.5'}</span>
+              <span class="delivery-time">${restaurant.deliveryTimeMinutes || 30} min</span>
+              <span class="delivery-fee">TZS ${restaurant.deliveryFee || 2000}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openRestaurant(restaurantId) {
+      currentRestaurant = restaurants.find(r => r.id === restaurantId);
+      if (!currentRestaurant) return;
+
+      document.getElementById('restaurantName').textContent = currentRestaurant.name;
+      document.getElementById('restaurantRating').textContent = `⭐ ${currentRestaurant.rating || '4.5'}`;
+      document.getElementById('restaurantTime').textContent = `${currentRestaurant.deliveryTimeMinutes || 30} min`;
+      document.getElementById('restaurantFee').textContent = `TZS ${currentRestaurant.deliveryFee || 2000}`;
+      
+      const restaurantMenu = menuItems.filter(item => item.restaurantId === restaurantId);
+      document.getElementById('menuItems').innerHTML = restaurantMenu.map(item => `
+        <div class="menu-item">
+          <div class="item-image">🍽️</div>
+          <div class="item-details">
+            <div class="item-name">${item.name}</div>
+            <div class="item-desc">${item.description || 'Delicious food item'}</div>
+            <div class="item-price">TZS ${item.price.toLocaleString()}</div>
+          </div>
+          <button class="add-to-cart" onclick="addToCart('${item.id}')">Add to Cart</button>
+        </div>
+      `).join('');
+
+      document.getElementById('menuModal').style.display = 'block';
+      document.getElementById('backBtn').style.display = 'block';
+    }
+
+    function closeMenu() {
+      document.getElementById('menuModal').style.display = 'none';
+      document.getElementById('backBtn').style.display = 'none';
+    }
+
+    function addToCart(itemId) {
+      const item = menuItems.find(i => i.id === itemId);
+      if (!item) return;
+
+      const existingItem = cart.find(cartItem => cartItem.id === itemId);
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({ ...item, quantity: 1 });
+      }
+
+      updateCart();
+      showNotification(`${item.name} added to cart!`);
+    }
+
+    function updateCart() {
+      const cartItems = document.getElementById('cartItems');
+      const cartCount = document.getElementById('cartCount');
+      const cartTotal = document.getElementById('cartTotal');
+
+      if (cart.length === 0) {
+        cartItems.innerHTML = '<p style="text-align: center; color: #666;">Your cart is empty</p>';
+        cartCount.textContent = '0';
+        cartTotal.textContent = 'TZS 0';
+        return;
+      }
+
+      cartItems.innerHTML = cart.map(item => `
+        <div class="cart-item">
+          <div class="cart-item-info">
+            <div class="cart-item-name">${item.name}</div>
+            <div class="cart-item-price">TZS ${item.price.toLocaleString()}</div>
+          </div>
+          <div class="quantity-controls">
+            <button class="quantity-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
+            <span>${item.quantity}</span>
+            <button class="quantity-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
+          </div>
+        </div>
+      `).join('');
+
+      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const deliveryFee = currentRestaurant ? currentRestaurant.deliveryFee || 2000 : 0;
+      const finalTotal = appliedPromo ? total - (total * appliedPromo.discount / 100) + deliveryFee : total + deliveryFee;
+      
+      cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+      cartTotal.textContent = `TZS ${finalTotal.toLocaleString()}`;
+      
+      updateLoyaltyPoints(finalTotal);
+    }
+
+    function updateQuantity(itemId, change) {
+      const item = cart.find(cartItem => cartItem.id === itemId);
+      if (!item) return;
+
+      item.quantity += change;
+      if (item.quantity <= 0) {
+        cart = cart.filter(cartItem => cartItem.id !== itemId);
+      }
+
+      updateCart();
+    }
+
+    function toggleCart() {
+      const sidebar = document.getElementById('cartSidebar');
+      sidebar.classList.toggle('open');
+    }
+
+    function showCheckout() {
+      if (cart.length === 0) {
+        alert('Your cart is empty!');
+        return;
+      }
+      document.getElementById('checkoutForm').style.display = 'block';
+      toggleCart();
+    }
+
+    function hideCheckout() {
+      document.getElementById('checkoutForm').style.display = 'none';
+    }
+
+    function selectPayment(method) {
+      selectedPayment = method;
+      document.querySelectorAll('.payment-option').forEach(option => {
+        option.classList.remove('selected');
+      });
+      event.target.classList.add('selected');
+    }
+
+    function applyPromo() {
+      const code = document.getElementById('promoCode').value.toUpperCase();
+      // This would check against promotions in Firestore
+      alert('Promo code functionality would be implemented here');
+    }
+
+    function updateLoyaltyPoints(total) {
+      const points = Math.floor(total / 100); // 1 point per TZS 100
+      document.getElementById('loyaltyPoints').textContent = points;
+    }
+
+    async function placeOrder() {
+      const name = document.getElementById('customerName').value;
+      const phone = document.getElementById('customerPhone').value;
+      const address = document.getElementById('deliveryAddress').value;
+      const orderType = document.getElementById('orderType').value;
+      const specialInstructions = document.getElementById('specialInstructions').value;
+
+      if (!name || !phone || !address) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const deliveryFee = currentRestaurant ? currentRestaurant.deliveryFee || 2000 : 0;
+      const finalTotal = appliedPromo ? total - (total * appliedPromo.discount / 100) + deliveryFee : total + deliveryFee;
+
+      const order = {
+        customerName: name,
+        customerPhone: phone,
+        deliveryAddress: address,
+        items: cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        subtotal: total,
+        deliveryFee: deliveryFee,
+        total: finalTotal,
+        paymentMethod: selectedPayment,
+        orderType: orderType,
+        specialInstructions: specialInstructions,
+        restaurantId: currentRestaurant.id,
+        restaurantName: currentRestaurant.name,
+        status: 'pending',
+        loyaltyPoints: Math.floor(finalTotal / 100),
+        promoCode: appliedPromo ? appliedPromo.code : null,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      try {
+        await db.collection('orders').add(order);
+        alert('Order placed successfully! You will receive a confirmation call.');
+        cart = [];
+        updateCart();
+        hideCheckout();
+        closeMenu();
+      } catch (error) {
+        alert('Error placing order: ' + error.message);
+      }
+    }
+
+    function filterRestaurants() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = restaurants.filter(r => 
+        r.name.toLowerCase().includes(searchTerm) ||
+        r.category.toLowerCase().includes(searchTerm)
+      );
+      // Render filtered restaurants
+    }
+
+    function filterByCategory(category) {
+      document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      // Filter restaurants by category
+    }
+
+    function showNotification(message) {
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 20px; border-radius: 8px; z-index: 1000;';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // Handle order type change
+    document.getElementById('orderType').addEventListener('change', function() {
+      const scheduleGroup = document.getElementById('scheduleGroup');
+      scheduleGroup.style.display = this.value === 'scheduled' ? 'block' : 'none';
+    });
+
+    // Initialize
+    loadData();
+
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/pwa/sw.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful');
+        })
+        .catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+    }
+  </script>
+</body>
+</html>

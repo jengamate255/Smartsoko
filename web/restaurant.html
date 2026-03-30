@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant Dashboard - Food Delivery</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
+    .header { background: #ff6600; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 24px; }
+    .restaurant-selector { padding: 8px 16px; border: none; border-radius: 6px; background: white; color: #333; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 24px; }
+    .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .stat-card h3 { color: #666; font-size: 14px; margin-bottom: 8px; }
+    .stat-card .value { font-size: 32px; font-weight: bold; color: #333; }
+    .tabs { display: flex; gap: 8px; padding: 0 24px; overflow-x: auto; }
+    .tab { padding: 12px 24px; background: white; border: none; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 14px; white-space: nowrap; }
+    .tab.active { background: #ff6600; color: white; }
+    .content { margin: 0 24px 24px; background: white; border-radius: 0 8px 8px 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .orders-table { width: 100%; border-collapse: collapse; }
+    .orders-table th, .orders-table td { padding: 16px; text-align: left; border-bottom: 1px solid #eee; }
+    .orders-table th { background: #f9f9f9; font-weight: 600; color: #666; }
+    .status { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .status.pending { background: #fff3e0; color: #ff9800; }
+    .status.preparing { background: #f3e5f5; color: #9c27b0; }
+    .status.ready { background: #e8f5e9; color: #4caf50; }
+    .status.completed { background: #e3f2fd; color: #2196f3; }
+    .priority { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+    .priority.high { background: #ffebee; color: #f44336; }
+    .priority.medium { background: #fff3e0; color: #ff9800; }
+    .priority.low { background: #e8f5e9; color: #4caf50; }
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px; }
+    .menu-item { background: #f9f9f9; padding: 20px; border-radius: 12px; position: relative; }
+    .menu-item h4 { margin-bottom: 8px; }
+    .menu-item .price { color: #ff6600; font-weight: bold; font-size: 18px; margin-bottom: 8px; }
+    .menu-item .category { color: #666; font-size: 14px; margin-bottom: 12px; }
+    .stock-status { position: absolute; top: 20px; right: 20px; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+    .stock-status.in-stock { background: #e8f5e9; color: #2e7d32; }
+    .stock-status.low-stock { background: #fff3e0; color: #ff6f00; }
+    .stock-status.out-of-stock { background: #ffebee; color: #c62828; }
+    .inventory-form { padding: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 4px; font-weight: bold; }
+    .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    .btn-primary { background: #ff6600; color: white; }
+    .btn-secondary { background: #666; color: white; }
+    .btn-success { background: #4caf50; color: white; }
+    .btn-danger { background: #f44336; color: white; }
+    .actions { display: flex; gap: 8px; }
+    .order-time { font-size: 12px; color: #666; }
+    .customer-info { display: flex; align-items: center; gap: 8px; }
+    .customer-avatar { width: 24px; height: 24px; border-radius: 50%; background: #ff6600; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
+    .preparation-time { background: #e3f2fd; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #1976d2; }
+    .notification-badge { background: #f44336; color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin-left: 8px; }
+    .real-time-indicator { width: 8px; height: 8px; background: #4caf50; border-radius: 50%; display: inline-block; margin-left: 8px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Restaurant Dashboard <span class="real-time-indicator"></span></h1>
+    <div>
+      <select class="restaurant-selector" id="restaurantSelector" onchange="switchRestaurant()">
+        <option value="">Select Restaurant</option>
+      </select>
+      <span class="notification-badge" id="notificationBadge" style="display:none;">0</span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <h3>Active Orders</h3>
+      <div class="value" id="activeOrders">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Preparing</h3>
+      <div class="value" id="preparingOrders">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Ready for Pickup</h3>
+      <div class="value" id="readyOrders">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Revenue Today</h3>
+      <div class="value" id="revenueToday">TZS 0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Avg Prep Time</h3>
+      <div class="value" id="avgPrepTime">0m</div>
+    </div>
+    <div class="stat-card">
+      <h3>Low Stock Items</h3>
+      <div class="value" id="lowStockItems">0</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('orders')">Orders</button>
+    <button class="tab" onclick="switchTab('menu')">Menu Management</button>
+    <button class="tab" onclick="switchTab('inventory')">Inventory</button>
+    <button class="tab" onclick="switchTab('analytics')">Analytics</button>
+  </div>
+
+  <!-- Orders Tab -->
+  <div class="content" id="ordersTab">
+    <table class="orders-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Order Time</th>
+          <th>Prep Time</th>
+          <th>Status</th>
+          <th>Priority</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="ordersTable"></tbody>
+    </table>
+  </div>
+
+  <!-- Menu Management Tab -->
+  <div class="content" id="menuTab" style="display:none;">
+    <div style="padding: 20px;">
+      <button class="btn btn-primary" onclick="showAddMenuItem()">+ Add Menu Item</button>
+    </div>
+    <div class="menu-grid" id="menuGrid"></div>
+  </div>
+
+  <!-- Inventory Tab -->
+  <div class="content" id="inventoryTab" style="display:none;">
+    <div class="inventory-form">
+      <h3>Inventory Management</h3>
+      <div class="form-group">
+        <label>Update Stock Levels</label>
+        <div id="stockUpdates"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics Tab -->
+  <div class="content" id="analyticsTab" style="display:none;">
+    <div style="padding: 20px;">
+      <h3>Restaurant Analytics</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;">
+        <div class="stat-card">
+          <h3>Peak Hours</h3>
+          <div id="peakHours">12:00 - 14:00</div>
+        </div>
+        <div class="stat-card">
+          <h3>Most Popular Items</h3>
+          <div id="popularItems">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <h3>Customer Rating</h3>
+          <div id="customerRating">⭐ 4.5</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Menu Item Modal (simplified) -->
+  <div id="addMenuItemModal" style="display:none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="background: white; margin: 50px auto; padding: 30px; border-radius: 12px; max-width: 500px;">
+      <h3>Add Menu Item</h3>
+      <div class="form-group">
+        <label>Item Name</label>
+        <input type="text" id="newItemName">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <input type="text" id="newItemDesc">
+      </div>
+      <div class="form-group">
+        <label>Price (TZS)</label>
+        <input type="number" id="newItemPrice">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <input type="text" id="newItemCategory">
+      </div>
+      <div class="form-group">
+        <label>Initial Stock</label>
+        <input type="number" id="newItemStock">
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="addMenuItem()">Add Item</button>
+        <button class="btn btn-secondary" onclick="hideAddMenuItem()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBKliW4sQwBFEYMptJ8VuWYHTJ73DbHoE",
+      authDomain: "fooddelievry-dce15.firebaseapp.com",
+      projectId: "fooddelievry-dce15",
+      storageBucket: "fooddelievry-dce15.firebasestorage.app",
+      messagingSenderId: "727819507148",
+      appId: "1:727819507148:web:372bee2608d5c7a9587969"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let restaurants = [];
+    let currentRestaurant = null;
+    let orders = [];
+    let menuItems = [];
+    let notifications = [];
+
+    function loadData() {
+      loadRestaurants();
+      setupRealtimeListeners();
+    }
+
+    function loadRestaurants() {
+      db.collection('restaurants').onSnapshot((snapshot) => {
+        restaurants = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        updateRestaurantSelector();
+        if (restaurants.length > 0 && !currentRestaurant) {
+          switchRestaurant(restaurants[0].id);
+        }
+      });
+    }
+
+    function updateRestaurantSelector() {
+      const selector = document.getElementById('restaurantSelector');
+      selector.innerHTML = '<option value="">Select Restaurant</option>' + 
+        restaurants.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+    }
+
+    function switchRestaurant(restaurantId) {
+      if (!restaurantId) {
+        restaurantId = document.getElementById('restaurantSelector').value;
+      }
+      currentRestaurant = restaurants.find(r => r.id === restaurantId);
+      if (currentRestaurant) {
+        document.getElementById('restaurantSelector').value = restaurantId;
+        loadRestaurantData();
+      }
+    }
+
+    function loadRestaurantData() {
+      if (!currentRestaurant) return;
+      
+      loadOrders();
+      loadMenuItems();
+      updateStats();
+    }
+
+    function setupRealtimeListeners() {
+      // Listen for new orders
+      db.collection('orders').onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === 'added') {
+            const order = { id: change.doc.id, ...change.doc.data() };
+            if (order.restaurantId === currentRestaurant?.id) {
+              showNotification(`New order #${order.id.substring(0, 8)} received!`);
+            }
+          }
+        });
+      });
+    }
+
+    function loadOrders() {
+      if (!currentRestaurant) return;
+      
+      db.collection('orders')
+        .where('restaurantId', '==', currentRestaurant.id)
+        .orderBy('createdAt', 'desc')
+        .onSnapshot((snapshot) => {
+          orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderOrders();
+          updateStats();
+        });
+    }
+
+    function loadMenuItems() {
+      if (!currentRestaurant) return;
+      
+      db.collection('menu_items')
+        .where('restaurantId', '==', currentRestaurant.id)
+        .onSnapshot((snapshot) => {
+          menuItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderMenuItems();
+          renderInventory();
+          updateStats();
+        });
+    }
+
+    function renderOrders() {
+      const tbody = document.getElementById('ordersTable');
+      tbody.innerHTML = orders.map(order => {
+        const customerName = order.customerName || 'Guest';
+        const orderTime = order.createdAt ? order.createdAt.toDate().toLocaleTimeString() : 'N/A';
+        const prepTime = order.preparationTime || calculatePrepTime(order);
+        const priority = getOrderPriority(order);
+        
+        return `
+          <tr>
+            <td>#${order.id.substring(0, 8)}</td>
+            <td>
+              <div class="customer-info">
+                <div class="customer-avatar">${customerName.charAt(0).toUpperCase()}</div>
+                <span>${customerName}</span>
+              </div>
+            </td>
+            <td>${order.items ? order.items.map(i => `${i.name} x${i.quantity}`).join(', ') : 'N/A'}</td>
+            <td>TZS ${(order.total || 0).toLocaleString()}</td>
+            <td class="order-time">${orderTime}</td>
+            <td><span class="preparation-time">${prepTime}</span></td>
+            <td><span class="status ${order.status}">${order.status || 'pending'}</span></td>
+            <td><span class="priority ${priority}">${priority.toUpperCase()}</span></td>
+            <td class="actions">
+              ${order.status === 'pending' ? `<button class="btn btn-success" onclick="updateOrderStatus('${order.id}', 'preparing')">Start Prep</button>` : ''}
+              ${order.status === 'preparing' ? `<button class="btn btn-primary" onclick="updateOrderStatus('${order.id}', 'ready')">Ready</button>` : ''}
+              ${order.status === 'ready' ? `<button class="btn btn-success" onclick="updateOrderStatus('${order.id}', 'completed')">Complete</button>` : ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderMenuItems() {
+      const grid = document.getElementById('menuGrid');
+      grid.innerHTML = menuItems.map(item => {
+        const stockStatus = getStockStatus(item);
+        return `
+          <div class="menu-item">
+            <div class="stock-status ${stockStatus.class}">${stockStatus.text}</div>
+            <h4>${item.name}</h4>
+            <div class="category">${item.category || 'Uncategorized'}</div>
+            <div class="price">TZS ${(item.price || 0).toLocaleString()}</div>
+            <p>${item.description || 'No description available'}</p>
+            <div class="actions">
+              <button class="btn btn-secondary" onclick="editMenuItem('${item.id}')">Edit</button>
+              <button class="btn btn-danger" onclick="toggleItemAvailability('${item.id}')">${item.isAvailable ? 'Hide' : 'Show'}</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderInventory() {
+      const container = document.getElementById('stockUpdates');
+      container.innerHTML = menuItems.map(item => `
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <div style="flex: 1;">
+            <strong>${item.name}</strong>
+            <div style="font-size: 12px; color: #666;">Current stock: ${item.stock || 0}</div>
+          </div>
+          <input type="number" id="stock-${item.id}" value="${item.stock || 0}" style="width: 80px; padding: 4px;">
+          <button class="btn btn-primary" onclick="updateStock('${item.id}')">Update</button>
+        </div>
+      `).join('');
+    }
+
+    function getStockStatus(item) {
+      const stock = item.stock || 0;
+      if (stock === 0) return { class: 'out-of-stock', text: 'OUT OF STOCK' };
+      if (stock < 10) return { class: 'low-stock', text: 'LOW STOCK' };
+      return { class: 'in-stock', text: 'IN STOCK' };
+    }
+
+    function getOrderPriority(order) {
+      const timeSinceOrder = order.createdAt ? Date.now() - order.createdAt.toDate().getTime() : 0;
+      const minutesSinceOrder = timeSinceOrder / 60000;
+      
+      if (minutesSinceOrder > 30) return 'high';
+      if (minutesSinceOrder > 15) return 'medium';
+      return 'low';
+    }
+
+    function calculatePrepTime(order) {
+      // Estimate preparation time based on items
+      const itemCount = order.items ? order.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+      const baseTime = 10; // minutes
+      const perItemTime = 3; // minutes per item
+      return `${baseTime + (itemCount * perItemTime)}m`;
+    }
+
+    function updateStats() {
+      if (!currentRestaurant) return;
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayOrders = orders.filter(o => o.createdAt && o.createdAt.toDate() >= today);
+      
+      document.getElementById('activeOrders').textContent = orders.filter(o => o.status !== 'completed').length;
+      document.getElementById('preparingOrders').textContent = orders.filter(o => o.status === 'preparing').length;
+      document.getElementById('readyOrders').textContent = orders.filter(o => o.status === 'ready').length;
+      
+      const revenue = todayOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+      document.getElementById('revenueToday').textContent = 'TZS ' + revenue.toLocaleString();
+      
+      // Calculate average prep time
+      const completedOrders = orders.filter(o => o.status === 'completed' && o.preparationStartedAt && o.completedAt);
+      if (completedOrders.length > 0) {
+        const avgTime = completedOrders.reduce((sum, o) => {
+          const prepTime = o.completedAt.toDate() - o.preparationStartedAt.toDate();
+          return sum + prepTime;
+        }, 0) / completedOrders.length;
+        document.getElementById('avgPrepTime').textContent = Math.round(avgTime / 60000) + 'm';
+      }
+      
+      // Count low stock items
+      const lowStock = menuItems.filter(item => (item.stock || 0) < 10 && (item.stock || 0) > 0).length;
+      document.getElementById('lowStockItems').textContent = lowStock;
+    }
+
+    function updateOrderStatus(orderId, status) {
+      const updateData = { status: status };
+      
+      if (status === 'preparing') {
+        updateData.preparationStartedAt = firebase.firestore.FieldValue.serverTimestamp();
+      } else if (status === 'completed') {
+        updateData.completedAt = firebase.firestore.FieldValue.serverTimestamp();
+      }
+      
+      db.collection('orders').doc(orderId).update(updateData);
+    }
+
+    function updateStock(itemId) {
+      const newStock = parseInt(document.getElementById(`stock-${itemId}`).value);
+      db.collection('menu_items').doc(itemId).update({ stock: newStock });
+    }
+
+    function toggleItemAvailability(itemId) {
+      const item = menuItems.find(i => i.id === itemId);
+      db.collection('menu_items').doc(itemId).update({ isAvailable: !item.isAvailable });
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      document.getElementById('ordersTab').style.display = tab === 'orders' ? 'block' : 'none';
+      document.getElementById('menuTab').style.display = tab === 'menu' ? 'block' : 'none';
+      document.getElementById('inventoryTab').style.display = tab === 'inventory' ? 'block' : 'none';
+      document.getElementById('analyticsTab').style.display = tab === 'analytics' ? 'block' : 'none';
+    }
+
+    function showAddMenuItem() {
+      document.getElementById('addMenuItemModal').style.display = 'block';
+    }
+
+    function hideAddMenuItem() {
+      document.getElementById('addMenuItemModal').style.display = 'none';
+    }
+
+    async function addMenuItem() {
+      const name = document.getElementById('newItemName').value;
+      const desc = document.getElementById('newItemDesc').value;
+      const price = parseInt(document.getElementById('newItemPrice').value);
+      const category = document.getElementById('newItemCategory').value;
+      const stock = parseInt(document.getElementById('newItemStock').value) || 0;
+
+      if (!name || !price || !currentRestaurant) {
+        alert('Please fill required fields');
+        return;
+      }
+
+      await db.collection('menu_items').add({
+        restaurantId: currentRestaurant.id,
+        name: name,
+        description: desc,
+        price: price,
+        category: category || 'General',
+        stock: stock,
+        isAvailable: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      hideAddMenuItem();
+      // Clear form
+      document.getElementById('newItemName').value = '';
+      document.getElementById('newItemDesc').value = '';
+      document.getElementById('newItemPrice').value = '';
+      document.getElementById('newItemCategory').value = '';
+      document.getElementById('newItemStock').value = '';
+    }
+
+    function showNotification(message) {
+      const badge = document.getElementById('notificationBadge');
+      badge.style.display = 'inline-flex';
+      badge.textContent = parseInt(badge.textContent) + 1;
+      
+      // Show toast notification
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #ff6600; color: white; padding: 12px 20px; border-radius: 8px; z-index: 1000; animation: slideIn 0.3s ease';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // Initialize
+    loadData();
+  </script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase Connection Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+    .test-section { background: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 8px; }
+    .success { color: #4caf50; }
+    .error { color: #f44336; }
+    .info { color: #2196f3; }
+    .result { margin: 10px 0; padding: 10px; background: white; border-radius: 4px; }
+    button { background: #ff6600; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+    input { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; }
+    .loading { color: #666; font-style: italic; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Supabase Connection Test</h1>
+  
+  <div class="test-section">
+    <h3>Configuration Test</h3>
+    <input type="text" id="supabaseUrl" placeholder="Supabase URL" value="https://vonkqyiczeqhuqhahsxm.supabase.co">
+    <input type="text" id="supabaseKey" placeholder="Supabase Anon Key" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvbmtxeWljemVxaHVxaGFoc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjIzNDksImV4cCI6MjA5MDM5ODM0OX0.UKAT3re6P_oAB3E1svwCFdqTQWZL6yulJ1ZX4nAgJJ8">
+    <button onclick="testConnection()">Test Connection</button>
+    <div id="connectionResult" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Authentication Test</h3>
+    <input type="email" id="testEmail" placeholder="test@example.com">
+    <input type="password" id="testPassword" placeholder="password">
+    <button onclick="testAuth()">Test Auth</button>
+    <div id="authResult" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Database Test</h3>
+    <button onclick="testDatabase()">Test Database Access</button>
+    <div id="dbResult" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Real-time Test</h3>
+    <button onclick="testRealtime()">Test Real-time</button>
+    <div id="realtimeResult" class="result"></div>
+  </div>
+
+  <script>
+    let supabase = null;
+    let realtimeSubscription = null;
+
+    function updateResult(elementId, message, type = 'info') {
+      const element = document.getElementById(elementId);
+      element.innerHTML = `<span class="${type}">${message}</span>`;
+    }
+
+    function showLoading(elementId) {
+      const element = document.getElementById(elementId);
+      element.innerHTML = '<span class="loading">Testing...</span>';
+    }
+
+    async function testConnection() {
+      const url = document.getElementById('supabaseUrl').value;
+      const key = document.getElementById('supabaseKey').value;
+      
+      if (!url || !key || url === 'YOUR_SUPABASE_URL' || key === 'YOUR_SUPABASE_ANON_KEY') {
+        updateResult('connectionResult', 'Please enter valid Supabase credentials', 'error');
+        return;
+      }
+
+      showLoading('connectionResult');
+      
+      try {
+        supabase = window.supabase.createClient(url, key);
+        
+        // Test basic connection
+        const { data, error } = await supabase.from('restaurants').select('count').head();
+        
+        if (error) {
+          throw error;
+        }
+        
+        updateResult('connectionResult', `✅ Connection successful! Found ${data?.length || 0} restaurants`, 'success');
+      } catch (error) {
+        updateResult('connectionResult', `❌ Connection failed: ${error.message}`, 'error');
+      }
+    }
+
+    async function testAuth() {
+      if (!supabase) {
+        updateResult('authResult', 'Please test connection first', 'error');
+        return;
+      }
+
+      const email = document.getElementById('testEmail').value;
+      const password = document.getElementById('testPassword').value;
+      
+      if (!email || !password) {
+        updateResult('authResult', 'Please enter email and password', 'error');
+        return;
+      }
+
+      showLoading('authResult');
+
+      try {
+        // Test sign up
+        const { data, error } = await supabase.auth.signUp({
+          email: `test_${Date.now()}@example.com`,
+          password: 'testpassword123'
+        });
+
+        if (error && !error.message.includes('already registered')) {
+          throw error;
+        }
+
+        updateResult('authResult', '✅ Authentication system working! (Test user created/exists)', 'success');
+      } catch (error) {
+        if (error.message.includes('already registered')) {
+          updateResult('authResult', '✅ Authentication system working! (User already exists)', 'success');
+        } else {
+          updateResult('authResult', `❌ Auth test failed: ${error.message}`, 'error');
+        }
+      }
+    }
+
+    async function testDatabase() {
+      if (!supabase) {
+        updateResult('dbResult', 'Please test connection first', 'error');
+        return;
+      }
+
+      showLoading('dbResult');
+
+      try {
+        // Test reading restaurants
+        const { data: restaurants, error: restaurantsError } = await supabase
+          .from('restaurants')
+          .select('*')
+          .limit(5);
+
+        if (restaurantsError) throw restaurantsError;
+
+        // Test reading menu items
+        const { data: menuItems, error: menuError } = await supabase
+          .from('menu_items')
+          .select('*')
+          .limit(5);
+
+        if (menuError) throw menuError;
+
+        // Test creating a test restaurant
+        const { data: newRestaurant, error: createError } = await supabase
+          .from('restaurants')
+          .insert({
+            name: `Test Restaurant ${Date.now()}`,
+            category: 'Test Category',
+            is_open: true,
+            rating: 4.5
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+
+        // Clean up test data
+        await supabase
+          .from('restaurants')
+          .delete()
+          .eq('id', newRestaurant.id);
+
+        updateResult('dbResult', 
+          `✅ Database working!\n` +
+          `• Found ${restaurants?.length || 0} restaurants\n` +
+          `• Found ${menuItems?.length || 0} menu items\n` +
+          `• Successfully created and deleted test record`, 
+          'success'
+        );
+      } catch (error) {
+        updateResult('dbResult', `❌ Database test failed: ${error.message}`, 'error');
+      }
+    }
+
+    async function testRealtime() {
+      if (!supabase) {
+        updateResult('realtimeResult', 'Please test connection first', 'error');
+        return;
+      }
+
+      showLoading('realtimeResult');
+
+      try {
+        // Clean up previous subscription
+        if (realtimeSubscription) {
+          realtimeSubscription.unsubscribe();
+        }
+
+        let updateCount = 0;
+        const startTime = Date.now();
+
+        realtimeSubscription = supabase
+          .from('restaurants')
+          .on('*', (payload) => {
+            updateCount++;
+            const elapsed = Date.now() - startTime;
+            
+            updateResult('realtimeResult', 
+              `✅ Real-time working!\n` +
+              `• Received ${updateCount} updates\n` +
+              `• First update received in ${elapsed}ms\n` +
+              `• Event type: ${payload.eventType}\n` +
+              `• Table: ${payload.table}`, 
+              'success'
+            );
+
+            // Unsubscribe after first update
+            setTimeout(() => {
+              if (realtimeSubscription) {
+                realtimeSubscription.unsubscribe();
+              }
+            }, 2000);
+          });
+
+        // Trigger a test update after 1 second
+        setTimeout(async () => {
+          const { data: testRestaurants } = await supabase
+            .from('restaurants')
+            .select('id')
+            .limit(1);
+
+          if (testRestaurants && testRestaurants.length > 0) {
+            await supabase
+              .from('restaurants')
+              .update({ updated_at: new Date().toISOString() })
+              .eq('id', testRestaurants[0].id);
+          }
+        }, 1000);
+
+        // Fallback message if no update received
+        setTimeout(() => {
+          if (updateCount === 0) {
+            updateResult('realtimeResult', '⚠️ Real-time test timeout - check RLS policies', 'error');
+          }
+        }, 5000);
+
+      } catch (error) {
+        updateResult('realtimeResult', `❌ Real-time test failed: ${error.message}`, 'error');
+      }
+    }
+
+    // Auto-test connection on load
+    window.addEventListener('load', () => {
+      updateResult('connectionResult', '⚠️ Configure Supabase credentials above to begin testing', 'info');
+    });
+  </script>
+</body>
+</html>

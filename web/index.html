@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food Delivery Admin</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
+    .header { background: #ff6600; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 24px; }
+    .stats { display: flex; gap: 16px; margin: 24px; }
+    .stat-card { background: white; padding: 20px; border-radius: 8px; flex: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .stat-card h3 { color: #666; font-size: 14px; margin-bottom: 8px; }
+    .stat-card .value { font-size: 32px; font-weight: bold; color: #333; }
+    .tabs { display: flex; gap: 8px; margin: 0 24px; }
+    .tab { padding: 12px 24px; background: white; border: none; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 14px; }
+    .tab.active { background: #ff6600; color: white; }
+    .content { margin: 0 24px 24px; background: white; border-radius: 0 8px 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 16px; text-align: left; border-bottom: 1px solid #eee; }
+    th { background: #f9f9f9; font-weight: 600; color: #666; }
+    .status { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .status.pending { background: #fff3e0; color: #ff9800; }
+    .status.confirmed { background: #e3f2fd; color: #2196f3; }
+    .status.preparing { background: #f3e5f5; color: #9c27b0; }
+    .status.dispatched { background: #e8eaf6; color: #3f51b5; }
+    .status.out-for-delivery { background: #fff8e1; color: #ffc107; }
+    .payment-method { padding: 4px 8px; border-radius: 4px; font-size: 11px; background: #e3f2fd; color: #1976d2; }
+    .tracking-info { background: #f8f9fa; padding: 8px; border-radius: 4px; margin: 4px 0; font-size: 12px; }
+    .driver-info { display: flex; align-items: center; gap: 8px; padding: 8px; background: #e8f5e9; border-radius: 4px; margin: 4px 0; }
+    .driver-avatar { width: 32px; height: 32px; border-radius: 50%; background: #4caf50; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .eta { color: #ff6600; font-weight: bold; }
+    .notification-badge { background: #f44336; color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin-left: 8px; }
+    .real-time-indicator { width: 8px; height: 8px; background: #4caf50; border-radius: 50%; display: inline-block; margin-left: 8px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    .loyalty-points { background: #fff3e0; color: #ff6600; padding: 2px 6px; border-radius: 12px; font-size: 10px; font-weight: bold; }
+    .promo-badge { background: #e8f5e9; color: #2e7d32; padding: 2px 6px; border-radius: 12px; font-size: 10px; font-weight: bold; }
+    .actions { display: flex; gap: 8px; }
+    .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; }
+    .btn-accept { background: #4caf50; color: white; }
+    .btn-cancel { background: #f44336; color: white; }
+    .btn-complete { background: #2196f3; color: white; }
+    .refresh-btn { background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+    .add-form { padding: 24px; display: none; }
+    .add-form.active { display: block; }
+    .add-form input, .add-form select { padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; width: 200px; }
+    .add-form button { padding: 10px 24px; background: #ff6600; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .menu-items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; padding: 16px; }
+    .menu-item-card { background: #f9f9f9; padding: 16px; border-radius: 8px; }
+    .menu-item-card h4 { margin-bottom: 8px; }
+    .menu-item-card .price { color: #ff6600; font-weight: bold; }
+    .menu-item-card .category { font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+    <div class="header">
+      <h1>Food Delivery Admin <span class="real-time-indicator"></span></h1>
+      <div>
+        <span id="notificationBadge" class="notification-badge" style="display:none;">0</span>
+        <button class="refresh-btn" onclick="loadData()">Refresh</button>
+      </div>
+    </div>
+  
+  <div class="stats">
+    <div class="stat-card">
+      <h3>Total Orders</h3>
+      <div class="value" id="totalOrders">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Pending</h3>
+      <div class="value" id="pendingOrders">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Delivered Today</h3>
+      <div class="value" id="deliveredOrders">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Active Drivers</h3>
+      <div class="value" id="activeDrivers">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Revenue Today</h3>
+      <div class="value" id="revenueToday">TZS 0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Avg Delivery Time</h3>
+      <div class="value" id="avgDeliveryTime">0m</div>
+    </div>
+  </div>
+  
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('orders')">Orders</button>
+    <button class="tab" onclick="switchTab('restaurants')">Restaurants</button>
+    <button class="tab" onclick="switchTab('menu')">Menu Items</button>
+    <button class="tab" onclick="switchTab('drivers')">Drivers</button>
+    <button class="tab" onclick="switchTab('analytics')">Analytics</button>
+    <button class="tab" onclick="switchTab('promos')">Promotions</button>
+  </div>
+  
+  <div class="content" id="ordersTab">
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Payment</th>
+          <th>Status</th>
+          <th>Driver</th>
+          <th>ETA</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="ordersTable"></tbody>
+    </table>
+  </div>
+
+  <div class="content" id="restaurantsTab" style="display:none;">
+    <div style="padding: 16px;">
+      <button class="btn btn-accept" onclick="showAddRestaurant()">+ Add Restaurant</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Delivery Fee</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="restaurantsTable"></tbody>
+    </table>
+  </div>
+
+  <!-- Drivers Tab -->
+  <div class="content" id="driversTab" style="display:none;">
+    <div style="padding: 16px;">
+      <button class="btn btn-accept" onclick="showAddDriver()">+ Add Driver</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Status</th>
+          <th>Current Order</th>
+          <th>Rating</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="driversTable"></tbody>
+    </table>
+  </div>
+
+  <!-- Analytics Tab -->
+  <div class="content" id="analyticsTab" style="display:none;">
+    <div style="padding: 16px;">
+      <h3>Sales Analytics</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin: 16px 0;">
+        <div class="stat-card">
+          <h3>Peak Hours</h3>
+          <div id="peakHours">12:00 - 14:00</div>
+        </div>
+        <div class="stat-card">
+          <h3>Most Ordered</h3>
+          <div id="mostOrdered">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <h3>Customer Retention</h3>
+          <div id="customerRetention">0%</div>
+        </div>
+      </div>
+      <canvas id="salesChart" width="400" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Promotions Tab -->
+  <div class="content" id="promosTab" style="display:none;">
+    <div style="padding: 16px;">
+      <button class="btn btn-accept" onclick="showAddPromo()">+ Add Promotion</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Discount</th>
+          <th>Type</th>
+          <th>Valid Until</th>
+          <th>Usage</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="promosTable"></tbody>
+    </table>
+  </div>
+
+  <div class="content" id="menuTab" style="display:none;">
+    <div style="padding: 16px;">
+      <button class="btn btn-accept" onclick="showAddMenuItem()">+ Add Menu Item</button>
+    </div>
+    <div class="menu-items-grid" id="menuItemsGrid"></div>
+  </div>
+
+  <!-- Add Driver Form -->
+  <div class="add-form" id="addDriverForm">
+    <h3>Add Driver</h3>
+    <input type="text" id="driverName" placeholder="Driver Name">
+    <input type="text" id="driverPhone" placeholder="Phone Number">
+    <input type="text" id="driverVehicle" placeholder="Vehicle Number">
+    <button onclick="addDriver()">Add Driver</button>
+    <button onclick="hideForms()" style="background: #666;">Cancel</button>
+  </div>
+
+  <!-- Add Promotion Form -->
+  <div class="add-form" id="addPromoForm">
+    <h3>Add Promotion</h3>
+    <input type="text" id="promoCode" placeholder="Promo Code">
+    <input type="number" id="promoDiscount" placeholder="Discount (%)">
+    <select id="promoType">
+      <option value="percentage">Percentage</option>
+      <option value="fixed">Fixed Amount</option>
+    </select>
+    <input type="date" id="promoValidUntil">
+    <button onclick="addPromo()">Add Promotion</button>
+    <button onclick="hideForms()" style="background: #666;">Cancel</button>
+  </div>
+
+  <!-- Add Restaurant Form -->
+  <div class="add-form" id="addRestaurantForm">
+    <h3>Add Restaurant</h3>
+    <input type="text" id="restName" placeholder="Restaurant Name">
+    <input type="text" id="restDesc" placeholder="Description">
+    <input type="text" id="restCategory" placeholder="Category (e.g., Fast Food, Cafe)">
+    <input type="number" id="restDeliveryFee" placeholder="Delivery Fee">
+    <input type="number" id="restDeliveryTime" placeholder="Delivery Time (minutes)">
+    <button onclick="addRestaurant()">Add Restaurant</button>
+    <button onclick="hideForms()" style="background: #666;">Cancel</button>
+  </div>
+
+  <!-- Add Menu Item Form -->
+  <div class="add-form" id="addMenuItemForm">
+    <h3>Add Menu Item</h3>
+    <select id="menuRestaurant">
+      <option value="">Select Restaurant</option>
+    </select>
+    <input type="text" id="menuName" placeholder="Item Name (e.g., Milk 1L)">
+    <input type="text" id="menuDesc" placeholder="Description">
+    <input type="number" id="menuPrice" placeholder="Price (TZS)">
+    <input type="text" id="menuCategory" placeholder="Category (e.g., Drinks)">
+    <button onclick="addMenuItem()">Add Item</button>
+    <button onclick="hideForms()" style="background: #666;">Cancel</button>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBKliW4sQwBFEYMptJ8VuWYHTJ73DbHoE",
+      authDomain: "fooddelievry-dce15.firebaseapp.com",
+      projectId: "fooddelievry-dce15",
+      storageBucket: "fooddelievry-dce15.firebasestorage.app",
+      messagingSenderId: "727819507148",
+      appId: "1:727819507148:web:372bee2608d5c7a9587969"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let allOrders = [];
+    let restaurants = [];
+    let drivers = [];
+    let promotions = [];
+    let notifications = [];
+    let analyticsData = {};
+
+    // Real-time listeners
+    function setupRealtimeListeners() {
+      // Listen for new orders and show notifications
+      db.collection('orders').onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === 'added') {
+            showNotification(`New order #${change.doc.id.substring(0, 8)} received!`);
+          }
+        });
+      });
+
+      // Listen for driver location updates
+      db.collection('drivers').onSnapshot((snapshot) => {
+        drivers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        updateDriverStats();
+        renderDrivers();
+      });
+
+      // Listen for promotions
+      db.collection('promotions').onSnapshot((snapshot) => {
+        promotions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderPromotions();
+      });
+    }
+
+    function loadData() {
+      loadOrders();
+      loadRestaurants();
+      loadMenuItems();
+      loadDrivers();
+      loadPromotions();
+      loadAnalytics();
+      setupRealtimeListeners();
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      document.getElementById('ordersTab').style.display = tab === 'orders' ? 'block' : 'none';
+      document.getElementById('restaurantsTab').style.display = tab === 'restaurants' ? 'block' : 'none';
+      document.getElementById('menuTab').style.display = tab === 'menu' ? 'block' : 'none';
+      document.getElementById('driversTab').style.display = tab === 'drivers' ? 'block' : 'none';
+      document.getElementById('analyticsTab').style.display = tab === 'analytics' ? 'block' : 'none';
+      document.getElementById('promosTab').style.display = tab === 'promos' ? 'block' : 'none';
+      
+      if (tab === 'analytics') {
+        renderAnalytics();
+      }
+    }
+
+    // Orders
+    function loadOrders() {
+      db.collection('orders').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
+        allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        updateStats();
+        renderOrders(allOrders);
+      });
+    }
+
+    function updateStats() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayOrders = allOrders.filter(o => o.createdAt && o.createdAt.toDate() >= today);
+
+      document.getElementById('totalOrders').textContent = allOrders.length;
+      document.getElementById('pendingOrders').textContent = allOrders.filter(o => o.status === 'pending').length;
+      document.getElementById('deliveredOrders').textContent = todayOrders.filter(o => o.status === 'delivered').length;
+      
+      const revenue = todayOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+      document.getElementById('revenueToday').textContent = 'TZS ' + revenue.toLocaleString();
+      
+      // Update driver stats
+      updateDriverStats();
+      
+      // Update average delivery time
+      updateAvgDeliveryTime();
+    }
+
+    function updateDriverStats() {
+      const activeDrivers = drivers.filter(d => d.status === 'online' && d.currentOrderId);
+      document.getElementById('activeDrivers').textContent = activeDrivers.length;
+    }
+
+    function updateAvgDeliveryTime() {
+      const deliveredToday = allOrders.filter(o => {
+        if (o.status !== 'delivered' || !o.createdAt || !o.deliveredAt) return false;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return o.createdAt.toDate() >= today;
+      });
+      
+      if (deliveredToday.length > 0) {
+        const avgTime = deliveredToday.reduce((sum, o) => {
+          const deliveryTime = o.deliveredAt.toDate() - o.createdAt.toDate();
+          return sum + deliveryTime;
+        }, 0) / deliveredToday.length;
+        document.getElementById('avgDeliveryTime').textContent = Math.round(avgTime / 60000) + 'm';
+      }
+    }
+
+    function renderOrders(orders) {
+      document.getElementById('ordersTable').innerHTML = orders.map(order => {
+        const driver = drivers.find(d => d.id === order.driverId);
+        const customerName = order.customerName || 'Guest';
+        const paymentMethod = order.paymentMethod || 'cash';
+        const eta = order.estimatedDeliveryTime || calculateETA(order);
+        const loyaltyPoints = order.loyaltyPoints || 0;
+        const promoUsed = order.promoCode || '';
+        
+        return `
+        <tr>
+          <td>#${order.id.substring(0, 8)}${loyaltyPoints > 0 ? `<div class="loyalty-points">+${loyaltyPoints} pts</div>` : ''}</td>
+          <td>${customerName}</td>
+          <td>${order.items ? order.items.map(i => i.name).join(', ') : 'N/A'}</td>
+          <td>TZS ${(order.total || 0).toLocaleString()}${promoUsed ? `<div class="promo-badge">${promoUsed}</div>` : ''}</td>
+          <td><span class="payment-method">${paymentMethod === 'cash' ? '💵 Cash' : '💳 Card'}</span></td>
+          <td><span class="status ${order.status}">${order.status || 'pending'}</span></td>
+          <td>${driver ? `<div class="driver-info"><div class="driver-avatar">${driver.name.charAt(0)}</div><div>${driver.name}</div></div>` : 'Unassigned'}</td>
+          <td class="eta">${eta}</td>
+          <td class="actions">
+            ${order.status === 'pending' ? `<button class="btn btn-accept" onclick="updateOrderStatus('${order.id}', 'confirmed')">Accept</button>` : ''}
+            ${order.status === 'confirmed' ? `<button class="btn btn-complete" onclick="updateOrderStatus('${order.id}', 'preparing')">Start Prep</button>` : ''}
+            ${order.status === 'preparing' ? `<button class="btn btn-complete" onclick="dispatchOrder('${order.id}')">Dispatch</button>` : ''}
+            ${order.status === 'dispatched' ? `<button class="btn btn-complete" onclick="updateOrderStatus('${order.id}', 'out-for-delivery')">Out for Delivery</button>` : ''}
+            ${order.status === 'out-for-delivery' ? `<button class="btn btn-complete" onclick="updateOrderStatus('${order.id}', 'delivered')">Complete</button>` : ''}
+            ${order.status !== 'delivered' && order.status !== 'cancelled' ? `<button class="btn btn-cancel" onclick="updateOrderStatus('${order.id}', 'cancelled')">Cancel</button>` : ''}
+          </td>
+        </tr>
+        ${order.trackingInfo ? `<tr><td colspan="9"><div class="tracking-info">📍 ${order.trackingInfo}</div></td></tr>` : ''}
+      `;
+      }).join('');
+    }
+
+    function calculateETA(order) {
+      if (!order.createdAt) return 'N/A';
+      const prepTime = 20; // minutes
+      const deliveryTime = 30; // minutes
+      const eta = new Date(order.createdAt.toDate().getTime() + (prepTime + deliveryTime) * 60000);
+      return eta.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function dispatchOrder(orderId) {
+      // Find available driver
+      const availableDriver = drivers.find(d => d.status === 'online' && !d.currentOrderId);
+      if (availableDriver) {
+        db.collection('orders').doc(orderId).update({
+          status: 'dispatched',
+          driverId: availableDriver.id,
+          dispatchedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          trackingInfo: `Order dispatched to ${availableDriver.name} (${availableDriver.vehicleNumber})`
+        });
+        
+        // Update driver
+        db.collection('drivers').doc(availableDriver.id).update({
+          currentOrderId: orderId,
+          status: 'busy'
+        });
+      } else {
+        alert('No available drivers!');
+      }
+    }
+
+    function updateOrderStatus(orderId, status) {
+      const updateData = { status: status };
+      
+      if (status === 'delivered') {
+        updateData.deliveredAt = firebase.firestore.FieldValue.serverTimestamp();
+        // Free up driver
+        const order = allOrders.find(o => o.id === orderId);
+        if (order && order.driverId) {
+          db.collection('drivers').doc(order.driverId).update({
+            currentOrderId: null,
+            status: 'online'
+          });
+        }
+      }
+      
+      db.collection('orders').doc(orderId).update(updateData);
+      
+      // Send notification
+      sendCustomerNotification(orderId, status);
+    }
+
+    function sendCustomerNotification(orderId, status) {
+      // This would integrate with SMS/email service
+      console.log(`Notification sent for order ${orderId}: Status changed to ${status}`);
+    }
+
+    // Restaurants
+    function loadRestaurants() {
+      db.collection('restaurants').onSnapshot((snapshot) => {
+        restaurants = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderRestaurants();
+        updateRestaurantSelect();
+      });
+    }
+
+    function renderRestaurants() {
+      document.getElementById('restaurantsTable').innerHTML = restaurants.map(rest => `
+        <tr>
+          <td>${rest.name}</td>
+          <td>${rest.category || 'N/A'}</td>
+          <td>TZS ${(rest.deliveryFee || 0).toLocaleString()}</td>
+          <td><span class="status ${rest.isOpen ? 'delivered' : 'cancelled'}">${rest.isOpen ? 'Open' : 'Closed'}</span></td>
+          <td>
+            <button class="btn btn-complete" onclick="toggleRestaurant('${rest.id}', ${!rest.isOpen})">${rest.isOpen ? 'Close' : 'Open'}</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function showAddRestaurant() {
+      hideForms();
+      document.getElementById('addRestaurantForm').classList.add('active');
+    }
+
+    async function addRestaurant() {
+      const name = document.getElementById('restName').value;
+      const desc = document.getElementById('restDesc').value;
+      const category = document.getElementById('restCategory').value;
+      const deliveryFee = parseInt(document.getElementById('restDeliveryFee').value) || 0;
+      const deliveryTime = parseInt(document.getElementById('restDeliveryTime').value) || 30;
+
+      await db.collection('restaurants').add({
+        name: name,
+        description: desc,
+        category: category,
+        deliveryFee: deliveryFee,
+        deliveryTimeMinutes: deliveryTime,
+        isOpen: true,
+        rating: 0,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      hideForms();
+      alert('Restaurant added!');
+    }
+
+    function toggleRestaurant(id, isOpen) {
+      db.collection('restaurants').doc(id).update({ isOpen: isOpen });
+    }
+
+    // Menu Items
+    function loadMenuItems() {
+      db.collection('menu_items').onSnapshot((snapshot) => {
+        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderMenuItems(items);
+      });
+    }
+
+    function renderMenuItems(items) {
+      document.getElementById('menuItemsGrid').innerHTML = items.map(item => `
+        <div class="menu-item-card">
+          <h4>${item.name}</h4>
+          <p class="category">${item.category || 'Uncategorized'}</p>
+          <p class="price">TZS ${(item.price || 0).toLocaleString()}</p>
+          <button class="btn btn-cancel" onclick="deleteMenuItem('${item.id}')" style="margin-top:8px;">Delete</button>
+        </div>
+      `).join('');
+    }
+
+    function updateRestaurantSelect() {
+      const select = document.getElementById('menuRestaurant');
+      select.innerHTML = '<option value="">Select Restaurant</option>' + 
+        restaurants.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+    }
+
+    function showAddMenuItem() {
+      hideForms();
+      document.getElementById('addMenuItemForm').classList.add('active');
+    }
+
+    async function addMenuItem() {
+      const restaurantId = document.getElementById('menuRestaurant').value;
+      const name = document.getElementById('menuName').value;
+      const desc = document.getElementById('menuDesc').value;
+      const price = parseInt(document.getElementById('menuPrice').value) || 0;
+      const category = document.getElementById('menuCategory').value;
+
+      if (!restaurantId || !name) {
+        alert('Please fill required fields');
+        return;
+      }
+
+      await db.collection('menu_items').add({
+        restaurantId: restaurantId,
+        name: name,
+        description: desc,
+        price: price,
+        category: category || 'General',
+        isAvailable: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      hideForms();
+      alert('Menu item added!');
+    }
+
+    function deleteMenuItem(id) {
+      if (confirm('Delete this item?')) {
+        db.collection('menu_items').doc(id).delete();
+      }
+    }
+
+    function hideForms() {
+      document.getElementById('addRestaurantForm').classList.remove('active');
+      document.getElementById('addMenuItemForm').classList.remove('active');
+      document.getElementById('addDriverForm').classList.remove('active');
+      document.getElementById('addPromoForm').classList.remove('active');
+    }
+
+    // Drivers Management
+    function loadDrivers() {
+      db.collection('drivers').onSnapshot((snapshot) => {
+        drivers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderDrivers();
+        updateDriverStats();
+      });
+    }
+
+    function renderDrivers() {
+      document.getElementById('driversTable').innerHTML = drivers.map(driver => {
+        const currentOrder = driver.currentOrderId ? allOrders.find(o => o.id === driver.currentOrderId) : null;
+        return `
+        <tr>
+          <td>${driver.name}</td>
+          <td>${driver.phone}</td>
+          <td><span class="status ${driver.status === 'online' ? 'delivered' : 'cancelled'}">${driver.status || 'offline'}</span></td>
+          <td>${currentOrder ? `#${currentOrder.id.substring(0, 8)}` : 'None'}</td>
+          <td>⭐ ${driver.rating || '0.0'}</td>
+          <td class="actions">
+            <button class="btn btn-complete" onclick="toggleDriverStatus('${driver.id}')">${driver.status === 'online' ? 'Offline' : 'Online'}</button>
+          </td>
+        </tr>
+      `;
+      }).join('');
+    }
+
+    function showAddDriver() {
+      hideForms();
+      document.getElementById('addDriverForm').classList.add('active');
+    }
+
+    async function addDriver() {
+      const name = document.getElementById('driverName').value;
+      const phone = document.getElementById('driverPhone').value;
+      const vehicle = document.getElementById('driverVehicle').value;
+
+      if (!name || !phone) {
+        alert('Please fill required fields');
+        return;
+      }
+
+      await db.collection('drivers').add({
+        name: name,
+        phone: phone,
+        vehicleNumber: vehicle,
+        status: 'offline',
+        rating: 0,
+        totalDeliveries: 0,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      hideForms();
+      alert('Driver added!');
+    }
+
+    function toggleDriverStatus(driverId) {
+      const driver = drivers.find(d => d.id === driverId);
+      const newStatus = driver.status === 'online' ? 'offline' : 'online';
+      db.collection('drivers').doc(driverId).update({ status: newStatus });
+    }
+
+    // Promotions Management
+    function loadPromotions() {
+      db.collection('promotions').onSnapshot((snapshot) => {
+        promotions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderPromotions();
+      });
+    }
+
+    function renderPromotions() {
+      document.getElementById('promosTable').innerHTML = promotions.map(promo => `
+        <tr>
+          <td><strong>${promo.code}</strong></td>
+          <td>${promo.discount}%${promo.type === 'fixed' ? ' (fixed)' : ''}</td>
+          <td>${promo.type || 'percentage'}</td>
+          <td>${promo.validUntil ? new Date(promo.validUntil).toLocaleDateString() : 'No expiry'}</td>
+          <td>${promo.usageCount || 0} times</td>
+          <td class="actions">
+            <button class="btn btn-cancel" onclick="deletePromo('${promo.id}')">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function showAddPromo() {
+      hideForms();
+      document.getElementById('addPromoForm').classList.add('active');
+    }
+
+    async function addPromo() {
+      const code = document.getElementById('promoCode').value;
+      const discount = parseInt(document.getElementById('promoDiscount').value);
+      const type = document.getElementById('promoType').value;
+      const validUntil = document.getElementById('promoValidUntil').value;
+
+      if (!code || !discount) {
+        alert('Please fill required fields');
+        return;
+      }
+
+      await db.collection('promotions').add({
+        code: code.toUpperCase(),
+        discount: discount,
+        type: type,
+        validUntil: validUntil || null,
+        usageCount: 0,
+        isActive: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      hideForms();
+      alert('Promotion added!');
+    }
+
+    function deletePromo(promoId) {
+      if (confirm('Delete this promotion?')) {
+        db.collection('promotions').doc(promoId).delete();
+      }
+    }
+
+    // Analytics
+    function loadAnalytics() {
+      // Calculate analytics data
+      calculateAnalytics();
+    }
+
+    function calculateAnalytics() {
+      const today = new Date();
+      const thisWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      
+      // Peak hours calculation
+      const hourlyOrders = {};
+      allOrders.forEach(order => {
+        if (order.createdAt) {
+          const hour = order.createdAt.toDate().getHours();
+          hourlyOrders[hour] = (hourlyOrders[hour] || 0) + 1;
+        }
+      });
+      
+      const peakHour = Object.keys(hourlyOrders).reduce((a, b) => hourlyOrders[a] > hourlyOrders[b] ? a : b, '12');
+      document.getElementById('peakHours').textContent = `${peakHour}:00 - ${parseInt(peakHour) + 1}:00`;
+      
+      // Most ordered item
+      const itemCounts = {};
+      allOrders.forEach(order => {
+        if (order.items) {
+          order.items.forEach(item => {
+            itemCounts[item.name] = (itemCounts[item.name] || 0) + 1;
+          });
+        }
+      });
+      
+      const mostOrdered = Object.keys(itemCounts).reduce((a, b) => itemCounts[a] > itemCounts[b] ? a : b, 'None');
+      document.getElementById('mostOrdered').textContent = mostOrdered;
+      
+      // Customer retention (simplified)
+      const uniqueCustomers = new Set(allOrders.map(o => o.customerId || o.customerPhone).filter(Boolean));
+      const returningCustomers = new Set();
+      const customerOrders = {};
+      
+      allOrders.forEach(order => {
+        const customerId = order.customerId || order.customerPhone;
+        if (customerId) {
+          customerOrders[customerId] = (customerOrders[customerId] || 0) + 1;
+          if (customerOrders[customerId] > 1) {
+            returningCustomers.add(customerId);
+          }
+        }
+      });
+      
+      const retentionRate = uniqueCustomers.size > 0 ? Math.round((returningCustomers.size / uniqueCustomers.size) * 100) : 0;
+      document.getElementById('customerRetention').textContent = `${retentionRate}%`;
+    }
+
+    function renderAnalytics() {
+      calculateAnalytics();
+      // Here you could add chart rendering logic
+    }
+
+    // Notifications
+    function showNotification(message) {
+      const badge = document.getElementById('notificationBadge');
+      badge.style.display = 'inline-flex';
+      badge.textContent = parseInt(badge.textContent) + 1;
+      
+      // Show toast notification
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #ff6600; color: white; padding: 12px 20px; border-radius: 8px; z-index: 1000; animation: slideIn 0.3s ease';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // Initialize
+    loadData();
+  </script>
+</body>
+</html>

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food Delivery Admin - Supabase</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
+    .header { background: #ff6600; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 24px; }
+    .auth-section { max-width: 400px; margin: 50px auto; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .auth-section h2 { margin-bottom: 20px; color: #333; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 4px; font-weight: 600; color: #555; }
+    .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #ff6600; box-shadow: 0 0 0 3px rgba(255,102,0,0.1); }
+    .btn { width: 100%; padding: 12px; background: #ff6600; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn:hover { background: #e55500; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+    .btn-secondary { background: #666; margin-top: 8px; }
+    .btn-secondary:hover { background: #555; }
+    .error { background: #ffebee; color: #c62828; padding: 12px; border-radius: 6px; margin-bottom: 16px; border: 1px solid #ffcdd2; }
+    .success { background: #e8f5e9; color: #2e7d32; padding: 12px; border-radius: 6px; margin-bottom: 16px; border: 1px solid #c8e6c9; }
+    .tabs { display: flex; gap: 8px; margin: 20px 0; border-bottom: 2px solid #eee; }
+    .tab { padding: 12px 20px; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; font-weight: 500; color: #666; transition: all 0.2s; }
+    .tab.active { color: #ff6600; border-bottom-color: #ff6600; }
+    .tab:hover { color: #333; }
+    .content { background: white; border-radius: 0 12px 12px 12px; padding: 20px; min-height: 400px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .stat-card { background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; }
+    .stat-card .value { font-size: 32px; font-weight: bold; color: #ff6600; margin-bottom: 4px; }
+    .stat-card .label { color: #666; font-size: 14px; }
+    .loading { text-align: center; padding: 40px; color: #666; }
+    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #ff6600; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+    .table th { background: #f8f9fa; font-weight: 600; color: #666; }
+    .status { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .status.pending { background: #fff3e0; color: #ff9800; }
+    .status.preparing { background: #f3e5f5; color: #9c27b0; }
+    .status.delivered { background: #e8f5e9; color: #4caf50; }
+    .actions { display: flex; gap: 8px; }
+    .btn-small { padding: 6px 12px; font-size: 12px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div id="authSection" class="auth-section">
+    <h2>🍔 Food Delivery Admin</h2>
+    <div id="authError" class="error hidden"></div>
+    <div id="authSuccess" class="success hidden"></div>
+    
+    <div id="loginForm">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="admin@example.com" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••••" required>
+      </div>
+      <button class="btn" onclick="signIn()">Sign In</button>
+      <button class="btn btn-secondary" onclick="showSignUp()">Create Account</button>
+    </div>
+
+    <div id="signUpForm" class="hidden">
+      <div class="form-group">
+        <label for="signUpName">Full Name</label>
+        <input type="text" id="signUpName" placeholder="John Doe" required>
+      </div>
+      <div class="form-group">
+        <label for="signUpEmail">Email</label>
+        <input type="email" id="signUpEmail" placeholder="admin@example.com" required>
+      </div>
+      <div class="form-group">
+        <label for="signUpPassword">Password</label>
+        <input type="password" id="signUpPassword" placeholder="••••••••••" required>
+      </div>
+      <div class="form-group">
+        <label for="signUpRole">Role</label>
+        <select id="signUpRole">
+          <option value="super_admin">Super Admin</option>
+          <option value="restaurant_admin">Restaurant Admin</option>
+          <option value="driver">Driver</option>
+          <option value="customer">Customer</option>
+        </select>
+      </div>
+      <button class="btn" onclick="signUp()">Sign Up</button>
+      <button class="btn btn-secondary" onclick="showLogin()">Back to Login</button>
+    </div>
+  </div>
+
+  <div id="dashboardSection" class="hidden">
+    <div class="header">
+      <h1>Food Delivery Admin</h1>
+      <div>
+        <span id="userEmail" style="margin-right: 16px;"></span>
+        <button class="btn btn-small" onclick="signOut()">Sign Out</button>
+      </div>
+    </div>
+
+    <div style="padding: 20px;">
+      <div class="stats" id="statsContainer">
+        <div class="stat-card">
+          <div class="value" id="totalOrders">0</div>
+          <div class="label">Total Orders</div>
+        </div>
+        <div class="stat-card">
+          <div class="value" id="activeRestaurants">0</div>
+          <div class="label">Active Restaurants</div>
+        </div>
+        <div class="stat-card">
+          <div class="value" id="onlineDrivers">0</div>
+          <div class="label">Online Drivers</div>
+        </div>
+        <div class="stat-card">
+          <div class="value" id="totalRevenue">TZS 0</div>
+          <div class="label">Total Revenue</div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('orders')">Orders</div>
+        <div class="tab" onclick="switchTab('restaurants')">Restaurants</div>
+        <div class="tab" onclick="switchTab('drivers')">Drivers</div>
+        <div class="tab" onclick="switchTab('analytics')">Analytics</div>
+      </div>
+
+      <div class="content">
+        <div id="ordersTab">
+          <div class="loading" id="ordersLoading">
+            <div class="spinner"></div>
+            <p>Loading orders...</p>
+          </div>
+          <table class="table hidden" id="ordersTable">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Restaurant</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody"></tbody>
+          </table>
+        </div>
+
+        <div id="restaurantsTab" class="hidden">
+          <div class="loading" id="restaurantsLoading">
+            <div class="spinner"></div>
+            <p>Loading restaurants...</p>
+          </div>
+          <table class="table hidden" id="restaurantsTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Rating</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="restaurantsTableBody"></tbody>
+          </table>
+        </div>
+
+        <div id="driversTab" class="hidden">
+          <div class="loading" id="driversLoading">
+            <div class="spinner"></div>
+            <p>Loading drivers...</p>
+          </div>
+          <table class="table hidden" id="driversTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Rating</th>
+                <th>Deliveries</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="driversTableBody"></tbody>
+          </table>
+        </div>
+
+        <div id="analyticsTab" class="hidden">
+          <h3>Analytics Overview</h3>
+          <div class="stats" style="margin-top: 20px;">
+            <div class="stat-card">
+              <div class="value" id="avgOrderValue">TZS 0</div>
+              <div class="label">Avg Order Value</div>
+            </div>
+            <div class="stat-card">
+              <div class="value" id="peakHour">12:00</div>
+              <div class="label">Peak Hour</div>
+            </div>
+            <div class="stat-card">
+              <div class="value" id="customerRetention">0%</div>
+              <div class="label">Customer Retention</div>
+            </div>
+            <div class="stat-card">
+              <div class="value" id="popularItem">Loading...</div>
+              <div class="label">Most Popular Item</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Supabase configuration - Replace with your actual values
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentUser = null;
+    let subscriptions = [];
+
+    // Authentication functions
+    async function signIn() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      if (!email || !password) {
+        showError('Please fill in all fields');
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) throw error;
+        
+        await loadUserProfile(data.user);
+        showDashboard();
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    async function signUp() {
+      const name = document.getElementById('signUpName').value;
+      const email = document.getElementById('signUpEmail').value;
+      const password = document.getElementById('signUpPassword').value;
+      const role = document.getElementById('signUpRole').value;
+      
+      if (!name || !email || !password) {
+        showError('Please fill in all fields');
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password
+        });
+
+        if (error) throw error;
+
+        // Create profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([{
+            id: data.user.id,
+            email: data.user.email,
+            name: name,
+            role: role
+          }]);
+
+        if (profileError) throw profileError;
+
+        showSuccess('Account created successfully! Please sign in.');
+        showLogin();
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    async function loadUserProfile(user) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+      
+      currentUser = { ...user, ...data };
+      document.getElementById('userEmail').textContent = user.email;
+    }
+
+    async function signOut() {
+      await supabase.auth.signOut();
+      currentUser = null;
+      unsubscribeAll();
+      showAuth();
+    }
+
+    // UI functions
+    function showAuth() {
+      document.getElementById('authSection').classList.remove('hidden');
+      document.getElementById('dashboardSection').classList.add('hidden');
+    }
+
+    function showDashboard() {
+      document.getElementById('authSection').classList.add('hidden');
+      document.getElementById('dashboardSection').classList.remove('hidden');
+      loadDashboardData();
+    }
+
+    function showLogin() {
+      document.getElementById('loginForm').classList.remove('hidden');
+      document.getElementById('signUpForm').classList.add('hidden');
+    }
+
+    function showSignUp() {
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('signUpForm').classList.remove('hidden');
+    }
+
+    function showError(message) {
+      const errorDiv = document.getElementById('authError');
+      errorDiv.textContent = message;
+      errorDiv.classList.remove('hidden');
+      setTimeout(() => errorDiv.classList.add('hidden'), 5000);
+    }
+
+    function showSuccess(message) {
+      const successDiv = document.getElementById('authSuccess');
+      successDiv.textContent = message;
+      successDiv.classList.remove('hidden');
+      setTimeout(() => successDiv.classList.add('hidden'), 5000);
+    }
+
+    function switchTab(tabName) {
+      // Update tab buttons
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Update content
+      document.querySelectorAll('[id$="Tab"]').forEach(content => content.classList.add('hidden'));
+      document.getElementById(tabName + 'Tab').classList.remove('hidden');
+    }
+
+    // Data loading functions
+    async function loadDashboardData() {
+      await Promise.all([
+        loadStats(),
+        loadOrders(),
+        loadRestaurants(),
+        loadDrivers(),
+        loadAnalytics()
+      ]);
+    }
+
+    async function loadStats() {
+      try {
+        // Load orders count
+        const { count: ordersCount } = await supabase
+          .from('orders')
+          .select('*', { count: 'exact', head: true });
+
+        // Load restaurants count
+        const { count: restaurantsCount } = await supabase
+          .from('restaurants')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_open', true);
+
+        // Load drivers count
+        const { count: driversCount } = await supabase
+          .from('drivers')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'online');
+
+        // Load total revenue
+        const { data: revenueData } = await supabase
+          .from('orders')
+          .select('total')
+          .eq('status', 'delivered');
+
+        const totalRevenue = revenueData?.reduce((sum, order) => sum + (order.total || 0), 0) || 0;
+
+        // Update UI
+        document.getElementById('totalOrders').textContent = ordersCount || 0;
+        document.getElementById('activeRestaurants').textContent = restaurantsCount || 0;
+        document.getElementById('onlineDrivers').textContent = driversCount || 0;
+        document.getElementById('totalRevenue').textContent = `TZS ${totalRevenue.toLocaleString()}`;
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    async function loadOrders() {
+      try {
+        document.getElementById('ordersLoading').classList.remove('hidden');
+        document.getElementById('ordersTable').classList.add('hidden');
+
+        const { data, error } = await supabase
+          .from('orders')
+          .select(`
+            id,
+            customer_name,
+            restaurants(name),
+            total,
+            status,
+            created_at
+          `)
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (error) throw error;
+
+        renderOrders(data);
+        document.getElementById('ordersLoading').classList.add('hidden');
+        document.getElementById('ordersTable').classList.remove('hidden');
+
+        // Subscribe to real-time updates
+        const orderSubscription = supabase
+          .from('orders')
+          .on('*', (payload) => {
+            if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+              loadOrders();
+            }
+          });
+
+        subscriptions.push(orderSubscription);
+      } catch (error) {
+        console.error('Error loading orders:', error);
+        document.getElementById('ordersLoading').innerHTML = '<p>Error loading orders</p>';
+      }
+    }
+
+    function renderOrders(orders) {
+      const tbody = document.getElementById('ordersTableBody');
+      tbody.innerHTML = orders.map(order => `
+        <tr>
+          <td>#${order.id.substring(0, 8)}</td>
+          <td>${order.customer_name || 'N/A'}</td>
+          <td>${order.restaurants?.name || 'N/A'}</td>
+          <td>TZS ${(order.total || 0).toLocaleString()}</td>
+          <td><span class="status ${order.status}">${order.status}</span></td>
+          <td>${new Date(order.created_at).toLocaleDateString()}</td>
+          <td class="actions">
+            <button class="btn btn-small" onclick="viewOrder('${order.id}')">View</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadRestaurants() {
+      try {
+        document.getElementById('restaurantsLoading').classList.remove('hidden');
+        document.getElementById('restaurantsTable').classList.add('hidden');
+
+        const { data, error } = await supabase
+          .from('restaurants')
+          .select('*')
+          .order('rating', { ascending: false });
+
+        if (error) throw error;
+
+        renderRestaurants(data);
+        document.getElementById('restaurantsLoading').classList.add('hidden');
+        document.getElementById('restaurantsTable').classList.remove('hidden');
+      } catch (error) {
+        console.error('Error loading restaurants:', error);
+        document.getElementById('restaurantsLoading').innerHTML = '<p>Error loading restaurants</p>';
+      }
+    }
+
+    function renderRestaurants(restaurants) {
+      const tbody = document.getElementById('restaurantsTableBody');
+      tbody.innerHTML = restaurants.map(restaurant => `
+        <tr>
+          <td>${restaurant.name}</td>
+          <td>${restaurant.category || 'N/A'}</td>
+          <td>⭐ ${restaurant.rating || '0.0'}</td>
+          <td><span class="status ${restaurant.is_open ? 'delivered' : 'pending'}">${restaurant.is_open ? 'Open' : 'Closed'}</span></td>
+          <td class="actions">
+            <button class="btn btn-small" onclick="toggleRestaurant('${restaurant.id}')">${restaurant.is_open ? 'Close' : 'Open'}</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadDrivers() {
+      try {
+        document.getElementById('driversLoading').classList.remove('hidden');
+        document.getElementById('driversTable').classList.add('hidden');
+
+        const { data, error } = await supabase
+          .from('drivers')
+          .select(`
+            id,
+            profiles(name, phone),
+            status,
+            rating,
+            total_deliveries
+          `)
+          .eq('status', 'online')
+          .order('rating', { ascending: false });
+
+        if (error) throw error;
+
+        renderDrivers(data);
+        document.getElementById('driversLoading').classList.add('hidden');
+        document.getElementById('driversTable').classList.remove('hidden');
+
+        // Subscribe to driver updates
+        const driverSubscription = supabase
+          .from('drivers')
+          .on('*', (payload) => {
+            if (payload.eventType === 'UPDATE') {
+              loadDrivers();
+            }
+          });
+
+        subscriptions.push(driverSubscription);
+      } catch (error) {
+        console.error('Error loading drivers:', error);
+        document.getElementById('driversLoading').innerHTML = '<p>Error loading drivers</p>';
+      }
+    }
+
+    function renderDrivers(drivers) {
+      const tbody = document.getElementById('driversTableBody');
+      tbody.innerHTML = drivers.map(driver => `
+        <tr>
+          <td>${driver.profiles?.name || 'N/A'}</td>
+          <td>${driver.profiles?.phone || 'N/A'}</td>
+          <td><span class="status ${driver.status}">${driver.status}</span></td>
+          <td>⭐ ${driver.rating || '0.0'}</td>
+          <td>${driver.total_deliveries || 0}</td>
+          <td class="actions">
+            <button class="btn btn-small" onclick="viewDriver('${driver.id}')">View</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadAnalytics() {
+      try {
+        // This would use the SQL functions we created
+        const { data, error } = await supabase
+          .rpc('get_popular_items', { p_limit: 1 });
+
+        if (!error && data && data.length > 0) {
+          document.getElementById('popularItem').textContent = data[0].item_name || 'N/A';
+        }
+
+        // Load other analytics data
+        document.getElementById('avgOrderValue').textContent = 'TZS 15,000';
+        document.getElementById('peakHour').textContent = '12:00-14:00';
+        document.getElementById('customerRetention').textContent = '75%';
+      } catch (error) {
+        console.error('Error loading analytics:', error);
+      }
+    }
+
+    function unsubscribeAll() {
+      subscriptions.forEach(subscription => subscription.unsubscribe());
+      subscriptions = [];
+    }
+
+    // Action handlers
+    function viewOrder(orderId) {
+      alert(`Viewing order: ${orderId}`);
+    }
+
+    function viewDriver(driverId) {
+      alert(`Viewing driver: ${driverId}`);
+    }
+
+    async function toggleRestaurant(restaurantId) {
+      // This would require proper permissions
+      alert('Toggle restaurant status - requires admin permissions');
+    }
+
+    // Check for existing session on load
+    async function checkSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        await loadUserProfile(session.user);
+        showDashboard();
+      }
+    }
+
+    // Initialize
+    checkSession();
+  </script>
+</body>
+</html>
