@@ -105,6 +105,14 @@
       "dest": "/web/main.html"
     },
     {
+      "src": "/orders",
+      "dest": "/web/orders.html"
+    },
+    {
+      "src": "/admin-dashboard",
+      "dest": "/web/admin.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/web/404.html"
     }

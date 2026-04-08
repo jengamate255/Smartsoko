@@ -139,3 +139,14 @@
   from = "/*"
   to = "/main.html"
   status = 200
+
+# Admin routes
+[[redirects]]
+  from = "/admin-dashboard"
+  to = "/admin.html"
+  status = 200
+
+[[redirects]]
+  from = "/orders"
+  to = "/orders.html"
+  status = 200
