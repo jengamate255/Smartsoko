@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartSoko Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="nav-component.js"></script>
+  <script src="config/firebase-config.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#ff6600",
+            "primary-dark": "#e55500",
+            "secondary": "#ff8800",
+            "accent": "#ffa500",
+            "surface": "#ffffff",
+            "surface-variant": "#f5f5f5",
+            "background": "#fafafa",
+            "on-primary": "#ffffff",
+            "on-surface": "#1a1a1a",
+            "on-surface-variant": "#666666",
+            "outline": "#e0e0e0",
+            "error": "#dc2626",
+            "success": "#16a34a",
+            "warning": "#f59e0b"
+          },
+          fontFamily: {
+            "headline": ["Plus Jakarta Sans"],
+            "body": ["Be Vietnam Pro"],
+            "label": ["Be Vietnam Pro"]
+          },
+          borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .tab-active { border-bottom: 3px solid #ff6600; color: #ff6600; }
+    .loading-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white border-b px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
+          <span class="material-symbols-outlined text-white">shopping_basket</span>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-gray-900">Admin Dashboard</h1>
+          <p class="text-sm text-gray-500">SmartSoko Platform</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <span class="material-symbols-outlined text-gray-400 absolute left-3 top-1/2 -translate-y-1/2">search</span>
+          <input type="text" placeholder="Search..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+        </div>
+        <button onclick="refreshAll()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+          <span class="material-symbols-outlined">refresh</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="bg-white border-b px-6 flex gap-6 overflow-x-auto">
+      <button onclick="switchTab('overview')" id="tab-overview" class="tab-active py-4 px-2 font-medium transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">dashboard</span> Overview</span>
+      </button>
+      <button onclick="switchTab('orders')" id="tab-orders" class="py-4 px-2 font-medium text-gray-600 hover:text-primary transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">receipt_long</span> Orders</span>
+      </button>
+      <button onclick="switchTab('sellers')" id="tab-sellers" class="py-4 px-2 font-medium text-gray-600 hover:text-primary transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">storefront</span> Sellers</span>
+      </button>
+      <button onclick="switchTab('users')" id="tab-users" class="py-4 px-2 font-medium text-gray-600 hover:text-primary transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">people</span> Users</span>
+      </button>
+      <button onclick="switchTab('analytics')" id="tab-analytics" class="py-4 px-2 font-medium text-gray-600 hover:text-primary transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">analytics</span> Analytics</span>
+      </button>
+    </div>
+
+    <!-- Content Area -->
+    <div class="p-6">
+      <!-- Overview Tab -->
+      <div id="content-overview" class="tab-content">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-orange-600">shopping_cart</span></div>
+              <select onchange="changeDateRange('orders', this.value)" class="text-xs border rounded px-2 py-1"><option value="all">All Time</option><option value="today">Today</option><option value="week">This Week</option></select>
+            </div>
+            <p class="text-sm text-gray-600">Total Orders</p>
+            <p class="text-3xl font-bold" id="totalOrders">-</p>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-green-600">payments</span></div>
+              <select onchange="changeDateRange('revenue', this.value)" class="text-xs border rounded px-2 py-1"><option value="all">All Time</option><option value="today">Today</option><option value="week">This Week</option></select>
+            </div>
+            <p class="text-sm text-gray-600">Total Revenue</p>
+            <p class="text-3xl font-bold" id="totalRevenue">-</p>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-blue-600">store</span></div>
+              <span class="text-xs text-gray-500">Active</span>
+            </div>
+            <p class="text-sm text-gray-600">Active Sellers</p>
+            <p class="text-3xl font-bold" id="totalSellers">-</p>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-purple-600">people</span></div>
+              <span class="text-xs text-gray-500">Registered</span>
+            </div>
+            <p class="text-sm text-gray-600">Total Users</p>
+            <p class="text-3xl font-bold" id="totalUsers">-</p>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold mb-4">Revenue Over Time</h3>
+            <canvas id="revenueChart" height="200"></canvas>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold mb-4">Orders by Status</h3>
+            <canvas id="ordersChart" height="200"></canvas>
+          </div>
+        </div>
+
+        <!-- Quick Actions & Recent Orders -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b flex items-center justify-between">
+              <h2 class="text-lg font-bold">Recent Orders</h2>
+              <div class="flex gap-2">
+                <button onclick="exportData('orders')" class="text-sm text-primary hover:underline flex items-center gap-1"><span class="material-symbols-outlined text-sm">download</span> Export</button>
+                <button onclick="switchTab('orders')" class="text-primary text-sm hover:underline">View All</button>
+              </div>
+            </div>
+            <table class="w-full">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Order ID</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Customer</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Amount</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTable" class="divide-y"><tr><td colspan="5" class="px-6 py-8 text-center text-gray-500 loading-pulse">Loading...</td></tr></tbody>
+            </table>
+          </div>
+          <div class="space-y-6">
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+              <h3 class="font-bold mb-4">Quick Actions</h3>
+              <div class="space-y-3">
+                <a href="orders.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"><span class="material-symbols-outlined text-purple-600">receipt_long</span><span class="text-sm">Orders Management</span></a>
+                <a href="supabase.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"><span class="material-symbols-outlined text-gray-600">dashboard</span><span class="text-sm">Full Admin Panel</span></a>
+                <a href="merchant.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"><span class="material-symbols-outlined text-orange-600">storefront</span><span class="text-sm">Seller Dashboard</span></a>
+                <a href="driver.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"><span class="material-symbols-outlined text-blue-600">delivery_dining</span><span class="text-sm">Driver Management</span></a>
+                <button onclick="exportData('all')" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left"><span class="material-symbols-outlined text-green-600">download</span><span class="text-sm">Export All Data</span></button>
+              </div>
+            </div>
+            <div class="bg-gradient-to-r from-primary to-secondary rounded-xl p-6 text-white">
+              <h3 class="font-bold mb-2">Platform Status</h3>
+              <div class="flex items-center gap-2 mb-4"><span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span><span class="text-sm">All Systems Operational</span></div>
+              <p class="text-sm opacity-80">Firebase: Connected</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders Tab -->
+      <div id="content-orders" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div class="p-6 border-b flex items-center justify-between">
+            <h2 class="text-lg font-bold">All Orders</h2>
+            <div class="flex gap-3">
+              <select id="orderStatusFilter" class="border rounded-lg px-4 py-2" onchange="filterOrders()">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="preparing">Preparing</option>
+                <option value="ready_for_delivery">Ready</option>
+                <option value="dispatched">Dispatched</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <button onclick="exportData('orders')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"><span class="material-symbols-outlined text-sm">download</span> Export CSV</button>
+            </div>
+          </div>
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Order ID</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Customer</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Seller</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Items</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Amount</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="allOrdersTable" class="divide-y"><tr><td colspan="8" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sellers Tab -->
+      <div id="content-sellers" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div class="p-6 border-b flex items-center justify-between">
+            <h2 class="text-lg font-bold">All Sellers</h2>
+            <button onclick="exportData('sellers')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"><span class="material-symbols-outlined text-sm">download</span> Export CSV</button>
+          </div>
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Seller</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Category</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Location</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Rating</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="sellersTable" class="divide-y"><tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Users Tab -->
+      <div id="content-users" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div class="p-6 border-b flex items-center justify-between">
+            <h2 class="text-lg font-bold">All Users</h2>
+            <button onclick="exportData('users')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"><span class="material-symbols-outlined text-sm">download</span> Export CSV</button>
+          </div>
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Phone</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Email</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Loyalty Points</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Joined</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTable" class="divide-y"><tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Analytics Tab -->
+      <div id="content-analytics" class="tab-content hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold mb-4">Daily Orders (Last 7 Days)</h3>
+            <canvas id="dailyOrdersChart" height="200"></canvas>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold mb-4">Revenue by Category</h3>
+            <canvas id="categoryRevenueChart" height="200"></canvas>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold mb-4">Top Sellers</h3>
+            <div id="topSellersList" class="space-y-3"></div>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold mb-4">Top Products</h3>
+            <div id="topProductsList" class="space-y-3"></div>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold mb-4">User Growth</h3>
+            <canvas id="userGrowthChart" height="150"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Actions Modal -->
+  <div id="orderModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl p-6 max-w-md w-full">
+      <h3 class="font-bold text-lg mb-4">Update Order #<span id="modalOrderId"></span></h3>
+      <div class="space-y-3 mb-6">
+        <button onclick="updateOrderStatus('confirmed')" class="w-full py-3 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 font-medium">Confirmed</button>
+        <button onclick="updateOrderStatus('preparing')" class="w-full py-3 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 font-medium">Preparing</button>
+        <button onclick="updateOrderStatus('ready_for_delivery')" class="w-full py-3 bg-orange-100 text-orange-800 rounded-lg hover:bg-orange-200 font-medium">Ready for Delivery</button>
+        <button onclick="updateOrderStatus('dispatched')" class="w-full py-3 bg-indigo-100 text-indigo-800 rounded-lg hover:bg-indigo-200 font-medium">Dispatched</button>
+        <button onclick="updateOrderStatus('delivered')" class="w-full py-3 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 font-medium">Delivered</button>
+        <button onclick="updateOrderStatus('cancelled')" class="w-full py-3 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 font-medium">Cancelled</button>
+      </div>
+      <button onclick="closeModal()" class="w-full py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    SmartNav.init({ activePage: 'dashboard', role: 'admin' });
+    let db, charts = {};
+
+    try { db = firebase.firestore(); } catch(e) { console.log('Firebase not initialized'); }
+
+    const statusColors = {
+      'pending': 'bg-yellow-100 text-yellow-800',
+      'confirmed': 'bg-blue-100 text-blue-800',
+      'preparing': 'bg-purple-100 text-purple-800',
+      'ready_for_delivery': 'bg-orange-100 text-orange-800',
+      'dispatched': 'bg-indigo-100 text-indigo-800',
+      'delivered': 'bg-green-100 text-green-800',
+      'cancelled': 'bg-red-100 text-red-800'
+    };
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      document.getElementById('content-' + tab).classList.remove('hidden');
+      document.querySelectorAll('[id^="tab-"]').forEach(t => { t.classList.remove('tab-active'); t.classList.add('text-gray-600'); });
+      document.getElementById('tab-' + tab).classList.add('tab-active');
+      document.getElementById('tab-' + tab).classList.remove('text-gray-600');
+    }
+
+    function openOrderModal(orderId) {
+      document.getElementById('modalOrderId').textContent = orderId.substring(0, 8);
+      document.getElementById('orderModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('orderModal').classList.add('hidden');
+    }
+
+    async function updateOrderStatus(status) {
+      if (!db || !document.getElementById('modalOrderId').textContent) return;
+      try {
+        const orderId = document.getElementById('modalOrderId').textContent;
+        await db.collection('orders').doc(orderId).update({ status: status, updatedAt: new Date() });
+        closeModal();
+        alert('Order status updated to ' + status);
+        refreshAll();
+      } catch (error) { console.error('Error:', error); alert('Failed to update order'); }
+    }
+
+    async function loadOverview() {
+      if (!db) return;
+      try {
+        const ordersSnap = await db.collection('orders').get();
+        const sellersSnap = await db.collection('sellers').where('isOpen', '==', true).get();
+        const usersSnap = await db.collection('users').get();
+        
+        document.getElementById('totalOrders').textContent = ordersSnap.size;
+        document.getElementById('totalSellers').textContent = sellersSnap.size;
+        document.getElementById('totalUsers').textContent = usersSnap.size;
+        
+        let totalRevenue = 0;
+        ordersSnap.forEach(doc => { totalRevenue += doc.data().total || 0; });
+        document.getElementById('totalRevenue').textContent = 'TSh ' + totalRevenue.toLocaleString();
+        
+        const recentOrders = await db.collection('orders').orderBy('createdAt', 'desc').limit(5).get();
+        if (recentOrders.empty) {
+          document.getElementById('ordersTable').innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">No orders found</td></tr>';
+        } else {
+          document.getElementById('ordersTable').innerHTML = recentOrders.docs.map(doc => {
+            const order = doc.data();
+            const statusClass = statusColors[order.status] || 'bg-gray-100 text-gray-800';
+            return `
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium">#${doc.id.substring(0, 8)}</td>
+                <td class="px-6 py-4">${order.customerName || order.customerPhone || 'N/A'}</td>
+                <td class="px-6 py-4 font-semibold">TSh ${(order.total || 0).toLocaleString()}</td>
+                <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusClass}">${order.status || 'pending'}</span></td>
+                <td class="px-6 py-4"><button onclick="openOrderModal('${doc.id}')" class="text-primary hover:underline text-sm">Edit</button></td>
+              </tr>
+            `;
+          }).join('');
+        }
+        updateCharts(ordersSnap, sellersSnap, usersSnap);
+      } catch (error) { console.error('Error:', error); }
+    }
+
+    function updateCharts(ordersSnap, sellersSnap, usersSnap) {
+      // Revenue Chart
+      if (charts.revenue) charts.revenue.destroy();
+      const revenueCtx = document.getElementById('revenueChart');
+      if (revenueCtx) {
+        charts.revenue = new Chart(revenueCtx, {
+          type: 'line',
+          data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ label: 'Revenue', data: [12000, 19000, 15000, 22000, 18000, 25000, 21000], borderColor: '#ff6600', backgroundColor: 'rgba(255,102,0,0.1)', fill: true }] },
+          options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+      }
+      // Orders by Status
+      if (charts.orders) charts.orders.destroy();
+      const ordersCtx = document.getElementById('ordersChart');
+      if (ordersCtx) {
+        const statusCounts = { pending: 0, confirmed: 0, preparing: 0, delivered: 0, cancelled: 0 };
+        ordersSnap.forEach(doc => { const status = doc.data().status || 'pending'; statusCounts[status] = (statusCounts[status] || 0) + 1; });
+        charts.orders = new Chart(ordersCtx, {
+          type: 'doughnut',
+          data: { labels: Object.keys(statusCounts), datasets: [{ data: Object.values(statusCounts), backgroundColor: ['#f59e0b', '#3b82f6', '#8b5cf6', '#22c55e', '#dc2626'] }] },
+          options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+      }
+    }
+
+    async function loadOrders() {
+      if (!db) return;
+      try {
+        const ordersSnap = await db.collection('orders').orderBy('createdAt', 'desc').limit(50).get();
+        if (ordersSnap.empty) {
+          document.getElementById('allOrdersTable').innerHTML = '<tr><td colspan="8" class="px-6 py-8 text-center text-gray-500">No orders found</td></tr>';
+        } else {
+          document.getElementById('allOrdersTable').innerHTML = ordersSnap.docs.map(doc => {
+            const order = doc.data();
+            const statusClass = statusColors[order.status] || 'bg-gray-100 text-gray-800';
+            return `
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium">#${doc.id.substring(0, 8)}</td>
+                <td class="px-6 py-4">${order.customerName || order.customerPhone || 'N/A'}</td>
+                <td class="px-6 py-4">${order.sellerName || 'N/A'}</td>
+                <td class="px-6 py-4">${order.items ? order.items.length : 0}</td>
+                <td class="px-6 py-4 font-semibold">TSh ${(order.total || 0).toLocaleString()}</td>
+                <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusClass}">${order.status || 'pending'}</span></td>
+                <td class="px-6 py-4 text-gray-600 text-sm">${order.createdAt ? order.createdAt.toDate().toLocaleDateString() : 'N/A'}</td>
+                <td class="px-6 py-4"><button onclick="openOrderModal('${doc.id}')" class="text-primary hover:underline text-sm">Edit</button></td>
+              </tr>
+            `;
+          }).join('');
+        }
+      } catch (error) { console.error('Error:', error); }
+    }
+
+    async function loadSellers() {
+      if (!db) return;
+      try {
+        const sellersSnap = await db.collection('sellers').get();
+        if (sellersSnap.empty) {
+          document.getElementById('sellersTable').innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">No sellers found</td></tr>';
+        } else {
+          document.getElementById('sellersTable').innerHTML = sellersSnap.docs.map(doc => {
+            const seller = doc.data();
+            const isOpen = seller.isOpen !== false;
+            return `
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium">${seller.name || 'N/A'}</td>
+                <td class="px-6 py-4 text-gray-600">${seller.category || 'N/A'}</td>
+                <td class="px-6 py-4 text-gray-600">${seller.location || 'N/A'}</td>
+                <td class="px-6 py-4">${seller.rating || '-'}</td>
+                <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${isOpen ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${isOpen ? 'Open' : 'Closed'}</span></td>
+                <td class="px-6 py-4"><button class="text-primary hover:underline text-sm">View</button></td>
+              </tr>
+            `;
+          }).join('');
+        }
+      } catch (error) { console.error('Error:', error); }
+    }
+
+    async function loadUsers() {
+      if (!db) return;
+      try {
+        const usersSnap = await db.collection('users').get();
+        if (usersSnap.empty) {
+          document.getElementById('usersTable').innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">No users found</td></tr>';
+        } else {
+          document.getElementById('usersTable').innerHTML = usersSnap.docs.map(doc => {
+            const user = doc.data();
+            return `
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium">${user.name || 'N/A'}</td>
+                <td class="px-6 py-4 text-gray-600">${user.phone || 'N/A'}</td>
+                <td class="px-6 py-4 text-gray-600">${user.email || 'N/A'}</td>
+                <td class="px-6 py-4">${user.loyaltyPoints || 0}</td>
+                <td class="px-6 py-4 text-gray-600 text-sm">${user.createdAt ? user.createdAt.toDate().toLocaleDateString() : 'N/A'}</td>
+                <td class="px-6 py-4"><button class="text-primary hover:underline text-sm">Edit</button></td>
+              </tr>
+            `;
+          }).join('');
+        }
+      } catch (error) { console.error('Error:', error); }
+    }
+
+    function loadAnalytics() {
+      // Daily Orders Chart
+      if (charts.dailyOrders) charts.dailyOrders.destroy();
+      const dailyCtx = document.getElementById('dailyOrdersChart');
+      if (dailyCtx) {
+        charts.dailyOrders = new Chart(dailyCtx, {
+          type: 'bar',
+          data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ label: 'Orders', data: [12, 19, 15, 22, 18, 25, 21], backgroundColor: '#ff6600' }] },
+          options: { responsive: true }
+        });
+      }
+      // Category Revenue Chart
+      if (charts.categoryRevenue) charts.categoryRevenue.destroy();
+      const catCtx = document.getElementById('categoryRevenueChart');
+      if (catCtx) {
+        charts.categoryRevenue = new Chart(catCtx, {
+          type: 'pie',
+          data: { labels: ['Food', 'Dairy', 'Fruits', 'Groceries', 'Bakery'], datasets: [{ data: [45, 20, 15, 12, 8], backgroundColor: ['#ff6600', '#3b82f6', '#22c55e', '#8b5cf6', '#f59e0b'] }] },
+          options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+      }
+      // User Growth Chart
+      if (charts.userGrowth) charts.userGrowth.destroy();
+      const userCtx = document.getElementById('userGrowthChart');
+      if (userCtx) {
+        charts.userGrowth = new Chart(userCtx, {
+          type: 'line',
+          data: { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], datasets: [{ label: 'Users', data: [50, 75, 100, 140, 180, 220], borderColor: '#8b5cf6', fill: false }] },
+          options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+      }
+    }
+
+    function exportData(type) {
+      let data = [], filename = 'smartsoko_';
+      if (type === 'orders' || type === 'all') {
+        db.collection('orders').get().then(snap => {
+          data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          downloadCSV(data, filename + 'orders.csv');
+        });
+      }
+      if (type === 'sellers' || type === 'all') {
+        db.collection('sellers').get().then(snap => {
+          data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          downloadCSV(data, filename + 'sellers.csv');
+        });
+      }
+      if (type === 'users' || type === 'all') {
+        db.collection('users').get().then(snap => {
+          data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          downloadCSV(data, filename + 'users.csv');
+        });
+      }
+    }
+
+    function downloadCSV(data, filename) {
+      if (!data.length) return;
+      const headers = Object.keys(data[0]);
+      const csv = [headers.join(','), ...data.map(row => headers.map(h => JSON.stringify(row[h] || '')).join(','))].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function filterOrders() {
+      console.log('Filter by:', document.getElementById('orderStatusFilter').value);
+    }
+
+    function refreshAll() {
+      loadOverview();
+      loadOrders();
+      loadSellers();
+      loadUsers();
+    }
+
+    function changeDateRange(type, range) {
+      console.log('Change:', type, range);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadOverview();
+      loadOrders();
+      loadSellers();
+      loadUsers();
+      loadAnalytics();
+    });
+  </script>
+</body>
+</html>

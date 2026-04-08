@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartSoko - User Profile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="nav-component.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#ff6600",
+            "primary-dark": "#e55500",
+            "secondary": "#ff8800",
+            "accent": "#ffa500",
+            "surface": "#ffffff",
+            "surface-variant": "#f5f5f5",
+            "background": "#fafafa",
+            "on-primary": "#ffffff",
+            "on-surface": "#1a1a1a",
+            "on-surface-variant": "#666666",
+            "outline": "#e0e0e0",
+            "error": "#dc2626",
+            "success": "#16a34a",
+            "warning": "#f59e0b"
+          },
+          fontFamily: {
+            "headline": ["Plus Jakarta Sans"],
+            "body": ["Be Vietnam Pro"],
+            "label": ["Be Vietnam Pro"]
+          },
+          borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          boxShadow: {
+            "sm": "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+            "md": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+            "lg": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+            "xl": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+            "2xl": "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-primary to-secondary text-white p-4 shadow-lg">
+    <div class="container mx-auto flex justify-between items-center">
+      <a href="main.html" class="flex items-center gap-3">
+        <div class="w-20 h-20 bg-white/20 rounded-xl flex items-center justify-center">
+          <i class="fas fa-shopping-basket text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold">SmartSoko</h1>
+          <p class="text-xs opacity-80">Your Profile</p>
+        </div>
+      </a>
+      <div class="flex items-center gap-3">
+        <button onclick="logout()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all duration-200">
+          <i class="fas fa-sign-out-alt mr-2"></i>Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- Auth State -->
+    <div id="authState">
+  <div id="loggedOutView" class="bg-white rounded-2xl shadow-lg p-8 max-w-md mx-auto space-y-6">
+    <div class="text-center">
+      <div class="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-user text-orange-600 text-3xl"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">Welcome Back</h2>
+      <p class="text-gray-600 mb-4">Sign in to access your profile</p>
+      
+      <!-- Login Form -->
+      <form id="loginForm" class="space-y-4 w-full">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+          <input type="tel" id="loginPhone" required 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+            placeholder="+255 XXX XXX XXX">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+          <input type="password" id="loginPassword" required 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+            placeholder="Enter your password">
+        </div>
+        <button type="submit" 
+          class="w-full bg-gradient-to-r from-primary to-secondary text-white font-semibold py-3 rounded-lg hover:opacity-90 transition-all duration-200">
+          Sign In
+        </button>
+      </form>
+      
+      <div class="mt-6 text-center">
+        <p class="text-gray-600 mb-2">Don't have an account?</p>
+        <button onclick="showRegister()" class="text-orange-600 font-medium hover:underline transition-colors">
+          Create Account
+        </button>
+      </div>
+      
+      <!-- Register Form (Hidden by default) -->
+      <form id="registerForm" class="space-y-4 w-full hidden">
+        <h3 class="text-xl font-bold text-center mb-4">Create Account</h3>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+          <input type="text" id="regName" required 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+            placeholder="Your full name">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+          <input type="tel" id="regPhone" required 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+            placeholder="+255 XXX XXX XXX">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+          <input type="email" id="regEmail" 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+            placeholder="your@email.com">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Password *</label>
+          <input type="password" id="regPassword" required 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+            placeholder="Create a password">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Delivery Address</label>
+          <input type="text" id="regAddress" 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+            placeholder="Your delivery address">
+        </div>
+        <div class="flex justify-between pt-4">
+          <button type="submit" 
+            class="w-full bg-gradient-to-r from-primary to-secondary text-white font-semibold py-3 rounded-lg hover:opacity-90 transition-all duration-200">
+            Create Account
+          </button>
+          <button type="button" onclick="showLogin()" 
+            class="w-full bg-gray-100 text-gray-700 font-medium py-3 rounded-lg hover:bg-gray-200 transition-all duration-200">
+            Back to Login
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+    
+    <!-- Logged In View -->
+    <div id="loggedInView" class="hidden">
+      <!-- Profile Header -->
+      <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+        <div class="flex items-center gap-4">
+          <div class="w-20 h-20 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white text-2xl font-bold" id="userAvatar">
+            U
+          </div>
+          <div class="flex-1">
+            <h2 class="text-2xl font-bold text-gray-800" id="userName">User Name</h2>
+            <p class="text-gray-600" id="userPhone">+255 XXX XXX XXX</p>
+            <div class="flex items-center gap-2 mt-2">
+              <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
+                <i class="fas fa-star mr-1"></i>Gold Member
+              </span>
+              <span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-semibold" id="loyaltyPoints">
+                <i class="fas fa-coins mr-1"></i>0 points
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tabs -->
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="flex border-b">
+          <button onclick="switchTab('orders')" class="tab-btn active flex-1 py-4 font-semibold transition-all duration-200" id="tab-orders">
+            <i class="fas fa-shopping-bag mr-2"></i>My Orders
+          </button>
+          <button onclick="switchTab('addresses')" class="tab-btn flex-1 py-4 font-semibold transition-all duration-200" id="tab-addresses">
+            <i class="fas fa-map-marker-alt mr-2"></i>Addresses
+          </button>
+          <button onclick="switchTab('settings')" class="tab-btn flex-1 py-4 font-semibold transition-all duration-200" id="tab-settings">
+            <i class="fas fa-cog mr-2"></i>Settings
+          </button>
+        </div>
+
+        <!-- Orders Tab -->
+        <div id="orders" class="tab-content active p-6">
+          <h3 class="text-lg font-bold mb-4">Order History</h3>
+          <div id="ordersList" class="space-y-4">
+            <p class="text-gray-500 text-center py-8">No orders yet</p>
+          </div>
+        </div>
+
+        <!-- Addresses Tab -->
+        <div id="addresses" class="tab-content p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold">Saved Addresses</h3>
+            <button onclick="showAddAddress()" class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-all duration-200">
+              <i class="fas fa-plus mr-2"></i>Add New
+            </button>
+          </div>
+          <div id="addressesList" class="space-y-4">
+            <div class="border rounded-lg p-4 flex justify-between items-center">
+              <div>
+                <p class="font-semibold">Home</p>
+                <p class="text-gray-600 text-sm">Dar es Salaam, Tanzania</p>
+              </div>
+              <button class="text-red-500 hover:text-red-700">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content p-6">
+          <h3 class="text-lg font-bold mb-4">Account Settings</h3>
+          <form id="settingsForm" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+              <input type="text" id="settingsName" 
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <input type="email" id="settingsEmail" 
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+              <input type="tel" id="settingsPhone" 
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
+            </div>
+            <button type="submit" class="w-full bg-gradient-to-r from-primary to-secondary text-white font-semibold py-3 rounded-lg hover:opacity-90 transition-all duration-200">
+              Save Changes
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    </div>
+  </main>
+
+  <!-- Add Address Modal -->
+  <div id="addressModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+      <h3 class="text-xl font-bold mb-4">Add New Address</h3>
+      <form id="addressForm" class="space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Label (e.g., Home, Office)</label>
+          <input type="text" id="addressLabel" required 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Street Address</label>
+          <input type="text" id="addressStreet" required 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+          <input type="text" id="addressCity" required 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+          <input type="tel" id="addressPhone" required 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
+        </div>
+        <div class="flex items-center mb-4">
+          <div class="flex items-center">
+            <input type="checkbox" id="isDefault" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+            <span class="ml-2 text-sm font-medium text-gray-700">Set as default address</span>
+          </div>
+        </div>
+        <div class="flex justify-end space-x-3">
+          <button type="button" onclick="hideAddressModal()" 
+            class="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-md hover:bg-gray-200 transition-colors">
+            Cancel
+          </button>
+          <button type="submit" 
+            class="px-4 py-2 bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-md hover:opacity-90 transition-all duration-200">
+            Save Address
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBKliW4sQwBFEYMptJ8VuWYHTJ73DbHoE",
+      authDomain: "fooddelievry-dce15.firebaseapp.com",
+      projectId: "fooddelievry-dce15",
+      storageBucket: "fooddelievry-dce15.firebasestorage.app",
+      messagingSenderId: "727819507148",
+      appId: "1:727819507148:web:372bee2608d5c7a9587969"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let currentUser = null;
+
+    // Check for logged in user
+    function checkAuth() {
+      const userData = localStorage.getItem('smartsoko_user');
+      if (userData) {
+        currentUser = JSON.parse(userData);
+        showLoggedInView();
+      } else {
+        showLoggedOutView();
+      }
+    }
+
+    function showLoggedOutView() {
+      document.getElementById('loggedOutView').classList.remove('hidden');
+      document.getElementById('loggedInView').classList.add('hidden');
+    }
+
+    function showLoggedInView() {
+      document.getElementById('loggedOutView').classList.add('hidden');
+      document.getElementById('loggedInView').classList.remove('hidden');
+      
+      // Update UI with user data
+      document.getElementById('userName').textContent = currentUser.name || 'User';
+      document.getElementById('userPhone').textContent = currentUser.phone || '';
+      document.getElementById('userAvatar').textContent = (currentUser.name || 'U').charAt(0).toUpperCase();
+      
+      // Update settings form
+      document.getElementById('settingsName').value = currentUser.name || '';
+      document.getElementById('settingsEmail').value = currentUser.email || '';
+      document.getElementById('settingsPhone').value = currentUser.phone || '';
+      
+     // Load user's orders
+     async function loadUserOrders() {
+         if (!currentUser) return;
+         
+         try {
+             // Show loading state
+             const ordersList = document.getElementById('ordersList');
+             ordersList.innerHTML = '<div class="text-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div><p class="mt-2 text-gray-500">Loading your orders...</p></div>';
+             
+             const snapshot = await db.collection('orders')
+                 .where('customerPhone', '==', currentUser.phone)
+                 .orderBy('createdAt', 'desc')
+                 .get();
+             
+             if (snapshot.empty) {
+                 ordersList.innerHTML = '<p class="text-gray-500 text-center py-8">No orders yet</p>';
+                 return;
+             }
+             
+             ordersList.innerHTML = snapshot.docs.map(doc => {
+                 const order = doc.data();
+                 const date = order.createdAt ? order.createdAt.toDate().toLocaleDateString() : 'N/A';
+                 return `
+                     <div class="border rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
+                         <div class="flex justify-between items-start mb-2">
+                             <div>
+                                 <p class="font-semibold text-gray-800">Order #${doc.id.substring(0, 8)}</p>
+                                 <p class="text-sm text-gray-500">${date}</p>
+                             </div>
+                             <span class="px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(order.status)}">
+                                 ${order.status || 'Pending'}
+                             </span>
+                         </div>
+                         <p class="text-gray-700">${order.items ? order.items.map(i => i.name).join(', ') : 'N/A'}</p>
+                         <p class="font-bold text-orange-600 mt-2">TSh ${(order.total || 0).toLocaleString()}</p>
+                     </div>
+                 `;
+             }).join('');
+         } catch (error) {
+             console.error('Error loading orders:', error);
+             document.getElementById('ordersList').innerHTML = '<p class="text-red-500 text-center py-8">Failed to load orders. Please try again.</p>';
+         }
+     }
+
+    function showRegister() {
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('registerForm').classList.remove('hidden');
+    }
+
+    function showLogin() {
+      document.getElementById('loginForm').classList.remove('hidden');
+      document.getElementById('registerForm').classList.add('hidden');
+    }
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const phone = document.getElementById('loginPhone').value;
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        const snapshot = await db.collection('users').where('phone', '==', phone).where('password', '==', password).get();
+        if (snapshot.empty) {
+          alert('Invalid phone number or password');
+          return;
+        }
+        
+        const userDoc = snapshot.docs[0];
+        currentUser = { id: userDoc.id, ...userDoc.data() };
+        localStorage.setItem('smartsoko_user', JSON.stringify(currentUser));
+        showLoggedInView();
+      } catch (error) {
+        console.error('Login error:', error);
+        alert('Login failed. Please try again.');
+      }
+    });
+
+    // Register
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const userData = {
+        name: document.getElementById('regName').value,
+        phone: document.getElementById('regPhone').value,
+        email: document.getElementById('regEmail').value,
+        password: document.getElementById('regPassword').value,
+        address: document.getElementById('regAddress').value,
+        loyaltyPoints: 0,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      try {
+        // Check if phone already exists
+        const existing = await db.collection('users').where('phone', '==', userData.phone).get();
+        if (!existing.empty) {
+          alert('Phone number already registered');
+          return;
+        }
+
+        const docRef = await db.collection('users').add(userData);
+        currentUser = { id: docRef.id, ...userData };
+        localStorage.setItem('smartsoko_user', JSON.stringify(currentUser));
+        showLoggedInView();
+      } catch (error) {
+        console.error('Registration error:', error);
+        alert('Registration failed. Please try again.');
+      }
+    });
+
+    // Logout
+    function logout() {
+      localStorage.removeItem('smartsoko_user');
+      currentUser = null;
+      showLoggedOutView();
+    }
+
+    // Tab switching
+    function switchTab(tab) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+      
+      // Show selected tab
+      document.getElementById(tab).classList.add('active');
+      document.getElementById('tab-' + tab).classList.add('active');
+    }
+
+    // Load user orders
+    async function loadUserOrders() {
+      if (!currentUser) return;
+      
+      try {
+        const snapshot = await db.collection('orders')
+          .where('customerPhone', '==', currentUser.phone)
+          .orderBy('createdAt', 'desc')
+          .get();
+        
+        const ordersList = document.getElementById('ordersList');
+        if (snapshot.empty) {
+          ordersList.innerHTML = '<p class="text-gray-500 text-center py-8">No orders yet</p>';
+          return;
+        }
+
+        ordersList.innerHTML = snapshot.docs.map(doc => {
+          const order = doc.data();
+          const date = order.createdAt ? order.createdAt.toDate().toLocaleDateString() : 'N/A';
+          return `
+            <div class="border rounded-lg p-4">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <p class="font-semibold">Order #${doc.id.substring(0, 8)}</p>
+                  <p class="text-sm text-gray-600">${date}</p>
+                </div>
+                <span class="px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(order.status)}">
+                  ${order.status || 'Pending'}
+                </span>
+              </div>
+              <p class="text-gray-700">${order.items ? order.items.map(i => i.name).join(', ') : 'N/A'}</p>
+              <p class="font-bold text-orange-600 mt-2">TSh ${(order.total || 0).toLocaleString()}</p>
+            </div>
+          `;
+        }).join('');
+      } catch (error) {
+        console.error('Error loading orders:', error);
+      }
+    }
+
+    function getStatusColor(status) {
+      const colors = {
+        'delivered': 'bg-green-100 text-green-700',
+        'pending': 'bg-yellow-100 text-yellow-700',
+        'confirmed': 'bg-blue-100 text-blue-700',
+        'cancelled': 'bg-red-100 text-red-700'
+      };
+      return colors[status] || 'bg-gray-100 text-gray-700';
+    }
+
+    // Address management
+    function showAddAddress() {
+      document.getElementById('addressModal').classList.remove('hidden');
+    }
+
+    function hideAddressModal() {
+      document.getElementById('addressModal').classList.add('hidden');
+      // Reset form
+      document.getElementById('addressForm').reset();
+      document.getElementById('editAddressId').value = '';
+      document.getElementById('modalTitle').textContent = 'Add New Address';
+    }
+
+    document.getElementById('addressForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentUser) {
+        alert('Please login first');
+        return;
+      }
+
+      const addressData = {
+        label: document.getElementById('addressLabel').value,
+        street: document.getElementById('addressStreet').value,
+        city: document.getElementById('addressCity').value,
+        phone: document.getElementById('addressPhone').value,
+        isDefault: document.getElementById('isDefault').checked,
+        userId: currentUser.id,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      try {
+        const editId = document.getElementById('editAddressId').value;
+        if (editId) {
+                     // Update existing
+                     await db.collection('addresses').doc(editId).update(addressData);
+                     showToast('Address updated', 'success');
+        } else {
+                     // Add new
+                     await db.collection('addresses').add(addressData);
+                     showToast('Address added', 'success');
+        }
+        hideAddressModal();
+        loadUserAddresses();
+      } catch (error) {
+        console.error('Error saving address:', error);
+        alert('Failed to save address');
+      }
+    });
+
+     async function loadUserAddresses() {
+         if (!currentUser) return;
+         
+         try {
+             // Show loading state
+             const addressesList = document.getElementById('addressesList');
+             addressesList.innerHTML = '<div class="text-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div><p class="mt-2 text-gray-500">Loading your addresses...</p></div>';
+             
+             const snapshot = await db.collection('addresses')
+                 .where('userId', '==', currentUser.id)
+                 .orderBy('createdAt', 'desc')
+                 .get();
+             
+             if (snapshot.empty) {
+                 addressesList.innerHTML = '<p class="text-gray-500 text-center py-8">No addresses saved</p>';
+                 return;
+             }
+             
+             addressesList.innerHTML = snapshot.docs.map(doc => {
+                 const addr = doc.data();
+                 return `
+                     <div class="border rounded-lg p-4 relative ${addr.isDefault ? 'border-orange-500 bg-orange-50' : ''}">
+                         ${addr.isDefault ? '<span class="absolute top-2 right-2 text-xs bg-orange-500 text-white px-2 py-1 rounded">Default</span>' : ''}
+                         <h4 class="font-semibold">${addr.label || 'Address'}</h4>
+                         <p class="text-gray-600 text-sm">${addr.street}</p>
+                         <p class="text-gray-600 text-sm">${addr.city}</p>
+                         <p class="text-gray-600 text-sm">${addr.phone}</p>
+                         <div class="flex gap-2 mt-3">
+                             <button onclick="editAddress('${doc.id}')" class="text-blue-600 text-sm hover:underline transition-colors duration-200">
+                                 Edit
+                             </button>
+                             <button onclick="deleteAddress('${doc.id}')" class="text-red-600 text-sm hover:underline transition-colors duration-200">
+                                 Delete
+                             </button>
+                             ${!addr.isDefault ? `<button onclick="setDefaultAddress('${doc.id}')" class="text-orange-600 text-sm hover:underline transition-colors duration-200">
+                                 Set Default
+                             </button>` : ''}
+                         </div>
+                     </div>
+                 `;
+}).join('');
+           } catch (error) {
+               console.error('Error loading addresses:', error);
+               document.getElementById('addressesList').innerHTML = '<p class="text-red-500 text-center py-8">Failed to load addresses. Please try again.</p>';
+           }
+       }
+
+    async function editAddress(addressId) {
+      try {
+        const doc = await db.collection('addresses').doc(addressId).get();
+        if (doc.exists) {
+          const addr = doc.data();
+          document.getElementById('addressLabel').value = addr.label || '';
+          document.getElementById('addressStreet').value = addr.street || '';
+          document.getElementById('addressCity').value = addr.city || '';
+          document.getElementById('addressPhone').value = addr.phone || '';
+          document.getElementById('isDefault').checked = addr.isDefault || false;
+          document.getElementById('editAddressId').value = addressId;
+          document.getElementById('modalTitle').textContent = 'Edit Address';
+          document.getElementById('addressModal').classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('Error loading address:', error);
+      }
+    }
+
+    async function deleteAddress(addressId) {
+      if (confirm('Delete this address?')) {
+        try {
+          await db.collection('addresses').doc(addressId).delete();
+          showToast('Address deleted');
+          loadUserAddresses();
+        } catch (error) {
+          console.error('Error deleting address:', error);
+        }
+      }
+    }
+
+    async function setDefaultAddress(addressId) {
+      try {
+        // Remove default from all addresses
+        const snapshot = await db.collection('addresses')
+          .where('userId', '==', currentUser.id)
+          .where('isDefault', '==', true)
+          .get();
+        
+        const batch = db.batch();
+        snapshot.docs.forEach(doc => {
+          batch.update(doc.ref, { isDefault: false });
+        });
+        batch.update(db.collection('addresses').doc(addressId), { isDefault: true });
+        await batch.commit();
+        
+        showToast('Default address set');
+        loadUserAddresses();
+      } catch (error) {
+        console.error('Error setting default:', error);
+      }
+    }
+
+    function showToast(message, type = 'info') {
+         const toast = document.createElement('div');
+         let bgColor = 'bg-gray-800';
+         if (type === 'success') bgColor = 'bg-green-600';
+         else if (type === 'error') bgColor = 'bg-red-600';
+         else if (type === 'warning') bgColor = 'bg-yellow-500';
+         
+         toast.className = `fixed bottom-4 left-1/2 -translate-x-1/2 ${bgColor} text-white px-6 py-3 rounded-full shadow-lg z-50`;
+         toast.textContent = message;
+         document.body.appendChild(toast);
+         setTimeout(() => toast.remove(), 3000);
+     }
+
+    // Settings form
+    document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const updates = {
+        name: document.getElementById('settingsName').value,
+        email: document.getElementById('settingsEmail').value,
+        phone: document.getElementById('settingsPhone').value
+      };
+
+      try {
+        await db.collection('users').doc(currentUser.id).update(updates);
+        currentUser = { ...currentUser, ...updates };
+        localStorage.setItem('smartsoko_user', JSON.stringify(currentUser));
+        alert('Settings saved!');
+      } catch (error) {
+        console.error('Error saving settings:', error);
+        alert('Failed to save settings');
+      }
+    });
+
+    // Initialize
+    SmartNav.init({ activePage: 'profile', role: 'customer', breadcrumbs: ['Home', 'Profile'] });
+    checkAuth();
+  </script>
+</body>
+</html>

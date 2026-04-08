@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>SmartSoko - Chat with Rider</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="config/firebase-config.js"></script>
+  <script src="nav-component.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#ff6600",
+            "primary-dark": "#e55500",
+            "secondary": "#ff8800",
+            "accent": "#ffa500",
+            "surface": "#ffffff",
+            "surface-variant": "#f5f5f5",
+            "background": "#fafafa",
+            "on-primary": "#ffffff",
+            "on-surface": "#1a1a1a",
+            "on-surface-variant": "#666666",
+            "outline": "#e0e0e0",
+            "error": "#dc2626",
+            "success": "#16a34a",
+            "warning": "#f59e0b"
+          },
+          fontFamily: {
+            "headline": ["Plus Jakarta Sans"],
+            "body": ["Be Vietnam Pro"],
+            "label": ["Be Vietnam Pro"]
+          },
+          borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body { 
+      font-family: 'Be Vietnam Pro', sans-serif;
+      min-height: 100vh;
+    }
+    h1, h2, h3 { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #ff6600 0%, #ff8800 100%);
+    }
+    .chat-container {
+      scrollbar-width: thin;
+      scrollbar-color: #e0e0e0 transparent;
+    }
+    .chat-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat-container::-webkit-scrollbar-thumb {
+      background-color: #e0e0e0;
+      border-radius: 3px;
+    }
+    .message-bubble {
+      max-width: 75%;
+      word-wrap: break-word;
+    }
+    .typing-indicator span {
+      animation: typing 1.4s infinite;
+    }
+    .typing-indicator span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .typing-indicator span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    @keyframes typing {
+      0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+      30% { opacity: 1; transform: translateY(-4px); }
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="fixed top-0 w-full z-50 bg-white shadow-sm">
+    <!-- Top Bar -->
+    <div class="flex justify-between items-center px-4 py-3">
+      <div class="flex items-center gap-3">
+        <a href="customer.html" class="w-10 h-10 flex items-center justify-center hover:bg-surface-variant rounded-full transition-colors">
+          <span class="material-symbols-outlined text-primary">arrow_back</span>
+        </a>
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary text-2xl">two_wheeler</span>
+            </div>
+            <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-success rounded-full border-2 border-white"></div>
+          </div>
+          <div>
+            <h1 id="riderName" class="font-headline text-base font-bold text-on-surface">Loading...</h1>
+            <p id="riderStatus" class="text-xs text-success flex items-center gap-1">
+              <span class="w-1.5 h-1.5 bg-success rounded-full"></span>
+              Online
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="callRider()" class="w-10 h-10 flex items-center justify-center bg-surface-variant hover:bg-primary/10 rounded-full transition-colors">
+          <span class="material-symbols-outlined text-primary">phone</span>
+        </button>
+        <button onclick="showOrderInfo()" class="w-10 h-10 flex items-center justify-center bg-surface-variant hover:bg-primary/10 rounded-full transition-colors">
+          <span class="material-symbols-outlined text-primary">info</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Order Status Bar -->
+    <div class="bg-surface-variant px-4 py-2 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span id="orderStatusIcon" class="material-symbols-outlined text-primary text-sm">local_shipping</span>
+        <span id="orderStatus" class="text-sm font-medium text-on-surface">On the way</span>
+      </div>
+      <span id="etaText" class="text-xs text-on-surface-variant">ETA: 15 min</span>
+    </div>
+  </header>
+
+  <!-- Chat Container -->
+  <main class="flex-1 pt-32 pb-24 px-4 overflow-y-auto chat-container" id="chatContainer">
+    <!-- Order Info Card -->
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-outline/20 mb-6">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-primary">receipt</span>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-on-surface">Order #<span id="orderId">-</span></p>
+          <p class="text-xs text-on-surface-variant">2 items • TSh <span id="orderTotal">0</span></p>
+        </div>
+      </div>
+      <div class="h-1 bg-surface-variant rounded-full overflow-hidden">
+        <div id="deliveryProgress" class="h-full gradient-bg rounded-full transition-all duration-500" style="width: 60%"></div>
+      </div>
+    </div>
+
+    <!-- Date Separator -->
+    <div class="flex items-center justify-center my-4">
+      <span class="text-xs text-on-surface-variant bg-surface-variant px-3 py-1 rounded-full">Today</span>
+    </div>
+
+    <!-- Messages -->
+    <div id="messagesList" class="space-y-4">
+      <!-- Welcome Message -->
+      <div class="flex justify-start">
+        <div class="message-bubble bg-white rounded-2xl rounded-tl-none p-3 shadow-sm border border-outline/20">
+          <p class="text-sm text-on-surface">Hello! I'm your delivery rider. I'll be delivering your order soon. Feel free to message me if you have any questions!</p>
+          <span class="text-[10px] text-on-surface-variant mt-1 block">Just now</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typing Indicator (Hidden by default) -->
+    <div id="typingIndicator" class="hidden flex justify-start mt-2">
+      <div class="bg-white rounded-2xl rounded-tl-none p-3 shadow-sm border border-outline/20">
+        <div class="typing-indicator flex gap-1">
+          <span class="w-2 h-2 bg-on-surface-variant rounded-full"></span>
+          <span class="w-2 h-2 bg-on-surface-variant rounded-full"></span>
+          <span class="w-2 h-2 bg-on-surface-variant rounded-full"></span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Quick Actions -->
+  <div class="fixed bottom-20 left-0 right-0 px-4 z-40">
+    <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
+      <button onclick="sendQuickMessage('I\'m at the location')" class="whitespace-nowrap px-4 py-2 bg-white rounded-full text-sm text-on-surface shadow-sm border border-outline/20 hover:bg-surface-variant transition-colors">
+        I'm at the location
+      </button>
+      <button onclick="sendQuickMessage('Please call when you arrive')" class="whitespace-nowrap px-4 py-2 bg-white rounded-full text-sm text-on-surface shadow-sm border border-outline/20 hover:bg-surface-variant transition-colors">
+        Call when arrive
+      </button>
+      <button onclick="sendQuickMessage('Leave at the door')" class="whitespace-nowrap px-4 py-2 bg-white rounded-full text-sm text-on-surface shadow-sm border border-outline/20 hover:bg-surface-variant transition-colors">
+        Leave at door
+      </button>
+      <button onclick="sendQuickMessage('I\'m running late')" class="whitespace-nowrap px-4 py-2 bg-white rounded-full text-sm text-on-surface shadow-sm border border-outline/20 hover:bg-surface-variant transition-colors">
+        Running late
+      </button>
+    </div>
+  </div>
+
+  <!-- Message Input -->
+  <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-outline/20 px-4 py-3 z-50">
+    <div class="flex items-center gap-2 max-w-2xl mx-auto">
+      <button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors">
+        <span class="material-symbols-outlined">add</span>
+      </button>
+      <div class="flex-1 relative">
+        <input 
+          type="text" 
+          id="messageInput" 
+          placeholder="Type a message..." 
+          class="w-full pl-4 pr-12 py-3 bg-surface-variant rounded-full text-on-surface placeholder:text-on-surface-variant/60 focus:ring-2 focus:ring-primary outline-none"
+          onkeypress="handleKeyPress(event)"
+        />
+        <button 
+          onclick="sendMessage()" 
+          id="sendButton"
+          class="absolute right-1.5 top-1/2 transform -translate-y-1/2 w-9 h-9 gradient-bg text-white rounded-full flex items-center justify-center shadow-md hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span class="material-symbols-outlined text-sm">send</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Order Info Modal -->
+  <div id="orderInfoModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
+    <div class="bg-white rounded-t-3xl md:rounded-2xl w-full max-w-md p-6 animate-slide-up">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-headline text-xl font-bold text-primary">Order Details</h3>
+        <button onclick="closeOrderInfo()" class="p-2 hover:bg-surface-variant rounded-full transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="space-y-4" id="orderInfoContent">
+        <!-- Order details will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const db = firebase.firestore();
+    let currentOrder = null;
+    let currentUser = JSON.parse(localStorage.getItem('smartsoko_user')) || { name: 'Customer', phone: '' };
+    let riderInfo = null;
+    let chatId = null;
+    let unsubscribe = null;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      SmartNav.init({ activePage: 'cart', role: 'customer', breadcrumbs: ['Home', 'Orders', 'Chat'] });
+      loadOrderInfo();
+      loadChat();
+    });
+
+    function loadOrderInfo() {
+      // Get order ID from URL or localStorage
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get('order') || localStorage.getItem('smartsoko_current_order');
+      
+      if (!orderId) {
+        showError('No order specified');
+        return;
+      }
+
+      // Load order from Firebase
+      db.collection('orders').doc(orderId).get().then((doc) => {
+        if (doc.exists) {
+          currentOrder = { id: doc.id, ...doc.data() };
+          displayOrderInfo();
+          loadRiderInfo(currentOrder.driverId);
+          initChat(orderId);
+        } else {
+          showError('Order not found');
+        }
+      }).catch((error) => {
+        console.error('Error loading order:', error);
+        showError('Failed to load order. Please try again.');
+      });
+    }
+
+    function showError(message) {
+      const container = document.getElementById('orderInfo');
+      if (container) {
+        container.innerHTML = `<p class="text-red-500 text-center py-8">${message}</p>`;
+      }
+    }
+
+    function displayOrderInfo() {
+      if (!currentOrder) return;
+
+      document.getElementById('orderId').textContent = currentOrder.id.substring(0, 8).toUpperCase();
+      document.getElementById('orderTotal').textContent = (currentOrder.total || 0).toLocaleString();
+      
+      // Update status
+      const statusMap = {
+        'confirmed': { text: 'Order Confirmed', icon: 'check_circle', width: '25%' },
+        'preparing': { text: 'Preparing', icon: 'restaurant', width: '40%' },
+        'dispatched': { text: 'On the way', icon: 'local_shipping', width: '60%' },
+        'delivered': { text: 'Delivered', icon: 'task_alt', width: '100%' }
+      };
+      
+      const status = statusMap[currentOrder.status] || statusMap['dispatched'];
+      document.getElementById('orderStatus').textContent = status.text;
+      document.getElementById('orderStatusIcon').textContent = status.icon;
+      document.getElementById('deliveryProgress').style.width = status.width;
+      document.getElementById('etaText').textContent = `ETA: ${currentOrder.eta || '15 min'}`;
+
+      // Update order info modal content
+      const itemsHtml = currentOrder.items ? currentOrder.items.map(item => `
+        <div class="flex justify-between items-center py-2 border-b border-outline/20">
+          <div>
+            <p class="font-medium text-on-surface">${item.name}</p>
+            <p class="text-xs text-on-surface-variant">Qty: ${item.quantity}</p>
+          </div>
+          <span class="font-medium text-primary">TSh ${(item.price * item.quantity).toLocaleString()}</span>
+        </div>
+      `).join('') : '';
+
+      document.getElementById('orderInfoContent').innerHTML = `
+        <div class="bg-surface-variant rounded-xl p-4">
+          <p class="text-sm text-on-surface-variant mb-1">Order ID</p>
+          <p class="font-semibold text-on-surface">#${currentOrder.id.substring(0, 8).toUpperCase()}</p>
+        </div>
+        <div class="bg-surface-variant rounded-xl p-4">
+          <p class="text-sm text-on-surface-variant mb-2">Items</p>
+          ${itemsHtml}
+        </div>
+        <div class="flex justify-between items-center pt-2">
+          <span class="font-semibold text-on-surface">Total</span>
+          <span class="font-bold text-xl text-primary">TSh ${(currentOrder.total || 0).toLocaleString()}</span>
+        </div>
+      `;
+    }
+
+    function loadRiderInfo(driverId) {
+      if (!driverId) {
+        // Use mock rider info
+        riderInfo = {
+          name: currentOrder?.driverName || 'Your Rider',
+          phone: currentOrder?.driverPhone || '+255 123 456 789',
+          rating: 4.8,
+          deliveries: 1240
+        };
+        displayRiderInfo();
+        return;
+      }
+
+      db.collection('drivers').doc(driverId).get().then((doc) => {
+        if (doc.exists) {
+          riderInfo = { id: doc.id, ...doc.data() };
+          displayRiderInfo();
+        } else {
+          riderInfo = {
+            name: 'Your Rider',
+            phone: '+255 123 456 789',
+            rating: 4.8,
+            deliveries: 1240
+          };
+          displayRiderInfo();
+        }
+      }).catch(() => {
+        riderInfo = {
+          name: currentOrder?.driverName || 'Your Rider',
+          phone: currentOrder?.driverPhone || '+255 123 456 789',
+          rating: 4.8,
+          deliveries: 1240
+        };
+        displayRiderInfo();
+      });
+    }
+
+    function displayRiderInfo() {
+      if (!riderInfo) return;
+      document.getElementById('riderName').textContent = riderInfo.name || 'Your Rider';
+    }
+
+    function initChat(orderId) {
+      chatId = `order_${orderId}`;
+      
+      // Subscribe to messages
+      unsubscribe = db.collection('chats').doc(chatId).collection('messages')
+        .orderBy('timestamp', 'asc')
+        .onSnapshot((snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === 'added') {
+              const message = change.doc.data();
+              displayMessage(message);
+            }
+          });
+        }, () => {
+          // Firebase error - use local messages only
+          console.log('Chat not connected to Firebase');
+        });
+    }
+
+    function loadChat() {
+      // Load any existing messages from localStorage
+      const savedMessages = JSON.parse(localStorage.getItem(`smartsoko_chat_${chatId}`)) || [];
+      savedMessages.forEach(msg => displayMessage(msg, false));
+    }
+
+    function displayMessage(message, save = true) {
+      const container = document.getElementById('messagesList');
+      const isMe = message.sender === 'customer' || message.senderId === currentUser.phone;
+      
+      const messageHtml = `
+        <div class="flex justify-${isMe ? 'end' : 'start'} animate-fade-in">
+          <div class="message-bubble ${isMe ? 'gradient-bg text-white rounded-2xl rounded-tr-none' : 'bg-white rounded-2xl rounded-tl-none border border-outline/20'} p-3 shadow-sm">
+            <p class="text-sm">${message.text}</p>
+            <span class="text-[10px] ${isMe ? 'text-white/70' : 'text-on-surface-variant'} mt-1 block">
+              ${formatTime(message.timestamp)}
+            </span>
+          </div>
+        </div>
+      `;
+      
+      container.insertAdjacentHTML('beforeend', messageHtml);
+      scrollToBottom();
+
+      if (save) {
+        // Save to localStorage
+        const savedMessages = JSON.parse(localStorage.getItem(`smartsoko_chat_${chatId}`)) || [];
+        savedMessages.push(message);
+        localStorage.setItem(`smartsoko_chat_${chatId}`, JSON.stringify(savedMessages));
+      }
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const text = input.value.trim();
+      
+      if (!text) return;
+
+      const message = {
+        text: text,
+        sender: 'customer',
+        senderId: currentUser.phone || 'customer',
+        senderName: currentUser.name || 'Customer',
+        timestamp: new Date().toISOString()
+      };
+
+      // Display immediately
+      displayMessage(message);
+      input.value = '';
+
+      // Try to save to Firebase
+      if (chatId) {
+        db.collection('chats').doc(chatId).collection('messages').add({
+          ...message,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(() => {
+          // Already saved to localStorage in displayMessage
+        });
+      }
+
+      // Simulate rider response after 2 seconds
+      setTimeout(() => {
+        showTypingIndicator();
+        setTimeout(() => {
+          hideTypingIndicator();
+          const riderResponse = {
+            text: getRiderResponse(text),
+            sender: 'rider',
+            senderId: riderInfo?.id || 'rider',
+            senderName: riderInfo?.name || 'Rider',
+            timestamp: new Date().toISOString()
+          };
+          displayMessage(riderResponse);
+        }, 2000);
+      }, 1000);
+    }
+
+    function sendQuickMessage(text) {
+      document.getElementById('messageInput').value = text;
+      sendMessage();
+    }
+
+    function getRiderResponse(customerMessage) {
+      const responses = {
+        'location': "I'm heading there now! See you soon.",
+        'call': "Sure, I'll call you when I'm nearby.",
+        'door': "No problem, I'll leave it at the door as requested.",
+        'late': "No worries, take your time. I'll wait for you.",
+        'default': "Got it! Thanks for letting me know."
+      };
+      
+      const lowerMsg = customerMessage.toLowerCase();
+      if (lowerMsg.includes('location')) return responses.location;
+      if (lowerMsg.includes('call')) return responses.call;
+      if (lowerMsg.includes('door')) return responses.door;
+      if (lowerMsg.includes('late')) return responses.late;
+      return responses.default;
+    }
+
+    function showTypingIndicator() {
+      document.getElementById('typingIndicator').classList.remove('hidden');
+      scrollToBottom();
+    }
+
+    function hideTypingIndicator() {
+      document.getElementById('typingIndicator').classList.add('hidden');
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+
+    function scrollToBottom() {
+      const container = document.getElementById('chatContainer');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function formatTime(timestamp) {
+      if (!timestamp) return 'Just now';
+      
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      const now = new Date();
+      const diff = Math.floor((now - date) / 1000); // seconds
+      
+      if (diff < 60) return 'Just now';
+      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+      return date.toLocaleDateString();
+    }
+
+    function callRider() {
+      if (riderInfo?.phone) {
+        window.location.href = `tel:${riderInfo.phone}`;
+      } else {
+        showToast('Phone number not available');
+      }
+    }
+
+    function showOrderInfo() {
+      document.getElementById('orderInfoModal').classList.remove('hidden');
+    }
+
+    function closeOrderInfo() {
+      document.getElementById('orderInfoModal').classList.add('hidden');
+    }
+
+    function showError(message) {
+      document.getElementById('riderName').textContent = 'Error';
+      showToast(message);
+    }
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-on-surface text-white px-6 py-3 rounded-full shadow-lg z-50 text-sm font-medium';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+  </script>
+</body>
+</html>

@@ -13,6 +13,78 @@
       "dest": "/web/customer.html"
     },
     {
+      "src": "/home",
+      "dest": "/web/home.html"
+    },
+    {
+      "src": "/discovery",
+      "dest": "/web/discovery.html"
+    },
+    {
+      "src": "/product",
+      "dest": "/web/product.html"
+    },
+    {
+      "src": "/cart",
+      "dest": "/web/cart.html"
+    },
+    {
+      "src": "/checkout",
+      "dest": "/web/smartsoko-checkout.html"
+    },
+    {
+      "src": "/tracking",
+      "dest": "/web/index.html"
+    },
+    {
+      "src": "/chat",
+      "dest": "/web/chat.html"
+    },
+    {
+      "src": "/profile",
+      "dest": "/web/profile.html"
+    },
+    {
+      "src": "/driver",
+      "dest": "/web/driver.html"
+    },
+    {
+      "src": "/merchant",
+      "dest": "/web/merchant.html"
+    },
+    {
+      "src": "/seller",
+      "dest": "/web/seller.html"
+    },
+    {
+      "src": "/restaurant",
+      "dest": "/web/restaurant.html"
+    },
+    {
+      "src": "/admin",
+      "dest": "/web/supabase.html"
+    },
+    {
+      "src": "/smartsoko",
+      "dest": "/web/smartsoko-home.html"
+    },
+    {
+      "src": "/smartsoko/products",
+      "dest": "/web/smartsoko-products.html"
+    },
+    {
+      "src": "/smartsoko/vendor",
+      "dest": "/web/smartsoko-vendor.html"
+    },
+    {
+      "src": "/smartsoko/cart",
+      "dest": "/web/smartsoko-cart.html"
+    },
+    {
+      "src": "/smartsoko/checkout",
+      "dest": "/web/smartsoko-checkout.html"
+    },
+    {
       "src": "/supabase",
       "dest": "/web/supabase.html"
     },
@@ -21,12 +93,20 @@
       "dest": "/web/test-supabase.html"
     },
     {
-      "src": "/restaurant",
-      "dest": "/web/restaurant.html"
+      "src": "/test/api",
+      "dest": "/web/test-api-integration.html"
+    },
+    {
+      "src": "/404",
+      "dest": "/web/404.html"
     },
     {
       "src": "/",
-      "dest": "/web/index.html"
+      "dest": "/web/main.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/web/404.html"
     }
   ],
   "headers": [

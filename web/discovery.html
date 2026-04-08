@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>SmartSoko - Discover</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="config/firebase-config.js"></script>
+  <script src="nav-component.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#ff6600",
+            "primary-dark": "#e55500",
+            "secondary": "#ff8800",
+            "accent": "#ffa500",
+            "surface": "#ffffff",
+            "surface-variant": "#f5f5f5",
+            "background": "#fafafa",
+            "on-primary": "#ffffff",
+            "on-surface": "#1a1a1a",
+            "on-surface-variant": "#666666",
+            "outline": "#e0e0e0",
+            "error": "#dc2626",
+            "success": "#16a34a",
+            "warning": "#f59e0b"
+          },
+          fontFamily: {
+            "headline": ["Plus Jakarta Sans"],
+            "body": ["Be Vietnam Pro"],
+            "label": ["Be Vietnam Pro"]
+          },
+          borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #ff6600 0%, #ff8800 100%);
+    }
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      min-height: 100vh;
+    }
+    h1, h2, h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .product-card {
+      transition: all 0.3s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body">
+  <!-- TopAppBar -->
+  <header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl flex justify-between items-center px-6 py-4 shadow-sm">
+    <div class="flex items-center gap-3">
+      <a href="home.html" class="flex items-center gap-2">
+        <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center text-white">
+          <i class="fas fa-shopping-basket text-lg"></i>
+        </div>
+        <h1 class="font-headline text-lg font-bold tracking-tight text-primary">SmartSoko</h1>
+      </a>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="profile.html" class="hover:opacity-80 transition-opacity">
+        <span class="material-symbols-outlined text-primary">person</span>
+      </a>
+      <button class="hover:opacity-80 transition-opacity relative" onclick="toggleCart()">
+        <span class="material-symbols-outlined text-primary">shopping_cart</span>
+        <span id="cartBadge" class="absolute -top-1 -right-1 w-5 h-5 bg-error text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="pt-24 pb-32 px-6 max-w-screen-xl mx-auto">
+    <!-- Search Section -->
+    <section class="mb-6">
+      <div class="relative flex items-center">
+        <span class="absolute left-6 material-symbols-outlined text-on-surface-variant">search</span>
+        <input type="text" id="searchInput" 
+          class="w-full pl-14 pr-6 py-4 bg-white border border-outline rounded-full font-body text-on-surface placeholder:text-on-surface-variant/60 focus:ring-2 focus:ring-primary outline-none transition-all" 
+          placeholder="Search products, sellers, categories..."/>
+        <button onclick="clearSearch()" id="clearBtn" class="absolute right-4 hidden p-2 hover:bg-surface-variant rounded-full transition-colors">
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Active Filters -->
+    <section id="activeFilters" class="mb-6 hidden">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-sm text-on-surface-variant">Filters:</span>
+        <span id="filterTag" class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium flex items-center gap-2">
+          <span id="filterText">Category</span>
+          <button onclick="clearFilter()" class="hover:bg-primary/20 rounded-full p-0.5">
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </span>
+      </div>
+    </section>
+
+    <!-- Category Chips -->
+    <section class="mb-8">
+      <div class="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
+        <button onclick="filterByCategory('all')" class="category-chip active px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap bg-primary text-white" data-category="all">
+          All Items
+        </button>
+        <button onclick="filterByCategory('food')" class="category-chip px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap bg-white text-on-surface-variant border border-outline hover:bg-surface-variant" data-category="food">
+          🍔 Food
+        </button>
+        <button onclick="filterByCategory('dairy')" class="category-chip px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap bg-white text-on-surface-variant border border-outline hover:bg-surface-variant" data-category="dairy">
+          🥛 Dairy
+        </button>
+        <button onclick="filterByCategory('fruits')" class="category-chip px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap bg-white text-on-surface-variant border border-outline hover:bg-surface-variant" data-category="fruits">
+          🍎 Fruits
+        </button>
+        <button onclick="filterByCategory('groceries')" class="category-chip px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap bg-white text-on-surface-variant border border-outline hover:bg-surface-variant" data-category="groceries">
+          🛒 Groceries
+        </button>
+        <button onclick="filterByCategory('bakery')" class="category-chip px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap bg-white text-on-surface-variant border border-outline hover:bg-surface-variant" data-category="bakery">
+          🍞 Bakery
+        </button>
+        <button onclick="filterByCategory('vegetables')" class="category-chip px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap bg-white text-on-surface-variant border border-outline hover:bg-surface-variant" data-category="vegetables">
+          🥬 Vegetables
+        </button>
+      </div>
+    </section>
+
+    <!-- Sort & Results Count -->
+    <section class="mb-6 flex justify-between items-center">
+      <h2 id="resultsTitle" class="font-headline text-xl font-bold text-primary">All Products</h2>
+      <div class="flex items-center gap-3">
+        <span id="resultsCount" class="text-sm text-on-surface-variant">0 items</span>
+        <select id="sortSelect" onchange="sortProducts()" class="px-3 py-2 bg-white border border-outline rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none">
+          <option value="default">Sort by</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="name">Name A-Z</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Products Grid -->
+    <section id="productsSection" class="mb-10">
+      <div id="productsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <!-- Products will be loaded dynamically -->
+        <div class="col-span-full flex justify-center items-center py-12">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <span class="ml-3 text-on-surface-variant">Loading products...</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Empty State -->
+    <section id="emptyState" class="hidden text-center py-12">
+      <div class="w-20 h-20 bg-surface-variant rounded-full flex items-center justify-center mx-auto mb-4">
+        <span class="material-symbols-outlined text-4xl text-on-surface-variant">search_off</span>
+      </div>
+      <h3 class="font-headline text-lg font-bold text-on-surface mb-2">No products found</h3>
+      <p class="text-on-surface-variant text-sm mb-4">Try adjusting your search or filters</p>
+      <button onclick="clearFilter()" class="gradient-bg text-white px-6 py-3 rounded-full font-medium hover:opacity-90 transition-all">
+        Clear Filters
+      </button>
+    </section>
+
+    <!-- Featured Sellers Section -->
+    <section class="mb-10">
+      <h2 class="font-headline text-xl font-bold text-primary mb-4">Popular Sellers</h2>
+      <div id="sellersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <a href="discovery.html?search=Fresh+Mart" class="bg-white rounded-2xl p-4 shadow-sm border border-outline/20 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer">
+          <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-primary text-2xl">store</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-headline font-bold text-on-surface truncate">Fresh Mart</h3>
+            <p class="text-xs text-on-surface-variant">⭐ 4.8 • Fruits & Vegetables</p>
+            <p class="text-xs text-success">Open now • 25-35 min</p>
+          </div>
+          <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+        </a>
+        <a href="discovery.html?search=Tasty+Kitchen" class="bg-white rounded-2xl p-4 shadow-sm border border-outline/20 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer">
+          <div class="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-secondary text-2xl">restaurant</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-headline font-bold text-on-surface truncate">Tasty Kitchen</h3>
+            <p class="text-xs text-on-surface-variant">⭐ 4.6 • Fast Food</p>
+            <p class="text-xs text-success">Open now • 30-45 min</p>
+          </div>
+          <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+        </a>
+        <a href="discovery.html?search=Daily+Bread" class="bg-white rounded-2xl p-4 shadow-sm border border-outline/20 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer">
+          <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-blue-600 text-2xl">bakery_dining</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-headline font-bold text-on-surface truncate">Daily Bread</h3>
+            <p class="text-xs text-on-surface-variant">⭐ 4.9 • Bakery & Pastries</p>
+            <p class="text-xs text-success">Open now • 20-30 min</p>
+          </div>
+          <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Cart Sidebar -->
+  <div id="cartSidebar" class="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300">
+    <div class="h-full flex flex-col">
+      <div class="p-6 border-b border-outline/20 flex justify-between items-center">
+        <h2 class="font-headline text-xl font-bold text-primary">Your Cart</h2>
+        <button onclick="toggleCart()" class="p-2 hover:bg-surface-variant rounded-full transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="cartItems" class="flex-1 overflow-y-auto p-6">
+        <p class="text-center text-on-surface-variant py-8">Your cart is empty</p>
+      </div>
+      <div class="p-6 border-t border-outline/20">
+        <div class="flex justify-between mb-4">
+          <span class="text-on-surface-variant">Subtotal</span>
+          <span id="cartTotal" class="font-bold text-primary">TSh 0</span>
+        </div>
+        <button onclick="checkout()" class="w-full gradient-bg text-white py-4 rounded-full font-headline font-bold hover:opacity-90 transition-all">
+          Checkout
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="cartOverlay" class="fixed inset-0 bg-black/50 z-40 hidden" onclick="toggleCart()"></div>
+
+  <!-- BottomNavBar -->
+  <nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-white/90 backdrop-blur-xl z-50 rounded-t-[2rem] shadow-lg">
+    <a href="home.html" class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-2 hover:bg-surface-variant rounded-full transition-all">
+      <span class="material-symbols-outlined">home</span>
+      <span class="font-headline text-[10px] font-medium tracking-wide">Home</span>
+    </a>
+    <a href="discovery.html" class="flex flex-col items-center justify-center bg-primary/10 text-primary rounded-full px-5 py-2 active:scale-90 transition-all">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">search</span>
+      <span class="font-headline text-[10px] font-medium tracking-wide">Discover</span>
+    </a>
+    <a href="customer.html" class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-2 hover:bg-surface-variant rounded-full transition-all relative">
+      <span class="material-symbols-outlined">shopping_cart</span>
+      <span class="font-headline text-[10px] font-medium tracking-wide">Cart</span>
+      <span id="bottomCartBadge" class="absolute -top-1 right-2 w-4 h-4 bg-error text-white text-[8px] rounded-full flex items-center justify-center hidden">0</span>
+    </a>
+    <a href="profile.html" class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-2 hover:bg-surface-variant rounded-full transition-all">
+      <span class="material-symbols-outlined">person</span>
+      <span class="font-headline text-[10px] font-medium tracking-wide">Profile</span>
+    </a>
+  </nav>
+
+  <!-- Product Quick View Modal -->
+  <div id="productModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
+    <div class="bg-white rounded-t-3xl md:rounded-2xl w-full max-w-md p-6 animate-slide-up">
+      <div class="flex justify-between items-start mb-4">
+        <h3 id="modalProductName" class="font-headline text-xl font-bold text-on-surface">Product Name</h3>
+        <button onclick="hideProductModal()" class="p-2 hover:bg-surface-variant rounded-full transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="modalProductContent" class="mb-4">
+        <!-- Product details will be populated here -->
+      </div>
+      <button id="modalAddToCart" class="w-full gradient-bg text-white py-4 rounded-full font-headline font-bold hover:opacity-90 transition-all">
+        Add to Cart
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const db = firebase.firestore();
+    let cart = JSON.parse(localStorage.getItem('smartsoko_cart')) || [];
+    let allProducts = [];
+    let filteredProducts = [];
+    let currentCategory = 'all';
+    let currentSearch = '';
+
+    // Load products from Firebase
+    function loadProducts() {
+      db.collection('products').get().then((snapshot) => {
+        allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        filteredProducts = [...allProducts];
+        
+        // Check for URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryParam = urlParams.get('category');
+        const searchParam = urlParams.get('search');
+        
+        if (categoryParam) {
+          filterByCategory(categoryParam);
+        } else if (searchParam) {
+          document.getElementById('searchInput').value = searchParam;
+          performSearch(searchParam);
+        } else {
+          renderProducts(allProducts);
+        }
+      }).catch((error) => {
+        console.error('Error loading products:', error);
+        document.getElementById('productsGrid').innerHTML = '<p class="col-span-full text-center py-8 text-red-500">Failed to load products. Please try again.</p>';
+      });
+    }
+
+    // Render products
+    function renderProducts(products) {
+      const container = document.getElementById('productsGrid');
+      const emptyState = document.getElementById('emptyState');
+      const resultsCount = document.getElementById('resultsCount');
+      
+      resultsCount.textContent = `${products.length} item${products.length !== 1 ? 's' : ''}`;
+      
+      if (products.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      
+      emptyState.classList.add('hidden');
+      
+      container.innerHTML = products.map(product => `
+        <a href="product.html?id=${product.id}" class="product-card bg-white rounded-2xl p-3 shadow-sm border border-outline/20 cursor-pointer">
+          <div class="relative aspect-square mb-3 bg-surface-variant rounded-xl overflow-hidden flex items-center justify-center">
+            ${getProductImageHtml(product)}
+            <span class="absolute top-2 left-2 px-2 py-1 bg-white/80 backdrop-blur-sm rounded-lg text-[10px] font-medium text-on-surface-variant capitalize">
+              ${product.category || 'General'}
+            </span>
+          </div>
+          <h3 class="font-headline font-bold text-on-surface text-sm leading-tight mb-1 line-clamp-1">${product.name}</h3>
+          <p class="text-xs text-on-surface-variant mb-2">${product.seller || 'SmartSoko'}</p>
+          <div class="flex items-center justify-between">
+            <p class="font-headline text-primary font-extrabold">TSh ${(product.price || 0).toLocaleString()}</p>
+            <button onclick="event.preventDefault(); addToCart('${product.id}')" class="w-8 h-8 gradient-bg text-white rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all hover:scale-105">
+              <span class="material-symbols-outlined text-sm">add</span>
+            </button>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    function getProductImageHtml(product, size = 'medium') {
+      const sizes = {
+        small: 'w-16 h-16',
+        medium: 'w-full h-full',
+        large: 'w-32 h-32'
+      };
+      const sizeClass = sizes[size] || sizes.medium;
+      
+      if (product.imageUrl) {
+        return `<img src="${product.imageUrl}" alt="${product.name}" class="${sizeClass} object-cover" onerror="this.parentElement.innerHTML='<span class=\\'material-symbols-outlined text-4xl text-primary/30\\'>inventory_2</span>'">`;
+      }
+      return `<span class="material-symbols-outlined text-4xl text-primary/30">inventory_2</span>`;
+    }
+
+    // Filter by category
+    function filterByCategory(category) {
+      currentCategory = category;
+      
+      // Update chip styles
+      document.querySelectorAll('.category-chip').forEach(chip => {
+        if (chip.dataset.category === category) {
+          chip.classList.add('bg-primary', 'text-white');
+          chip.classList.remove('bg-white', 'text-on-surface-variant', 'border', 'border-outline');
+        } else {
+          chip.classList.remove('bg-primary', 'text-white');
+          chip.classList.add('bg-white', 'text-on-surface-variant', 'border', 'border-outline');
+        }
+      });
+      
+      // Update title
+      const titles = {
+        'all': 'All Products',
+        'food': 'Food Items',
+        'dairy': 'Dairy Products',
+        'fruits': 'Fresh Fruits',
+        'groceries': 'Groceries',
+        'bakery': 'Bakery Items',
+        'vegetables': 'Vegetables'
+      };
+      document.getElementById('resultsTitle').textContent = titles[category] || 'Products';
+      
+      // Filter products
+      if (category === 'all') {
+        filteredProducts = currentSearch ? 
+          allProducts.filter(p => p.name.toLowerCase().includes(currentSearch.toLowerCase())) :
+          [...allProducts];
+      } else {
+        filteredProducts = allProducts.filter(p => p.category === category);
+        if (currentSearch) {
+          filteredProducts = filteredProducts.filter(p => 
+            p.name.toLowerCase().includes(currentSearch.toLowerCase())
+          );
+        }
+      }
+      
+      renderProducts(filteredProducts);
+    }
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+      document.getElementById('clearBtn').classList.toggle('hidden', !query);
+      
+      if (query) {
+        currentSearch = query;
+        filteredProducts = allProducts.filter(p => 
+          p.name.toLowerCase().includes(query.toLowerCase()) ||
+          p.category?.toLowerCase().includes(query.toLowerCase())
+        );
+        if (currentCategory !== 'all') {
+          filteredProducts = filteredProducts.filter(p => p.category === currentCategory);
+        }
+        document.getElementById('activeFilters').classList.remove('hidden');
+        document.getElementById('filterText').textContent = `Search: "${query}"`;
+      } else {
+        currentSearch = '';
+        filterByCategory(currentCategory);
+        document.getElementById('activeFilters').classList.add('hidden');
+      }
+      
+      renderProducts(filteredProducts);
+    });
+
+    function performSearch(query) {
+      if (!query) query = document.getElementById('searchInput').value.trim();
+      if (!query) return;
+      
+      currentSearch = query;
+      document.getElementById('searchInput').value = query;
+      document.getElementById('clearBtn').classList.remove('hidden');
+      
+      filteredProducts = allProducts.filter(p => 
+        p.name.toLowerCase().includes(query.toLowerCase()) ||
+        p.category?.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      document.getElementById('activeFilters').classList.remove('hidden');
+      document.getElementById('filterText').textContent = `Search: "${query}"`;
+      document.getElementById('resultsTitle').textContent = 'Search Results';
+      
+      renderProducts(filteredProducts);
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('clearBtn').classList.add('hidden');
+      document.getElementById('activeFilters').classList.add('hidden');
+      currentSearch = '';
+      filterByCategory(currentCategory);
+    }
+
+    function clearFilter() {
+      clearSearch();
+      filterByCategory('all');
+    }
+
+    // Sort products
+    function sortProducts() {
+      const sortValue = document.getElementById('sortSelect').value;
+      
+      switch(sortValue) {
+        case 'price-low':
+          filteredProducts.sort((a, b) => a.price - b.price);
+          break;
+        case 'price-high':
+          filteredProducts.sort((a, b) => b.price - a.price);
+          break;
+        case 'name':
+          filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+      }
+      
+      renderProducts(filteredProducts);
+    }
+
+    // Product Modal
+    function showProductModal(productId) {
+      const product = allProducts.find(p => p.id === productId);
+      if (!product) return;
+      
+      document.getElementById('modalProductName').textContent = product.name;
+      document.getElementById('modalProductContent').innerHTML = `
+        <div class="bg-surface-variant rounded-xl p-6 mb-4 flex items-center justify-center">
+          <span class="material-symbols-outlined text-6xl text-primary/30">inventory_2</span>
+        </div>
+        <p class="text-on-surface-variant mb-2">Category: <span class="text-on-surface font-medium capitalize">${product.category || 'General'}</span></p>
+        <p class="text-on-surface-variant mb-2">Seller: <span class="text-on-surface font-medium">${product.seller || 'SmartSoko'}</span></p>
+        <p class="text-2xl font-headline font-bold text-primary">TSh ${(product.price || 0).toLocaleString()}</p>
+      `;
+      
+      const addBtn = document.getElementById('modalAddToCart');
+      addBtn.onclick = () => {
+        addToCart(productId);
+        hideProductModal();
+      };
+      
+      document.getElementById('productModal').classList.remove('hidden');
+    }
+
+    function hideProductModal() {
+      document.getElementById('productModal').classList.add('hidden');
+    }
+
+    // Cart functions
+    function addToCart(productId) {
+      const product = allProducts.find(p => p.id === productId);
+      if (!product) return;
+
+      const existing = cart.find(item => item.id === productId);
+      if (existing) {
+        existing.quantity++;
+      } else {
+        cart.push({ ...product, quantity: 1 });
+      }
+
+      saveCart();
+      updateCartUI();
+      showToast(`${product.name} added to cart`);
+    }
+
+    function removeFromCart(productId) {
+      cart = cart.filter(item => item.id !== productId);
+      saveCart();
+      updateCartUI();
+    }
+
+    function updateQuantity(productId, delta) {
+      const item = cart.find(item => item.id === productId);
+      if (item) {
+        item.quantity += delta;
+        if (item.quantity <= 0) {
+          removeFromCart(productId);
+        } else {
+          saveCart();
+          updateCartUI();
+        }
+      }
+    }
+
+    function saveCart() {
+      localStorage.setItem('smartsoko_cart', JSON.stringify(cart));
+    }
+
+    function updateCartUI() {
+      const cartItems = document.getElementById('cartItems');
+      const cartTotal = document.getElementById('cartTotal');
+      const cartBadge = document.getElementById('cartBadge');
+      const bottomCartBadge = document.getElementById('bottomCartBadge');
+
+      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+      cartTotal.textContent = `TSh ${total.toLocaleString()}`;
+
+      if (count > 0) {
+        cartBadge.classList.remove('hidden');
+        cartBadge.textContent = count;
+        bottomCartBadge.classList.remove('hidden');
+        bottomCartBadge.textContent = count;
+      } else {
+        cartBadge.classList.add('hidden');
+        bottomCartBadge.classList.add('hidden');
+      }
+
+      if (cart.length === 0) {
+        cartItems.innerHTML = '<p class="text-center text-on-surface-variant py-8">Your cart is empty</p>';
+      } else {
+        cartItems.innerHTML = cart.map(item => `
+          <div class="flex gap-3 mb-4 p-3 bg-surface-variant rounded-xl">
+            <div class="w-16 h-16 bg-white rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+              ${item.imageUrl ? `<img src="${item.imageUrl}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\'material-symbols-outlined text-primary/30\\'>inventory_2</span>'">` : '<span class="material-symbols-outlined text-primary/30">inventory_2</span>'}
+            </div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold text-on-surface text-sm truncate">${item.name}</h4>
+              <p class="text-primary font-bold text-sm">TSh ${(item.price * item.quantity).toLocaleString()}</p>
+              <div class="flex items-center gap-2 mt-2">
+                <button onclick="updateQuantity('${item.id}', -1)" class="w-6 h-6 bg-white rounded-full flex items-center justify-center text-on-surface-variant hover:bg-primary hover:text-white transition-all">
+                  <span class="material-symbols-outlined text-xs">remove</span>
+                </button>
+                <span class="text-sm font-medium w-6 text-center">${item.quantity}</span>
+                <button onclick="updateQuantity('${item.id}', 1)" class="w-6 h-6 bg-white rounded-full flex items-center justify-center text-on-surface-variant hover:bg-primary hover:text-white transition-all">
+                  <span class="material-symbols-outlined text-xs">add</span>
+                </button>
+              </div>
+            </div>
+            <button onclick="removeFromCart('${item.id}')" class="text-error hover:opacity-80 self-start">
+              <span class="material-symbols-outlined text-sm">delete</span>
+            </button>
+          </div>
+        `).join('');
+      }
+    }
+
+    function toggleCart() {
+      const sidebar = document.getElementById('cartSidebar');
+      const overlay = document.getElementById('cartOverlay');
+      
+      if (sidebar.classList.contains('translate-x-full')) {
+        sidebar.classList.remove('translate-x-full');
+        overlay.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('translate-x-full');
+        overlay.classList.add('hidden');
+      }
+    }
+
+    function checkout() {
+      if (cart.length === 0) {
+        showToast('Your cart is empty');
+        return;
+      }
+      window.location.href = 'customer.html';
+    }
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-on-surface text-white px-6 py-3 rounded-full shadow-lg z-50 text-sm font-medium';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      SmartNav.init({ activePage: 'discover', role: 'customer', breadcrumbs: ['Home', 'Discover'] });
+      loadProducts();
+      updateCartUI();
+    });
+  </script>
+</body>
+</html>

@@ -1,627 +1,933 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="light" lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Food Delivery - Order Online</title>
-  <meta name="description" content="Food Delivery System with M-Pesa Payments">
+  <title>SmartSoko - Your Local Marketplace</title>
+  <meta name="description" content="SmartSoko - Your Local Marketplace for Food, Dairy, Fruits, Groceries & Bakery">
   <meta name="theme-color" content="#ff6600">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Food Delivery">
+  <meta name="apple-mobile-web-app-title" content="SmartSoko">
   <link rel="manifest" href="pwa/manifest.json">
   <link rel="apple-touch-icon" href="pwa/icons/icon-192x192.png">
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="config/firebase-config.js"></script>
+  <script src="nav-component.js"></script>
+  <script src="config/api-config.js"></script>
+  <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#ff6600",
+              "primary-dark": "#e55500",
+              "secondary": "#ff8800",
+              "accent": "#ffa500",
+              "surface": "#ffffff",
+              "surface-variant": "#f5f5f5",
+              "background": "#fafafa",
+              "on-primary": "#ffffff",
+              "on-surface": "#1a1a1a",
+              "on-surface-variant": "#666666",
+              "outline": "#e0e0e0",
+              "error": "#dc2626",
+              "success": "#16a34a",
+              "warning": "#f59e0b"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Be Vietnam Pro"],
+              "label": ["Be Vietnam Pro"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
-    .header { background: #ff6600; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-    .header h1 { font-size: 24px; }
-    .cart-icon { position: relative; cursor: pointer; }
-    .cart-count { position: absolute; top: -8px; right: -8px; background: #f44336; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
-    .search-bar { padding: 16px 24px; background: white; border-bottom: 1px solid #eee; }
-    .search-bar input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
-    .restaurant-filters { padding: 16px 24px; display: flex; gap: 8px; overflow-x: auto; }
-    .filter-chip { padding: 8px 16px; background: white; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; white-space: nowrap; }
-    .filter-chip.active { background: #ff6600; color: white; border-color: #ff6600; }
-    .restaurants-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 24px; }
-    .restaurant-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; }
-    .restaurant-card:hover { transform: translateY(-4px); }
-    .restaurant-image { height: 200px; background: linear-gradient(45deg, #ff6600, #ff8800); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px; }
-    .restaurant-info { padding: 16px; }
-    .restaurant-name { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
-    .restaurant-category { color: #666; font-size: 14px; margin-bottom: 8px; }
-    .restaurant-meta { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-    .rating { color: #ff6600; }
-    .delivery-time { color: #666; }
-    .delivery-fee { font-weight: bold; color: #333; }
-    .menu-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1000; }
-    .menu-content { background: white; height: 90vh; overflow-y: auto; margin-top: 10vh; border-radius: 20px 20px 0 0; }
-    .menu-header { padding: 20px; border-bottom: 1px solid #eee; position: sticky; top: 0; background: white; z-index: 10; }
-    .menu-items { padding: 20px; }
-    .menu-item { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid #eee; }
-    .item-image { width: 80px; height: 80px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; }
-    .item-details { flex: 1; }
-    .item-name { font-weight: bold; margin-bottom: 4px; }
-    .item-desc { color: #666; font-size: 14px; margin-bottom: 8px; }
-    .item-price { color: #ff6600; font-weight: bold; }
-    .add-to-cart { padding: 8px 16px; background: #ff6600; color: white; border: none; border-radius: 6px; cursor: pointer; }
-    .cart-sidebar { position: fixed; right: -400px; top: 0; bottom: 0; width: 400px; background: white; box-shadow: -2px 0 8px rgba(0,0,0,0.1); transition: right 0.3s; z-index: 1001; }
-    .cart-sidebar.open { right: 0; }
-    .cart-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-    .cart-items { padding: 20px; flex: 1; overflow-y: auto; }
-    .cart-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #eee; }
-    .cart-item-info { flex: 1; }
-    .cart-item-name { font-weight: bold; margin-bottom: 4px; }
-    .cart-item-price { color: #666; }
-    .quantity-controls { display: flex; align-items: center; gap: 8px; }
-    .quantity-btn { width: 24px; height: 24px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; }
-    .cart-footer { padding: 20px; border-top: 1px solid #eee; }
-    .checkout-btn { width: 100%; padding: 16px; background: #ff6600; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-    .checkout-form { padding: 20px; display: none; }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; margin-bottom: 4px; font-weight: bold; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
-    .promo-section { background: #f9f9f9; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
-    .loyalty-info { background: #fff3e0; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
-    .order-scheduling { margin-bottom: 16px; }
-    .payment-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-    .payment-option { padding: 16px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: center; }
-    .payment-option.selected { border-color: #ff6600; background: #fff8f0; }
-    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; }
-    .back-btn { background: none; border: none; font-size: 20px; cursor: pointer; margin-right: 16px; }
-    .order-history { padding: 20px; }
-    .history-item { background: white; padding: 20px; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .order-id { font-weight: bold; color: #ff6600; }
-    .order-date { color: #666; font-size: 14px; }
-    .order-items { margin-bottom: 12px; }
-    .order-item { display: flex; justify-content: space-between; padding: 4px 0; }
-    .order-total { font-weight: bold; font-size: 18px; color: #333; }
-    .repeat-order-btn { background: #ff6600; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
-    .recommendations { background: #fff3e0; padding: 16px; border-radius: 8px; margin: 16px 0; }
-    .recommendation-item { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-    .recommendation-item img { width: 40px; height: 40px; border-radius: 8px; background: #f0f0f0; }
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .card-hover { 
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-hover:hover { 
+      transform: translateY(-8px) scale(1.02); 
+      box-shadow: 0 20px 40px rgba(255, 102, 0, 0.15);
+    }
+    .floating { animation: float 6s ease-in-out infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+    .slide-in { animation: slideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .pulse-dot { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } }
+    body {
+      min-height: max(884px, 100dvh);
+    }
+    .restaurant-image {
+      background: linear-gradient(135deg, #ff6600 0%, #ff8800 50%, #ffa500 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .restaurant-image::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.1"><circle cx="20" cy="20" r="3"/></g></svg>');
+    }
   </style>
 </head>
-<body>
-  <div class="header">
-    <div style="display: flex; align-items: center;">
-      <button class="back-btn" onclick="closeMenu()" style="display:none;" id="backBtn">←</button>
-      <h1>Food Delivery</h1>
-    </div>
-    <div class="cart-icon" onclick="toggleCart()">
-      🛒 <span class="cart-count" id="cartCount">0</span>
-    </div>
-  </div>
+<body class="bg-background text-on-surface font-body">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl flex justify-between items-center px-6 py-4 shadow-sm border-b border-outline/20">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-3">
+<button class="back-btn hover:opacity-80 transition-opacity active:scale-95 duration-200" onclick="closeMenu()" style="display:none;" id="backBtn">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-2xl flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-white text-xl" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+</div>
+<div>
+<h1 class="font-headline text-xl font-bold tracking-tight text-on-surface">SME Marketplace</h1>
+<p class="text-[10px] text-on-surface-variant font-medium">Food, Dairy, Fruits, Groceries & Bakery</p>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<!-- Location Selector -->
+<div class="hidden md:flex items-center gap-2 bg-surface px-3 py-2 rounded-full border border-outline/30 hover:border-primary/50 transition-all cursor-pointer group">
+<span class="material-symbols-outlined text-on-surface-variant text-sm group-hover:text-primary">location_on</span>
+<div class="flex flex-col">
+<span class="text-[10px] text-on-surface-variant font-medium">Deliver to</span>
+<span class="text-xs font-semibold text-on-surface">Dar es Salaam</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-xs group-hover:text-primary">expand_more</span>
+</div>
 
-  <div class="search-bar">
-    <input type="text" placeholder="Search restaurants or dishes..." id="searchInput" onkeyup="filterRestaurants()">
-  </div>
+<!-- App Navigation -->
+<div class="hidden md:flex items-center gap-1 bg-surface px-2 py-1 rounded-xl border border-outline/30">
+<a href="main.html" class="nav-link flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined text-sm">home</span>
+<span>Home</span>
+</a>
+<a href="index.html" class="nav-link flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined text-sm">admin_panel_settings</span>
+<span>Admin</span>
+</a>
+<a href="merchant.html" class="nav-link flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined text-sm">store</span>
+<span>Merchant</span>
+</a>
+<a href="driver.html" class="nav-link flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined text-sm">motorcycle</span>
+<span>Driver</span>
+</a>
+</div>
 
-  <div class="restaurant-filters" id="filters">
-    <div class="filter-chip active" onclick="filterByCategory('all')">All</div>
-    <div class="filter-chip" onclick="filterByCategory('Fast Food')">Fast Food</div>
-    <div class="filter-chip" onclick="filterByCategory('Cafe')">Cafe</div>
-    <div class="filter-chip" onclick="filterByCategory('Restaurant')">Restaurant</div>
-    <div class="filter-chip" onclick="filterByCategory('Bakery')">Bakery</div>
-    <div class="filter-chip" onclick="showOrderHistory()">📋 Order History</div>
-  </div>
+<!-- Cart -->
+<div class="relative">
+<button class="cart-icon flex items-center gap-2 bg-primary text-on-primary px-3 py-2 rounded-full hover:bg-primary-dark transition-all active:scale-95 duration-200" onclick="toggleCart()">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="text-sm font-semibold">Cart</span>
+<span class="cart-count absolute -top-2 -right-2 bg-error text-on-primary rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold" id="cartCount">0</span>
+</button>
+</div>
 
-  <div class="restaurants-grid" id="restaurantsGrid"></div>
+<!-- User Menu -->
+<div class="flex items-center gap-2">
+<a href="profile.html" class="flex items-center gap-2 hover:bg-surface px-2 py-1 rounded-lg transition-all">
+<div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm">person</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">expand_more</span>
+</a>
+</div>
+</div>
+</header>
 
-  <!-- Menu Modal -->
-  <div class="menu-modal" id="menuModal">
-    <div class="menu-content">
-      <div class="menu-header">
-        <div style="display: flex; align-items: center;">
-          <button class="back-btn" onclick="closeMenu()">←</button>
-          <h2 id="restaurantName">Restaurant Name</h2>
-        </div>
-        <div class="restaurant-meta">
-          <span class="rating" id="restaurantRating">⭐ 4.5</span>
-          <span class="delivery-time" id="restaurantTime">30-40 min</span>
-          <span class="delivery-fee" id="restaurantFee">TZS 2000</span>
-        </div>
-      </div>
-      <div class="menu-items" id="menuItems"></div>
-    </div>
-  </div>
+<!-- Secondary Navigation -->
+<nav class="fixed top-20 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl z-40 border-b border-outline/20">
+<div class="max-w-screen-xl mx-auto px-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1">
+<a href="#sellers" class="nav-tab flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-primary bg-primary/10 transition-all">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span>Sellers</span>
+</a>
+<a href="#categories" class="nav-tab flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined">category</span>
+<span>Categories</span>
+</a>
+<a href="#popular" class="nav-tab flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined">trending_up</span>
+<span>Popular</span>
+</a>
+<a href="#orders" class="nav-tab flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined">receipt_long</span>
+<span>Orders</span>
+</a>
+</div>
 
-  <!-- Cart Sidebar -->
-  <div class="cart-sidebar" id="cartSidebar">
-    <div class="cart-header">
-      <h3>Your Cart</h3>
-      <button class="close-btn" onclick="toggleCart()">×</button>
-    </div>
-    <div class="cart-items" id="cartItems"></div>
-    <div class="cart-footer">
-      <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
-        <span>Total:</span>
-        <span id="cartTotal" style="font-weight: bold; font-size: 18px;">TZS 0</span>
-      </div>
-      <button class="checkout-btn" onclick="showCheckout()">Checkout</button>
-    </div>
-  </div>
+<!-- Quick Actions -->
+<div class="flex items-center gap-2">
+<button class="bg-surface border border-outline px-4 py-2 rounded-full text-sm font-semibold hover:bg-surface-variant transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+<span>Filters</span>
+</button>
+<button class="bg-surface border border-outline px-4 py-2 rounded-full text-sm font-semibold hover:bg-surface-variant transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">sort</span>
+<span>Sort</span>
+</button>
+</div>
+</div>
+</div>
+</nav>
 
-  <!-- Checkout Form -->
-  <div class="checkout-form" id="checkoutForm">
-    <h3>Delivery Information</h3>
-    
-    <div class="form-group">
-      <label>Name</label>
-      <input type="text" id="customerName" placeholder="Your name">
-    </div>
-    
-    <div class="form-group">
-      <label>Phone</label>
-      <input type="tel" id="customerPhone" placeholder="Your phone number">
-    </div>
-    
-    <div class="form-group">
-      <label>Delivery Address</label>
-      <textarea id="deliveryAddress" placeholder="Enter your delivery address" rows="3"></textarea>
-    </div>
+<main class="pt-44 pb-32 px-6 max-w-screen-xl mx-auto">
+<!-- Search Bar Section -->
+<section class="mb-6 slide-in">
+<div class="relative flex items-center group">
+<span class="absolute left-6 material-symbols-outlined text-on-surface-variant">search</span>
+<input class="w-full pl-14 pr-6 py-5 bg-surface border-none rounded-full font-body text-on-surface placeholder:text-on-surface-variant/60 focus:ring-2 focus:ring-primary transition-all" placeholder="Search sellers or products..." type="text" id="searchInput" onkeyup="filterRestaurants()">
+</div>
+</section>
 
-    <div class="order-scheduling">
-      <div class="form-group">
-        <label>Order Type</label>
-        <select id="orderType">
-          <option value="now">Deliver Now</option>
-          <option value="scheduled">Schedule Later</option>
-        </select>
-      </div>
-      <div class="form-group" id="scheduleGroup" style="display:none;">
-        <label>Delivery Time</label>
-        <input type="datetime-local" id="scheduledTime">
-      </div>
-    </div>
+<!-- Seller Categories -->
+<section class="mb-8">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline text-xl font-bold tracking-tight text-primary">Categories</h2>
+<span class="text-sm font-semibold text-secondary cursor-pointer hover:opacity-80 transition">See all →</span>
+</div>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar -mx-6 px-6">
+<div class="filter-chip bg-surface px-4 py-2 rounded-full border border-outline cursor-pointer hover:bg-primary/10 transition-all active" onclick="filterByCategory('all')">
+<span class="material-symbols-outlined text-sm mr-1">apps</span>
+<span class="text-sm font-medium">All</span>
+</div>
+<div class="filter-chip bg-surface px-4 py-2 rounded-full border border-outline cursor-pointer hover:bg-primary/10 transition-all" onclick="filterByCategory('food')">
+<span class="material-symbols-outlined text-sm mr-1">lunch_dining</span>
+<span class="text-sm font-medium">🍔 Food</span>
+</div>
+<div class="filter-chip bg-surface px-4 py-2 rounded-full border border-outline cursor-pointer hover:bg-primary/10 transition-all" onclick="filterByCategory('dairy')">
+<span class="material-symbols-outlined text-sm mr-1">local_drink</span>
+<span class="text-sm font-medium">🥛 Dairy</span>
+</div>
+<div class="filter-chip bg-surface px-4 py-2 rounded-full border border-outline cursor-pointer hover:bg-primary/10 transition-all" onclick="filterByCategory('fruits')">
+<span class="material-symbols-outlined text-sm mr-1">nutrition</span>
+<span class="text-sm font-medium">🍎 Fruits</span>
+</div>
+<div class="filter-chip bg-surface px-4 py-2 rounded-full border border-outline cursor-pointer hover:bg-primary/10 transition-all" onclick="filterByCategory('groceries')">
+<span class="material-symbols-outlined text-sm mr-1">shopping_basket</span>
+<span class="text-sm font-medium">🛒 Groceries</span>
+</div>
+<div class="filter-chip bg-surface px-4 py-2 rounded-full border border-outline cursor-pointer hover:bg-primary/10 transition-all" onclick="filterByCategory('bakery')">
+<span class="material-symbols-outlined text-sm mr-1">bakery_dining</span>
+<span class="text-sm font-medium">🍞 Bakery</span>
+</div>
+</div>
+</section>
 
-    <div class="promo-section">
-      <div class="form-group">
-        <label>Promo Code</label>
-        <div style="display: flex; gap: 8px;">
-          <input type="text" id="promoCode" placeholder="Enter promo code">
-          <button class="add-to-cart" onclick="applyPromo()">Apply</button>
-        </div>
-      </div>
-    </div>
+<!-- Featured Banner -->
+<section class="mb-8">
+<div class="bg-gradient-to-r from-primary to-secondary rounded-2xl p-6 relative overflow-hidden">
+<div class="relative z-10">
+<div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full mb-4">
+<span class="material-symbols-outlined text-sm">local_fire_department</span>
+<span class="text-sm font-semibold text-white">Today's Special</span>
+</div>
+<h3 class="font-headline text-2xl font-bold text-white mb-2">30% Off First Order</h3>
+<p class="text-white/90 text-sm mb-4">Use code: FIRST30</p>
+<button class="bg-white text-primary px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-100 transition-all">
+Order Now
+</button>
+</div>
+<div class="absolute right-4 top-4 w-16 h-16 bg-white/10 rounded-full floating"></div>
+<div class="absolute left-1/3 bottom-4 w-12 h-12 bg-white/10 rounded-full floating" style="animation-delay: 1s;"></div>
+</div>
+</section>
 
-    <div class="loyalty-info" id="loyaltyInfo">
-      🎯 You'll earn <span id="loyaltyPoints">0</span> points with this order!
-    </div>
+<!-- Sellers Grid -->
+<section class="mb-8">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline text-2xl font-bold tracking-tight text-primary">Popular Sellers</h2>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition">tune</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition">sort</span>
+</div>
+</div>
+<div class="restaurants-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="restaurantsGrid">
+<!-- Restaurant Card 1 -->
+<div class="restaurant-card bg-surface rounded-2xl shadow-lg overflow-hidden card-hover cursor-pointer" onclick="openMenu('Restaurant 1')">
+<div class="restaurant-image h-48 flex items-center justify-center relative">
+<span class="material-symbols-outlined text-6xl text-white/80 relative z-10">restaurant</span>
+<div class="absolute top-3 right-3 bg-success text-on-primary px-2 py-1 rounded-full text-xs font-semibold">
+Open Now
+</div>
+</div>
+<div class="p-4">
+<div class="flex items-start justify-between mb-3">
+<div>
+<h3 class="font-headline text-lg font-bold text-on-surface mb-1">The Golden Plate</h3>
+<p class="text-on-surface-variant text-sm">African • Continental</p>
+</div>
+<div class="text-right">
+<div class="flex items-center gap-1 text-warning text-sm mb-1">
+<span class="material-symbols-outlined text-sm">star</span>
+<span class="font-semibold">4.8</span>
+</div>
+<p class="text-on-surface-variant text-xs">256 reviews</p>
+</div>
+</div>
+<div class="flex items-center justify-between text-sm">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>25-35 min</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">local_shipping</span>
+<span>TZS 3,000</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition">favorite_border</span>
+</div>
+</div>
+</div>
 
-    <div class="form-group">
-      <label>Payment Method</label>
-      <div class="payment-methods">
-        <div class="payment-option selected" onclick="selectPayment('cash')">
-          💵 Cash on Delivery
-        </div>
-        <div class="payment-option" onclick="selectPayment('card')">
-          💳 Card Payment
-        </div>
-      </div>
-    </div>
+<!-- Restaurant Card 2 -->
+<div class="restaurant-card bg-surface rounded-2xl shadow-lg overflow-hidden card-hover cursor-pointer" onclick="openMenu('Restaurant 2')">
+<div class="restaurant-image h-48 flex items-center justify-center relative">
+<span class="material-symbols-outlined text-6xl text-white/80 relative z-10">local_pizza</span>
+<div class="absolute top-3 right-3 bg-success text-on-primary px-2 py-1 rounded-full text-xs font-semibold">
+Open Now
+</div>
+</div>
+<div class="p-4">
+<div class="flex items-start justify-between mb-3">
+<div>
+<h3 class="font-headline text-lg font-bold text-on-surface mb-1">Pizza Paradise</h3>
+<p class="text-on-surface-variant text-sm">Italian • Fast Food</p>
+</div>
+<div class="text-right">
+<div class="flex items-center gap-1 text-warning text-sm mb-1">
+<span class="material-symbols-outlined text-sm">star</span>
+<span class="font-semibold">4.6</span>
+</div>
+<p class="text-on-surface-variant text-xs">189 reviews</p>
+</div>
+</div>
+<div class="flex items-center justify-between text-sm">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>20-30 min</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">local_shipping</span>
+<span>TZS 2,500</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition">favorite_border</span>
+</div>
+</div>
+</div>
 
-    <div class="form-group">
-      <label>Special Instructions</label>
-      <textarea id="specialInstructions" placeholder="Any special requests?" rows="2"></textarea>
-    </div>
+<!-- Restaurant Card 3 -->
+<div class="restaurant-card bg-surface rounded-2xl shadow-lg overflow-hidden card-hover cursor-pointer" onclick="openMenu('Restaurant 3')">
+<div class="restaurant-image h-48 flex items-center justify-center relative">
+<span class="material-symbols-outlined text-6xl text-white/80 relative z-10">ramen_dining</span>
+<div class="absolute top-3 right-3 bg-warning text-on-primary px-2 py-1 rounded-full text-xs font-semibold">
+Busy
+</div>
+</div>
+<div class="p-4">
+<div class="flex items-start justify-between mb-3">
+<div>
+<h3 class="font-headline text-lg font-bold text-on-surface mb-1">Noodle House</h3>
+<p class="text-on-surface-variant text-sm">Asian • Chinese</p>
+</div>
+<div class="text-right">
+<div class="flex items-center gap-1 text-warning text-sm mb-1">
+<span class="material-symbols-outlined text-sm">star</span>
+<span class="font-semibold">4.7</span>
+</div>
+<p class="text-on-surface-variant text-xs">142 reviews</p>
+</div>
+</div>
+<div class="flex items-center justify-between text-sm">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>30-40 min</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">local_shipping</span>
+<span>TZS 3,500</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition">favorite_border</span>
+</div>
+</div>
+</div>
+</div>
+</section>
 
-    <button class="checkout-btn" onclick="placeOrder()">Place Order</button>
-    <button class="checkout-btn" style="background: #666; margin-top: 8px;" onclick="hideCheckout()">Back to Cart</button>
-  </div>
+<!-- Recommendations -->
+<section class="mb-8">
+<div class="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-6 border border-primary/20">
+<h3 class="font-headline text-lg font-bold text-primary mb-4">Recommended for You</h3>
+<div class="space-y-3">
+<div class="flex items-center gap-4 bg-surface p-3 rounded-xl cursor-pointer hover:bg-surface-variant transition">
+<div class="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">fastfood</span>
+</div>
+<div class="flex-1">
+<h4 class="font-semibold text-on-surface">Burger Palace</h4>
+<p class="text-on-surface-variant text-sm">American • 4.5 ⭐</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">arrow_forward_ios</span>
+</div>
+<div class="flex items-center gap-4 bg-surface p-3 rounded-xl cursor-pointer hover:bg-surface-variant transition">
+<div class="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">bakery_dining</span>
+</div>
+<div class="flex-1">
+<h4 class="font-semibold text-on-surface">Sweet Treats</h4>
+<p class="text-on-surface-variant text-sm">Desserts • 4.9 ⭐</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">arrow_forward_ios</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+    <!-- Menu Modal -->
+<div class="menu-modal fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden" id="menuModal">
+<div class="menu-content bg-surface h-[90vh] overflow-y-auto mt-[10vh] rounded-t-[3rem] relative">
+<div class="menu-header sticky top-0 bg-surface p-6 border-b border-outline z-10">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<button class="close-btn hover:opacity-80 transition-opacity active:scale-95 duration-200" onclick="closeMenu()">
+<span class="material-symbols-outlined">close</span>
+</button>
+<div>
+<h3 class="font-headline text-xl font-bold text-on-surface" id="restaurantName">Restaurant Name</h3>
+<p class="text-on-surface-variant text-sm">African • Continental</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1 text-warning text-sm">
+<span class="material-symbols-outlined text-sm">star</span>
+<span class="font-semibold">4.8</span>
+</div>
+<span class="text-on-surface-variant text-sm">• 25-35 min</span>
+</div>
+</div>
+</div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBBKliW4sQwBFEYMptJ8VuWYHTJ73DbHoE",
-      authDomain: "fooddelievry-dce15.firebaseapp.com",
-      projectId: "fooddelievry-dce15",
-      storageBucket: "fooddelievry-dce15.firebasestorage.app",
-      messagingSenderId: "727819507148",
-      appId: "1:727819507148:web:372bee2608d5c7a9587969"
-    };
+<div class="menu-items p-6">
+<!-- Menu Categories -->
+<div class="mb-6">
+<div class="flex gap-2 overflow-x-auto hide-scrollbar mb-4">
+<button class="bg-primary text-on-primary px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap">Popular</button>
+<button class="bg-surface border border-outline px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-variant transition">Main Course</button>
+<button class="bg-surface border border-outline px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-variant transition">Appetizers</button>
+<button class="bg-surface border border-outline px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-variant transition">Desserts</button>
+<button class="bg-surface border border-outline px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-variant transition">Drinks</button>
+</div>
+</div>
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+<!-- Menu Items -->
+<div class="space-y-4">
+<!-- Menu Item 1 -->
+<div class="menu-item bg-surface p-4 rounded-2xl border border-outline hover:border-primary/30 transition-all">
+<div class="flex gap-4">
+<div class="item-image w-20 h-20 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl text-primary">lunch_dining</span>
+</div>
+<div class="flex-1">
+<div class="flex items-start justify-between mb-2">
+<div>
+<h4 class="font-headline text-lg font-bold text-on-surface mb-1">Grilled Chicken Platter</h4>
+<p class="text-on-surface-variant text-sm mb-2">Tender grilled chicken served with rice and vegetables</p>
+<div class="flex items-center gap-3 text-xs">
+<span class="bg-success/20 text-success px-2 py-1 rounded-full font-medium">Popular</span>
+<span class="text-on-surface-variant">• 450 cal</span>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline text-lg font-bold text-primary mb-2">TZS 15,000</p>
+<button class="bg-primary text-on-primary px-4 py-2 rounded-full text-sm font-medium hover:bg-primary-dark transition-all active:scale-95" onclick="addToCart('Grilled Chicken Platter', 15000)">
+<span class="material-symbols-outlined text-sm mr-1">add</span>
+Add
+</button>
+</div>
+</div>
+</div>
+</div>
 
-    let restaurants = [];
-    let menuItems = [];
+<!-- Menu Item 2 -->
+<div class="menu-item bg-surface p-4 rounded-2xl border border-outline hover:border-primary/30 transition-all">
+<div class="flex gap-4">
+<div class="item-image w-20 h-20 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl text-primary">ramen_dining</span>
+</div>
+<div class="flex-1">
+<div class="flex items-start justify-between mb-2">
+<div>
+<h4 class="font-headline text-lg font-bold text-on-surface mb-1">Beef Stir Fry Noodles</h4>
+<p class="text-on-surface-variant text-sm mb-2">Fresh noodles with beef and mixed vegetables</p>
+<div class="flex items-center gap-3 text-xs">
+<span class="bg-warning/20 text-warning px-2 py-1 rounded-full font-medium">Spicy</span>
+<span class="text-on-surface-variant">• 380 cal</span>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline text-lg font-bold text-primary mb-2">TZS 12,000</p>
+<button class="bg-primary text-on-primary px-4 py-2 rounded-full text-sm font-medium hover:bg-primary-dark transition-all active:scale-95" onclick="addToCart('Beef Stir Fry Noodles', 12000)">
+<span class="material-symbols-outlined text-sm mr-1">add</span>
+Add
+</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Menu Item 3 -->
+<div class="menu-item bg-surface p-4 rounded-2xl border border-outline hover:border-primary/30 transition-all">
+<div class="flex gap-4">
+<div class="item-image w-20 h-20 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl text-primary">local_pizza</span>
+</div>
+<div class="flex-1">
+<div class="flex items-start justify-between mb-2">
+<div>
+<h4 class="font-headline text-lg font-bold text-on-surface mb-1">Margherita Pizza</h4>
+<p class="text-on-surface-variant text-sm mb-2">Fresh mozzarella, tomato sauce, and basil</p>
+<div class="flex items-center gap-3 text-xs">
+<span class="bg-primary/20 text-primary px-2 py-1 rounded-full font-medium">Vegetarian</span>
+<span class="text-on-surface-variant">• 520 cal</span>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline text-lg font-bold text-primary mb-2">TZS 18,000</p>
+<button class="bg-primary text-on-primary px-4 py-2 rounded-full text-sm font-medium hover:bg-primary-dark transition-all active:scale-95" onclick="addToCart('Margherita Pizza', 18000)">
+<span class="material-symbols-outlined text-sm mr-1">add</span>
+Add
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Cart Sidebar -->
+<div class="cart-sidebar fixed right-0 top-0 bottom-0 w-96 bg-surface shadow-2xl transform translate-x-full transition-transform duration-300 z-50" id="cartSidebar">
+<div class="cart-header p-6 border-b border-outline">
+<div class="flex items-center justify-between">
+<h3 class="font-headline text-lg font-bold text-on-surface">Your Cart</h3>
+<button class="close-btn hover:opacity-80 transition-opacity active:scale-95 duration-200" onclick="toggleCart()">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</div>
+<div class="cart-items p-6 flex-1 overflow-y-auto" id="cartItems">
+<div class="text-center py-8">
+<span class="material-symbols-outlined text-6xl text-on-surface-variant mb-4">shopping_cart</span>
+<p class="text-on-surface-variant">Your cart is empty</p>
+<p class="text-on-surface-variant text-sm">Add items from restaurants to get started</p>
+</div>
+</div>
+<div class="cart-footer p-6 border-t border-outline">
+<div class="mb-4">
+<div class="flex justify-between items-center mb-2">
+<span class="text-on-surface-variant">Subtotal</span>
+<span class="font-semibold text-on-surface" id="subtotal">TZS 0</span>
+</div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-on-surface-variant">Delivery Fee</span>
+<span class="font-semibold text-on-surface" id="deliveryFee">TZS 3,000</span>
+</div>
+<div class="flex justify-between items-center pt-2 border-t border-outline">
+<span class="font-headline text-lg font-bold text-on-surface">Total</span>
+<span class="font-headline text-lg font-bold text-primary" id="total">TZS 3,000</span>
+</div>
+</div>
+<button class="checkout-btn w-full bg-primary text-on-primary py-4 rounded-2xl font-headline font-bold hover:bg-primary-dark transition-all active:scale-95" onclick="proceedToCheckout()">
+Proceed to Checkout
+</button>
+</div>
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl z-40 rounded-t-[3rem] shadow-[0_-8px_24px_rgba(0,0,0,0.06)]">
+<a class="flex flex-col items-center justify-center bg-primary text-on-primary rounded-full px-5 py-2 active:scale-90 duration-200" href="main.html">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-headline text-[10px] font-medium tracking-wide">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-2 hover:bg-surface-variant rounded-full transition-all active:scale-90 duration-200" href="#search">
+<span class="material-symbols-outlined">search</span>
+<span class="font-headline text-[10px] font-medium tracking-wide">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-2 hover:bg-surface-variant rounded-full transition-all active:scale-90 duration-200 relative" onclick="toggleCart()">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-headline text-[10px] font-medium tracking-wide">Cart</span>
+<span class="cart-count absolute -top-1 -right-1 bg-error text-on-primary rounded-full w-4 h-4 flex items-center justify-center text-[8px] font-bold" id="bottomCartCount">0</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-2 hover:bg-surface-variant rounded-full transition-all active:scale-90 duration-200" href="profile.html">
+<span class="material-symbols-outlined">person</span>
+<span class="font-headline text-[10px] font-medium tracking-wide">Profile</span>
+</a>
+</nav>
+        <script>
+    // State management
     let cart = [];
-    let currentRestaurant = null;
-    let selectedPayment = 'cash';
-    let appliedPromo = null;
-    let orderHistory = [];
-    let customerPhone = localStorage.getItem('customerPhone') || '';
+    let currentSeller = null;
+    let sellers = [];
 
-    // Load data
-    function loadData() {
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      SmartNav.init({ activePage: 'cart', role: 'customer' });
       loadRestaurants();
-      loadMenuItems();
-      loadOrderHistory();
-    }
+      setupEventListeners();
+      updateCartUI();
+    });
 
-    function loadRestaurants() {
-      db.collection('restaurants').where('isOpen', '==', true).onSnapshot((snapshot) => {
-        restaurants = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderRestaurants();
-      });
-    }
-
-    function loadOrderHistory() {
-      if (!customerPhone) return;
-      
-      db.collection('orders')
-        .where('customerPhone', '==', customerPhone)
-        .orderBy('createdAt', 'desc')
-        .limit(20)
-        .onSnapshot((snapshot) => {
-          orderHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        });
-    }
-
-    function showOrderHistory() {
-      if (!customerPhone) {
-        const phone = prompt('Please enter your phone number to view order history:');
-        if (phone) {
-          customerPhone = phone;
-          localStorage.setItem('customerPhone', phone);
-          loadOrderHistory();
-        } else {
-          return;
-        }
-      }
-
-      const grid = document.getElementById('restaurantsGrid');
-      grid.innerHTML = `
-        <div class="order-history">
-          <h2>Order History</h2>
-          ${orderHistory.length === 0 ? '<p>No orders found</p>' : orderHistory.map(order => `
-            <div class="history-item">
-              <div class="history-header">
-                <div>
-                  <div class="order-id">Order #${order.id.substring(0, 8)}</div>
-                  <div class="order-date">${order.createdAt ? order.createdAt.toDate().toLocaleDateString() + ' ' + order.createdAt.toDate().toLocaleTimeString() : 'N/A'}</div>
-                </div>
-                <div>
-                  <span class="status ${order.status}">${order.status || 'pending'}</span>
-                </div>
-              </div>
-              <div class="order-items">
-                ${order.items ? order.items.map(item => `
-                  <div class="order-item">
-                    <span>${item.name} x${item.quantity}</span>
-                    <span>TZS ${(item.price * item.quantity).toLocaleString()}</span>
-                  </div>
-                `).join('') : ''}
-              </div>
-              <div class="order-total">Total: TZS ${(order.total || 0).toLocaleString()}</div>
-              ${order.status === 'delivered' ? `<button class="repeat-order-btn" onclick="repeatOrder('${order.id}')">🔄 Repeat Order</button>` : ''}
-            </div>
-          `).join('')}
-          ${getRecommendations()}
-        </div>
-      `;
-    }
-
-    function repeatOrder(orderId) {
-      const order = orderHistory.find(o => o.id === orderId);
-      if (!order) return;
-
-      cart = [];
-      order.items.forEach(orderItem => {
-        const menuItem = menuItems.find(m => m.id === orderItem.id);
-        if (menuItem && menuItem.isAvailable) {
-          cart.push({
-            ...menuItem,
-            quantity: orderItem.quantity
-          });
-        }
-      });
-
-      if (cart.length > 0) {
-        updateCart();
-        showNotification('Order added to cart! Some items may not be available.');
-        // Find the restaurant and open it
-        const restaurant = restaurants.find(r => r.id === order.restaurantId);
-        if (restaurant) {
-          openRestaurant(restaurant.id);
-        }
-      } else {
-        showNotification('No items from this order are currently available');
-      }
-    }
-
-    function getRecommendations() {
-      if (orderHistory.length === 0) return '';
-
-      // Get most ordered items
-      const itemCounts = {};
-      orderHistory.forEach(order => {
-        if (order.items) {
-          order.items.forEach(item => {
-            itemCounts[item.name] = (itemCounts[item.name] || 0) + item.quantity;
-          });
-        }
-      });
-
-      const topItems = Object.entries(itemCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3);
-
-      if (topItems.length === 0) return '';
-
-      return `
-        <div class="recommendations">
-          <h3>🌟 Recommended for you</h3>
-          ${topItems.map(([itemName, count]) => {
-            const menuItem = menuItems.find(m => m.name === itemName);
-            if (!menuItem || !menuItem.isAvailable) return '';
-            
-            return `
-              <div class="recommendation-item">
-                <div style="width: 40px; height: 40px; border-radius: 8px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">🍽️</div>
-                <div style="flex: 1;">
-                  <div style="font-weight: bold;">${menuItem.name}</div>
-                  <div style="font-size: 12px; color: #666;">Ordered ${count} times before</div>
-                </div>
-                <button class="add-to-cart" onclick="addToCart('${menuItem.id}')">Add</button>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      `;
-    }
-
-    function renderRestaurants() {
-      const grid = document.getElementById('restaurantsGrid');
-      grid.innerHTML = restaurants.map(restaurant => `
-        <div class="restaurant-card" onclick="openRestaurant('${restaurant.id}')">
-          <div class="restaurant-image">🍔</div>
-          <div class="restaurant-info">
-            <div class="restaurant-name">${restaurant.name}</div>
-            <div class="restaurant-category">${restaurant.category || 'Restaurant'}</div>
-            <div class="restaurant-meta">
-              <span class="rating">⭐ ${restaurant.rating || '4.5'}</span>
-              <span class="delivery-time">${restaurant.deliveryTimeMinutes || 30} min</span>
-              <span class="delivery-fee">TZS ${restaurant.deliveryFee || 2000}</span>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function openRestaurant(restaurantId) {
-      currentRestaurant = restaurants.find(r => r.id === restaurantId);
-      if (!currentRestaurant) return;
-
-      document.getElementById('restaurantName').textContent = currentRestaurant.name;
-      document.getElementById('restaurantRating').textContent = `⭐ ${currentRestaurant.rating || '4.5'}`;
-      document.getElementById('restaurantTime').textContent = `${currentRestaurant.deliveryTimeMinutes || 30} min`;
-      document.getElementById('restaurantFee').textContent = `TZS ${currentRestaurant.deliveryFee || 2000}`;
-      
-      const restaurantMenu = menuItems.filter(item => item.restaurantId === restaurantId);
-      document.getElementById('menuItems').innerHTML = restaurantMenu.map(item => `
-        <div class="menu-item">
-          <div class="item-image">🍽️</div>
-          <div class="item-details">
-            <div class="item-name">${item.name}</div>
-            <div class="item-desc">${item.description || 'Delicious food item'}</div>
-            <div class="item-price">TZS ${item.price.toLocaleString()}</div>
-          </div>
-          <button class="add-to-cart" onclick="addToCart('${item.id}')">Add to Cart</button>
-        </div>
-      `).join('');
-
-      document.getElementById('menuModal').style.display = 'block';
-      document.getElementById('backBtn').style.display = 'block';
-    }
-
-    function closeMenu() {
-      document.getElementById('menuModal').style.display = 'none';
-      document.getElementById('backBtn').style.display = 'none';
-    }
-
-    function addToCart(itemId) {
-      const item = menuItems.find(i => i.id === itemId);
-      if (!item) return;
-
-      const existingItem = cart.find(cartItem => cartItem.id === itemId);
-      if (existingItem) {
-        existingItem.quantity += 1;
-      } else {
-        cart.push({ ...item, quantity: 1 });
-      }
-
-      updateCart();
-      showNotification(`${item.name} added to cart!`);
-    }
-
-    function updateCart() {
-      const cartItems = document.getElementById('cartItems');
-      const cartCount = document.getElementById('cartCount');
-      const cartTotal = document.getElementById('cartTotal');
-
-      if (cart.length === 0) {
-        cartItems.innerHTML = '<p style="text-align: center; color: #666;">Your cart is empty</p>';
-        cartCount.textContent = '0';
-        cartTotal.textContent = 'TZS 0';
-        return;
-      }
-
-      cartItems.innerHTML = cart.map(item => `
-        <div class="cart-item">
-          <div class="cart-item-info">
-            <div class="cart-item-name">${item.name}</div>
-            <div class="cart-item-price">TZS ${item.price.toLocaleString()}</div>
-          </div>
-          <div class="quantity-controls">
-            <button class="quantity-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
-            <span>${item.quantity}</span>
-            <button class="quantity-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
-          </div>
-        </div>
-      `).join('');
-
-      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const deliveryFee = currentRestaurant ? currentRestaurant.deliveryFee || 2000 : 0;
-      const finalTotal = appliedPromo ? total - (total * appliedPromo.discount / 100) + deliveryFee : total + deliveryFee;
-      
-      cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-      cartTotal.textContent = `TZS ${finalTotal.toLocaleString()}`;
-      
-      updateLoyaltyPoints(finalTotal);
-    }
-
-    function updateQuantity(itemId, change) {
-      const item = cart.find(cartItem => cartItem.id === itemId);
-      if (!item) return;
-
-      item.quantity += change;
-      if (item.quantity <= 0) {
-        cart = cart.filter(cartItem => cartItem.id !== itemId);
-      }
-
-      updateCart();
-    }
-
-    function toggleCart() {
-      const sidebar = document.getElementById('cartSidebar');
-      sidebar.classList.toggle('open');
-    }
-
-    function showCheckout() {
-      if (cart.length === 0) {
-        alert('Your cart is empty!');
-        return;
-      }
-      document.getElementById('checkoutForm').style.display = 'block';
-      toggleCart();
-    }
-
-    function hideCheckout() {
-      document.getElementById('checkoutForm').style.display = 'none';
-    }
-
-    function selectPayment(method) {
-      selectedPayment = method;
-      document.querySelectorAll('.payment-option').forEach(option => {
-        option.classList.remove('selected');
-      });
-      event.target.classList.add('selected');
-    }
-
-    function applyPromo() {
-      const code = document.getElementById('promoCode').value.toUpperCase();
-      // This would check against promotions in Firestore
-      alert('Promo code functionality would be implemented here');
-    }
-
-    function updateLoyaltyPoints(total) {
-      const points = Math.floor(total / 100); // 1 point per TZS 100
-      document.getElementById('loyaltyPoints').textContent = points;
-    }
-
-    async function placeOrder() {
-      const name = document.getElementById('customerName').value;
-      const phone = document.getElementById('customerPhone').value;
-      const address = document.getElementById('deliveryAddress').value;
-      const orderType = document.getElementById('orderType').value;
-      const specialInstructions = document.getElementById('specialInstructions').value;
-
-      if (!name || !phone || !address) {
-        alert('Please fill in all required fields');
-        return;
-      }
-
-      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const deliveryFee = currentRestaurant ? currentRestaurant.deliveryFee || 2000 : 0;
-      const finalTotal = appliedPromo ? total - (total * appliedPromo.discount / 100) + deliveryFee : total + deliveryFee;
-
-      const order = {
-        customerName: name,
-        customerPhone: phone,
-        deliveryAddress: address,
-        items: cart.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity
-        })),
-        subtotal: total,
-        deliveryFee: deliveryFee,
-        total: finalTotal,
-        paymentMethod: selectedPayment,
-        orderType: orderType,
-        specialInstructions: specialInstructions,
-        restaurantId: currentRestaurant.id,
-        restaurantName: currentRestaurant.name,
-        status: 'pending',
-        loyaltyPoints: Math.floor(finalTotal / 100),
-        promoCode: appliedPromo ? appliedPromo.code : null,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    function setupEventListeners() {
+      // Add scroll animations
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
       };
 
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('slide-in');
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll('section').forEach(section => {
+        observer.observe(section);
+      });
+    }
+
+    // Seller functions - Using API routes
+    async function loadRestaurants() {
       try {
-        await db.collection('orders').add(order);
-        alert('Order placed successfully! You will receive a confirmation call.');
-        cart = [];
-        updateCart();
-        hideCheckout();
-        closeMenu();
+        // Try API first, fallback to Firebase
+        const response = await apiHelpers.get(API_ROUTES.CUSTOMER.RESTAURANTS);
+        sellers = response;
+        renderRestaurants();
       } catch (error) {
-        alert('Error placing order: ' + error.message);
+        console.log('API not available, using Firebase directly:', error);
+        // Fallback to direct Firebase access
+        try {
+          const snapshot = await db.collection('sellers')
+            .where('isOpen', '==', true)
+            .get();
+          sellers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderRestaurants();
+        } catch (firebaseError) {
+          console.error('Error loading sellers:', firebaseError);
+          document.getElementById('restaurantsGrid').innerHTML = '<p class="text-red-500 text-center py-8">Failed to load sellers. Please try again.</p>';
+        }
       }
     }
 
+    function renderRestaurants(filteredSellers = null) {
+      const grid = document.getElementById('restaurantsGrid');
+      const sellersToRender = filteredSellers || sellers;
+      
+      const categoryIcons = {
+        'food': 'storefront',
+        'dairy': 'local_drink',
+        'fruits': 'nutrition',
+        'groceries': 'shopping_basket',
+        'bakery': 'bakery_dining'
+      };
+      
+      grid.innerHTML = sellersToRender.map(seller => `
+        <div class="restaurant-card bg-surface rounded-2xl shadow-lg overflow-hidden card-hover cursor-pointer" onclick="openMenu('${seller.name}')">
+          <div class="restaurant-image h-48 flex items-center justify-center relative">
+            <span class="material-symbols-outlined text-6xl text-white/80 relative z-10">${categoryIcons[seller.category] || 'storefront'}</span>
+            <div class="absolute top-3 right-3 ${seller.isOpen ? 'bg-success' : 'bg-warning'} text-on-primary px-2 py-1 rounded-full text-xs font-semibold">
+              ${seller.isOpen ? 'Open Now' : 'Closed'}
+            </div>
+          </div>
+          <div class="p-4">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h3 class="font-headline text-lg font-bold text-on-surface mb-1">${seller.name}</h3>
+                <p class="text-on-surface-variant text-sm">${(seller.category || 'food').replaceFirstChar(c => c.toUpperCase())}</p>
+              </div>
+              <div class="text-right">
+                <div class="flex items-center gap-1 text-warning text-sm mb-1">
+                  <span class="material-symbols-outlined text-sm">star</span>
+                  <span class="font-semibold">${seller.rating || '4.5'}</span>
+                </div>
+                <p class="text-on-surface-variant text-xs">${seller.reviews || 0} reviews</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1 text-on-surface-variant">
+                  <span class="material-symbols-outlined text-sm">schedule</span>
+                  <span>${seller.deliveryTime || '25-35 min'}</span>
+                </div>
+                 <div class="flex items-center gap-1 text-on-surface-variant">
+                   <span class="material-symbols-outlined text-sm">local_shipping</span>
+                   <span>TSh ${seller.deliveryFee?.toLocaleString() || 3000}</span>
+                 </div>
+              </div>
+              <span class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition">favorite_border</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Filter functions
     function filterRestaurants() {
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = restaurants.filter(r => 
-        r.name.toLowerCase().includes(searchTerm) ||
-        r.category.toLowerCase().includes(searchTerm)
+      const filtered = sellers.filter(seller => 
+        seller.name.toLowerCase().includes(searchTerm) ||
+        (seller.category || '').toLowerCase().includes(searchTerm)
       );
-      // Render filtered restaurants
+      renderRestaurants(filtered);
     }
 
     function filterByCategory(category) {
+      // Update active state
       document.querySelectorAll('.filter-chip').forEach(chip => {
-        chip.classList.remove('active');
+        chip.classList.remove('active', 'bg-primary', 'text-on-primary');
+        chip.classList.add('bg-surface', 'border-outline');
       });
-      event.target.classList.add('active');
-      // Filter restaurants by category
+      
+      event.target.closest('.filter-chip').classList.add('active', 'bg-primary', 'text-on-primary');
+      event.target.closest('.filter-chip').classList.remove('bg-surface', 'border-outline');
+
+      // Filter sellers
+      if (category === 'all') {
+        renderRestaurants();
+      } else {
+        const filtered = sellers.filter(seller => 
+          (seller.category || '').toLowerCase().includes(category.toLowerCase())
+        );
+        renderRestaurants(filtered);
+      }
     }
 
+    // Menu functions
+    function openMenu(sellerName) {
+      currentSeller = sellerName;
+      document.getElementById('restaurantName').textContent = sellerName;
+      document.getElementById('menuModal').classList.remove('hidden');
+      document.getElementById('backBtn').style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMenu() {
+      document.getElementById('menuModal').classList.add('hidden');
+      document.getElementById('backBtn').style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    // Cart functions
+    function toggleCart() {
+      const sidebar = document.getElementById('cartSidebar');
+      sidebar.classList.toggle('translate-x-full');
+    }
+
+    function addToCart(itemName, price) {
+      const existingItem = cart.find(item => item.name === itemName);
+      
+      if (existingItem) {
+        existingItem.quantity++;
+      } else {
+        cart.push({
+          name: itemName,
+          price: price,
+          quantity: 1
+        });
+      }
+      
+      updateCartUI();
+      showNotification('Item added to cart!');
+    }
+
+    function removeFromCart(itemName) {
+      cart = cart.filter(item => item.name !== itemName);
+      updateCartUI();
+    }
+
+    function updateQuantity(itemName, change) {
+      const item = cart.find(item => item.name === itemName);
+      if (item) {
+        item.quantity += change;
+        if (item.quantity <= 0) {
+          removeFromCart(itemName);
+        } else {
+          updateCartUI();
+        }
+      }
+    }
+
+    function updateCartUI() {
+      const cartItems = document.getElementById('cartItems');
+      const cartCount = document.getElementById('cartCount');
+      const bottomCartCount = document.getElementById('bottomCartCount');
+      const subtotal = document.getElementById('subtotal');
+      const total = document.getElementById('total');
+      
+      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+      cartCount.textContent = totalItems;
+      bottomCartCount.textContent = totalItems;
+      
+      if (cart.length === 0) {
+        cartItems.innerHTML = `
+          <div class="text-center py-8">
+            <span class="material-symbols-outlined text-6xl text-on-surface-variant mb-4">shopping_cart</span>
+            <p class="text-on-surface-variant">Your cart is empty</p>
+            <p class="text-on-surface-variant text-sm">Add items from restaurants to get started</p>
+          </div>
+        `;
+      } else {
+        cartItems.innerHTML = cart.map(item => `
+          <div class="cart-item bg-surface p-4 rounded-xl mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-semibold text-on-surface">${item.name}</h4>
+              <button onclick="removeFromCart('${item.name}')" class="text-error hover:opacity-80 transition">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <button onclick="updateQuantity('${item.name}', -1)" class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center hover:bg-outline transition">
+                  <span class="material-symbols-outlined text-sm">remove</span>
+                </button>
+                <span class="font-semibold text-on-surface w-8 text-center">${item.quantity}</span>
+                <button onclick="updateQuantity('${item.name}', 1)" class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center hover:bg-primary-dark transition">
+                  <span class="material-symbols-outlined text-sm">add</span>
+                </button>
+              </div>
+              <p class="font-bold text-primary">TZS ${(item.price * item.quantity).toLocaleString()}</p>
+            </div>
+          </div>
+        `).join('');
+      }
+      
+      const subtotalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const deliveryFee = 3000;
+      const totalAmount = subtotalAmount + deliveryFee;
+      
+      subtotal.textContent = `TZS ${subtotalAmount.toLocaleString()}`;
+      total.textContent = `TZS ${totalAmount.toLocaleString()}`;
+    }
+
+    // Checkout function - Using API
+    async function proceedToCheckout() {
+      if (cart.length === 0) {
+        showNotification('Your cart is empty!');
+        return;
+      }
+      
+      try {
+        const orderData = {
+          customerName: 'Customer Name', // Get from form or user session
+          customerPhone: '+255123456789', // Get from form or user session
+          deliveryAddress: 'Delivery Address', // Get from form
+          items: cart,
+          subtotal: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+          deliveryFee: 3000,
+          total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) + 3000,
+          restaurantName: currentRestaurant,
+          status: 'pending',
+          createdAt: new Date().toISOString()
+        };
+
+        // Try API first
+        const response = await apiHelpers.post(API_ROUTES.CUSTOMER.ORDERS, orderData);
+        showNotification('Order placed successfully!');
+        cart = [];
+        updateCartUI();
+        toggleCart();
+        
+      } catch (error) {
+        console.log('API not available, using Firebase directly:', error);
+        // Fallback to direct Firebase access
+        try {
+          const docRef = await db.collection(COLLECTIONS.ORDERS).add({
+            ...orderData,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          showNotification('Order placed successfully!');
+          cart = [];
+          updateCartUI();
+          toggleCart();
+        } catch (firebaseError) {
+          console.error('Error placing order:', firebaseError);
+          showNotification('Error placing order. Please try again.');
+        }
+      }
+    }
+
+    // Utility functions
     function showNotification(message) {
-      const toast = document.createElement('div');
-      toast.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 20px; border-radius: 8px; z-index: 1000;';
-      toast.textContent = message;
-      document.body.appendChild(toast);
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-24 right-6 bg-primary text-on-primary px-4 py-3 rounded-full shadow-lg z-50 slide-in';
+      notification.textContent = message;
+      document.body.appendChild(notification);
       
       setTimeout(() => {
-        toast.remove();
+        notification.remove();
       }, 3000);
     }
 
-    // Handle order type change
-    document.getElementById('orderType').addEventListener('change', function() {
-      const scheduleGroup = document.getElementById('scheduleGroup');
-      scheduleGroup.style.display = this.value === 'scheduled' ? 'block' : 'none';
+    // Close modal when clicking outside
+    document.getElementById('menuModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeMenu();
+      }
     });
 
-    // Initialize
-    loadData();
-
-    // Register Service Worker for PWA
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/pwa/sw.js')
-        .then(registration => {
-          console.log('ServiceWorker registration successful');
-        })
-        .catch(err => {
-          console.log('ServiceWorker registration failed: ', err);
-        });
-    }
+    // Close cart when clicking outside
+    document.addEventListener('click', function(e) {
+      const cartSidebar = document.getElementById('cartSidebar');
+      const cartIcon = document.querySelector('.cart-icon');
+      
+      if (!cartSidebar.contains(e.target) && !cartIcon.contains(e.target) && !cartSidebar.classList.contains('translate-x-full')) {
+        toggleCart();
+      }
+    });
   </script>
 </body>
 </html>
+                    
+                              
+                  
+                                                      
+    
+        
