@@ -1,0 +1,27 @@
+# Use Node.js 18 LTS
+FROM node:18-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies
+RUN npm install
+
+# Copy necessary source code
+COPY server-secure.js ./
+COPY middleware ./middleware/
+COPY validators ./validators/
+COPY web ./web/
+
+# Set environment variables
+ENV NODE_ENV=development
+ENV PORT=3000
+
+# Expose port
+EXPOSE 3000
+
+# Start the server. Provide Firebase credentials through runtime secrets/env.
+CMD ["node", "server-secure.js"]

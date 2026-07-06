@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discover Stores - Food Delivery</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #064e3b;
+      --primary-light: #10b981;
+      --dark: #020617;
+      --gray: #64748b;
+      --light-gray: #f8fafc;
+      --white: #ffffff;
+      --shadow: 0 4px 20px rgba(0,0,0,0.05);
+      --shadow-hover: 0 10px 30px rgba(6, 78, 59, 0.1);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--light-gray); color: var(--dark); }
+    
+    .hero {
+      background: linear-gradient(135deg, #064e3b 0%, #10b981 100%);
+      padding: 60px 24px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 400px;
+      height: 400px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+    }
+    .hero h1 { color: white; font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+    .hero p { color: rgba(255,255,255,0.9); font-size: 16px; margin-bottom: 24px; }
+    
+    .search-box {
+      background: white;
+      border-radius: 50px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      max-width: 500px;
+      margin: 0 auto;
+      box-shadow: var(--shadow);
+    }
+    .search-box input {
+      flex: 1;
+      border: none;
+      padding: 12px 20px;
+      font-size: 15px;
+      outline: none;
+      font-family: inherit;
+    }
+    .search-box button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      font-family: inherit;
+      transition: transform 0.2s;
+    }
+    .search-box button:hover { transform: scale(1.02); }
+    
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    
+    .categories-section { padding: 24px 0; }
+    .section-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .categories-grid { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+    .categories-grid::-webkit-scrollbar { display: none; }
+    .category-card {
+      flex-shrink: 0;
+      background: white;
+      padding: 16px 24px;
+      border-radius: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: var(--shadow);
+      min-width: 100px;
+    }
+    .category-card:hover, .category-card.active {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+    }
+    .category-card .icon { font-size: 28px; margin-bottom: 8px; }
+    .category-card .name { font-size: 13px; font-weight: 500; }
+    
+    .featured-section { padding: 24px 0; }
+    .featured-badge {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .stores-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; padding-bottom: 40px; }
+    
+    .store-card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    .store-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+    .store-image {
+      height: 140px;
+      background: linear-gradient(135deg, #064e3b 0%, #10b981 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 56px;
+      position: relative;
+    }
+    .store-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .store-badge.open { color: #4caf50; }
+    .store-badge.closed { color: #f44336; }
+    .store-info { padding: 20px; }
+    .store-name { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+    .store-desc { color: var(--gray); font-size: 14px; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .store-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid #eee;
+    }
+    .store-meta-left { display: flex; align-items: center; gap: 12px; }
+    .rating { display: flex; align-items: center; gap: 4px; font-weight: 600; }
+    .rating-star { color: #FFD700; }
+    .rating-count { color: var(--gray); font-size: 12px; font-weight: 400; }
+    .delivery-info { font-size: 13px; color: var(--gray); display: flex; align-items: center; gap: 6px; }
+    .delivery-info .fee { color: var(--primary); font-weight: 600; }
+    
+    .quick-filters {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .filter-chip {
+      background: white;
+      border: 1px solid #ddd;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-chip:hover, .filter-chip.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--gray);
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+    
+    .loading { text-align: center; padding: 40px; color: var(--gray); }
+    
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 26px; }
+      .hero { padding: 40px 20px 60px; }
+      .stores-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>Discover Local Stores</h1>
+    <p>Find your favorite restaurants and shops near you</p>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search stores or categories..." oninput="handleSearch()">
+      <button onclick="performSearch()">Search</button>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div class="categories-section">
+      <h2 class="section-title">�_categories</h2>
+      <div class="categories-grid" id="categoriesGrid"></div>
+    </div>
+    
+    <div class="quick-filters">
+      <div class="filter-chip active" onclick="setFilter('all', this)">All</div>
+      <div class="filter-chip" onclick="setFilter('rating', this)">Top Rated</div>
+      <div class="filter-chip" onclick="setFilter('fast', this)">Fast Delivery</div>
+      <div class="filter-chip" onclick="setFilter('nearby', this)">Nearby</div>
+    </div>
+    
+    <div class="featured-section">
+      <div id="featuredSection" style="display:none;">
+        <span class="featured-badge">⭐ Featured</span>
+        <div class="stores-grid" id="featuredGrid"></div>
+      </div>
+      
+      <h2 class="section-title" id="storesTitle">All Stores</h2>
+      <div class="stores-grid" id="storesGrid">
+        <div class="loading">Loading stores...</div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBKliW4sQwBFEYMptJ8VuWYHTJ73DbHoE",
+      authDomain: "fooddelievry-dce15.firebaseapp.com",
+      projectId: "fooddelievry-dce15",
+      storageBucket: "fooddelievry-dce15.firebasestorage.app",
+      messagingSenderId: "727819507148",
+      appId: "1:727819507148:web:372bee2608d5c7a9587969"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const categories = [
+      { icon: '🍔', name: 'All' },
+      { icon: '🍕', name: 'Fast Food' },
+      { icon: '🥗', name: 'Healthy' },
+      { icon: '🍜', name: 'Local' },
+      { icon: '🛒', name: 'Supermarket' },
+      { icon: '☕', name: 'Coffee' },
+      { icon: '🍰', name: 'Desserts' },
+      { icon: '🥤', name: 'Drinks' }
+    ];
+
+    let allStores = [];
+    let currentFilter = 'all';
+    let currentCategory = 'All';
+    let searchQuery = '';
+
+    function init() {
+      renderCategories();
+      loadStores();
+    }
+
+    function renderCategories() {
+      const grid = document.getElementById('categoriesGrid');
+      grid.innerHTML = categories.map(cat => `
+        <div class="category-card ${cat.name === 'All' ? 'active' : ''}" onclick="selectCategory('${cat.name}', this)">
+          <div class="icon">${cat.icon}</div>
+          <div class="name">${cat.name}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectCategory(category, element) {
+      currentCategory = category;
+      document.querySelectorAll('.category-card').forEach(c => c.classList.remove('active'));
+      element.classList.add('active');
+      filterAndRenderStores();
+    }
+
+    function setFilter(filter, element) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      element.classList.add('active');
+      filterAndRenderStores();
+    }
+
+    function handleSearch() {
+      searchQuery = document.getElementById('searchInput').value.toLowerCase();
+      filterAndRenderStores();
+    }
+
+    function performSearch() {
+      handleSearch();
+    }
+
+    async function loadStores() {
+      try {
+        const snapshot = await db.collection('restaurants').get();
+        allStores = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: data.name || 'Store',
+            description: data.description || '',
+            category: data.category || 'Other',
+            deliveryFee: data.deliveryFee || 0,
+            deliveryTimeMinutes: data.deliveryTimeMinutes || 30,
+            isOpen: data.isOpen !== false,
+            rating: data.rating || 0,
+            totalRatings: data.totalRatings || 0,
+            imageEmoji: getCategoryEmoji(data.category)
+          };
+        });
+        filterAndRenderStores();
+      } catch (error) {
+        document.getElementById('storesGrid').innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>Unable to load stores</p></div>';
+      }
+    }
+
+    function getCategoryEmoji(category) {
+      const emojis = {
+        'Fast Food': '🍔', 'Healthy': '🥗', 'Local': '🍜', 'Supermarket': '🛒',
+        'Coffee': '☕', 'Desserts': '🍰', 'Drinks': '🥤', 'Pizza': '🍕'
+      };
+      return emojis[category] || '🍽️';
+    }
+
+    function filterAndRenderStores() {
+      let stores = [...allStores];
+
+      if (currentCategory !== 'All') {
+        stores = stores.filter(s => s.category === currentCategory || s.category?.toLowerCase().includes(currentCategory.toLowerCase()));
+      }
+
+      if (searchQuery) {
+        stores = stores.filter(s => 
+          s.name.toLowerCase().includes(searchQuery) || 
+          s.description.toLowerCase().includes(searchQuery) ||
+          s.category?.toLowerCase().includes(searchQuery)
+        );
+      }
+
+      if (currentFilter === 'rating') {
+        stores.sort((a, b) => b.rating - a.rating);
+      } else if (currentFilter === 'fast') {
+        stores.sort((a, b) => a.deliveryTimeMinutes - b.deliveryTimeMinutes);
+      } else if (currentFilter === 'nearby') {
+        stores.sort((a, b) => a.deliveryFee - b.deliveryFee);
+      }
+
+      const featured = stores.filter(s => s.rating >= 4.5).slice(0, 3);
+      document.getElementById('featuredSection').style.display = featured.length > 0 ? 'block' : 'none';
+      document.getElementById('featuredGrid').innerHTML = featured.map(store => renderStoreCard(store, true)).join('');
+
+      document.getElementById('storesTitle').textContent = currentCategory === 'All' ? 'All Stores' : currentCategory;
+      document.getElementById('storesGrid').innerHTML = stores.length > 0 
+        ? stores.map(store => renderStoreCard(store)).join('')
+        : '<div class="empty-state"><div class="icon">🔍</div><p>No stores found</p></div>';
+    }
+
+    function renderStoreCard(store, isFeatured = false) {
+      return `
+        <div class="store-card" onclick="openStore('${store.id}')">
+          <div class="store-image">
+            ${store.imageEmoji}
+            <div class="store-badge ${store.isOpen ? 'open' : 'closed'}">
+              ${store.isOpen ? '✓ Open' : '✕ Closed'}
+            </div>
+          </div>
+          <div class="store-info">
+            <div class="store-name">${store.name}</div>
+            <div class="store-desc">${store.description}</div>
+            <div class="store-meta">
+              <div class="store-meta-left">
+                <div class="rating">
+                  <span class="rating-star">★</span>
+                  <span>${store.rating > 0 ? store.rating.toFixed(1) : 'New'}</span>
+                  <span class="rating-count">${store.totalRatings ? `(${store.totalRatings})` : ''}</span>
+                </div>
+              </div>
+              <div class="delivery-info">
+                <span>🚚</span>
+                <span class="fee">TZS ${store.deliveryFee.toLocaleString()}</span>
+              </div>
+            </div>
+            <div style="margin-top: 8px; font-size: 13px; color: var(--gray);">
+              ⏱️ ${store.deliveryTimeMinutes} min
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function openStore(storeId) {
+      window.location.href = `customer.html?store=${storeId}`;
+    }
+
+    init();
+  </script>
+</body>
+</html>

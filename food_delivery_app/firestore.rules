@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Users
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if isOwner(userId) || isAdmin();
+    }
+
+    // Sellers/Merchants - public read, vendor-only write
+    match /sellers/{sellerId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && (request.auth.uid == resource.data.ownerId || request.auth.uid == sellerId || isAdmin());
+    }
+
+    // Products - public read for storefront, vendor-only write
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.resource.data.merchantId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.merchantId == request.auth.uid;
+    }
+
+    // Orders
+    match /orders/{orderId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (resource.data.merchantId == request.auth.uid || resource.data.customerId == request.auth.uid || isAdmin());
+    }
+
+    // Drivers
+    match /drivers/{driverId} {
+      allow read: if true;
+      allow write: if isOwner(driverId) || isAdmin();
+    }
+
+    // Customers
+    match /customers/{customerId} {
+      allow read: if true;
+      allow write: if isOwner(customerId) || isAdmin();
+    }
+
+    // Reviews
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && resource.data.customerId == request.auth.uid;
+    }
+
+    // Payments
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated() && (resource.data.customerId == request.auth.uid || resource.data.merchantId == request.auth.uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Inventory logs - vendor read own, admin all
+    match /inventory_logs/{logId} {
+      allow read: if isAuthenticated() && (resource.data.merchantId == request.auth.uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Product collections - public read, vendor write own
+    match /product_collections/{collectionId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.resource.data.merchantId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.merchantId == request.auth.uid;
+    }
+
+    // Promotions
+    match /promotions/{promoId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && resource.data.sellerId == request.auth.uid;
+    }
+
+    // Admin data
+    match /admin/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

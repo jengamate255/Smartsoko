@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_order_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Order #12345"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Status"
+            android:textSize="12sp"
+            android:textColor="@color/text_hint" />
+
+        <TextView
+            android:id="@+id/tv_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pending"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="4dp"
+            android:background="@drawable/bg_status_pending"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Customer"
+            android:textSize="12sp"
+            android:textColor="@color/text_hint" />
+
+        <TextView
+            android:id="@+id/tv_customer_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Customer Name"
+            android:textSize="16sp"
+            android:textColor="@color/text_primary" />
+
+        <TextView
+            android:id="@+id/tv_customer_phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="+254 700 000000"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Delivery Address"
+            android:textSize="12sp"
+            android:textColor="@color/text_hint" />
+
+        <TextView
+            android:id="@+id/tv_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="123 Main Street"
+            android:textSize="14sp"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Items"
+            android:textSize="12sp"
+            android:textColor="@color/text_hint" />
+
+        <TextView
+            android:id="@+id/tv_items"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2x Burger, 1x Fries"
+            android:textSize="14sp"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Payment Method"
+            android:textSize="12sp"
+            android:textColor="@color/text_hint" />
+
+        <TextView
+            android:id="@+id/tv_payment_method"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="M-Pesa"
+            android:textSize="14sp"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Order Time"
+            android:textSize="12sp"
+            android:textColor="@color/text_hint" />
+
+        <TextView
+            android:id="@+id/tv_order_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Jan 01, 2024 12:30"
+            android:textSize="14sp"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="16dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider"
+            android:layout_marginVertical="16dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Total"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary" />
+
+            <TextView
+                android:id="@+id/tv_total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="KSh 1,500.00"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

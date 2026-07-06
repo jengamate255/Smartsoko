@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>Food Delivery - Customer</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; color: #020617; }
+    .header { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 0 rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+    .logo { font-size: 24px; font-weight: 800; color: #064e3b; letter-spacing: -0.5px; }
+    .cart-btn { position: relative; background: none; border: none; cursor: pointer; font-size: 24px; }
+    .cart-badge { position: absolute; top: -8px; right: -8px; background: #10b981; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+    .btn { padding: 8px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; }
+    .btn-primary { background: #064e3b; color: white; }
+    .btn-secondary { background: #6c757d; color: white; }
+    
+    .auth-screen { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .auth-box { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 40px rgba(6, 78, 59, 0.1); width: 100%; max-width: 400px; border: 1px solid rgba(0,0,0,0.05); }
+    .auth-box h2 { margin-bottom: 8px; text-align: center; font-weight: 800; color: #064e3b; }
+    .auth-box p { text-align: center; color: #64748b; margin-bottom: 32px; }
+    .auth-box input { width: 100%; padding: 14px 20px; margin-bottom: 16px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 16px; transition: all 0.2s; }
+    .auth-box input:focus { border-color: #064e3b; box-shadow: 0 0 0 4px rgba(6, 78, 59, 0.1); outline: none; }
+    .auth-box .btn { width: 100%; padding: 16px; font-size: 16px; font-weight: 700; border-radius: 12px; }
+    
+    .main-content { padding: 24px; max-width: 1200px; margin: 0 auto; padding-bottom: 80px; }
+    .section-title { font-size: 20px; font-weight: 600; margin-bottom: 16px; color: #333; }
+    
+    .restaurants-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+    .restaurant-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(0,0,0,0.03); }
+    .restaurant-card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(6, 78, 59, 0.08); }
+    .restaurant-image { width: 100%; height: 160px; background: linear-gradient(135deg, #064e3b 0%, #10b981 100%); display: flex; align-items: center; justify-content: center; font-size: 56px; }
+    .restaurant-info { padding: 16px; }
+    .restaurant-name { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .restaurant-details { display: flex; gap: 16px; color: #666; font-size: 14px; }
+    
+    .menu-screen { display: none; }
+    .menu-header { background: white; padding: 24px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .back-btn { background: none; border: none; cursor: pointer; font-size: 16px; color: #666; display: flex; align-items: center; gap: 4px; margin-bottom: 16px; }
+    .menu-categories { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .category-chip { padding: 8px 16px; background: white; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; }
+    .category-chip.active { background: #064e3b; color: white; border-color: #064e3b; }
+    .menu-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .menu-item { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; gap: 16px; }
+    .menu-item-image { width: 80px; height: 80px; background: linear-gradient(135deg, #064e3b 0%, #10b981 100%); border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+    .menu-item-name { font-weight: 600; margin-bottom: 4px; }
+    .menu-item-desc { font-size: 12px; color: #666; margin-bottom: 8px; }
+    .menu-item-price { font-weight: 600; color: #064e3b; font-size: 18px; }
+    .add-btn { padding: 8px 20px; background: #064e3b; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    .qty-controls { display: flex; align-items: center; gap: 12px; }
+    .qty-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #064e3b; background: white; color: #064e3b; cursor: pointer; font-size: 18px; }
+    .qty-btn:hover { background: #064e3b; color: white; }
+    
+    .cart-screen { display: none; padding: 24px; max-width: 600px; margin: 0 auto; }
+    .cart-card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-weight: 600; }
+    .cart-item-price { color: #666; font-size: 14px; }
+    .cart-total { margin-top: 24px; padding-top: 16px; border-top: 2px solid #eee; }
+    .cart-total-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .cart-total-row.final { font-size: 18px; font-weight: bold; }
+    .checkout-btn { width: 100%; padding: 16px; background: #064e3b; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin-top: 16px; }
+    
+    .orders-screen { display: none; }
+    .order-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .order-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+    .order-id { font-weight: 600; }
+    .order-status { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .status-pending { background: #fff3e0; color: #ff9800; }
+    .status-confirmed { background: #e3f2fd; color: #2196f3; }
+    .status-preparing { background: #f3e5f5; color: #9c27b0; }
+    .status-pickedUp { background: #e1bee7; color: #7b1fa2; }
+    .status-delivered { background: #e8f5e9; color: #4caf50; }
+    .status-cancelled { background: #ffebee; color: #f44336; }
+    .order-items { color: #666; font-size: 14px; margin-bottom: 12px; }
+    .order-total { font-weight: 600; font-size: 18px; }
+    
+    .profile-screen { display: none; }
+    .profile-card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 16px; }
+    .profile-field { margin-bottom: 16px; }
+    .profile-field label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
+    .profile-field input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
+    .address-card { background: white; padding: 16px; border-radius: 8px; margin-bottom: 8px; border: 2px solid #eee; cursor: pointer; }
+    .address-card.selected { border-color: #064e3b; }
+    
+    .empty-state { text-align: center; padding: 60px 20px; color: #666; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+    .tab { flex: 1; padding: 12px; background: white; border: none; border-radius: 8px; cursor: pointer; text-align: center; }
+    .tab.active { background: #064e3b; color: white; }
+    .skeleton { background: #eee; background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%); border-radius: 5px; background-size: 200% 100%; animation: 1.5s shine linear infinite; }
+    @keyframes shine { to { background-position-x: -200%; } }
+    .hidden { display: none !important; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 12px; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); }
+    .nav-btn { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #666; }
+    .nav-btn.active { color: #064e3b; }
+    .nav-btn span { font-size: 12px; }
+    .payment-status { padding: 12px; border-radius: 8px; margin-top: 12px; text-align: center; font-weight: 600; }
+    .payment-status.pending { background: #fff3e0; color: #ff9800; }
+    .payment-status.success { background: #e8f5e9; color: #4caf50; }
+    .payment-status.failed { background: #ffebee; color: #f44336; }
+  </style>
+</head>
+<body>
+  <div id="authScreen" class="auth-screen">
+    <div class="auth-box">
+      <h2>🍔 Food Delivery</h2>
+      <p>Enter your phone to continue</p>
+      <input type="tel" id="phoneInput" placeholder="Phone (07XXXXXXXX)">
+      <input type="text" id="nameInput" placeholder="Your Name">
+      <button class="btn btn-primary" onclick="login()">Continue</button>
+    </div>
+  </div>
+
+  <div id="mainApp" class="hidden">
+    <header class="header">
+      <div class="logo">🍔 Food Delivery</div>
+      <button class="cart-btn" onclick="showScreen('cart')">🛒<span class="cart-badge" id="cartBadge">0</span></button>
+    </header>
+
+    <div id="restaurantsScreen" class="main-content">
+      <h2 class="section-title">Restaurants</h2>
+      <div class="restaurants-grid" id="restaurantsGrid"></div>
+    </div>
+
+    <div id="menuScreen" class="menu-screen">
+      <div class="main-content">
+        <button class="back-btn" onclick="showScreen('restaurants')">← Back</button>
+        <div class="menu-header">
+          <h2 id="restaurantName">Restaurant</h2>
+          <p id="restaurantDesc" style="color: #666; margin: 8px 0;"></p>
+          <div class="restaurant-details">
+            <span>⏱️ <span id="deliveryTime">30</span> min</span>
+            <span>🚚 TZS <span id="deliveryFee">0</span></span>
+          </div>
+        </div>
+        <div class="menu-categories" id="menuCategories"></div>
+        <div class="menu-items" id="menuItems"></div>
+      </div>
+    </div>
+
+    <div id="cartScreen" class="cart-screen">
+      <button class="back-btn" onclick="showScreen('restaurants')">← Back</button>
+      <h2 class="section-title">Your Cart</h2>
+      <div class="cart-card">
+        <div id="cartItems"></div>
+        <div class="cart-total">
+          <div class="cart-total-row"><span>Subtotal</span><span id="cartSubtotal">TZS 0</span></div>
+          <div class="cart-total-row"><span>Delivery Fee</span><span id="cartDeliveryFee">TZS 0</span></div>
+          <div class="cart-total-row final"><span>Total</span><span id="cartTotal">TZS 0</span></div>
+        </div>
+        <p style="font-weight: 600; margin-top: 16px;">Delivery Address</p>
+        <div id="savedAddresses"></div>
+        <input type="text" id="addressInput" placeholder="Or enter new address" style="width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 8px;">
+        <p style="font-weight: 600; margin-top: 16px;">Payment: M-Pesa</p>
+        <button class="checkout-btn" onclick="placeOrder()">Pay with M-Pesa & Place Order</button>
+      </div>
+    </div>
+
+    <div id="ordersScreen" class="orders-screen">
+      <div class="main-content">
+        <div class="tabs">
+          <button class="tab active" onclick="filterOrders('all')">All</button>
+          <button class="tab" onclick="filterOrders('pending')">Pending</button>
+          <button class="tab" onclick="filterOrders('delivered')">Delivered</button>
+        </div>
+        <div id="ordersList"></div>
+      </div>
+    </div>
+
+    <div id="profileScreen" class="profile-screen">
+      <div class="main-content">
+        <div class="profile-card">
+          <h3 style="margin-bottom: 16px;">Profile</h3>
+          <div class="profile-field">
+            <label>Phone</label>
+            <input type="tel" id="profilePhone" disabled>
+          </div>
+          <div class="profile-field">
+            <label>Name</label>
+            <input type="text" id="profileName">
+          </div>
+          <button class="btn btn-primary" onclick="updateProfile()">Update Profile</button>
+        </div>
+        <div class="profile-card">
+          <h3 style="margin-bottom: 16px;">Saved Addresses</h3>
+          <div id="addressList"></div>
+          <div class="profile-field">
+            <label>Add New Address</label>
+            <input type="text" id="newAddress" placeholder="Enter address">
+          </div>
+          <button class="btn btn-primary" onclick="addAddress()">Add Address</button>
+        </div>
+        <button class="btn btn-secondary" style="width: 100%;" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn active" onclick="showScreen('restaurants')"><span style="font-size: 20px;">🏠</span><span>Home</span></button>
+      <button class="nav-btn" onclick="showScreen('orders')"><span style="font-size: 20px;">📋</span><span>Orders</span></button>
+      <button class="nav-btn" onclick="showScreen('profile')"><span style="font-size: 20px;">👤</span><span>Profile</span></button>
+    </nav>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBKliW4sQwBFEYMptJ8VuWYHTJ73DbHoE",
+      authDomain: "fooddelievry-dce15.firebaseapp.com",
+      projectId: "fooddelievry-dce15",
+      storageBucket: "fooddelievry-dce15.firebasestorage.app",
+      messagingSenderId: "727819507148",
+      appId: "1:727819507148:web:372bee2608d5c7a9587969"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let currentUser = null, userData = null, cart = {}, currentRestaurant = null, allOrders = [], addresses = [];
+    
+    // Data Service with fallback to Supabase Bridge
+    const DataService = {
+      async getRestaurants() {
+        try {
+          // Check if we should use bridge (e.g. offline or forced fallback)
+          if (window.AndroidBridge && !navigator.onLine) {
+            console.log('Using native Supabase bridge for restaurants');
+            return new Promise((resolve, reject) => {
+              window.customerListeners = window.customerListeners || {};
+              window.customerListeners.getRestaurants = (status, data) => {
+                if (status === 'success') resolve(JSON.parse(data));
+                else reject(data);
+              };
+              window.AndroidBridge.getRestaurants();
+            });
+          }
+          
+          const snapshot = await db.collection('restaurants').where('isOpen', '==', true).get();
+          return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (e) {
+          console.warn('Firebase error, trying bridge:', e);
+          if (window.AndroidBridge) {
+            return new Promise((resolve, reject) => {
+              window.customerListeners = window.customerListeners || {};
+              window.customerListeners.getRestaurants = (status, data) => {
+                if (status === 'success') resolve(JSON.parse(data));
+                else reject(data);
+              };
+              window.AndroidBridge.getRestaurants();
+            });
+          }
+          throw e;
+        }
+      },
+      
+      async getMenuItems(restaurantId) {
+        try {
+          if (window.AndroidBridge && !navigator.onLine) {
+            return new Promise((resolve, reject) => {
+              window.customerListeners = window.customerListeners || {};
+              window.customerListeners.getMenuItems = (status, data) => {
+                if (status === 'success') resolve(JSON.parse(data));
+                else reject(data);
+              };
+              window.AndroidBridge.getMenuItems(restaurantId);
+            });
+          }
+          const snapshot = await db.collection('menu_items').where('restaurantId', '==', restaurantId).where('isAvailable', '==', true).get();
+          return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (e) {
+          if (window.AndroidBridge) {
+            return new Promise((resolve, reject) => {
+              window.customerListeners = window.customerListeners || {};
+              window.customerListeners.getMenuItems = (status, data) => {
+                if (status === 'success') resolve(JSON.parse(data));
+                else reject(data);
+              };
+              window.AndroidBridge.getMenuItems(restaurantId);
+            });
+          }
+          throw e;
+        }
+      }
+    };
+
+    async function login() {
+      const phone = document.getElementById('phoneInput').value.trim();
+      const name = document.getElementById('nameInput').value.trim();
+      if (!phone) return alert('Please enter phone number');
+      
+      const userId = 'user_' + phone.replace(/\D/g, '');
+      const userDoc = await db.collection('users').doc(userId).get();
+      if (!userDoc.exists) {
+        await db.collection('users').doc(userId).set({ phone, name: name || 'Customer', addresses: [], createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      }
+      
+      currentUser = { id: userId, phone };
+      await loadUserData();
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      loadRestaurants(); loadOrders(); loadAddresses();
+    }
+
+    async function loadUserData() {
+      const doc = await db.collection('users').doc(currentUser.id).get();
+      if (doc.exists) {
+        userData = doc.data();
+        document.getElementById('profilePhone').value = userData.phone || '';
+        document.getElementById('profileName').value = userData.name || '';
+        addresses = userData.addresses || [];
+      }
+    }
+
+    function logout() {
+      currentUser = null; cart = {};
+      document.getElementById('authScreen').classList.remove('hidden');
+      document.getElementById('mainApp').classList.add('hidden');
+    }
+
+    function showScreen(screen) {
+      document.getElementById('restaurantsScreen').style.display = 'none';
+      document.getElementById('menuScreen').style.display = 'none';
+      document.getElementById('cartScreen').style.display = 'none';
+      document.getElementById('ordersScreen').style.display = 'none';
+      document.getElementById('profileScreen').style.display = 'none';
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      
+      if (screen === 'restaurants') { document.getElementById('restaurantsScreen').style.display = 'block'; document.querySelectorAll('.nav-btn')[0].classList.add('active'); }
+      else if (screen === 'menu') { document.getElementById('menuScreen').style.display = 'block'; }
+      else if (screen === 'cart') { renderCart(); document.getElementById('cartScreen').style.display = 'block'; }
+      else if (screen === 'orders') { document.getElementById('ordersScreen').style.display = 'block'; document.querySelectorAll('.nav-btn')[1].classList.add('active'); }
+      else if (screen === 'profile') { document.getElementById('profileScreen').style.display = 'block'; document.querySelectorAll('.nav-btn')[2].classList.add('active'); }
+    }
+
+    async function loadRestaurants() {
+      try {
+        const restaurants = await DataService.getRestaurants();
+        document.getElementById('restaurantsGrid').innerHTML = restaurants.map(d => {
+          return `<div class="restaurant-card" onclick="openRestaurant('${d.id}')"><div class="restaurant-image">🍽️</div><div class="restaurant-info"><div class="restaurant-name">${d.name||'Restaurant'}</div><p style="color:#666;font-size:14px;margin-bottom:8px">${d.description||''}</p><div class="restaurant-details"><span>⏱️ ${d.deliveryTimeMinutes||30} min</span><span>🚚 TZS ${d.deliveryFee||0}</span></div></div></div>`;
+        }).join('') || '<div class="empty-state"><p>No restaurants available</p></div>';
+      } catch (e) {
+        document.getElementById('restaurantsGrid').innerHTML = `<div class="empty-state"><p>Error loading restaurants: ${e}</p></div>`;
+      }
+    }
+
+    async function openRestaurant(restaurantId) {
+      const doc = await db.collection('restaurants').doc(restaurantId).get();
+      currentRestaurant = { id: restaurantId, ...doc.data() };
+      document.getElementById('restaurantName').textContent = doc.data().name;
+      document.getElementById('restaurantDesc').textContent = doc.data().description;
+      document.getElementById('deliveryTime').textContent = doc.data().deliveryTimeMinutes || 30;
+      document.getElementById('deliveryFee').textContent = doc.data().deliveryFee || 0;
+      loadMenu(restaurantId);
+      showScreen('menu');
+    }
+
+    async function loadMenu(restaurantId) {
+      const items = await DataService.getMenuItems(restaurantId);
+      const categories = [...new Set(items.map(d => d.category || 'Other'))];
+      document.getElementById('menuCategories').innerHTML = '<div class="category-chip active" onclick="filterCategory(null)">All</div>' + categories.map(cat => `<div class="category-chip" onclick="filterCategory('${cat}')">${cat}</div>`).join('');
+      renderMenuItems(items);
+    }
+
+    function filterCategory(category) {
+      document.querySelectorAll('.category-chip').forEach(chip => chip.classList.remove('active'));
+      event.target.classList.add('active');
+      db.collection('menu_items').where('restaurantId', '==', currentRestaurant.id).where('isAvailable', '==', true).get().then(snapshot => {
+        const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderMenuItems(category ? items.filter(i => i.category === category) : items);
+      });
+    }
+
+    function renderMenuItems(items) {
+      document.getElementById('menuItems').innerHTML = items.map(item => `
+        <div class="menu-item"><div class="menu-item-image">🍔</div><div class="menu-item-details" style="flex:1"><div class="menu-item-name">${item.name}</div><div class="menu-item-desc">${item.description||''}</div><div class="menu-item-price">TZS ${(item.price||0).toLocaleString()}</div><div style="margin-top:8px">${cart[item.id]?`<div class="qty-controls"><button class="qty-btn" onclick="updateQty('${item.id}',-1)">−</button><span>${cart[item.id].qty}</span><button class="qty-btn" onclick="updateQty('${item.id}',1)">+</button></div>`:`<button class="add-btn" onclick="addToCart('${item.id}','${item.name}',${item.price})">Add</button>`}</div></div></div>`).join('');
+    }
+
+    function addToCart(id, name, price) { cart[id] = { name, price, qty: 1 }; updateCartBadge(); loadMenu(currentRestaurant.id); }
+    function updateQty(id, delta) { if (!cart[id]) return; cart[id].qty += delta; if (cart[id].qty <= 0) delete cart[id]; updateCartBadge(); loadMenu(currentRestaurant.id); }
+    function updateCartBadge() { document.getElementById('cartBadge').textContent = Object.values(cart).reduce((sum, item) => sum + item.qty, 0); }
+
+    function renderCart() {
+      const items = Object.entries(cart);
+      if (items.length === 0) {
+        document.getElementById('cartItems').innerHTML = '<div class="empty-state"><p>Cart is empty</p></div>';
+        document.getElementById('cartSubtotal').textContent = 'TZS 0';
+        document.getElementById('cartDeliveryFee').textContent = 'TZS 0';
+        document.getElementById('cartTotal').textContent = 'TZS 0';
+        return;
+      }
+      let subtotal = 0;
+      document.getElementById('cartItems').innerHTML = items.map(([id, item]) => { const itemTotal = item.price * item.qty; subtotal += itemTotal; return `<div class="cart-item"><div class="cart-item-info"><div class="cart-item-name">${item.name}</div><div class="cart-item-price">TZS ${item.price.toLocaleString()} x ${item.qty}</div></div><div class="qty-controls"><button class="qty-btn" onclick="updateQty('${id}',-1)">−</button><span>${item.qty}</span><button class="qty-btn" onclick="updateQty('${id}',1)">+</button></div><div style="font-weight:600">TZS ${itemTotal.toLocaleString()}</div></div>`; }).join('');
+      const deliveryFee = currentRestaurant?.deliveryFee || 0;
+      document.getElementById('cartSubtotal').textContent = 'TZS ' + subtotal.toLocaleString();
+      document.getElementById('cartDeliveryFee').textContent = 'TZS ' + deliveryFee.toLocaleString();
+      document.getElementById('cartTotal').textContent = 'TZS ' + (subtotal + deliveryFee).toLocaleString();
+    }
+
+    function loadAddresses() {
+      const savedDiv = document.getElementById('savedAddresses');
+      const listDiv = document.getElementById('addressList');
+      if (addresses.length === 0) { savedDiv.innerHTML = '<p style="color:#666;font-size:14px">No saved addresses</p>'; listDiv.innerHTML = ''; return; }
+      savedDiv.innerHTML = addresses.map((addr, i) => `<div class="address-card ${i===0?'selected':''}" onclick="selectAddress(${i})">📍 ${addr}</div>`).join('');
+      listDiv.innerHTML = addresses.map(addr => `<div class="address-card">📍 ${addr} <button onclick="deleteAddress('${addr}')" style="float:right;background:none;border:none;color:red;cursor:pointer">✕</button></div>`).join('');
+    }
+
+    function selectAddress(index) { document.querySelectorAll('.address-card').forEach((card, i) => card.classList.toggle('selected', i === index)); }
+
+    async function addAddress() {
+      const newAddr = document.getElementById('newAddress').value.trim();
+      if (!newAddr) return;
+      addresses.push(newAddr);
+      await db.collection('users').doc(currentUser.id).update({ addresses });
+      document.getElementById('newAddress').value = '';
+      loadAddresses();
+    }
+
+    async function deleteAddress(addr) {
+      addresses = addresses.filter(a => a !== addr);
+      await db.collection('users').doc(currentUser.id).update({ addresses });
+      loadAddresses();
+    }
+
+    async function placeOrder() {
+      const address = document.getElementById('addressInput').value.trim();
+      if (!address && addresses.length === 0) return alert('Please enter delivery address');
+      if (Object.keys(cart).length === 0) return alert('Cart is empty');
+      
+      const deliveryAddress = address || addresses[0];
+      const items = Object.entries(cart).map(([id, item]) => ({ id, name: item.name, price: item.price, quantity: item.qty }));
+      const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      const deliveryFee = currentRestaurant?.deliveryFee || 0;
+      const total = subtotal + deliveryFee;
+
+      await db.collection('orders').add({
+        userId: currentUser.id, phone: currentUser.phone, restaurantId: currentRestaurant.id, restaurantName: currentRestaurant.name,
+        items, subtotal, deliveryFee, total, deliveryAddress, status: 'pending', paymentStatus: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      cart = {}; updateCartBadge();
+      alert('Order placed! Pay TZS ' + total.toLocaleString() + ' via M-Pesa to complete.');
+      showScreen('orders'); loadOrders();
+    }
+
+    function loadOrders() {
+      db.collection('orders').where('userId', '==', currentUser?.id).orderBy('createdAt', 'desc').onSnapshot(snapshot => {
+        allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderOrders(allOrders);
+      });
+    }
+
+    function filterOrders(status) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      renderOrders(status === 'all' ? allOrders : allOrders.filter(o => o.status === status));
+    }
+
+    function renderOrders(orders) {
+      const list = document.getElementById('ordersList');
+      if (orders.length === 0) { list.innerHTML = '<div class="empty-state"><p>No orders yet</p></div>'; return; }
+      list.innerHTML = orders.map(order => `
+        <div class="order-card">
+          <div class="order-header"><span class="order-id">#${order.id.substring(0, 8)}</span><span class="order-status status-${order.status}">${order.status||'pending'}</span></div>
+          <div class="order-items">${order.items?.map(i => `${i.quantity}x ${i.name}`).join(', ')||''}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span class="order-total">TZS ${(order.total||0).toLocaleString()}</span>
+            ${order.paymentStatus==='pending'?'<span class="payment-status pending">Awaiting Payment</span>':''}
+            ${order.paymentStatus==='completed'?'<span class="payment-status success">Paid</span>':''}
+          </div>
+          <div style="margin-top:8px;font-size:12px;color:#666">📍 ${order.deliveryAddress}</div>
+        </div>`).join('');
+    }
+
+    async function updateProfile() {
+      const name = document.getElementById('profileName').value;
+      await db.collection('users').doc(currentUser.id).update({ name });
+      alert('Profile updated!');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <!-- Performance: Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>SmartSoko - Admin Dashboard</title>
+  <meta name="theme-color" content="#012d1d">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="pwa/manifest.json">
+  <link rel="preload" href="dist/tailwind.css" as="style">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link rel="stylesheet" href="design-system.css">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+  <!-- Chart.js & Mapbox -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <!-- Firebase Modular SDK -->
+  <script type="module" src="config/firebase-config.js?v=3"></script>
+  <script src="nav-component.js?v=3" defer></script>
+  <script src="auth-check.js?v=4" defer></script>
+  
+  <style> .material-symbols-outlined {font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24} body {min-height: 100dvh} .tab-active {border-bottom: 3px solid var(--os-primary);color: var(--os-primary)} .loading-pulse {animation: pulse 2s cubic-bezier(0.4,0,0.6,1) infinite} @keyframes pulse {0%,100% {opacity: 1} 50% {opacity: 0.5} } </style>
+  <style> .map-fullscreen {position: fixed !important;top: 0 !important;left: 0 !important;width: 100vw !important;height: 100vh !important;z-index: 9999 !important;border-radius: 0 !important;margin: 0 !important} </style>
+</head>
+<body class="bg-background font-body text-on-surface min-h-screen pt-20 animate-premium">
+<!-- Navigation handled by SmartNav -->
+
+<main class="pb-24 px-4 sm:px-6 max-w-7xl mx-auto animate-premium">
+  <!-- Header -->
+  <div class="px-6 py-8 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-sm">
+        <span class="material-symbols-outlined text-2xl">admin_panel_settings</span>
+      </div>
+      <div>
+        <h1 class="font-headline text-2xl font-bold tracking-tight text-primary">Admin Dashboard</h1>
+        <p class="text-sm text-on-surface-variant font-medium">Platform Overview & Management</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="hidden md:flex relative group">
+        <span class="material-symbols-outlined text-on-surface-variant absolute left-3 top-1/2 -translate-y-1/2 text-sm">search</span>
+        <input type="text" placeholder="Quick search..." class="pl-9 pr-4 py-2 bg-surface-container border border-outline-variant rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all w-48 focus:w-64">
+      </div>
+      <button onclick="refreshAll()" class="w-10 h-10 bg-surface-container flex items-center justify-center rounded-xl hover:bg-surface-container-high transition-all shadow-sm">
+        <span class="material-symbols-outlined text-on-surface-variant">refresh</span>
+      </button>
+    </div>
+  </div>
+
+    <!-- Tab Navigation -->
+    <div class="bg-surface border-b border-outline-variant px-6 flex gap-6 overflow-x-auto">
+      <button onclick="switchTab('overview')" id="tab-overview" class="tab-active py-4 px-2 font-medium transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">dashboard</span> Overview</span>
+      </button>
+      <button onclick="switchTab('orders')" id="tab-orders" class="py-4 px-2 font-medium text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">receipt_long</span> Orders</span>
+      </button>
+      <button onclick="switchTab('sellers')" id="tab-sellers" class="py-4 px-2 font-medium text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">storefront</span> Sellers</span>
+      </button>
+      <button onclick="switchTab('users')" id="tab-users" class="py-4 px-2 font-medium text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">people</span> Users</span>
+      </button>
+      <button onclick="switchTab('marketing')" id="tab-marketing" class="py-4 px-2 font-medium text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">campaign</span> Marketing</span>
+      </button>
+      <button onclick="switchTab('logistics')" id="tab-logistics" class="py-4 px-2 font-medium text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">local_shipping</span> Logistics</span>
+      </button>
+      <button onclick="switchTab('verification')" id="tab-verification" class="py-4 px-2 font-medium text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">verified</span> Verification</span>
+      </button>
+      <button onclick="switchTab('finance')" id="tab-finance" class="py-4 px-2 font-medium text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">account_balance_wallet</span> Finance</span>
+      </button>
+      <button onclick="switchTab('support')" id="tab-support" class="py-4 px-2 font-medium text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">support_agent</span> Support</span>
+      </button>
+      <button onclick="switchTab('analytics')" id="tab-analytics" class="py-4 px-2 font-medium text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">analytics</span> Analytics</span>
+      </button>
+      <button onclick="switchTab('audit')" id="tab-audit" class="py-4 px-2 font-medium text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">history</span> Audit Logs</span>
+      </button>
+      <button onclick="switchTab('settings')" id="tab-settings" class="py-4 px-2 font-medium text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">settings</span> Settings</span>
+      </button>
+    </div>
+
+    <!-- Content Area -->
+    <div class="p-6">
+      <!-- Overview Tab -->
+      <div id="content-overview" class="tab-content">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-primary-fixed rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-primary">shopping_cart</span></div>
+              <select onchange="changeDateRange('orders', this.value)" class="text-xs border rounded px-2 py-1"><option value="all">All Time</option><option value="today">Today</option><option value="week">This Week</option></select>
+            </div>
+            <p class="text-sm text-gray-600">Total Orders</p>
+            <p class="text-3xl font-bold" id="totalOrders">-</p>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-green-600">payments</span></div>
+              <select onchange="changeDateRange('revenue', this.value)" class="text-xs border rounded px-2 py-1"><option value="all">All Time</option><option value="today">Today</option><option value="week">This Week</option></select>
+            </div>
+            <p class="text-sm text-gray-600">Total Revenue</p>
+            <p class="text-3xl font-bold" id="totalRevenue">-</p>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-blue-600">store</span></div>
+              <span class="text-xs text-gray-500">Active</span>
+            </div>
+            <p class="text-sm text-gray-600">Active Sellers</p>
+            <p class="text-3xl font-bold" id="totalSellers">-</p>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-purple-600">people</span></div>
+              <span class="text-xs text-gray-500">Registered</span>
+            </div>
+            <p class="text-sm text-gray-600">Total Users</p>
+            <p class="text-3xl font-bold" id="totalUsers">-</p>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold mb-4">Revenue Over Time</h3>
+            <canvas id="revenueChart" height="200"></canvas>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold mb-4">Orders by Status</h3>
+            <canvas id="ordersChart" height="200"></canvas>
+          </div>
+        </div>
+
+        <!-- Quick Actions & Recent Orders -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b flex items-center justify-between">
+              <h2 class="text-lg font-bold">Recent Orders</h2>
+              <div class="flex gap-2">
+                <button onclick="exportData('orders')" class="text-sm text-primary hover:underline flex items-center gap-1"><span class="material-symbols-outlined text-sm">download</span> Export</button>
+                <button onclick="switchTab('orders')" class="text-primary text-sm hover:underline">View All</button>
+              </div>
+            </div>
+            <table class="w-full">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Order ID</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Customer</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Amount</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTable" class="divide-y"><tr><td colspan="5" class="px-6 py-8 text-center text-gray-500 loading-pulse">Loading...</td></tr></tbody>
+            </table>
+          </div>
+          <div class="space-y-6">
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+              <h3 class="font-bold mb-4">Quick Actions</h3>
+              <div class="space-y-3">
+                <a href="orders.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"><span class="material-symbols-outlined text-purple-600">receipt_long</span><span class="text-sm">Orders Management</span></a>
+                <a href="supabase.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"><span class="material-symbols-outlined text-gray-600">dashboard</span><span class="text-sm">Full Admin Panel</span></a>
+                <a href="merchant.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"><span class="material-symbols-outlined text-primary">storefront</span><span class="text-sm">Seller Dashboard</span></a>
+                <a href="driver.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"><span class="material-symbols-outlined text-blue-600">delivery_dining</span><span class="text-sm">Driver Management</span></a>
+                <button onclick="exportData('all')" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left"><span class="material-symbols-outlined text-green-600">download</span><span class="text-sm">Export All Data</span></button>
+              </div>
+            </div>
+            <div class="bg-primary rounded-xl p-6 text-on-primary shadow-lg shadow-primary/20">
+              <h3 class="font-bold mb-2">Platform Status</h3>
+              <div class="flex items-center gap-2 mb-4"><span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span><span class="text-sm">All Systems Operational</span></div>
+              <p class="text-sm opacity-90">Firebase: Connected</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders Tab -->
+      <div id="content-orders" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div class="p-6 border-b flex items-center justify-between">
+            <h2 class="text-lg font-bold">All Orders</h2>
+            <div class="flex gap-3">
+              <select id="orderStatusFilter" class="border rounded-lg px-4 py-2" onchange="filterOrders()">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="preparing">Preparing</option>
+                <option value="ready_for_delivery">Ready</option>
+                <option value="dispatched">Dispatched</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <button onclick="exportData('orders')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"><span class="material-symbols-outlined text-sm">download</span> Export CSV</button>
+            </div>
+          </div>
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Order ID</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Customer</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Seller</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Items</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Amount</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="allOrdersTable" class="divide-y"><tr><td colspan="8" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sellers Tab -->
+      <div id="content-sellers" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div class="p-6 border-b flex items-center justify-between">
+            <h2 class="text-lg font-bold">All Sellers</h2>
+            <button onclick="exportData('sellers')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"><span class="material-symbols-outlined text-sm">download</span> Export CSV</button>
+          </div>
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Seller</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Category</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Location</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Rating</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="sellersTable" class="divide-y"><tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Users Tab -->
+      <div id="content-users" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div class="p-6 border-b flex items-center justify-between">
+            <div>
+              <h2 class="text-lg font-bold">User Management</h2>
+              <p class="text-sm text-gray-500 mt-1">Manage user roles and permissions</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg">
+                <span class="material-symbols-outlined text-gray-500 text-sm">filter_list</span>
+                <select id="userRoleFilter" onchange="filterUsersByRole()" class="bg-transparent text-sm font-medium text-gray-700 focus:outline-none">
+                  <option value="all">All Roles</option>
+                  <option value="customer">Customers</option>
+                  <option value="seller">Sellers</option>
+                  <option value="driver">Drivers</option>
+                  <option value="admin">Admins</option>
+                </select>
+              </div>
+              <button onclick="exportData('users')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm font-medium">
+                <span class="material-symbols-outlined text-sm">download</span> Export
+              </button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">User</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Contact</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Role</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Joined</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersTable" class="divide-y">
+                <tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading users...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Role Edit Modal -->
+      <div id="userRoleModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="font-headline text-xl font-bold text-gray-900">Edit User Role</h3>
+            <button onclick="closeUserRoleModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
+              <span class="material-symbols-outlined text-gray-500">close</span>
+            </button>
+          </div>
+          <div class="mb-6">
+            <div class="flex items-center gap-3 mb-4 p-4 bg-gray-50 rounded-xl">
+              <div id="modalUserAvatar" class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                <span class="material-symbols-outlined">person</span>
+              </div>
+              <div>
+                <p id="modalUserName" class="font-semibold text-gray-900">User Name</p>
+                <p id="modalUserEmail" class="text-sm text-gray-500">user@email.com</p>
+              </div>
+            </div>
+            <label class="block text-sm font-semibold text-gray-700 mb-3">Select Role</label>
+            <div class="grid grid-cols-2 gap-3">
+              <button onclick="selectRole('customer')" id="role-customer" class="role-option p-4 border-2 border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-primary hover:bg-primary/5 transition-all">
+                <span class="material-symbols-outlined text-2xl text-gray-600">shopping_cart</span>
+                <span class="font-medium text-sm">Customer</span>
+              </button>
+              <button onclick="selectRole('seller')" id="role-seller" class="role-option p-4 border-2 border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-primary hover:bg-primary/5 transition-all">
+                <span class="material-symbols-outlined text-2xl text-gray-600">store</span>
+                <span class="font-medium text-sm">Seller</span>
+              </button>
+              <button onclick="selectRole('driver')" id="role-driver" class="role-option p-4 border-2 border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-primary hover:bg-primary/5 transition-all">
+                <span class="material-symbols-outlined text-2xl text-gray-600">local_shipping</span>
+                <span class="font-medium text-sm">Driver</span>
+              </button>
+              <button onclick="selectRole('admin')" id="role-admin" class="role-option p-4 border-2 border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-primary hover:bg-primary/5 transition-all">
+                <span class="material-symbols-outlined text-2xl text-gray-600">admin_panel_settings</span>
+                <span class="font-medium text-sm">Admin</span>
+              </button>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <button onclick="closeUserRoleModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+              Cancel
+            </button>
+            <button onclick="saveUserRole()" class="flex-1 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primary-dark transition-colors">
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delete User Confirmation Modal -->
+      <div id="deleteUserModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-red-600">
+              <span class="material-symbols-outlined text-2xl">warning</span>
+            </div>
+            <div>
+              <h3 class="font-headline text-xl font-bold text-gray-900">Delete User</h3>
+              <p class="text-sm text-gray-500">This action cannot be undone</p>
+            </div>
+          </div>
+          <div class="mb-6 p-4 bg-gray-50 rounded-xl">
+            <p class="text-gray-700">Are you sure you want to delete <strong id="deleteUserName" class="font-semibold text-gray-900">this user</strong>?</p>
+            <p class="text-sm text-gray-500 mt-2">All their data including orders, reviews, and history will be permanently removed.</p>
+          </div>
+          <div class="flex gap-3">
+            <button onclick="closeDeleteUserModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+              Cancel
+            </button>
+            <button onclick="deleteUser()" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors">
+              Delete User
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Marketing Tab -->
+      <div id="content-marketing" class="tab-content hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Coupon Management -->
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-outline-variant flex justify-between items-center">
+              <h2 class="font-headline font-bold text-lg">Active Coupons</h2>
+              <button onclick="openCouponModal()" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">add</span> New Coupon
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead class="bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <tr>
+                    <th class="px-6 py-3">Code</th>
+                    <th class="px-6 py-3">Discount</th>
+                    <th class="px-6 py-3">Status</th>
+                    <th class="px-6 py-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="couponsTable" class="divide-y divide-gray-100">
+                  <tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">Loading coupons...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <!-- Banner Management -->
+          <div class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="font-headline font-bold text-lg mb-6">Homepage Banners</h2>
+            <div id="bannersList" class="space-y-4">
+              <div class="p-8 text-center text-gray-400 border border-dashed rounded-xl">Loading banners...</div>
+            </div>
+            <button class="w-full mt-6 py-3 border-2 border-dashed border-outline-variant rounded-xl text-gray-500 hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined">add_photo_alternate</span> Add Banner
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logistics Tab -->
+      <div id="content-logistics" class="tab-content hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm p-2 flex flex-col min-h-[750px] border border-gray-100">
+            <div class="p-6 flex items-center justify-between">
+              <h2 class="font-headline font-bold text-lg">Delivery Map Overview</h2>
+              <div class="flex gap-2 items-center">
+                <span class="flex items-center gap-1 text-xs text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full"><span class="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span> 12 Active Drivers</span>
+                <button onclick="toggleMapFullscreen()" class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg hover:bg-gray-200 transition-all text-gray-600">
+                  <span id="fullscreen-icon" class="material-symbols-outlined text-sm">fullscreen</span>
+                </button>
+              </div>
+            </div>
+            <div id="logisticsMap" class="flex-grow bg-gray-50 rounded-xl overflow-hidden relative mx-2 mb-2"></div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-outline-variant">
+              <h2 class="font-headline font-bold text-lg">Driver Status</h2>
+            </div>
+            <div id="driversList" class="divide-y divide-gray-100">
+              <div class="p-8 text-center text-gray-400">Loading drivers...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Verification Tab -->
+      <div id="content-verification" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div class="p-6 border-b border-outline-variant flex justify-between items-center">
+            <h2 class="font-headline font-bold text-lg">Seller Verification Queue</h2>
+            <span class="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold">4 Pending Reviews</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-gray-50 text-[10px] uppercase tracking-wider font-bold text-gray-500">
+                  <th class="px-6 py-4">Seller Info</th>
+                  <th class="px-6 py-4">Documents</th>
+                  <th class="px-6 py-4">Applied Date</th>
+                  <th class="px-6 py-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="verificationQueue" class="divide-y divide-gray-100">
+                <tr class="hover:bg-gray-50">
+                  <td class="px-6 py-4">
+                    <p class="font-bold text-sm">Zanzibar Spices Ltd</p>
+                    <p class="text-xs text-gray-500">Owner: Ali Hassan</p>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex gap-2">
+                      <span class="px-2 py-1 bg-blue-50 text-blue-600 rounded text-[10px] cursor-pointer hover:bg-blue-100">Business_Permit.pdf</span>
+                      <span class="px-2 py-1 bg-blue-50 text-blue-600 rounded text-[10px] cursor-pointer hover:bg-blue-100">Identity_Card.jpg</span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-600">Oct 16, 2026</td>
+                  <td class="px-6 py-4">
+                    <div class="flex gap-2">
+                      <button onclick="verifySeller('123', true)" class="px-3 py-1 bg-green-600 text-white rounded-lg text-xs hover:bg-green-700">Approve</button>
+                      <button onclick="verifySeller('123', false)" class="px-3 py-1 bg-red-50 text-red-600 rounded-lg text-xs hover:bg-red-100">Reject</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Finance Tab -->
+      <div id="content-finance" class="tab-content hidden">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-600">
+            <p class="text-xs text-gray-500 uppercase font-bold mb-1">Total Payouts Done</p>
+            <p class="text-2xl font-bold">TSh 12,450,000</p>
+          </div>
+          <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-amber-500">
+            <p class="text-xs text-gray-500 uppercase font-bold mb-1">Pending Settlements</p>
+            <p class="text-2xl font-bold">TSh 1,240,000</p>
+          </div>
+          <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-primary">
+            <p class="text-xs text-gray-500 uppercase font-bold mb-1">Net Platform Fee</p>
+            <p class="text-2xl font-bold">TSh 4,120,500</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div class="p-6 border-b border-outline-variant flex justify-between items-center">
+            <h2 class="font-headline font-bold text-lg">Seller Settlements Ledger</h2>
+            <button onclick="exportData('finance')" class="text-sm text-primary flex items-center gap-1"><span class="material-symbols-outlined text-sm">download</span> Export CSV</button>
+          </div>
+          <div id="financeTable" class="overflow-x-auto">
+            <div class="p-8 text-center text-gray-400">Loading financial records...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Support Tab -->
+      <div id="content-support" class="tab-content hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div class="lg:col-span-1 space-y-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm">
+              <h3 class="font-bold text-sm mb-4">Ticket Status</h3>
+              <div class="space-y-2">
+                <div class="flex justify-between text-xs"><span class="text-gray-500">Open Tickets</span><span class="font-bold text-red-600">12</span></div>
+                <div class="flex justify-between text-xs"><span class="text-gray-500">In Progress</span><span class="font-bold text-amber-600">5</span></div>
+                <div class="flex justify-between text-xs"><span class="text-gray-500">Resolved Today</span><span class="font-bold text-green-600">28</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-3 bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-outline-variant">
+              <h2 class="font-headline font-bold text-lg">Active Support Tickets</h2>
+            </div>
+            <div id="supportTickets" class="divide-y divide-gray-100">
+              <div class="p-8 text-center text-gray-400">No active support tickets</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit Tab -->
+      <div id="content-audit" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div class="p-6 border-b border-outline-variant">
+            <h2 class="font-headline font-bold text-lg">System Audit Logs</h2>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead class="bg-gray-50 text-[10px] uppercase font-bold text-gray-500">
+                <tr><th class="px-6 py-4">Timestamp</th><th class="px-6 py-4">User</th><th class="px-6 py-4">Action</th><th class="px-6 py-4">IP Address</th></tr>
+              </thead>
+              <tbody id="auditLogs" class="divide-y divide-gray-100 text-sm">
+                <tr class="hover:bg-gray-50">
+                  <td class="px-6 py-4 text-gray-500">2026-10-17 22:45:10</td>
+                  <td class="px-6 py-4 font-bold">Admin_Dave</td>
+                  <td class="px-6 py-4"><span class="text-primary font-medium">Update Settings:</span> Commission Rate 10% -> 12%</td>
+                  <td class="px-6 py-4 text-gray-400">192.168.1.45</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+        <div class="max-w-2xl bg-white rounded-xl shadow-sm p-8">
+          <h2 class="font-headline font-bold text-lg mb-8">System Configuration</h2>
+          <form id="settingsForm" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Base Delivery Fee (TSh)</label>
+                <input type="number" name="baseDeliveryFee" value="3000" class="w-full p-2 border rounded-lg focus:ring-primary focus:border-primary">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Platform Commission (%)</label>
+                <input type="number" name="commissionRate" value="10" class="w-full p-2 border rounded-lg focus:ring-primary focus:border-primary">
+              </div>
+            </div>
+            <div class="border-t pt-6">
+              <h3 class="text-sm font-semibold mb-4">Notification Settings</h3>
+              <div class="space-y-3">
+                <label class="flex items-center gap-3">
+                  <input type="checkbox" checked class="rounded text-primary">
+                  <span class="text-sm">Email notifications for new seller registrations</span>
+                </label>
+                <label class="flex items-center gap-3">
+                  <input type="checkbox" checked class="rounded text-primary">
+                  <span class="text-sm">SMS alerts for high-value orders (> 100k TSh)</span>
+                </label>
+              </div>
+            </div>
+            <div class="border-t pt-6 flex justify-end gap-4">
+              <button type="button" class="px-6 py-2 border rounded-lg text-sm font-medium">Reset Defaults</button>
+              <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Analytics Tab -->
+      <div id="content-analytics" class="tab-content hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold mb-4">Daily Orders (Last 7 Days)</h3>
+            <canvas id="dailyOrdersChart" height="200"></canvas>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold mb-4">Revenue by Category</h3>
+            <canvas id="categoryRevenueChart" height="200"></canvas>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold mb-4">Top Sellers</h3>
+            <div id="topSellersList" class="space-y-3"></div>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold mb-4">Top Products</h3>
+            <div id="topProductsList" class="space-y-3"></div>
+          </div>
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold mb-4">User Growth</h3>
+            <canvas id="userGrowthChart" height="150"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Actions Modal -->
+  <div id="orderModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl p-6 max-w-md w-full">
+      <h3 class="font-bold text-lg mb-4">Update Order #<span id="modalOrderId"></span></h3>
+      <div class="space-y-3 mb-6">
+        <button onclick="updateOrderStatus('confirmed')" class="w-full py-3 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 font-medium">Confirmed</button>
+        <button onclick="updateOrderStatus('preparing')" class="w-full py-3 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 font-medium">Preparing</button>
+        <button onclick="updateOrderStatus('ready_for_delivery')" class="w-full py-3 bg-primary-fixed text-on-primary-fixed rounded-lg hover:bg-primary-fixed-dim font-medium">Ready for Delivery</button>
+        <button onclick="updateOrderStatus('dispatched')" class="w-full py-3 bg-indigo-100 text-indigo-800 rounded-lg hover:bg-indigo-200 font-medium">Dispatched</button>
+        <button onclick="updateOrderStatus('delivered')" class="w-full py-3 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 font-medium">Delivered</button>
+        <button onclick="updateOrderStatus('cancelled')" class="w-full py-3 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 font-medium">Cancelled</button>
+      </div>
+      <button onclick="closeModal()" class="w-full py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Cancel</button>
+    </div>
+  </div>
+
+  </main>
+
+  <script src="config/mapbox-config.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      SmartNav.init({ activePage: 'dashboard', role: 'admin' });
+    });
+    // db is already defined in firebase-config.js
+    let charts = {};
+
+    // XSS sanitization helper
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    // Verify db is available
+    if (typeof db === 'undefined') {
+      console.error('Firebase db not initialized');
+    }
+
+    const statusColors = {
+      'pending': 'bg-yellow-100 text-yellow-800',
+      'confirmed': 'bg-blue-100 text-blue-800',
+      'preparing': 'bg-purple-100 text-purple-800',
+      'ready_for_delivery': 'bg-primary-fixed text-on-primary-fixed',
+      'dispatched': 'bg-indigo-100 text-indigo-800',
+      'delivered': 'bg-green-100 text-green-800',
+      'cancelled': 'bg-red-100 text-red-800'
+    };
+
+    // Helper function to format dates safely
+    function formatDate(timestamp) {
+      if (!timestamp) return 'N/A';
+
+      try {
+        // Handle Firebase Timestamp objects
+        if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+          return timestamp.toDate().toLocaleDateString();
+        }
+
+        // Handle Firestore Timestamp with seconds
+        if (timestamp.seconds) {
+          return new Date(timestamp.seconds * 1000).toLocaleDateString();
+        }
+
+        // Handle ISO string or regular date string
+        if (typeof timestamp === 'string') {
+          return new Date(timestamp).toLocaleDateString();
+        }
+
+        // Handle Date objects
+        if (timestamp instanceof Date) {
+          return timestamp.toLocaleDateString();
+        }
+
+        // Handle numeric timestamps
+        if (typeof timestamp === 'number') {
+          return new Date(timestamp).toLocaleDateString();
+        }
+
+        return 'N/A';
+      } catch (error) {
+        console.warn('Error formatting date:', error);
+        return 'N/A';
+      }
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      document.getElementById('content-' + tab).classList.remove('hidden');
+      document.querySelectorAll('[id^="tab-"]').forEach(t => { t.classList.remove('tab-active', 'text-primary'); t.classList.add('text-gray-600'); });
+      const activeTab = document.getElementById('tab-' + tab);
+      activeTab.classList.add('tab-active', 'text-primary');
+      activeTab.classList.remove('text-gray-600');
+      
+      // Load tab-specific data
+      if (tab === 'verification') loadVerification();
+      if (tab === 'finance') loadFinance();
+      if (tab === 'support') loadSupport();
+      if (tab === 'audit') loadAudit();
+    }
+
+    function openOrderModal(orderId) {
+      document.getElementById('modalOrderId').textContent = orderId.substring(0, 8);
+      document.getElementById('orderModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('orderModal').classList.add('hidden');
+    }
+
+    async function updateOrderStatus(status) {
+      if (!db || !document.getElementById('modalOrderId').textContent) return;
+      try {
+        const orderId = document.getElementById('modalOrderId').textContent;
+        await db.collection('orders').doc(orderId).update({ status: status, updatedAt: new Date() });
+        closeModal();
+        alert('Order status updated to ' + status);
+        refreshAll();
+      } catch (error) { console.error('Error:', error); alert('Failed to update order'); }
+    }
+
+    async function loadOverview() {
+      if (!db) return;
+      try {
+        const ordersSnap = await db.collection('orders').get();
+        // Use restaurants collection (sellers collection only has references)
+        const sellersSnap = await db.collection('restaurants').where('isOpen', '==', true).get();
+        const usersSnap = await db.collection('users').get();
+        
+        document.getElementById('totalOrders').textContent = ordersSnap.size;
+        document.getElementById('totalSellers').textContent = sellersSnap.size;
+        document.getElementById('totalUsers').textContent = usersSnap.size;
+        
+        let totalRevenue = 0;
+        ordersSnap.forEach(doc => { totalRevenue += doc.data().total || 0; });
+        document.getElementById('totalRevenue').textContent = 'TSh ' + totalRevenue.toLocaleString();
+        
+        const recentOrders = await db.collection('orders').orderBy('createdAt', 'desc').limit(5).get();
+        if (recentOrders.empty) {
+          document.getElementById('ordersTable').innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">No orders found</td></tr>';
+        } else {
+          document.getElementById('ordersTable').innerHTML = recentOrders.docs.map(doc => {
+            const order = doc.data();
+            const statusClass = statusColors[order.status] || 'bg-gray-100 text-gray-800';
+            return `
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium">#${doc.id.substring(0, 8)}</td>
+                <td class="px-6 py-4">${order.customerName || order.customerPhone || 'N/A'}</td>
+                <td class="px-6 py-4 font-semibold">TSh ${(order.total || 0).toLocaleString()}</td>
+                <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusClass}">${order.status || 'pending'}</span></td>
+                <td class="px-6 py-4"><button onclick="openOrderModal('${doc.id}')" class="text-primary hover:underline text-sm">Edit</button></td>
+              </tr>
+            `;
+          }).join('');
+        }
+        updateCharts(ordersSnap, sellersSnap, usersSnap);
+      } catch (error) { console.error('Error:', error); }
+    }
+
+    function updateCharts(ordersSnap, sellersSnap, usersSnap) {
+      // Revenue by Day calculation
+      const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const revenueData = new Array(7).fill(0);
+      const ordersPerDay = new Array(7).fill(0);
+      
+      ordersSnap.forEach(doc => {
+        const order = doc.data();
+        const date = order.createdAt ? new Date(order.createdAt) : new Date();
+        const day = date.getDay();
+        revenueData[day] += (order.total || 0);
+        ordersPerDay[day]++;
+      });
+
+      // Shift data so it ends on today
+      const today = new Date().getDay();
+      const sortedLabels = [];
+      const sortedRevenue = [];
+      const sortedOrders = [];
+      
+      for (let i = 6; i >= 0; i--) {
+        const d = (today - i + 7) % 7;
+        sortedLabels.push(dayLabels[d]);
+        sortedRevenue.push(revenueData[d]);
+        sortedOrders.push(ordersPerDay[d]);
+      }
+
+      // Revenue Chart
+      if (charts.revenue) charts.revenue.destroy();
+      const revenueCtx = document.getElementById('revenueChart');
+      if (revenueCtx) {
+        charts.revenue = new Chart(revenueCtx, {
+          type: 'line',
+          data: { 
+            labels: sortedLabels, 
+            datasets: [{ 
+              label: 'Revenue', 
+              data: sortedRevenue, 
+              borderColor: '#012d1d', 
+              backgroundColor: 'rgba(1, 45, 29, 0.1)', 
+              fill: true,
+              tension: 0.4
+            }] 
+          },
+          options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
+      }
+
+      // Orders by Status
+      if (charts.orders) charts.orders.destroy();
+      const ordersCtx = document.getElementById('ordersChart');
+      if (ordersCtx) {
+        const statusCounts = { pending: 0, confirmed: 0, preparing: 0, delivered: 0, cancelled: 0 };
+        ordersSnap.forEach(doc => { 
+          const status = (doc.data().status || 'pending').toLowerCase();
+          if (statusCounts.hasOwnProperty(status)) statusCounts[status]++;
+        });
+        charts.orders = new Chart(ordersCtx, {
+          type: 'doughnut',
+          data: { 
+            labels: Object.keys(statusCounts).map(s => s.charAt(0).toUpperCase() + s.slice(1)), 
+            datasets: [{ 
+              data: Object.values(statusCounts), 
+              backgroundColor: ['#f59e0b', '#3b82f6', '#8b5cf6', '#22c55e', '#dc2626'] 
+            }] 
+          },
+          options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+      }
+
+      // Update Analytics tab charts too if they are present
+      updateAnalyticsCharts(ordersSnap, sellersSnap, usersSnap, sortedLabels, sortedOrders);
+    }
+
+    function updateAnalyticsCharts(ordersSnap, sellersSnap, usersSnap, sortedLabels, sortedOrders) {
+      // Daily Orders Chart (Bar)
+      if (charts.dailyOrders) charts.dailyOrders.destroy();
+      const dailyCtx = document.getElementById('dailyOrdersChart');
+      if (dailyCtx) {
+        charts.dailyOrders = new Chart(dailyCtx, {
+          type: 'bar',
+          data: { 
+            labels: sortedLabels, 
+            datasets: [{ 
+              label: 'Orders', 
+              data: sortedOrders, 
+              backgroundColor: '#012d1d',
+              borderRadius: 6
+            }] 
+          },
+          options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+        });
+      }
+
+      // Category Performance
+      const categoryCounts = {};
+      ordersSnap.forEach(doc => {
+        const order = doc.data();
+        if (order.items) {
+          order.items.forEach(item => {
+            const cat = item.category || 'General';
+            categoryCounts[cat] = (categoryCounts[cat] || 0) + (item.price * item.quantity);
+          });
+        }
+      });
+
+      // User Growth Chart
+      const userGrowth = new Array(6).fill(0);
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const currentMonth = new Date().getMonth();
+      const monthLabels = [];
+      
+      for (let i = 5; i >= 0; i--) {
+        monthLabels.push(months[(currentMonth - i + 12) % 12]);
+      }
+
+      usersSnap.forEach(doc => {
+        const user = doc.data();
+        const date = user.createdAt ? new Date(user.createdAt) : new Date();
+        const m = date.getMonth();
+        const diff = (currentMonth - m + 12) % 12;
+        if (diff < 6) userGrowth[5 - diff]++;
+      });
+
+      if (charts.userGrowth) charts.userGrowth.destroy();
+      const userCtx = document.getElementById('userGrowthChart');
+      if (userCtx) {
+        charts.userGrowth = new Chart(userCtx, {
+          type: 'line',
+          data: { labels: monthLabels, datasets: [{ label: 'Users', data: userGrowth, borderColor: '#8b5cf6', fill: false, tension: 0.3 }] },
+          options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+        });
+      }
+    }
+
+    async function loadOrders() {
+      if (!db) return;
+      try {
+        const ordersSnap = await db.collection('orders').orderBy('createdAt', 'desc').limit(50).get();
+        if (ordersSnap.empty) {
+          document.getElementById('allOrdersTable').innerHTML = '<tr><td colspan="8" class="px-6 py-8 text-center text-gray-500">No orders found</td></tr>';
+        } else {
+          document.getElementById('allOrdersTable').innerHTML = ordersSnap.docs.map(doc => {
+            const order = doc.data();
+            const statusClass = statusColors[order.status] || 'bg-gray-100 text-gray-800';
+            return `
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium">#${doc.id.substring(0, 8)}</td>
+                <td class="px-6 py-4">${order.customerName || order.customerPhone || 'N/A'}</td>
+                <td class="px-6 py-4">${order.sellerName || 'N/A'}</td>
+                <td class="px-6 py-4">${order.items ? order.items.length : 0}</td>
+                <td class="px-6 py-4 font-semibold">TSh ${(order.total || 0).toLocaleString()}</td>
+                <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusClass}">${order.status || 'pending'}</span></td>
+                <td class="px-6 py-4 text-gray-600 text-sm">${order.createdAt ? order.createdAt.toDate().toLocaleDateString() : 'N/A'}</td>
+                <td class="px-6 py-4"><button onclick="openOrderModal('${doc.id}')" class="text-primary hover:underline text-sm">Edit</button></td>
+              </tr>
+            `;
+          }).join('');
+        }
+      } catch (error) { console.error('Error:', error); }
+    }
+
+    async function loadSellers() {
+      if (!db) return;
+      try {
+        // Load from restaurants collection
+        const sellersSnap = await db.collection('restaurants').get();
+        if (sellersSnap.empty) {
+          document.getElementById('sellersTable').innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">No sellers found</td></tr>';
+        } else {
+          document.getElementById('sellersTable').innerHTML = sellersSnap.docs.map(doc => {
+            const seller = doc.data();
+            const isOpen = seller.isOpen !== false;
+            return `
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium">${seller.name || 'N/A'}</td>
+                <td class="px-6 py-4 text-gray-600 capitalize">${seller.category || 'N/A'}</td>
+                <td class="px-6 py-4 text-gray-600">${seller.address || 'N/A'}</td>
+                <td class="px-6 py-4">${seller.rating ? '⭐ ' + seller.rating : '-'}</td>
+                <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${isOpen ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${isOpen ? 'Open' : 'Closed'}</span></td>
+                <td class="px-6 py-4"><button onclick="viewSeller('${doc.id}')" class="text-primary hover:underline text-sm">View</button></td>
+              </tr>
+            `;
+          }).join('');
+        }
+      } catch (error) { 
+        console.error('Error loading sellers:', error);
+        document.getElementById('sellersTable').innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-500">Error: ${error.message}</td></tr>`;
+      }
+    }
+    
+    function viewSeller(id) {
+      alert('View seller: ' + id);
+    }
+
+    // User Role Management Variables
+    let currentEditingUserId = null;
+    let selectedRoleValue = null;
+    let allUsersData = []; // Store all users for filtering
+
+    // Role configuration with labels, colors, and icons
+    const ROLE_CONFIG = {
+      customer: { label: 'Customer', color: 'bg-blue-100 text-blue-700', icon: 'shopping_cart' },
+      seller: { label: 'Seller', color: 'bg-green-100 text-green-700', icon: 'store' },
+      driver: { label: 'Driver', color: 'bg-orange-100 text-orange-700', icon: 'local_shipping' },
+      admin: { label: 'Admin', color: 'bg-purple-100 text-purple-700', icon: 'admin_panel_settings' }
+    };
+
+    async function loadUsers() {
+      if (!db) {
+        document.getElementById('usersTable').innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-red-500">Firebase not initialized. Please check your connection.</td></tr>';
+        return;
+      }
+      try {
+        // Aggregate users from different collections (no single 'users' collection exists)
+        const [customersSnap, driversSnap] = await Promise.all([
+          db.collection('customers').get(),
+          db.collection('drivers').get()
+        ]);
+        
+        const customers = customersSnap.docs.map(doc => ({ 
+          id: doc.id, 
+          ...doc.data(), 
+          role: 'customer',
+          userType: 'Customer',
+          _collection: 'customers'
+        }));
+        
+        const drivers = driversSnap.docs.map(doc => ({ 
+          id: doc.id, 
+          ...doc.data(), 
+          role: 'driver',
+          userType: 'Driver',
+          _collection: 'drivers'
+        }));
+        
+        allUsersData = [...customers, ...drivers];
+        
+        if (allUsersData.length === 0) {
+          document.getElementById('usersTable').innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">No users found</td></tr>';
+        } else {
+          renderUsersTable(allUsersData);
+        }
+      } catch (error) {
+        console.error('Error loading users:', error);
+        document.getElementById('usersTable').innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-500">Error loading users: ${error.message}</td></tr>`;
+      }
+    }
+
+    function renderUsersTable(users) {
+      const filterValue = document.getElementById('userRoleFilter')?.value || 'all';
+      let filteredUsers = users;
+
+      if (filterValue !== 'all') {
+        filteredUsers = users.filter(user => (user.role || 'customer') === filterValue);
+      }
+
+      if (filteredUsers.length === 0) {
+        document.getElementById('usersTable').innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">No users found with role "${filterValue}"</td></tr>`;
+        return;
+      }
+
+      document.getElementById('usersTable').innerHTML = filteredUsers.map(user => {
+        const role = user.role || 'customer';
+        const roleConfig = ROLE_CONFIG[role] || ROLE_CONFIG.customer;
+        const isActive = user.status !== 'suspended';
+        const safeName = escapeHtml(user.name);
+        const safeEmail = escapeHtml(user.email);
+
+        return `
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
+                  ${(safeName || safeEmail || 'U').charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p class="font-medium text-gray-900">${safeName || 'No Name'}</p>
+                  ${user.loyaltyPoints ? `<p class="text-xs text-gray-500">⭐ ${user.loyaltyPoints} points</p>` : ''}
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="text-sm">
+                <p class="text-gray-900">${user.phone || 'No phone'}</p>
+                <p class="text-gray-500 text-xs">${user.email || 'No email'}</p>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${roleConfig.color}">
+                <span class="material-symbols-outlined text-sm">${roleConfig.icon}</span>
+                ${roleConfig.label}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                <span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-red-500'}"></span>
+                ${isActive ? 'Active' : 'Suspended'}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-gray-600 text-sm">
+              ${formatDate(user.createdAt)}
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-2">
+                <button onclick="openUserRoleModal('${user.id}', '${user.name || ''}', '${user.email || ''}', '${role}')" class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="Edit Role">
+                  <span class="material-symbols-outlined text-sm">edit</span>
+                </button>
+                <button onclick="toggleUserStatus('${user.id}', ${!isActive})" class="p-2 ${isActive ? 'text-red-600 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'} rounded-lg transition-colors" title="${isActive ? 'Suspend' : 'Activate'}">
+                  <span class="material-symbols-outlined text-sm">${isActive ? 'block' : 'check_circle'}</span>
+                </button>
+                <button onclick="confirmDeleteUser('${user.id}', '${user.name || user.email || 'this user'}')" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete User">
+                  <span class="material-symbols-outlined text-sm">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterUsersByRole() {
+      renderUsersTable(allUsersData);
+    }
+
+    function openUserRoleModal(userId, name, email, currentRole) {
+      currentEditingUserId = userId;
+      selectedRoleValue = currentRole;
+
+      document.getElementById('modalUserName').textContent = name || 'Unnamed User';
+      document.getElementById('modalUserEmail').textContent = email || 'No email';
+
+      // Update avatar with initial
+      const initial = (name || email || 'U').charAt(0).toUpperCase();
+      document.getElementById('modalUserAvatar').innerHTML = `<span class="text-lg font-bold">${initial}</span>`;
+
+      // Update selected role visual state
+      document.querySelectorAll('.role-option').forEach(btn => {
+        btn.classList.remove('border-primary', 'bg-primary/10');
+        btn.classList.add('border-gray-200');
+      });
+      document.getElementById(`role-${currentRole}`)?.classList.add('border-primary', 'bg-primary/10');
+      document.getElementById(`role-${currentRole}`)?.classList.remove('border-gray-200');
+
+      document.getElementById('userRoleModal').classList.remove('hidden');
+      document.getElementById('userRoleModal').classList.add('flex');
+    }
+
+    function closeUserRoleModal() {
+      document.getElementById('userRoleModal').classList.add('hidden');
+      document.getElementById('userRoleModal').classList.remove('flex');
+      currentEditingUserId = null;
+      selectedRoleValue = null;
+    }
+
+    function selectRole(role) {
+      selectedRoleValue = role;
+
+      // Update visual selection
+      document.querySelectorAll('.role-option').forEach(btn => {
+        btn.classList.remove('border-primary', 'bg-primary/10');
+        btn.classList.add('border-gray-200');
+      });
+      document.getElementById(`role-${role}`).classList.add('border-primary', 'bg-primary/10');
+      document.getElementById(`role-${role}`).classList.remove('border-gray-200');
+    }
+
+    async function saveUserRole() {
+      if (!currentEditingUserId || !selectedRoleValue) return;
+
+      if (!db) {
+        showNotification('Firebase not available. Cannot save changes.', 'error');
+        return;
+      }
+
+      try {
+        // Find user in allUsersData to get their collection
+        const user = allUsersData.find(u => u.id === currentEditingUserId);
+        if (!user) {
+          showNotification('User not found', 'error');
+          return;
+        }
+        
+        // Moving between collections is complex - for now just update metadata
+        const collectionName = user._collection || 'customers';
+        await db.collection(collectionName).doc(currentEditingUserId).update({
+          role: selectedRoleValue,
+          roleUpdatedAt: new Date().toISOString(),
+          roleUpdatedBy: 'admin'
+        });
+
+        showNotification(`User role updated to ${ROLE_CONFIG[selectedRoleValue].label}`, 'success');
+        closeUserRoleModal();
+        loadUsers();
+      } catch (error) {
+        console.error('Error updating user role:', error);
+        showNotification('Failed to update user role: ' + error.message, 'error');
+      }
+    }
+
+    async function toggleUserStatus(userId, activate) {
+      if (!db) {
+        showNotification('Firebase not available. Cannot save changes.', 'error');
+        return;
+      }
+
+      try {
+        // Find user to get their collection
+        const user = allUsersData.find(u => u.id === userId);
+        if (!user) {
+          showNotification('User not found', 'error');
+          return;
+        }
+        
+        const collectionName = user._collection || 'customers';
+        await db.collection(collectionName).doc(userId).update({
+          status: activate ? 'active' : 'suspended',
+          statusUpdatedAt: new Date().toISOString()
+        });
+
+        showNotification(`User ${activate ? 'activated' : 'suspended'} successfully`, 'success');
+        loadUsers();
+      } catch (error) {
+        console.error('Error updating user status:', error);
+        showNotification('Failed to update user status: ' + error.message, 'error');
+      }
+    }
+
+    // User Delete Variables and Functions
+    let userToDeleteId = null;
+
+    function confirmDeleteUser(userId, userName) {
+      userToDeleteId = userId;
+      document.getElementById('deleteUserName').textContent = userName || 'this user';
+      document.getElementById('deleteUserModal').classList.remove('hidden');
+      document.getElementById('deleteUserModal').classList.add('flex');
+    }
+
+    function closeDeleteUserModal() {
+      document.getElementById('deleteUserModal').classList.add('hidden');
+      document.getElementById('deleteUserModal').classList.remove('flex');
+      userToDeleteId = null;
+    }
+
+    async function deleteUser() {
+      if (!userToDeleteId) return;
+
+      if (!db) {
+        showNotification('Firebase not available. Cannot delete user.', 'error');
+        return;
+      }
+
+      try {
+        // Find user to get their collection
+        const user = allUsersData.find(u => u.id === userToDeleteId);
+        if (!user) {
+          showNotification('User not found', 'error');
+          return;
+        }
+        
+        const collectionName = user._collection || 'customers';
+        await db.collection(collectionName).doc(userToDeleteId).delete();
+
+        showNotification('User deleted successfully', 'success');
+        closeDeleteUserModal();
+        loadUsers();
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        showNotification('Failed to delete user: ' + error.message, 'error');
+      }
+    }
+
+    function showNotification(message, type = 'info') {
+      const colors = {
+        success: 'bg-green-600',
+        error: 'bg-red-600',
+        info: 'bg-primary'
+      };
+
+      const notification = document.createElement('div');
+      notification.className = `fixed bottom-6 right-6 ${colors[type]} text-white px-6 py-3 rounded-xl shadow-lg z-50 flex items-center gap-2 animate-slide-up`;
+      notification.innerHTML = `
+        <span class="material-symbols-outlined text-sm">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}</span>
+        <span class="font-medium">${message}</span>
+      `;
+
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 3000);
+    }
+
+    function loadAnalytics() {
+      // This is now called via updateAnalyticsCharts within loadOverview for real data
+      console.log('Analytics loaded from Firestore');
+    }
+
+    async function exportData(type) {
+      let data = [], filename = 'smartsoko_';
+      
+      try {
+        if (type === 'orders' || type === 'all') {
+          const snap = await db.collection('orders').get();
+          data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          downloadCSV(data, filename + 'orders.csv');
+        }
+        if (type === 'sellers' || type === 'all') {
+          const snap = await db.collection('restaurants').get();
+          data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          downloadCSV(data, filename + 'restaurants.csv');
+        }
+        if (type === 'users' || type === 'all') {
+          // Aggregate from customers and drivers
+          const [customersSnap, driversSnap] = await Promise.all([
+            db.collection('customers').get(),
+            db.collection('drivers').get()
+          ]);
+          const customers = customersSnap.docs.map(d => ({ id: d.id, ...d.data(), role: 'customer' }));
+          const drivers = driversSnap.docs.map(d => ({ id: d.id, ...d.data(), role: 'driver' }));
+          data = [...customers, ...drivers];
+          downloadCSV(data, filename + 'users.csv');
+        }
+      } catch (error) {
+        console.error('Export error:', error);
+        showNotification('Export failed: ' + error.message, 'error');
+      }
+    }
+
+    function downloadCSV(data, filename) {
+      if (!data.length) return;
+      const headers = Object.keys(data[0]);
+      const csv = [headers.join(','), ...data.map(row => headers.map(h => JSON.stringify(row[h] || '')).join(','))].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function filterOrders() {
+      console.log('Filter by:', document.getElementById('orderStatusFilter').value);
+    }
+
+    function refreshAll() {
+      loadOverview();
+      loadOrders();
+      loadSellers();
+      loadUsers();
+    }
+
+    async function loadMarketing() {
+      if (!db) return;
+      try {
+        // Load coupons with error handling
+        let couponsSnap;
+        try {
+          couponsSnap = await db.collection('coupons').get();
+        } catch (e) {
+          console.warn('Coupons collection not accessible:', e.message);
+          couponsSnap = { empty: true, docs: [] };
+        }
+        
+        const couponsTable = document.getElementById('couponsTable');
+        if (couponsSnap.empty) {
+          couponsTable.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">No coupons active</td></tr>';
+        } else {
+          couponsTable.innerHTML = couponsSnap.docs.map(doc => {
+            const coupon = doc.data();
+            const isActive = !coupon.expiresAt || new Date(coupon.expiresAt) > new Date();
+            return `
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 font-bold text-primary">${coupon.code || 'N/A'}</td>
+                <td class="px-6 py-4">${coupon.type === 'percent' ? coupon.value + '%' : 'TSh ' + (coupon.value || 0).toLocaleString()} Off</td>
+                <td class="px-6 py-4"><span class="px-2 py-1 ${isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'} rounded-full text-xs">${isActive ? 'Active' : 'Expired'}</span></td>
+                <td class="px-6 py-4"><button onclick="deleteCoupon('${doc.id}')" class="text-gray-400 hover:text-red-600"><span class="material-symbols-outlined text-sm">delete</span></button></td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+        // Load banners with error handling
+        let bannersSnap;
+        try {
+          bannersSnap = await db.collection('banners').get();
+        } catch (e) {
+          console.warn('Banners collection not accessible:', e.message);
+          bannersSnap = { empty: true, docs: [] };
+        }
+        
+        const bannersList = document.getElementById('bannersList');
+        if (bannersSnap.empty) {
+          bannersList.innerHTML = '<div class="p-8 text-center text-gray-400 border border-dashed rounded-xl">No active banners</div>';
+        } else {
+          bannersList.innerHTML = bannersSnap.docs.map(doc => {
+            const banner = doc.data();
+            return `
+              <div class="flex items-center gap-4 p-4 border rounded-xl">
+                <div class="w-20 h-12 bg-gray-100 rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-gray-400">image</span></div>
+                <div class="flex-grow">
+                  <p class="text-sm font-bold">${banner.title || 'Untitled'}</p>
+                  <p class="text-xs text-gray-500">${banner.status || 'Active'}</p>
+                </div>
+                <button onclick="deleteBanner('${doc.id}')" class="text-red-600 hover:underline text-xs">Delete</button>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (error) { 
+        console.error('Error loading marketing:', error);
+        document.getElementById('couponsTable').innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-red-500">Error: ${error.message}</td></tr>`;
+      }
+    }
+
+    async function openCouponModal() {
+      if (!db) {
+        alert('Firebase not initialized');
+        return;
+      }
+      const code = prompt('Enter coupon code:');
+      if (!code) return;
+      const value = prompt('Enter discount value (number only):');
+      if (!value) return;
+      const type = confirm('Is this a percentage discount? (OK = %, Cancel = Fixed Amount)') ? 'percent' : 'fixed';
+      
+      try {
+        await db.collection('coupons').add({
+          code: code.toUpperCase(),
+          value: parseInt(value),
+          type: type,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showNotification('Coupon created!', 'success');
+        loadMarketing();
+      } catch (error) {
+        console.error('Error creating coupon:', error);
+        alert('Failed to create coupon: ' + error.message);
+      }
+    }
+
+    async function deleteCoupon(id) {
+      if (!db) return;
+      if (confirm('Delete this coupon?')) {
+        try {
+          await db.collection('coupons').doc(id).delete();
+          showNotification('Coupon deleted', 'success');
+          loadMarketing();
+        } catch (error) {
+          console.error('Error deleting coupon:', error);
+          alert('Failed to delete coupon: ' + error.message);
+        }
+      }
+    }
+
+    async function deleteBanner(id) {
+      if (!db) return;
+      if (confirm('Delete this banner?')) {
+        try {
+          await db.collection('banners').doc(id).delete();
+          showNotification('Banner deleted', 'success');
+          loadMarketing();
+        } catch (error) {
+          console.error('Error deleting banner:', error);
+          alert('Failed to delete banner: ' + error.message);
+        }
+      }
+    }
+
+    let logisticsMap = null;
+    async function loadLogistics() {
+      if (!db) return;
+      try {
+        const driversSnap = await db.collection('drivers').get();
+        const driversList = document.getElementById('driversList');
+        
+        // Initialize Map if not already done
+        if (!logisticsMap && document.getElementById('logisticsMap')) {
+          initLogisticsMap();
+        }
+
+        if (driversSnap.empty) {
+          driversList.innerHTML = '<div class="p-8 text-center text-gray-400">No drivers registered</div>';
+        } else {
+          driversList.innerHTML = driversSnap.docs.map(doc => {
+            const driver = doc.data();
+            const initials = (driver.name || 'D').split(' ').map(n => n[0]).join('').toUpperCase();
+            const status = driver.status || 'AVAILABLE';
+            const statusColor = status === 'ON TRIP' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700';
+            
+            // Add markers for drivers with coordinates
+            if (driver.location && logisticsMap) {
+              const el = document.createElement('div');
+              el.className = 'driver-marker';
+              el.style.backgroundColor = status === 'ON TRIP' ? '#10b981' : '#012d1d';
+              el.style.width = '20px';
+              el.style.height = '20px';
+              el.style.borderRadius = '50%';
+              el.style.border = '2px solid white';
+              el.title = driver.name;
+
+              new mapboxgl.Marker(el)
+                .setLngLat([driver.location.lng, driver.location.lat])
+                .setPopup(new mapboxgl.Popup().setHTML(`<b>${driver.name}</b><br>${status}`))
+                .addTo(logisticsMap);
+            }
+
+            return `
+              <div class="p-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">${initials}</div>
+                  <div>
+                    <p class="text-sm font-bold">${driver.name || 'Anonymous Driver'}</p>
+                    <p class="text-xs text-gray-500">${driver.phone || 'N/A'} • ${driver.rating || 5.0}⭐</p>
+                  </div>
+                </div>
+                <span class="px-2 py-1 ${statusColor} rounded-full text-[10px] font-bold">${status}</span>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (error) { console.error('Error loading logistics:', error); }
+    }
+
+    function initLogisticsMap() {
+      if (typeof MAPBOX_CONFIG === 'undefined') return;
+      mapboxgl.accessToken = MAPBOX_CONFIG.accessToken;
+      logisticsMap = new mapboxgl.Map({
+        container: 'logisticsMap',
+        style: MAPBOX_CONFIG.style,
+        center: MAPBOX_CONFIG.defaultCenter,
+        zoom: MAPBOX_CONFIG.defaultZoom
+      });
+      logisticsMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      
+      // Add a resize trigger when switching tabs
+      window.addEventListener('resize', () => logisticsMap.resize());
+    }
+
+    function toggleMapFullscreen() {
+      const mapContainer = document.getElementById('logisticsMap').parentElement;
+      const icon = document.getElementById('fullscreen-icon');
+      
+      mapContainer.classList.toggle('map-fullscreen');
+      
+      if (mapContainer.classList.contains('map-fullscreen')) {
+        icon.textContent = 'fullscreen_exit';
+      } else {
+        icon.textContent = 'fullscreen';
+      }
+      
+      // Force Mapbox to resize to the new container dimensions
+      if (logisticsMap) {
+        setTimeout(() => {
+          logisticsMap.resize();
+        }, 300); // Wait for transition if any
+      }
+    }
+
+    async function logAudit(action) {
+      if (!db) return;
+      try {
+        const currentUser = firebase.auth().currentUser;
+        await db.collection('audit_logs').add({
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          user: currentUser ? currentUser.email || currentUser.uid : 'unknown',
+          action: action,
+          ip: '127.0.0.1'
+        });
+      } catch (e) { console.error('Audit log failed:', e); }
+    }
+
+    async function loadVerification() {
+      if (!db) return;
+      try {
+        const queue = document.getElementById('verificationQueue');
+        // Use restaurants collection instead of sellers
+        const snap = await db.collection('restaurants').where('status', '==', 'pending').get();
+        if (snap.empty) {
+          queue.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">No pending verifications</td></tr>';
+        } else {
+          queue.innerHTML = snap.docs.map(doc => {
+            const s = doc.data();
+            const safeName = escapeHtml(s.name);
+            const safeCategory = escapeHtml(s.category) || 'Restaurant';
+            return `
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4"><p class="font-bold text-sm">${safeName}</p><p class="text-xs text-gray-500">${safeCategory}</p></td>
+                <td class="px-6 py-4"><span class="px-2 py-1 bg-blue-50 text-blue-600 rounded text-[10px]">Pending Review</span></td>
+                <td class="px-6 py-4 text-sm text-gray-600">${s.createdAt ? formatDate(s.createdAt) : 'Recently'}</td>
+                <td class="px-6 py-4"><div class="flex gap-2">
+                  <button onclick="verifySeller('${doc.id}', true)" class="px-3 py-1 bg-green-600 text-white rounded-lg text-xs">Approve</button>
+                  <button onclick="verifySeller('${doc.id}', false)" class="px-3 py-1 bg-red-50 text-red-600 rounded-lg text-xs">Reject</button>
+                </div></td>
+              </tr>`;
+          }).join('');
+        }
+      } catch (error) {
+        console.error('Error loading verifications:', error);
+        document.getElementById('verificationQueue').innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-red-500">Error: ${error.message}</td></tr>`;
+      }
+    }
+
+    async function verifySeller(id, approved) {
+      if (!db) return;
+      try {
+        await db.collection('restaurants').doc(id).update({ 
+          status: approved ? 'approved' : 'rejected',
+          isActive: approved,
+          verifiedAt: new Date()
+        });
+        await logAudit(`${approved ? 'Approved' : 'Rejected'} seller ${id}`);
+        showNotification(`Seller ${approved ? 'approved' : 'rejected'} successfully`, 'success');
+        loadVerification();
+      } catch (e) { 
+        console.error('Error verifying seller:', e);
+        showNotification('Failed to verify seller: ' + e.message, 'error');
+      }
+    }
+
+    async function loadFinance() {
+      if (!db) return;
+      try {
+        const table = document.getElementById('financeTable');
+        const snap = await db.collection('orders').where('status', '==', 'delivered').get();
+        if (snap.empty) {
+          table.innerHTML = '<div class="p-8 text-center text-gray-400">No financial records found</div>';
+        } else {
+          table.innerHTML = `
+            <table class="w-full text-left">
+              <thead class="bg-gray-50 text-[10px] uppercase font-bold text-gray-500">
+                <tr><th class="px-6 py-4">Order</th><th class="px-6 py-4">Seller</th><th class="px-6 py-4">Amount</th><th class="px-6 py-4">Comm.</th><th class="px-6 py-4">Net Payout</th></tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 text-sm">
+                ${snap.docs.map(doc => {
+                  const o = doc.data();
+                  const comm = (o.total || 0) * 0.1;
+                  const safeSellerName = escapeHtml(o.restaurantName || o.sellerName) || 'Vendor';
+                  return `<tr><td class="px-6 py-4">#${doc.id.substring(0,6)}</td><td class="px-6 py-4">${safeSellerName}</td><td class="px-6 py-4">TSh ${(o.total || 0).toLocaleString()}</td><td class="px-6 py-4 text-red-600">-TSh ${comm.toLocaleString()}</td><td class="px-6 py-4 font-bold text-green-600">TSh ${((o.total || 0) - comm).toLocaleString()}</td></tr>`;
+                }).join('')}
+              </tbody>
+            </table>`;
+        }
+      } catch (error) {
+        console.error('Error loading finance:', error);
+        document.getElementById('financeTable').innerHTML = `<div class="p-8 text-center text-red-500">Error: ${error.message}</div>`;
+      }
+    }
+
+    async function loadSupport() {
+      if (!db) return;
+      try {
+        const list = document.getElementById('supportTickets');
+        // Collection may not exist - wrap in try-catch
+        const snap = await db.collection('support_tickets').orderBy('createdAt', 'desc').get();
+        if (snap.empty) {
+          list.innerHTML = '<div class="p-8 text-center text-gray-400">No active support tickets</div>';
+        } else {
+          list.innerHTML = snap.docs.map(doc => {
+            const t = doc.data();
+            const safeSubject = escapeHtml(t.subject) || 'No Subject';
+            const safeUserName = escapeHtml(t.userName) || 'Unknown';
+            const safeOrderId = escapeHtml(t.orderId) || 'N/A';
+            return `<div class="p-4 flex justify-between items-center"><div class="text-sm"><p class="font-bold">${safeSubject}</p><p class="text-xs text-gray-500">From: ${safeUserName} • Order #${safeOrderId}</p></div><span class="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] font-bold">${(t.status || 'open').toUpperCase()}</span></div>`;
+          }).join('');
+        }
+      } catch (error) {
+        console.error('Error loading support tickets:', error);
+        document.getElementById('supportTickets').innerHTML = `<div class="p-8 text-center text-red-500">Error loading tickets: ${error.message}</div>`;
+      }
+    }
+
+    async function loadAudit() {
+      if (!db) return;
+      try {
+        const body = document.getElementById('auditLogs');
+        // Collection may not exist - wrap in try-catch
+        const snap = await db.collection('audit_logs').orderBy('timestamp', 'desc').limit(50).get();
+        if (snap.empty) {
+          body.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">No audit logs found</td></tr>';
+        } else {
+          body.innerHTML = snap.docs.map(doc => {
+            const a = doc.data();
+            const d = a.timestamp ? a.timestamp.toDate().toLocaleString() : 'Just now';
+            const safeUser = escapeHtml(a.user) || 'Unknown';
+            const safeAction = escapeHtml(a.action) || 'Unknown';
+            const safeIp = escapeHtml(a.ip) || '-';
+            return `<tr class="hover:bg-gray-50"><td class="px-6 py-4 text-gray-500">${d}</td><td class="px-6 py-4 font-bold">${safeUser}</td><td class="px-6 py-4">${safeAction}</td><td class="px-6 py-4 text-gray-400">${safeIp}</td></tr>`;
+          }).join('');
+        }
+      } catch (error) {
+        console.error('Error loading audit logs:', error);
+        document.getElementById('auditLogs').innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-red-500">Error: ${error.message}</td></tr>`;
+      }
+    }
+
+    function changeDateRange(type, range) {
+      console.log('Change:', type, range);
+    }
+
+    async function loadSettings() {
+      if (!db) return;
+      try {
+        let doc;
+        try {
+          doc = await db.collection('settings').doc('platform').get();
+        } catch (e) {
+          console.warn('Settings collection not accessible:', e.message);
+          return; // Use default values in form
+        }
+        
+        if (doc && doc.exists) {
+          const data = doc.data();
+          const form = document.getElementById('settingsForm');
+          if (form) {
+            form.baseDeliveryFee.value = data.baseDeliveryFee || 3000;
+            form.commissionRate.value = data.commissionRate || 10;
+            // Set checkboxes
+            const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+            if (data.notifications && checkboxes.length >= 2) {
+              checkboxes[0].checked = data.notifications.emailRegistration !== false;
+              checkboxes[1].checked = data.notifications.smsHighValue !== false;
+            }
+          }
+        }
+      } catch (error) { 
+        console.error('Error loading settings:', error);
+      }
+    }
+
+    async function saveSettings(e) {
+      e.preventDefault();
+      if (!db) return;
+      const btn = e.target.querySelector('button[type="submit"]');
+      const originalText = btn.textContent;
+      btn.textContent = 'Saving...';
+      btn.disabled = true;
+
+      const form = e.target;
+      const settings = {
+        baseDeliveryFee: parseInt(form.baseDeliveryFee.value),
+        commissionRate: parseInt(form.commissionRate.value),
+        notifications: {
+          emailRegistration: form.querySelectorAll('input[type="checkbox"]')[0].checked,
+          smsHighValue: form.querySelectorAll('input[type="checkbox"]')[1].checked
+        },
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      try {
+        await db.collection('settings').doc('platform').set(settings);
+        await logAudit('Updated system settings');
+        showNotification('Settings saved successfully!', 'success');
+      } catch (error) {
+        console.error('Error saving settings:', error);
+        showNotification('Failed to save settings: ' + error.message, 'error');
+      } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadOverview();
+      loadOrders();
+      loadSellers();
+      loadUsers();
+      loadAnalytics();
+      loadSettings();
+      loadMarketing();
+      loadLogistics();
+      
+      document.getElementById('settingsForm').addEventListener('submit', saveSettings);
+    });
+  </script>
+</body>
+</html>

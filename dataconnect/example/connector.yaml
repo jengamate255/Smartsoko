@@ -1,0 +1,29 @@
+connectorId: example
+generate:
+  dartSdk:
+    - outputDir: ..\..\food_delivery_app\lib\dataconnect_generated
+      package: dataconnect_generated/generated.dart
+      clientCache: {}
+  javascriptSdk:
+    - outputDir: ..\..\Smartsoko\src\dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ..\..\Smartsoko
+      react: true
+      angular: false
+      clientCache: {}
+    - outputDir: ..\..\food_delivery_app\src\dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ..\..\food_delivery_app
+      react: false
+      angular: false
+      clientCache: {}
+    - outputDir: ..\..\food_delivery_app\mobile\src\dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ..\..\food_delivery_app\mobile
+      react: true
+      angular: false
+      clientCache: {}
+  adminNodeSdk:
+    - outputDir: ..\..\food_delivery_app\functions\src\dataconnect-admin-generated
+      package: "@dataconnect/admin-generated"
+      packageJsonDir: ..\..\food_delivery_app\functions

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SME Marketplace - Driver App</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .order-card { transition: all 0.3s ease; }
+    .order-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .status-badge { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .location-dot { width: 12px; height: 12px; background: #ff6600; border-radius: 50%; animation: blink 1s infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <!-- Header -->
+    <header class="bg-orange-600 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-motorcycle text-2xl"></i>
+                <h1 class="text-xl font-bold">Marketplace Driver</h1>
+                <div class="flex space-x-2 ml-4">
+                    <a href="main.html" class="bg-orange-700 text-white px-2 py-1 rounded text-xs hover:bg-orange-800 transition">
+                        <i class="fas fa-home"></i>
+                    </a>
+                    <a href="customer.html" class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700 transition">
+                        <i class="fas fa-user"></i>
+                    </a>
+                    <a href="merchant.html" class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700 transition">
+                        <i class="fas fa-store"></i>
+                    </a>
+                    <a href="index.html" class="bg-purple-600 text-white px-2 py-1 rounded text-xs hover:bg-purple-700 transition">
+                        <i class="fas fa-cog"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <div class="location-dot"></div>
+                    <span class="text-sm">Online</span>
+                </div>
+                <button onclick="toggleProfile()" class="bg-orange-700 px-3 py-1 rounded-lg text-sm hover:bg-orange-800">
+                    <i class="fas fa-user"></i> Profile
+                </button>
+            </div>
+        </div>
+    </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto p-4">
+    <!-- Driver Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white p-4 rounded-lg shadow">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-500 text-sm">Today's Earnings</p>
+            <p class="text-2xl font-bold text-green-600" id="todayEarnings">$0.00</p>
+          </div>
+          <i class="fas fa-dollar-sign text-green-500 text-2xl"></i>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-500 text-sm">Deliveries</p>
+            <p class="text-2xl font-bold text-blue-600" id="deliveryCount">0</p>
+          </div>
+          <i class="fas fa-box text-blue-500 text-2xl"></i>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-500 text-sm">Rating</p>
+            <p class="text-2xl font-bold text-yellow-600" id="driverRating">4.8</p>
+          </div>
+          <i class="fas fa-star text-yellow-500 text-2xl"></i>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-500 text-sm">Online Hours</p>
+            <p class="text-2xl font-bold text-purple-600" id="onlineHours">0h</p>
+          </div>
+          <i class="fas fa-clock text-purple-500 text-2xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Available Orders -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-gray-800">
+          <i class="fas fa-clipboard-list mr-2"></i>Available Orders
+        </h2>
+        <button onclick="refreshOrders()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+          <i class="fas fa-sync-alt mr-2"></i>Refresh
+        </button>
+      </div>
+      <div id="availableOrders" class="space-y-4">
+        <!-- Orders will be loaded here -->
+      </div>
+    </div>
+
+    <!-- Current Orders -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-4">
+        <i class="fas fa-motorcycle mr-2"></i>Current Deliveries
+      </h2>
+      <div id="currentOrders" class="space-y-4">
+        <!-- Current orders will be loaded here -->
+      </div>
+    </div>
+
+    <!-- Earnings History -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-4">
+        <i class="fas fa-chart-line mr-2"></i>Earnings History
+      </h2>
+      <div id="earningsHistory" class="space-y-3">
+        <!-- Earnings history will be loaded here -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Profile Modal -->
+  <div id="profileModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center h-full">
+      <div class="bg-white rounded-lg p-6 w-96 max-h-96 overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold">Driver Profile</h3>
+          <button onclick="toggleProfile()" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div id="profileContent">
+          <!-- Profile content will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Load TypeScript module
+    async function loadTypeScriptModule() {
+      try {
+        // Load the TypeScript file
+        const response = await fetch('./driver-earnings.ts');
+        const tsCode = await response.text();
+        
+        // Compile TypeScript to JavaScript (in a real scenario, you'd use a proper build tool)
+        const jsCode = ts.transpile(tsCode, {
+          target: ts.ScriptTarget.ES2020,
+          module: ts.ModuleKind.ESNext
+        });
+        
+        // Execute the compiled code
+        eval(jsCode);
+        
+        // Initialize the earnings manager
+        if (typeof window !== 'undefined') {
+          console.log('TypeScript module loaded successfully');
+        }
+      } catch (error) {
+        console.error('Error loading TypeScript module:', error);
+      }
+    }
+
+    // Supabase configuration
+    const { createClient } = window.supabase;
+    const supabase = createClient(
+      'https://vonkqyiczeqhuqhahsxm.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvbmtxeWljemVxaHVxaGFoc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjIzNDksImV4cCI6MjA5MDM5ODM0OX0.UKAT3re6P_oAB3E1svwCFdqTQWZL6yulJ1ZX4nAgJJ8'
+    );
+
+    let currentDriver = null;
+    let authToken = null;
+    let locationUpdateInterval = null;
+    let earningsManager = null;
+
+    // Initialize app
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadTypeScriptModule();
+      checkAuth();
+      startLocationTracking();
+      setupRealtimeSubscriptions();
+    });
+
+    // Check authentication
+    async function checkAuth() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        authToken = session.access_token;
+        await loadDriverProfile();
+        loadAvailableOrders();
+        loadCurrentOrders();
+        loadEarningsHistory();
+      } else {
+        window.location.href = 'customer.html#login';
+      }
+    }
+
+    // Load driver profile
+    async function loadDriverProfile() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        currentDriver = user;
+        
+        // Initialize TypeScript earnings manager
+        if (typeof DriverEarningsManager !== 'undefined') {
+          earningsManager = new DriverEarningsManager(supabase);
+          earningsManager.setCurrentDriver(user);
+          window.driverEarningsManager = earningsManager;
+          
+          // Load today's earnings using TypeScript
+          await earningsManager.loadTodayEarnings();
+        } else {
+          // Fallback to original implementation
+          const today = new Date().toISOString().split('T')[0];
+          const { data: earnings } = await supabase
+            .from('driver_earnings')
+            .select('amount')
+            .eq('driver_id', user.id)
+            .eq('date', today);
+          
+          const totalEarnings = earnings?.reduce((sum, e) => sum + e.amount, 0) || 0;
+          document.getElementById('todayEarnings').textContent = `$${totalEarnings.toFixed(2)}`;
+        }
+        
+        // Update profile display
+        document.getElementById('driverRating').textContent = user.user_metadata?.rating || '4.8';
+        document.getElementById('onlineHours').textContent = user.user_metadata?.online_hours || '0h';
+        
+      } catch (error) {
+        console.error('Error loading driver profile:', error);
+      }
+    }
+
+    // Load available orders
+    async function loadAvailableOrders() {
+      try {
+        const { data: orders } = await supabase
+          .from('orders')
+          .select(`
+            *,
+            customer:customer_id(name, phone),
+            restaurant:restaurant_id(name, address)
+          `)
+          .eq('status', 'pending')
+          .eq('driver_assigned', false)
+          .order('created_at', { ascending: false });
+        
+        displayAvailableOrders(orders);
+      } catch (error) {
+        console.error('Error loading available orders:', error);
+      }
+    }
+
+    // Display available orders
+    function displayAvailableOrders(orders) {
+      const container = document.getElementById('availableOrders');
+      
+      if (orders.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 text-gray-500">
+            <i class="fas fa-clipboard-list text-4xl mb-4"></i>
+            <p>No available orders at the moment</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = orders.map(order => `
+        <div class="order-card border border-gray-200 rounded-lg p-4 hover:shadow-md">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <div class="flex items-center mb-2">
+                <h3 class="font-bold text-lg">${order.restaurant.name}</h3>
+                <span class="ml-2 px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+                  $${order.total_amount}
+                </span>
+              </div>
+              <div class="text-sm text-gray-600 mb-2">
+                <i class="fas fa-user mr-1"></i> ${order.customer.name}
+                <i class="fas fa-phone ml-3 mr-1"></i> ${order.customer.phone}
+              </div>
+              <div class="text-sm text-gray-600">
+                <i class="fas fa-map-marker-alt mr-1"></i> ${order.delivery_address}
+              </div>
+              <div class="text-sm text-gray-500 mt-2">
+                <i class="fas fa-clock mr-1"></i> ${formatTime(order.created_at)}
+              </div>
+            </div>
+            <div class="flex flex-col space-y-2 ml-4">
+              <button onclick="acceptOrder('${order.id}')" 
+                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm">
+                <i class="fas fa-check mr-1"></i>Accept
+              </button>
+              <button onclick="viewOrderDetails('${order.id}')" 
+                class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 text-sm">
+                <i class="fas fa-info-circle mr-1"></i>Details
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Accept order
+    async function acceptOrder(orderId) {
+      try {
+        const { error } = await supabase
+          .from('orders')
+          .update({ 
+            status: 'accepted',
+            driver_id: currentDriver.id,
+            driver_assigned: true,
+            accepted_at: new Date().toISOString()
+          })
+          .eq('id', orderId);
+        
+        if (error) throw error;
+        
+        // Show success message
+        if (window.driverApp && window.driverApp.showToast) {
+          window.driverApp.showToast('Order accepted successfully!');
+        } else {
+          alert('Order accepted successfully!');
+        }
+        
+        // Reload orders
+        loadAvailableOrders();
+        loadCurrentOrders();
+        
+      } catch (error) {
+        console.error('Error accepting order:', error);
+        if (window.driverApp && window.driverApp.showToast) {
+          window.driverApp.showToast('Failed to accept order');
+        } else {
+          alert('Failed to accept order');
+        }
+      }
+    }
+
+    // Load current orders
+    async function loadCurrentOrders() {
+      try {
+        const { data: orders } = await supabase
+          .from('orders')
+          .select(`
+            *,
+            customer:customer_id(name, phone),
+            restaurant:restaurant_id(name, address)
+          `)
+          .eq('driver_id', currentDriver.id)
+          .in('status', ['accepted', 'picked_up'])
+          .order('created_at', { ascending: false });
+        
+        displayCurrentOrders(orders);
+        
+        // Update delivery count
+        document.getElementById('deliveryCount').textContent = orders.length;
+        
+      } catch (error) {
+        console.error('Error loading current orders:', error);
+      }
+    }
+
+    // Display current orders
+    function displayCurrentOrders(orders) {
+      const container = document.getElementById('currentOrders');
+      
+      if (orders.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 text-gray-500">
+            <i class="fas fa-motorcycle text-4xl mb-4"></i>
+            <p>No current deliveries</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = orders.map(order => {
+        const statusColors = {
+          'accepted': 'bg-blue-100 text-blue-800',
+          'picked_up': 'bg-yellow-100 text-yellow-800'
+        };
+        
+        const statusIcons = {
+          'accepted': 'fa-motorcycle',
+          'picked_up': 'fa-box'
+        };
+        
+        return `
+          <div class="order-card border border-gray-200 rounded-lg p-4">
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <div class="flex items-center mb-2">
+                  <h4 class="font-bold">${order.restaurant.name}</h4>
+                  <span class="ml-2 px-2 py-1 ${statusColors[order.status]} text-xs rounded-full status-badge">
+                    <i class="fas ${statusIcons[order.status]} mr-1"></i>
+                    ${order.status.replace('_', ' ').toUpperCase()}
+                  </span>
+                </div>
+                <div class="text-sm text-gray-600 mb-2">
+                  <i class="fas fa-user mr-1"></i> ${order.customer.name}
+                  <i class="fas fa-phone ml-3 mr-1"></i> ${order.customer.phone}
+                </div>
+                <div class="text-sm text-gray-600">
+                  <i class="fas fa-map-marker-alt mr-1"></i> ${order.delivery_address}
+                </div>
+              </div>
+              <div class="flex flex-col space-y-2 ml-4">
+                ${order.status === 'accepted' ? `
+                  <button onclick="updateOrderStatus('${order.id}', 'picked_up')" 
+                    class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 text-sm">
+                    <i class="fas fa-box mr-1"></i>Picked Up
+                  </button>
+                ` : ''}
+                ${order.status === 'picked_up' ? `
+                  <button onclick="updateOrderStatus('${order.id}', 'delivered')" 
+                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm">
+                    <i class="fas fa-check mr-1"></i>Delivered
+                  </button>
+                ` : ''}
+                <button onclick="startNavigation('${order.delivery_address}')" 
+                  class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
+                  <i class="fas fa-directions mr-1"></i>Navigate
+                </button>
+                <button onclick="callCustomer('${order.customer.phone}')" 
+                  class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 text-sm">
+                  <i class="fas fa-phone mr-1"></i>Call
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Update order status
+    async function updateOrderStatus(orderId, newStatus) {
+      try {
+        const updateData = { status: newStatus };
+        if (newStatus === 'delivered') {
+          updateData.delivered_at = new Date().toISOString();
+        }
+        
+        const { error } = await supabase
+          .from('orders')
+          .update(updateData)
+          .eq('id', orderId);
+        
+        if (error) throw error;
+        
+        if (window.driverApp && window.driverApp.showToast) {
+          window.driverApp.showToast(`Order marked as ${newStatus}!`);
+        }
+        
+        // Update earnings using TypeScript manager if order is delivered
+        if (newStatus === 'delivered' && earningsManager) {
+          await earningsManager.loadTodayEarnings();
+        }
+        
+        loadCurrentOrders();
+        
+      } catch (error) {
+        console.error('Error updating order status:', error);
+      }
+    }
+
+    // Function to demonstrate TypeScript earnings features
+    async function demonstrateTypeScriptFeatures() {
+      if (!earningsManager) {
+        console.log('TypeScript earnings manager not available');
+        return;
+      }
+
+      try {
+        // Get earnings summary for different periods
+        const todaySummary = await earningsManager.getEarningsSummary('today');
+        const weekSummary = await earningsManager.getEarningsSummary('week');
+        const monthSummary = await earningsManager.getEarningsSummary('month');
+
+        console.log('Today\'s earnings:', todaySummary);
+        console.log('This week:', weekSummary);
+        console.log('This month:', monthSummary);
+
+        // Calculate earnings from orders as alternative method
+        const calculatedEarnings = await earningsManager.calculateEarningsFromOrders();
+        console.log('Calculated earnings from orders:', calculatedEarnings);
+
+        return {
+          today: todaySummary,
+          week: weekSummary,
+          month: monthSummary,
+          calculated: calculatedEarnings
+        };
+      } catch (error) {
+        console.error('Error demonstrating TypeScript features:', error);
+        return null;
+      }
+    }
+
+    // Start navigation
+    function startNavigation(address) {
+      if (window.driverApp && window.driverApp.startNavigation) {
+        window.driverApp.startNavigation(address);
+      } else {
+        // Fallback to web maps
+        window.open(`https://maps.google.com/?q=${encodeURIComponent(address)}`, '_blank');
+      }
+    }
+
+    // Call customer
+    function callCustomer(phone) {
+      if (window.driverApp && window.driverApp.callCustomer) {
+        window.driverApp.callCustomer(phone);
+      } else {
+        window.open(`tel:${phone}`, '_blank');
+      }
+    }
+
+    // Load earnings history
+    async function loadEarningsHistory() {
+      try {
+        const { data: earnings } = await supabase
+          .from('driver_earnings')
+          .select('*')
+          .eq('driver_id', currentDriver.id)
+          .order('date', { ascending: false })
+          .limit(10);
+        
+        displayEarningsHistory(earnings);
+        
+      } catch (error) {
+        console.error('Error loading earnings history:', error);
+      }
+    }
+
+    // Display earnings history
+    function displayEarningsHistory(earnings) {
+      const container = document.getElementById('earningsHistory');
+      
+      if (earnings.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center">No earnings history available</p>';
+        return;
+      }
+      
+      container.innerHTML = earnings.map(earning => `
+        <div class="flex justify-between items-center p-3 border-b">
+          <div>
+            <p class="font-semibold">${formatDate(earning.date)}</p>
+            <p class="text-sm text-gray-600">${earning.orders_count} deliveries</p>
+          </div>
+          <div class="text-right">
+            <p class="font-bold text-green-600">$${earning.amount.toFixed(2)}</p>
+            <p class="text-sm text-gray-500">${earning.hours_worked}h</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Refresh orders
+    function refreshOrders() {
+      loadAvailableOrders();
+      loadCurrentOrders();
+    }
+
+    // Toggle profile modal
+    function toggleProfile() {
+      const modal = document.getElementById('profileModal');
+      modal.classList.toggle('hidden');
+    }
+
+    // Setup real-time subscriptions
+    function setupRealtimeSubscriptions() {
+      // Listen for new orders
+      supabase
+        .channel('orders')
+        .on('postgres_changes', 
+          { event: 'INSERT', schema: 'public', table: 'orders' },
+          (payload) => {
+            if (payload.new.status === 'pending') {
+              loadAvailableOrders();
+            }
+          }
+        )
+        .subscribe();
+    }
+
+    // Start location tracking
+    function startLocationTracking() {
+      if (navigator.geolocation) {
+        locationUpdateInterval = setInterval(() => {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              // Update driver location in Supabase
+              if (currentDriver && window.driverApp && window.driverApp.updateLocation) {
+                window.driverApp.updateLocation(
+                  position.coords.latitude,
+                  position.coords.longitude,
+                  authToken
+                );
+              }
+            },
+            (error) => console.error('Location error:', error),
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+          );
+        }, 30000); // Update every 30 seconds
+      }
+    }
+
+    // Utility functions
+    function formatTime(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric' 
+      });
+    }
+  </script>
+</body>
+</html>

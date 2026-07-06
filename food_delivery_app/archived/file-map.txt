@@ -1,0 +1,8 @@
+com.fooddelivery.app-pngs-0 D:\Project\food delivery\food_delivery_app\android-wrapper\build\generated\res\pngs\release
+com.fooddelivery.app-resValues-1 D:\Project\food delivery\food_delivery_app\android-wrapper\build\generated\res\resValues\release
+com.fooddelivery.app-updated_navigation_xml-2 D:\Project\food delivery\food_delivery_app\android-wrapper\build\generated\updated_navigation_xml\release
+com.fooddelivery.app-packageReleaseResources-3 D:\Project\food delivery\food_delivery_app\android-wrapper\build\intermediates\incremental\release\packageReleaseResources\merged.dir
+com.fooddelivery.app-packageReleaseResources-4 D:\Project\food delivery\food_delivery_app\android-wrapper\build\intermediates\incremental\release\packageReleaseResources\stripped.dir
+com.fooddelivery.app-release-5 D:\Project\food delivery\food_delivery_app\android-wrapper\build\intermediates\merged_res\release\mergeReleaseResources
+com.fooddelivery.app-main-6 D:\Project\food delivery\food_delivery_app\android-wrapper\src\main\res
+com.fooddelivery.app-release-7 D:\Project\food delivery\food_delivery_app\android-wrapper\src\release\res

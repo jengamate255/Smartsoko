@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Stores Near Me | SmartSoko</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script type="module" src="config/firebase-config.js"></script>
+  <script src="nav-component.js" defer></script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24 }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Be Vietnam Pro', sans-serif; background: #f8fafc; min-height: 100vh; }
+    h1,h2,h3,h4 { font-family: 'Plus Jakarta Sans', sans-serif; }
+    #map { height: 300px; border-radius: 16px; overflow: hidden; }
+    .store-card { transition: all 0.2s ease; }
+    .store-card:hover { transform: translateY(-2px); }
+    .distance-badge { background: rgba(16,185,129,0.1); color: #059669; }
+    .leaflet-popup-content { margin: 8px 12px; font-size: 13px; }
+    .leaflet-popup-content strong { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body>
+  <main class="max-w-2xl mx-auto px-4 py-6 pb-32">
+    <div class="flex items-center gap-3 mb-6">
+      <a href="/home" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+        <span class="material-symbols-outlined text-gray-600">arrow_back</span>
+      </a>
+      <div>
+        <h1 class="text-xl font-bold">Stores Near Me</h1>
+        <p id="locationStatus" class="text-sm text-gray-500">Detecting your location...</p>
+      </div>
+    </div>
+
+    <!-- Map -->
+    <div id="map" class="mb-4 shadow-sm border border-gray-200"></div>
+
+    <!-- Detect Button -->
+    <button id="detectBtn" onclick="detectLocation()" class="w-full mb-6 px-4 py-3 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+      <span class="material-symbols-outlined text-sm">my_location</span>
+      <span>Update My Location</span>
+    </button>
+
+    <!-- Results -->
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-bold" id="resultsTitle">Nearby Stores</h2>
+      <span id="resultsCount" class="text-sm text-gray-500">0 stores</span>
+    </div>
+    <div id="storesList" class="space-y-3">
+      <div class="text-center py-12 text-gray-400">
+        <span class="material-symbols-outlined text-5xl mb-3">my_location</span>
+        <p>Allow location access to find stores near you</p>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    let db = window.db;
+    let auth = window.auth;
+
+    if (!db || !auth) {
+      await new Promise((resolve) => {
+        const check = setInterval(() => {
+          if (window.db && window.auth) {
+            db = window.db; auth = window.auth; clearInterval(check); resolve();
+          }
+        }, 100);
+        setTimeout(() => { clearInterval(check); resolve(); }, 5000);
+      });
+    }
+
+    const { collection, getDocs, GeoPoint } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+
+    let map = null;
+    let userMarker = null;
+    let storeMarkers = [];
+    let userLat = null;
+    let userLng = null;
+    let allSellers = [];
+
+    function haversineKm(lat1, lng1, lat2, lng2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function initMap(lat, lng) {
+      if (map) { map.setView([lat, lng], 12); return; }
+      map = L.map('map', { zoomControl: true }).setView([lat, lng], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19, attribution: '© OpenStreetMap'
+      }).addTo(map);
+      userMarker = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: '',
+          html: '<div style="width:20px;height:20px;background:#3b82f6;border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>',
+          iconSize: [20, 20], iconAnchor: [10, 10]
+        })
+      }).addTo(map).bindPopup('<strong>You are here</strong>');
+    }
+
+    function updateUserMarker(lat, lng) {
+      userLat = lat; userLng = lng;
+      if (!map) { initMap(lat, lng); }
+      else if (userMarker) { userMarker.setLatLng([lat, lng]); map.setView([lat, lng], 12); }
+      loadAndRenderStores();
+    }
+
+    function detectLocation() {
+      const status = document.getElementById('locationStatus');
+      const btn = document.getElementById('detectBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-symbols-outlined text-sm">hourglass_top</span> Detecting...';
+
+      if (!navigator.geolocation) {
+        status.textContent = 'Geolocation not supported. Using default location.';
+        updateUserMarker(-6.7924, 39.2083);
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined text-sm">my_location</span> Update My Location';
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          updateUserMarker(pos.coords.latitude, pos.coords.longitude);
+          status.textContent = 'Showing stores near your location';
+          btn.disabled = false;
+          btn.innerHTML = '<span class="material-symbols-outlined text-sm">my_location</span> Update My Location';
+        },
+        () => {
+          updateUserMarker(-6.7924, 39.2083);
+          status.textContent = 'Using Dar es Salaam (location access denied)';
+          btn.disabled = false;
+          btn.innerHTML = '<span class="material-symbols-outlined text-sm">my_location</span> Update My Location';
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    function getMarkerColor(category) {
+      const colors = {
+        restaurant: '#10b981', bakery: '#f59e0b', dairy: '#3b82f6',
+        farmer: '#84cc16', grocery: '#8b5cf6', pharmacy: '#ec4899',
+        fashion: '#f97316', electronics: '#06b6d4', beauty: '#d946ef',
+        beverages: '#14b8a6', flowers: '#f43f5e', baby: '#a78bfa',
+        hardware: '#64748b', stationery: '#6366f1', pets: '#22c55e'
+      };
+      return colors[category] || '#10b981';
+    }
+
+    async function loadAndRenderStores() {
+      if (!userLat || !userLng) return;
+      const list = document.getElementById('storesList');
+      const count = document.getElementById('resultsCount');
+
+      try {
+        if (allSellers.length === 0) {
+          const snap = await getDocs(collection(db, 'sellers'));
+          allSellers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        }
+
+        // Clear old markers
+        storeMarkers.forEach(m => map?.removeLayer(m));
+        storeMarkers = [];
+
+        const stores = [];
+        for (const s of allSellers) {
+          if (!s.location) continue;
+          const lat = s.location.latitude || s.location.lat;
+          const lng = s.location.longitude || s.location.lng || s.location.long;
+          if (!lat || !lng) continue;
+          const dist = haversineKm(userLat, userLng, lat, lng);
+          const radius = s.deliveryRadius || 0;
+          stores.push({ ...s, _lat: lat, _lng: lng, _dist: dist, _inRange: radius === 0 || dist <= radius });
+        }
+
+        stores.sort((a, b) => a._dist - b._dist);
+
+        if (stores.length === 0) {
+          list.innerHTML = '<div class="text-center py-12 text-gray-400"><span class="material-symbols-outlined text-5xl mb-3">storefront</span><p>No stores with location data yet</p></div>';
+          count.textContent = '0 stores';
+          return;
+        }
+
+        count.textContent = `${stores.length} store${stores.length !== 1 ? 's' : ''}`;
+
+        // Fit map to show all stores + user
+        const group = L.featureGroup([
+          userMarker,
+          ...stores.map(s => L.marker([s._lat, s._lng]))
+        ]);
+        if (map && stores.length > 0) {
+          map.fitBounds(group.getBounds().pad(0.15));
+          if (map.getZoom() > 15) map.setZoom(15);
+        }
+
+        list.innerHTML = stores.map((s, i) => {
+          const cat = (s.category || 'store').charAt(0).toUpperCase() + (s.category || 'store').slice(1);
+          const inRange = s._inRange;
+          const distStr = s._dist < 1
+            ? `${Math.round(s._dist * 1000)} m`
+            : `${s._dist.toFixed(1)} km`;
+          return `
+            <a href="/store.html?slug=${s.slug || s.id}" class="store-card flex items-center gap-4 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 cursor-pointer">
+              <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0" style="background:${getMarkerColor(s.category)}">
+                ${(s.name || 'S').charAt(0).toUpperCase()}
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="font-bold text-gray-900 truncate">${s.name || 'Unnamed Store'}</h3>
+                <p class="text-xs text-gray-500">${cat}${s.placeName ? ' · ' + s.placeName : ''}</p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="distance-badge text-xs px-2 py-0.5 rounded-full font-medium">${distStr}</span>
+                  ${inRange ? '<span class="text-xs text-green-600">Delivers to you ✓</span>' : s.deliveryRadius ? '<span class="text-xs text-gray-400">Outside delivery area</span>' : ''}
+                </div>
+              </div>
+              <span class="material-symbols-outlined text-gray-400">chevron_right</span>
+            </a>
+          `;
+        }).join('');
+
+        // Add markers
+        stores.forEach(s => {
+          const color = getMarkerColor(s.category);
+          const marker = L.marker([s._lat, s._lng], {
+            icon: L.divIcon({
+              className: '',
+              html: `<div style="width:24px;height:24px;background:${color};border:2px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;">${(s.name || 'S').charAt(0).toUpperCase()}</div>`,
+              iconSize: [24, 24], iconAnchor: [12, 12]
+            })
+          }).addTo(map)
+            .bindPopup(`<strong>${s.name || 'Store'}</strong><br>${distStr} away`);
+          storeMarkers.push(marker);
+
+          if (s.deliveryRadius && s._dist <= s.deliveryRadius) {
+            const circle = L.circle([s._lat, s._lng], {
+              radius: s.deliveryRadius * 1000,
+              color: '#10b981', fillColor: '#10b981', fillOpacity: 0.06, weight: 1, dashArray: '4'
+            }).addTo(map);
+            storeMarkers.push(circle);
+          }
+        });
+
+      } catch (err) {
+        console.error('Failed to load stores:', err);
+        list.innerHTML = '<div class="text-center py-12 text-red-400"><p>Failed to load stores</p></div>';
+      }
+    }
+
+    // Init
+    if (typeof SmartNav !== 'undefined') {
+      SmartNav.init({ activePage: 'discover', role: 'customer', breadcrumbs: ['Home', 'Nearby'] });
+    }
+    detectLocation();
+  </script>
+</body>
+</html>

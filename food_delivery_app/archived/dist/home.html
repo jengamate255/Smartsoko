@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>SmartSoko - Your Local Marketplace | Shop Food, Groceries & More</title>
+  <meta name="description" content="SmartSoko - Tanzania's premier marketplace. Shop fresh food, groceries, dairy, fruits, and bakery items from local sellers. Fast delivery, great prices.">
+  
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  
+  <!-- Styles -->
+  <link rel="preload" href="dist/tailwind.css" as="style">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  
+  <!-- Firebase Modular SDK -->
+  <script type="module" src="config/firebase-config.js?v=4"></script>
+  <script src="js/cart-service.js?v=4"></script>
+  
+  <style>
+    :root {
+      --primary: #064e3b;
+      --primary-light: #10b981;
+      --accent: #f97316;
+      --bg-gray: #f3f4f6;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1),0 1px 2px -1px rgb(0 0 0 / 0.1);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    }
+    
+    * { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, h4, h5, h6 { font-family: 'Plus Jakarta Sans', sans-serif; }
+    
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24 }
+    
+    /* Amazon-style header */
+    .amz-header {
+      background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+      position: sticky; top: 0; z-index: 1000;
+    }
+    
+    .amz-search {
+      background: #fff;
+      border-radius: 8px;
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .amz-search input {
+      border: none;
+      outline: none;
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 15px;
+    }
+    
+    .amz-search-btn {
+      background: #f97316;
+      border: none;
+      padding: 0 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .amz-search-btn:hover { background: #ea580c; }
+    
+    /* Category nav */
+    .cat-nav {
+      background: #065f46;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .cat-nav a {
+      color: rgba(255,255,255,0.9);
+      font-size: 14px;
+      padding: 10px 16px;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    
+    .cat-nav a:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    
+    /* Hero Carousel */
+    .hero-carousel {
+      position: relative;
+      height: 400px;
+      overflow: hidden;
+      border-radius: 0 0 20px 20px;
+    }
+    
+    .hero-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      background-size: cover;
+      background-position: center;
+    }
+    
+    .hero-slide.active { opacity: 1; }
+    
+    .hero-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 40px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      color: white;
+    }
+    
+    /* Flash Deals */
+    .flash-deals {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .countdown {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .countdown-item {
+      background: #064e3b;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 18px;
+      min-width: 45px;
+      text-align: center;
+    }
+    
+    /* Product Cards - Amazon Style */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    
+    .amz-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .amz-card:hover {
+      box-shadow: var(--shadow-xl);
+      transform: translateY(-4px);
+      border-color: #064e3b;
+    }
+    
+    .amz-card-img {
+      aspect-ratio: 1;
+      background: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .amz-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+    
+    .amz-card:hover .amz-card-img img { transform: scale(1.05); }
+    
+    .discount-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: #dc2626;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    
+    .amz-card-body { padding: 16px; }
+    
+    .amz-card-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 8px;
+      height: 40px;
+    }
+    
+    .amz-rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    
+    .stars {
+      color: #fbbf24;
+      font-size: 14px;
+    }
+    
+    .amz-price {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .price-current {
+      font-size: 20px;
+      font-weight: 700;
+      color: #064e3b;
+    }
+    
+    .price-original {
+      font-size: 14px;
+      color: #9ca3af;
+      text-decoration: line-through;
+    }
+    
+    .amz-add-btn {
+      width: 100%;
+      padding: 10px;
+      background: #064e3b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .amz-add-btn:hover { background: #047857; }
+    
+    /* Section headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .section-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #111827;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .see-all {
+      color: #064e3b;
+      font-weight: 600;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    /* Hide scrollbar */
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Carousel dots */
+    .carousel-dots {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+    }
+    
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .dot.active { background: white; width: 30px; border-radius: 5px; }
+    
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <!-- Amazon-Style Header -->
+  <header class="amz-header">
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <div class="flex items-center gap-4">
+        <!-- Logo -->
+        <a href="home.html" class="flex items-center gap-2 text-white">
+          <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+            <span class="material-symbols-outlined text-2xl">shopping_basket</span>
+          </div>
+          <span class="text-xl font-bold hidden sm:block">SmartSoko</span>
+        </a>
+        
+        <!-- Location -->
+        <div class="hidden md:flex items-center gap-1 text-white/80 text-sm cursor-pointer hover:text-white">
+          <span class="material-symbols-outlined text-sm">location_on</span>
+          <div>
+            <div class="text-xs opacity-70">Deliver to</div>
+            <div class="font-semibold">Dar es Salaam</div>
+          </div>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="flex-1 max-w-2xl mx-4">
+          <div class="amz-search">
+            <select class="bg-gray-100 border-none px-3 text-sm text-gray-700 outline-none cursor-pointer">
+              <option>All</option>
+              <option>Food</option>
+              <option>Groceries</option>
+              <option>Dairy</option>
+              <option>Fruits</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="Search products, brands and more..." onkeypress="handleSearch(event)">
+            <button onclick="performSearch()" class="amz-search-btn">
+              <span class="material-symbols-outlined text-white">search</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Right Actions -->
+        <div class="flex items-center gap-4 text-white">
+          <a href="login.html" class="hidden md:block text-sm">
+            <div class="text-xs opacity-70">Hello, Sign in</div>
+            <div class="font-semibold">Account</div>
+          </a>
+          
+          <a href="orders.html" class="hidden md:block text-sm">
+            <div class="text-xs opacity-70">Returns</div>
+            <div class="font-semibold">& Orders</div>
+          </a>
+          
+          <a href="customer.html" class="relative flex items-center gap-1">
+            <span class="material-symbols-outlined text-3xl">shopping_cart</span>
+            <span id="cartBadge" class="absolute -top-1 -right-2 bg-orange-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center hidden">0</span>
+            <span class="hidden md:block font-semibold">Cart</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Category Navigation -->
+    <nav class="cat-nav">
+      <div class="max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto hide-scrollbar">
+        <a href="#" onclick="toggleSidebar()" class="flex items-center gap-1 font-semibold">
+          <span class="material-symbols-outlined">menu</span> All
+        </a>
+        <a href="discovery.html?category=food">Food & Restaurants</a>
+        <a href="discovery.html?category=dairy">Fresh Dairy</a>
+        <a href="discovery.html?category=fruits">Fruits & Vegetables</a>
+        <a href="discovery.html?category=groceries">Groceries</a>
+        <a href="discovery.html?category=bakery">Bakery</a>
+        <a href="discovery.html">Today's Deals</a>
+        <a href="customer.html">Customer Service</a>
+        <a href="merchant.html" class="ml-auto text-orange-300">Sell on SmartSoko</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 pt-4">
+    <!-- Hero Carousel -->
+    <section class="hero-carousel mb-6">
+      <div class="hero-slide active" style="background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);">
+        <div class="hero-content">
+          <span class="inline-block bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-bold mb-3">Flash Sale</span>
+          <h2 class="text-4xl md:text-5xl font-bold mb-2">Fresh Groceries<br>Delivered Fast</h2>
+          <p class="text-lg text-white/90 mb-4">Up to 40% off on fresh fruits & vegetables</p>
+          <a href="discovery.html" class="inline-block bg-white text-green-800 px-8 py-3 rounded-xl font-bold hover:bg-gray-100 transition">Shop Now</a>
+        </div>
+      </div>
+      <div class="hero-slide" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);">
+        <div class="hero-content">
+          <span class="inline-block bg-white text-orange-600 px-4 py-1 rounded-full text-sm font-bold mb-3">New Arrivals</span>
+          <h2 class="text-4xl md:text-5xl font-bold mb-2">Local Restaurants<br>At Your Door</h2>
+          <p class="text-lg text-white/90 mb-4">Discover the best food from local sellers</p>
+          <a href="discovery.html?category=food" class="inline-block bg-white text-orange-600 px-8 py-3 rounded-xl font-bold hover:bg-gray-100 transition">Explore</a>
+        </div>
+      </div>
+      <div class="hero-slide" style="background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);">
+        <div class="hero-content">
+          <span class="inline-block bg-white text-purple-600 px-4 py-1 rounded-full text-sm font-bold mb-3">Free Delivery</span>
+          <h2 class="text-4xl md:text-5xl font-bold mb-2">Daily Fresh Dairy<br>Products</h2>
+          <p class="text-lg text-white/90 mb-4">Milk, cheese, yogurt - delivered fresh daily</p>
+          <a href="discovery.html?category=dairy" class="inline-block bg-white text-purple-600 px-8 py-3 rounded-xl font-bold hover:bg-gray-100 transition">Order Now</a>
+        </div>
+      </div>
+      <div class="carousel-dots">
+        <span class="dot active" onclick="goToSlide(0)"></span>
+        <span class="dot" onclick="goToSlide(1)"></span>
+        <span class="dot" onclick="goToSlide(2)"></span>
+      </div>
+    </section>
+
+    <!-- Quick Categories -->
+    <section class="mb-8">
+      <div class="grid grid-cols-5 md:grid-cols-10 gap-3">
+        <a href="discovery.html?category=food" class="flex flex-col items-center gap-2 p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-orange-600">restaurant</span>
+          </div>
+          <span class="text-xs font-medium text-gray-700">Food</span>
+        </a>
+        <a href="discovery.html?category=dairy" class="flex flex-col items-center gap-2 p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-blue-600">water_drop</span>
+          </div>
+          <span class="text-xs font-medium text-gray-700">Dairy</span>
+        </a>
+        <a href="discovery.html?category=fruits" class="flex flex-col items-center gap-2 p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-green-600">nutrition</span>
+          </div>
+          <span class="text-xs font-medium text-gray-700">Fruits</span>
+        </a>
+        <a href="discovery.html?category=groceries" class="flex flex-col items-center gap-2 p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-purple-600">shopping_bag</span>
+          </div>
+          <span class="text-xs font-medium text-gray-700">Grocery</span>
+        </a>
+        <a href="discovery.html?category=bakery" class="flex flex-col items-center gap-2 p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-yellow-600">bakery_dining</span>
+          </div>
+          <span class="text-xs font-medium text-gray-700">Bakery</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Flash Deals -->
+    <section class="flash-deals">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-3xl text-red-600">flash_on</span>
+          <div>
+            <h2 class="text-xl font-bold text-gray-800">Flash Deals</h2>
+            <p class="text-sm text-gray-600">Limited time offers</p>
+          </div>
+        </div>
+        <div class="countdown">
+          <span class="text-sm font-medium text-gray-600 mr-2">Ends in:</span>
+          <div class="countdown-item" id="hours">04</div>
+          <span class="text-xl font-bold">:</span>
+          <div class="countdown-item" id="minutes">32</div>
+          <span class="text-xl font-bold">:</span>
+          <div class="countdown-item" id="seconds">15</div>
+        </div>
+      </div>
+      <div id="flashDealsGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <!-- Flash deal items will be loaded dynamically -->
+      </div>
+    </section>
+
+    <!-- Featured Sellers -->
+    <section class="mb-10 bg-white rounded-2xl p-6 shadow-sm">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="material-symbols-outlined text-3xl text-green-600">storefront</span>
+          Featured Sellers
+        </h2>
+        <a href="discovery.html" class="see-all">
+          View all <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <a href="discovery.html?seller=Fresh+Mart" class="group p-4 border border-gray-200 rounded-xl hover:border-green-500 hover:shadow-lg transition-all">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+              <span class="material-symbols-outlined text-3xl text-green-600">store</span>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-bold text-gray-800">Fresh Mart</h3>
+              <div class="flex items-center gap-1 text-sm text-gray-500">
+                <span class="text-yellow-500">★</span> 4.8 (1.2k reviews)
+              </div>
+              <p class="text-xs text-green-600 mt-1">25-35 min delivery</p>
+            </div>
+          </div>
+        </a>
+        <a href="discovery.html?seller=Tasty+Kitchen" class="group p-4 border border-gray-200 rounded-xl hover:border-orange-500 hover:shadow-lg transition-all">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+              <span class="material-symbols-outlined text-3xl text-orange-600">restaurant</span>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-bold text-gray-800">Tasty Kitchen</h3>
+              <div class="flex items-center gap-1 text-sm text-gray-500">
+                <span class="text-yellow-500">★</span> 4.6 (856 reviews)
+              </div>
+              <p class="text-xs text-orange-600 mt-1">30-45 min delivery</p>
+            </div>
+          </div>
+        </a>
+        <a href="discovery.html?seller=Daily+Bread" class="group p-4 border border-gray-200 rounded-xl hover:border-yellow-500 hover:shadow-lg transition-all">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-yellow-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+              <span class="material-symbols-outlined text-3xl text-yellow-600">bakery_dining</span>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-bold text-gray-800">Daily Bread</h3>
+              <div class="flex items-center gap-1 text-sm text-gray-500">
+                <span class="text-yellow-500">★</span> 4.9 (2.1k reviews)
+              </div>
+              <p class="text-xs text-yellow-600 mt-1">20-30 min delivery</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Popular Products -->
+    <section class="mb-10">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="material-symbols-outlined text-3xl text-orange-500">trending_up</span>
+          Popular Products
+        </h2>
+        <a href="discovery.html" class="see-all">
+          See all <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </a>
+      </div>
+      <div id="popularProducts" class="product-grid">
+        <!-- Products will be loaded dynamically -->
+        <div class="col-span-full text-center py-12">
+          <div class="w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mb-4 mx-auto"></div>
+          <p class="text-gray-500">Loading amazing products...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recommended for You -->
+    <section class="mb-10">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="material-symbols-outlined text-3xl text-purple-500">recommend</span>
+          Recommended for You
+        </h2>
+        <a href="discovery.html" class="see-all">
+          See all <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </a>
+      </div>
+      <div id="recommendedProducts" class="product-grid">
+        <!-- Recommended products will be loaded -->
+      </div>
+    </section>
+
+    <!-- Quick Links Banner -->
+    <section class="mb-10 grid grid-cols-2 md:grid-cols-4 gap-4">
+      <a href="customer.html" class="bg-gradient-to-br from-green-50 to-green-100 p-5 rounded-2xl hover:shadow-lg transition flex items-center gap-3">
+        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+          <span class="material-symbols-outlined text-2xl text-green-600">receipt_long</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-gray-800">My Orders</h3>
+          <p class="text-xs text-gray-500">Track deliveries</p>
+        </div>
+      </a>
+      <a href="profile.html" class="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-2xl hover:shadow-lg transition flex items-center gap-3">
+        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+          <span class="material-symbols-outlined text-2xl text-blue-600">person</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-gray-800">My Profile</h3>
+          <p class="text-xs text-gray-500">Manage account</p>
+        </div>
+      </a>
+      <a href="track-order.html" class="bg-gradient-to-br from-orange-50 to-orange-100 p-5 rounded-2xl hover:shadow-lg transition flex items-center gap-3">
+        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+          <span class="material-symbols-outlined text-2xl text-orange-600">local_shipping</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-gray-800">Track Order</h3>
+          <p class="text-xs text-gray-500">Real-time tracking</p>
+        </div>
+      </a>
+      <a href="merchant.html" class="bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-2xl hover:shadow-lg transition flex items-center gap-3">
+        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+          <span class="material-symbols-outlined text-2xl text-purple-600">store</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-gray-800">Sell Items</h3>
+          <p class="text-xs text-gray-500">Become a seller</p>
+        </div>
+      </a>
+    </section>
+  </main>
+
+  <!-- Cart Sidebar -->
+  <div id="cartSidebar" class="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300">
+    <div class="h-full flex flex-col">
+      <div class="p-6 border-b border-outline/20 flex justify-between items-center">
+        <h2 class="font-headline text-xl font-bold text-primary">Your Cart</h2>
+        <button onclick="toggleCart()" class="p-2 hover:bg-surface-variant rounded-full transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="cartItems" class="flex-1 overflow-y-auto p-6">
+        <p class="text-center text-on-surface-variant py-8">Your cart is empty</p>
+      </div>
+      <div class="p-6 border-t border-outline/20">
+        <div class="flex justify-between mb-4">
+          <span class="text-on-surface-variant">Subtotal</span>
+          <span id="cartTotal" class="font-bold text-primary">TSh 0</span>
+        </div>
+        <button onclick="checkout()" class="w-full gradient-bg text-white py-4 rounded-full font-headline font-bold hover:opacity-90 transition-all">
+          Checkout
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="cartOverlay" class="fixed inset-0 bg-black/50 z-40 hidden" onclick="toggleCart()"></div>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-50">
+    <div class="flex items-center justify-around py-2">
+      <a href="home.html" class="flex flex-col items-center gap-1 p-2 text-green-600">
+        <span class="material-symbols-outlined">home</span>
+        <span class="text-xs">Home</span>
+      </a>
+      <a href="discovery.html" class="flex flex-col items-center gap-1 p-2 text-gray-500">
+        <span class="material-symbols-outlined">search</span>
+        <span class="text-xs">Search</span>
+      </a>
+      <a href="customer.html" class="flex flex-col items-center gap-1 p-2 text-gray-500 relative">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <span class="text-xs">Cart</span>
+        <span id="bottomCartBadge" class="absolute top-0 right-2 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+      </a>
+      <a href="profile.html" class="flex flex-col items-center gap-1 p-2 text-gray-500">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-xs">Account</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-300 mt-16 pb-20 md:pb-0">
+    <div class="max-w-7xl mx-auto px-4 py-12">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <h4 class="text-white font-bold mb-4">Get to Know Us</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#" class="hover:text-white">About SmartSoko</a></li>
+            <li><a href="#" class="hover:text-white">Careers</a></li>
+            <li><a href="#" class="hover:text-white">Press</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-bold mb-4">Make Money with Us</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="merchant.html" class="hover:text-white">Sell on SmartSoko</a></li>
+            <li><a href="#" class="hover:text-white">Become a Driver</a></li>
+            <li><a href="#" class="hover:text-white">Advertise</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-bold mb-4">Payment Products</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#" class="hover:text-white">M-Pesa</a></li>
+            <li><a href="#" class="hover:text-white">Cash on Delivery</a></li>
+            <li><a href="#" class="hover:text-white">Business Card</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-bold mb-4">Let Us Help You</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#" class="hover:text-white">Your Account</a></li>
+            <li><a href="#" class="hover:text-white">Your Orders</a></li>
+            <li><a href="#" class="hover:text-white">Help Center</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-700 pt-8 text-center text-sm">
+        <p>&copy; 2024 SmartSoko. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    let cart = window.CartService ? CartService.getCart() : (JSON.parse(localStorage.getItem('smartsoko_cart')) || []);
+    let products = [];
+
+    function getProductImageHtml(product, size = 'medium') {
+      const sizes = {
+        small: 'w-16 h-16',
+        medium: 'w-full h-full',
+        large: 'w-32 h-32'
+      };
+      const sizeClass = sizes[size] || sizes.medium;
+      
+      if (product.imageUrl) {
+        return `<img src="${product.imageUrl}" alt="${product.name}" class="${sizeClass} object-cover" onerror="this.parentElement.innerHTML='<span class=\\'material-symbols-outlined text-4xl text-primary/30\\' loading="lazy">inventory_2</span>'">`;
+      }
+      return `<span class="material-symbols-outlined text-4xl text-primary/30">inventory_2</span>`;
+    }
+
+    // Amazon-style product card rendering
+    function renderProducts(items, containerId = 'popularProducts') {
+      const container = document.getElementById(containerId);
+      if (items.length === 0) {
+        container.innerHTML = '<div class="col-span-full text-center py-8 text-gray-500">No products available</div>';
+        return;
+      }
+
+      container.innerHTML = items.map((product, index) => {
+        const originalPrice = Math.round(product.price * 1.2);
+        const discount = 20;
+        const rating = (4 + Math.random()).toFixed(1);
+        const reviews = Math.floor(Math.random() * 500) + 50;
+        
+        return `
+        <div class="amz-card" style="animation: slideUp 0.5s ease ${index * 0.05}s forwards; opacity: 0;">
+          <a href="product.html?id=${product.id}" class="block">
+            <div class="amz-card-img">
+              ${product.imageUrl ? 
+                `<img src="${product.imageUrl}" alt="${product.name}" loading="lazy">` : 
+                `<span class="material-symbols-outlined text-5xl text-gray-300">inventory_2</span>`
+              }
+              <span class="discount-badge">-${discount}%</span>
+            </div>
+          </a>
+          <div class="amz-card-body">
+            <a href="product.html?id=${product.id}" class="block">
+              <h3 class="amz-card-title">${product.name}</h3>
+            </a>
+            <div class="amz-rating">
+              <span class="stars">★★★★★</span>
+              <span class="text-sm text-gray-500">${rating} (${reviews})</span>
+            </div>
+            <div class="amz-price">
+              <span class="price-current">TSh ${(product.price || 0).toLocaleString()}</span>
+              <span class="price-original">TSh ${originalPrice.toLocaleString()}</span>
+            </div>
+            <p class="text-xs text-gray-500 mb-3">${product.seller || 'SmartSoko'}</p>
+            <button onclick="addToCart('${product.id}')" class="amz-add-btn">
+              <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      `}).join('');
+    }
+
+    // Render flash deals
+    function renderFlashDeals(items) {
+      const container = document.getElementById('flashDealsGrid');
+      if (!container || items.length === 0) return;
+      
+      const deals = items.slice(0, 6).map((product, index) => {
+        const discount = [30, 40, 50, 25, 35, 45][index] || 30;
+        return `
+        <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition cursor-pointer" onclick="window.location.href='product.html?id=${product.id}'">
+          <div class="aspect-square bg-gray-100 relative overflow-hidden">
+            ${product.imageUrl ? 
+              `<img src="${product.imageUrl}" class="w-full h-full object-cover">` : 
+              `<div class="w-full h-full flex items-center justify-center"><span class="material-symbols-outlined text-4xl text-gray-300">inventory_2</span></div>`
+            }
+            <span class="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">-${discount}%</span>
+            <span class="absolute bottom-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">HOT</span>
+          </div>
+          <div class="p-3">
+            <p class="text-lg font-bold text-gray-900">TSh ${(product.price || 0).toLocaleString()}</p>
+            <p class="text-sm text-gray-500 line-through">TSh ${Math.round((product.price || 0) * 1.3).toLocaleString()}</p>
+            <div class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-red-500 rounded-full" style="width: ${Math.random() * 50 + 40}%"></div>
+            </div>
+            <p class="text-xs text-red-600 mt-1">${Math.floor(Math.random() * 20 + 5)} items left</p>
+          </div>
+        </div>
+      `}).join('');
+      
+      container.innerHTML = deals;
+    }
+
+    // Hero Carousel
+    let currentSlide = 0;
+    const totalSlides = 3;
+    
+    function goToSlide(index) {
+      const slides = document.querySelectorAll('.hero-slide');
+      const dots = document.querySelectorAll('.dot');
+      
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+      
+      currentSlide = index;
+    }
+    
+    function nextSlide() {
+      goToSlide((currentSlide + 1) % totalSlides);
+    }
+    
+    // Auto-advance carousel
+    setInterval(nextSlide, 5000);
+
+    // Countdown Timer
+    function updateCountdown() {
+      const now = new Date();
+      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+      const diff = endOfDay - now;
+      
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      const hoursEl = document.getElementById('hours');
+      const minutesEl = document.getElementById('minutes');
+      const secondsEl = document.getElementById('seconds');
+      
+      if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
+      if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+      if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
+    }
+    
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // Cart functions
+    function addToCart(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+
+      const existing = cart.find(item => item.id === productId);
+      if (existing) {
+        existing.quantity++;
+      } else {
+        cart.push({ ...product, quantity: 1 });
+      }
+
+      saveCart();
+      updateCartUI();
+      showToast(`${product.name} added to cart`);
+    }
+
+    function removeFromCart(productId) {
+      cart = cart.filter(item => item.id !== productId);
+      saveCart();
+      updateCartUI();
+    }
+
+    function updateQuantity(productId, delta) {
+      const item = cart.find(item => item.id === productId);
+      if (item) {
+        item.quantity += delta;
+        if (item.quantity <= 0) {
+          removeFromCart(productId);
+        } else {
+          saveCart();
+          updateCartUI();
+        }
+      }
+    }
+
+    function saveCart() {
+      if (window.CartService) {
+        CartService.saveCart(cart);
+      } else {
+        localStorage.setItem('smartsoko_cart', JSON.stringify(cart));
+      }
+    }
+
+    function updateCartUI() {
+      const cartItems = document.getElementById('cartItems');
+      const cartTotal = document.getElementById('cartTotal');
+      const cartBadge = document.getElementById('cartBadge');
+      const bottomCartBadge = document.getElementById('bottomCartBadge');
+
+      const total = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || item.qty || 1)), 0);
+      const count = cart.reduce((sum, item) => sum + (item.quantity || item.qty || 1), 0);
+
+      cartTotal.textContent = `TSh ${total.toLocaleString()}`;
+
+      if (count > 0) {
+        cartBadge.classList.remove('hidden');
+        cartBadge.textContent = count;
+        bottomCartBadge.classList.remove('hidden');
+        bottomCartBadge.textContent = count;
+      } else {
+        cartBadge.classList.add('hidden');
+        bottomCartBadge.classList.add('hidden');
+      }
+
+      if (cart.length === 0) {
+        cartItems.innerHTML = '<p class="text-center text-on-surface-variant py-8">Your cart is empty</p>';
+      } else {
+        cartItems.innerHTML = cart.map(item => `
+          <div class="flex gap-3 mb-4 p-3 bg-surface-variant rounded-xl">
+            <div class="w-16 h-16 bg-white rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+              ${item.imageUrl ? `<img src="${item.imageUrl}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\'material-symbols-outlined text-primary/30\\' loading="lazy">inventory_2</span>'">` : '<span class="material-symbols-outlined text-primary/30">inventory_2</span>'}
+            </div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold text-on-surface text-sm truncate">${item.name}</h4>
+              <p class="text-primary font-bold text-sm">TSh ${(item.price * item.quantity).toLocaleString()}</p>
+              <div class="flex items-center gap-2 mt-2">
+                <button onclick="updateQuantity('${item.id}', -1)" class="w-6 h-6 bg-white rounded-full flex items-center justify-center text-on-surface-variant hover:bg-primary hover:text-white transition-all">
+                  <span class="material-symbols-outlined text-xs">remove</span>
+                </button>
+                <span class="text-sm font-medium w-6 text-center">${item.quantity}</span>
+                <button onclick="updateQuantity('${item.id}', 1)" class="w-6 h-6 bg-white rounded-full flex items-center justify-center text-on-surface-variant hover:bg-primary hover:text-white transition-all">
+                  <span class="material-symbols-outlined text-xs">add</span>
+                </button>
+              </div>
+            </div>
+            <button onclick="removeFromCart('${item.id}')" class="text-error hover:opacity-80 self-start">
+              <span class="material-symbols-outlined text-sm">delete</span>
+            </button>
+          </div>
+        `).join('');
+      }
+    }
+
+    function toggleCart() {
+      const sidebar = document.getElementById('cartSidebar');
+      const overlay = document.getElementById('cartOverlay');
+      
+      if (sidebar.classList.contains('translate-x-full')) {
+        sidebar.classList.remove('translate-x-full');
+        overlay.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('translate-x-full');
+        overlay.classList.add('hidden');
+      }
+    }
+
+    function checkout() {
+      if (cart.length === 0) {
+        showToast('Your cart is empty');
+        return;
+      }
+      window.location.href = 'customer.html';
+    }
+
+    function handleSearch(event) {
+      if (event.key === 'Enter') {
+        performSearch();
+      }
+    }
+
+    function performSearch() {
+      const query = document.getElementById('searchInput').value.trim();
+      if (query) {
+        window.location.href = `discovery.html?search=${encodeURIComponent(query)}`;
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg z-50 text-sm font-medium';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Sidebar toggle for mobile menu
+    function toggleSidebar() {
+      // Create sidebar if it doesn't exist
+      let sidebar = document.getElementById('mobileSidebar');
+      let overlay = document.getElementById('sidebarOverlay');
+      
+      if (!sidebar) {
+        // Create overlay
+        overlay = document.createElement('div');
+        overlay.id = 'sidebarOverlay';
+        overlay.className = 'fixed inset-0 bg-black/50 z-[2000] hidden';
+        overlay.onclick = toggleSidebar;
+        document.body.appendChild(overlay);
+        
+        // Create sidebar
+        sidebar = document.createElement('div');
+        sidebar.id = 'mobileSidebar';
+        sidebar.className = 'fixed top-0 left-0 bottom-0 w-[280px] bg-white z-[2001] transform -translate-x-full transition-transform duration-300 overflow-y-auto';
+        sidebar.innerHTML = `
+          <div class="p-4 bg-gradient-to-r from-green-800 to-green-600 text-white">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-lg">SmartSoko</span>
+              <button onclick="toggleSidebar()" class="p-1 hover:bg-white/20 rounded">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+          </div>
+          <div class="p-4">
+            <h3 class="font-bold text-gray-800 mb-3">Shop By Category</h3>
+            <div class="space-y-2">
+              <a href="discovery.html?category=food" class="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg">
+                <span class="material-symbols-outlined text-orange-500">restaurant</span>
+                <span>Food & Restaurants</span>
+              </a>
+              <a href="discovery.html?category=dairy" class="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg">
+                <span class="material-symbols-outlined text-blue-500">water_drop</span>
+                <span>Fresh Dairy</span>
+              </a>
+              <a href="discovery.html?category=fruits" class="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg">
+                <span class="material-symbols-outlined text-green-500">nutrition</span>
+                <span>Fruits & Vegetables</span>
+              </a>
+              <a href="discovery.html?category=groceries" class="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg">
+                <span class="material-symbols-outlined text-purple-500">shopping_bag</span>
+                <span>Groceries</span>
+              </a>
+              <a href="discovery.html?category=bakery" class="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg">
+                <span class="material-symbols-outlined text-yellow-500">bakery_dining</span>
+                <span>Bakery</span>
+              </a>
+            </div>
+            <h3 class="font-bold text-gray-800 mb-3 mt-6">Help & Settings</h3>
+            <div class="space-y-2">
+              <a href="profile.html" class="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg">
+                <span class="material-symbols-outlined">person</span>
+                <span>My Account</span>
+              </a>
+              <a href="orders.html" class="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg">
+                <span class="material-symbols-outlined">receipt_long</span>
+                <span>My Orders</span>
+              </a>
+              <a href="customer.html" class="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg">
+                <span class="material-symbols-outlined">headset_mic</span>
+                <span>Customer Service</span>
+              </a>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(sidebar);
+      }
+      
+      // Toggle visibility
+      const isOpen = !sidebar.classList.contains('-translate-x-full');
+      if (isOpen) {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+      } else {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+      }
+    }
+
+    // Wait for Firebase Modular SDK to initialize
+    function waitForFirebase(maxAttempts = 10) {
+      return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const check = setInterval(() => {
+          attempts++;
+          if (window.db) {
+            clearInterval(check);
+            resolve(window.db);
+          } else if (attempts >= maxAttempts) {
+            clearInterval(check);
+            reject(new Error('Firebase not initialized'));
+          }
+        }, 200);
+      });
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        await waitForFirebase();
+        console.log('Firebase ready, loading products...');
+        loadProducts();
+        updateCartUI();
+      } catch (err) {
+        console.error('Firebase init error:', err);
+        document.getElementById('popularProducts').innerHTML = `
+          <div class="col-span-full text-center py-8">
+            <p class="text-red-500 mb-2">Connecting to database...</p>
+            <button onclick="location.reload()" class="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg">Refresh Page</button>
+          </div>
+        `;
+      }
+    });
+    
+    // Load products with flash deals
+    async function loadProducts() {
+      const db = window.db;
+      if (!db) {
+        console.warn('Firebase not initialized');
+        return;
+      }
+      
+      try {
+        // Dynamic import for Modular SDK
+        const { collection, query, getDocs, limit } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        
+        let snapshot;
+        
+        // Try menuItems collection first
+        try {
+          const menuQuery = query(collection(db, 'menuItems'), limit(12));
+          snapshot = await getDocs(menuQuery);
+        } catch (e) {
+          console.log('menuItems not accessible, trying products...');
+        }
+        
+        // Fallback to products collection
+        if (!snapshot || snapshot.empty) {
+          const productsQuery = query(collection(db, 'products'), limit(12));
+          snapshot = await getDocs(productsQuery);
+        }
+        
+        products = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: data.name || 'Unnamed Item',
+            description: data.description || '',
+            price: data.price || 0,
+            imageUrl: data.imageUrl || data.image || '',
+            category: data.category || 'General',
+            isAvailable: data.isAvailable !== false,
+            sellerId: data.sellerId || data.restaurantId || '',
+            seller: data.seller || data.restaurantName || 'SmartSoko'
+          };
+        });
+        
+        // Render all sections
+        renderProducts(products, 'popularProducts');
+        renderProducts(products.slice(4, 8), 'recommendedProducts');
+        renderFlashDeals(products.slice(0, 6));
+      } catch (error) {
+        console.error('Error loading products:', error);
+        document.getElementById('popularProducts').innerHTML = `
+          <div class="col-span-full text-center py-8">
+            <p class="text-red-500 mb-2">Failed to load products</p>
+            <button onclick="loadProducts()" class="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Retry</button>
+          </div>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>

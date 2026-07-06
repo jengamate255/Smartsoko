@@ -1,0 +1,144 @@
+✅ Firebase initialized successfully
+✅ Supabase initialized for advanced features
+
+╔════════════════════════════════════════════════════════╗
+║         SmartSoko - Secure Server Ready                ║
+╠════════════════════════════════════════════════════════╣
+║  Environment: development                           ║
+║  Port: 3000                                           ║
+║  Database: Connected                                  ║
+╠════════════════════════════════════════════════════════╣
+║  Features:                                             ║
+║  ✅ Firebase Auth verification                         ║
+║  ✅ Role-based access control                          ║
+║  ✅ Input validation (Zod)                             ║
+║  ✅ Rate limiting                                      ║
+║  ✅ Security headers (Helmet)                          ║
+╚════════════════════════════════════════════════════════╝
+
+[2026-05-09T20:47:37.805Z] [anon] GET /api/health
+[2026-05-09T21:04:28.723Z] [anon] GET /api/health
+[2026-05-09T21:04:28.760Z] [anon] GET /api/admin/system/logs
+[2026-05-09T21:14:19.725Z] [anon] GET /discovery.html
+[2026-05-09T21:14:19.905Z] [anon] GET /design-system.css
+[2026-05-09T21:14:19.911Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:14:19.912Z] [anon] GET /js/cart-service.js
+[2026-05-09T21:14:19.916Z] [anon] GET /dist/tailwind.css
+[2026-05-09T21:14:19.949Z] [anon] GET /nav-component.js
+[2026-05-09T21:14:20.945Z] [anon] GET /favicon.ico
+[2026-05-09T21:18:04.326Z] [anon] GET /api/health
+[2026-05-09T21:18:14.860Z] [anon] GET /test-api-integration.html
+[2026-05-09T21:18:15.491Z] [anon] GET /api/health
+[2026-05-09T21:18:16.488Z] [anon] GET /api/sellers
+[2026-05-09T21:18:17.912Z] [anon] GET /api/categories
+[2026-05-09T21:18:18.491Z] [anon] GET /api/config
+[2026-05-09T21:24:02.399Z] [anon] GET /api/health
+[2026-05-09T21:24:08.285Z] [anon] GET /api/sellers
+[2026-05-09T21:24:23.613Z] [anon] GET /api/categories
+[2026-05-09T21:24:25.824Z] [anon] GET /
+[2026-05-09T21:24:25.883Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:24:25.886Z] [anon] GET /js/data-service.js
+[2026-05-09T21:24:25.892Z] [anon] GET /nav-component.js
+[2026-05-09T21:24:25.929Z] [anon] GET /js/data-service.js
+[2026-05-09T21:27:08.016Z] [anon] GET /main
+[2026-05-09T21:27:59.175Z] [anon] GET /discovery
+[2026-05-09T21:27:59.206Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:27:59.211Z] [anon] GET /js/cart-service.js
+[2026-05-09T21:27:59.233Z] [anon] GET /design-system.css
+[2026-05-09T21:27:59.260Z] [anon] GET /nav-component.js
+[2026-05-09T21:28:23.091Z] [anon] GET /login
+[2026-05-09T21:28:23.146Z] [anon] GET /design-system.css
+[2026-05-09T21:28:23.147Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:28:23.148Z] [anon] GET /js/onboarding-guard.js
+[2026-05-09T21:28:50.923Z] [anon] GET /cart
+[2026-05-09T21:28:50.964Z] [anon] GET /js/cart-service.js
+[2026-05-09T21:28:50.996Z] [anon] GET /design-system.css
+[2026-05-09T21:28:51.087Z] [anon] GET /favicon.png
+[2026-05-09T21:29:07.248Z] [anon] GET /profile
+[2026-05-09T21:29:07.282Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:29:07.283Z] [anon] GET /design-system.css
+[2026-05-09T21:29:07.307Z] [anon] GET /auth-check.js
+[2026-05-09T21:29:07.309Z] [anon] GET /nav-component.js
+[2026-05-09T21:29:07.612Z] [anon] GET /login
+[2026-05-09T21:29:07.678Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:29:07.679Z] [anon] GET /js/onboarding-guard.js
+[2026-05-09T21:29:07.702Z] [anon] GET /design-system.css
+[2026-05-09T21:29:26.921Z] [anon] GET /customer
+[2026-05-09T21:29:26.993Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:29:26.995Z] [anon] GET /js/app-config.js
+[2026-05-09T21:29:26.995Z] [anon] GET /js/data-service.js
+[2026-05-09T21:29:26.996Z] [anon] GET /js/cart-service.js
+[2026-05-09T21:29:26.999Z] [anon] GET /js/customer-enhancements.js
+[2026-05-09T21:29:26.999Z] [anon] GET /config/api-config.js
+[2026-05-09T21:29:27.008Z] [anon] GET /design-system.css
+[2026-05-09T21:29:27.010Z] [anon] GET /config/mapbox-config.js
+[2026-05-09T21:29:27.042Z] [anon] GET /pwa/manifest.json
+[2026-05-09T21:29:27.091Z] [anon] GET /auth-check.js
+[2026-05-09T21:29:27.112Z] [anon] GET /nav-component.js
+[2026-05-09T21:29:27.362Z] [anon] GET /favicon.svg
+[2026-05-09T21:29:27.363Z] [anon] GET /login
+[2026-05-09T21:29:27.414Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:29:27.415Z] [anon] GET /js/onboarding-guard.js
+[2026-05-09T21:29:27.416Z] [anon] GET /design-system.css
+[2026-05-09T21:29:47.434Z] [anon] GET /merchant
+[2026-05-09T21:29:47.495Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:29:47.497Z] [anon] GET /js/merchant-enhancements.js
+[2026-05-09T21:29:47.498Z] [anon] GET /js/merchant-app.js
+[2026-05-09T21:29:47.499Z] [anon] GET /design-system.css
+[2026-05-09T21:29:47.527Z] [anon] GET /auth-check.js
+[2026-05-09T21:29:47.527Z] [anon] GET /js/inventory-manager.js
+[2026-05-09T21:29:47.529Z] [anon] GET /js/shopify-dashboard.js
+[2026-05-09T21:29:47.529Z] [anon] GET /js/vendor-dashboard.js
+[2026-05-09T21:29:47.530Z] [anon] GET /js/shopify-features.js
+[2026-05-09T21:29:47.549Z] [anon] GET /images/default-map.png
+[2026-05-09T21:29:47.560Z] [anon] GET /nav-component.js
+[2026-05-09T21:29:47.679Z] [anon] GET /login
+[2026-05-09T21:29:47.692Z] [anon] GET /login
+[2026-05-09T21:29:47.724Z] [anon] GET /design-system.css
+[2026-05-09T21:29:47.725Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:29:47.726Z] [anon] GET /js/onboarding-guard.js
+[2026-05-09T21:30:05.996Z] [anon] GET /home
+[2026-05-09T21:30:06.030Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:30:06.031Z] [anon] GET /js/cart-service.js
+[2026-05-09T21:30:24.108Z] [anon] GET /orders
+[2026-05-09T21:30:24.144Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:30:24.159Z] [anon] GET /design-system.css
+[2026-05-09T21:30:24.171Z] [anon] GET /nav-component.js
+[2026-05-09T21:30:24.175Z] [anon] GET /auth-check.js
+[2026-05-09T21:30:24.316Z] [anon] GET /login
+[2026-05-09T21:30:24.383Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:30:24.387Z] [anon] GET /js/onboarding-guard.js
+[2026-05-09T21:30:24.388Z] [anon] GET /design-system.css
+[2026-05-09T21:30:44.330Z] [anon] GET /test-api-integration.html
+[2026-05-09T21:30:44.924Z] [anon] GET /api/health
+[2026-05-09T21:30:45.888Z] [anon] GET /api/sellers
+[2026-05-09T21:30:46.885Z] [anon] GET /api/categories
+[2026-05-09T21:30:47.890Z] [anon] GET /api/config
+[2026-05-09T21:32:13.518Z] [anon] GET /api/health
+[2026-05-09T21:32:45.745Z] [anon] GET /
+[2026-05-09T21:32:45.832Z] [anon] GET /nav-component.js
+[2026-05-09T21:32:45.843Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:32:45.885Z] [anon] GET /js/data-service.js
+[2026-05-09T21:32:45.898Z] [anon] GET /js/data-service.js
+[2026-05-09T21:33:27.204Z] [anon] GET /admin
+[2026-05-09T21:33:27.415Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:33:27.417Z] [anon] GET /config/mapbox-config.js
+[2026-05-09T21:33:27.433Z] [anon] GET /design-system.css
+[2026-05-09T21:33:27.498Z] [anon] GET /pwa/manifest.json
+[2026-05-09T21:33:27.530Z] [anon] GET /nav-component.js
+[2026-05-09T21:33:27.580Z] [anon] GET /auth-check.js
+[2026-05-09T21:33:28.194Z] [anon] GET /favicon.svg
+[2026-05-09T21:33:29.342Z] [anon] GET /login
+[2026-05-09T21:33:29.762Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:33:29.764Z] [anon] GET /js/onboarding-guard.js
+[2026-05-09T21:33:29.911Z] [anon] GET /design-system.css
+[2026-05-09T21:33:52.094Z] [anon] GET /supabase
+[2026-05-09T21:34:09.753Z] [anon] GET /product
+[2026-05-09T21:34:09.794Z] [anon] GET /config/firebase-config.js
+[2026-05-09T21:34:09.797Z] [anon] GET /nav-component.js
+[2026-05-09T21:34:09.899Z] [anon] GET /images/default-product.png
+[2026-05-09T21:40:11.708Z] [anon] GET /api/health
+[2026-05-09T21:40:11.717Z] [anon] GET /api/admin/system/logs
+[2026-05-09T21:40:24.350Z] [anon] GET /pwa/manifest.json
+[2026-05-09T21:40:24.382Z] [anon] GET /.well-known/appspecific/com.chrome.devtools.json
+[2026-05-09T22:26:03.706Z] [anon] GET /main

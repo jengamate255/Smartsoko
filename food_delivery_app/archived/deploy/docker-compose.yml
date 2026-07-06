@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # Food Delivery Web App
+  food-delivery-web:
+    build: ./docker
+    container_name: food-delivery-web
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx Load Balancer (optional for production)
+  nginx-lb:
+    image: nginx:alpine
+    container_name: food-delivery-lb
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx-lb.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - food-delivery-web
+    restart: unless-stopped
+    profiles:
+      - production
+
+  # Redis for caching (optional)
+  redis-cache:
+    image: redis:alpine
+    container_name: food-delivery-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    profiles:
+      - production
+
+volumes:
+  redis_data:
+
+networks:
+  default:
+    name: food-delivery-network

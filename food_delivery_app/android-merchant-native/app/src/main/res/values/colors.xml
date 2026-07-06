@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Colors -->
+    <color name="primary">#10B981</color>
+    <color name="primary_dark">#059669</color>
+    <color name="primary_light">#34D399</color>
+    <color name="accent">#F59E0B</color>
+
+    <!-- Semantic Colors -->
+    <color name="success">#10B981</color>
+    <color name="error">#EF4444</color>
+    <color name="warning">#F59E0B</color>
+    <color name="info">#3B82F6</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#111827</color>
+    <color name="text_secondary">#6B7280</color>
+    <color name="text_hint">#9CA3AF</color>
+
+    <!-- Background -->
+    <color name="background">#F9FAFB</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="divider">#E5E7EB</color>
+
+    <!-- Status Colors -->
+    <color name="status_pending">#F59E0B</color>
+    <color name="status_accepted">#3B82F6</color>
+    <color name="status_ready">#8B5CF6</color>
+    <color name="status_delivered">#10B981</color>
+    <color name="status_cancelled">#EF4444</color>
+
+    <!-- Legacy Colors -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

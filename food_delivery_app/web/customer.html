@@ -1,0 +1,1966 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <!-- Performance: Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartSoko - Customer Marketplace</title>
+  <meta name="description" content="Shop from local SMEs and businesses at SmartSoko. Discover food, electronics, fashion, home goods, services, and more. Support local entrepreneurs in your community.">
+
+  <meta name="theme-color" content="#012d1d">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="SmartSoko">
+  <link rel="manifest" href="pwa/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="pwa/icons/icon-192x192.png">
+  <!-- Firebase Modular SDK -->
+  <script type="module" src="config/firebase-config.js?v=3"></script>
+  <!-- App Configuration Service -->
+  <script src="js/app-config.js"></script>
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link rel="stylesheet" href="design-system.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script type="module" src="js/data-service.js?v=4"></script>
+  <script src="auth-check.js?v=4" defer></script>
+  <script src="js/cart-service.js?v=3"></script>
+  <script src="js/customer-enhancements.js?v=4"></script>
+  <script src="nav-component.js?v=3" defer></script>
+  <script src="config/api-config.js?v=3"></script>
+  <script src="config/mapbox-config.js"></script>
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
+  <style> /* Modern sleek design system */ :root {--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);--shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1),0 1px 2px -1px rgb(0 0 0 / 0.1);--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),0 2px 4px -2px rgb(0 0 0 / 0.1);--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),0 4px 6px -4px rgb(0 0 0 / 0.1);--shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1),0 8px 10px -6px rgb(0 0 0 / 0.1);--shadow-primary: 0 10px 40px -10px rgba(1,45,29,0.4);--radius-sm: 0.75rem;--radius: 1rem;--radius-lg: 1.5rem;--radius-xl: 2rem;--radius-full: 9999px} .material-symbols-outlined {font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24} /* Hide scrollbar but keep functionality */ .hide-scrollbar::-webkit-scrollbar {display: none} .hide-scrollbar {-ms-overflow-style: none;scrollbar-width: none} /* Sleek card design with glassmorphism */ .card-hover {transition: all 0.4s cubic-bezier(0.4,0,0.2,1);box-shadow: var(--shadow)} .card-hover:hover {transform: translateY(-4px);box-shadow: var(--shadow-primary)} /* Category chip styles */ .filter-chip {transition: all 0.3s cubic-bezier(0.4,0,0.2,1);box-shadow: var(--shadow-sm)} .filter-chip:hover {transform: translateY(-2px);box-shadow: var(--shadow-md)} .filter-chip.active {background: linear-gradient(135deg,#012d1d 0%,#024a30 100%);color: white;border-color: transparent;box-shadow: var(--shadow-primary)} /* Search input enhancement */ .search-container {position: relative;transition: all 0.3s ease} .search-input {transition: all 0.3s cubic-bezier(0.4,0,0.2,1);box-shadow: var(--shadow)} .search-input:focus {box-shadow: var(--shadow-primary),0 0 0 3px rgba(1,45,29,0.1)} /* Modern floating animation */ .floating {animation: float 6s ease-in-out infinite} @keyframes float {0%,100% {transform: translateY(0px) rotate(0deg)} 50% {transform: translateY(-15px) rotate(2deg)} } /* Smooth slide animations */ .slide-in {animation: slideIn 0.6s cubic-bezier(0.4,0,0.2,1) forwards;opacity: 0} @keyframes slideIn {from {opacity: 0;transform: translateY(20px)} to {opacity: 1;transform: translateY(0)} } /* Staggered animations */ .stagger-1 {animation-delay: 0.1s} .stagger-2 {animation-delay: 0.2s} .stagger-3 {animation-delay: 0.3s} /* Modal transitions */ .menu-modal {transition: opacity 0.3s cubic-bezier(0.4,0,0.2,1)} .menu-content {transition: transform 0.4s cubic-bezier(0.4,0,0.2,1)} .cart-sidebar {transition: transform 0.4s cubic-bezier(0.4,0,0.2,1)} /* Restaurant image with gradient overlay */ .restaurant-image {background: linear-gradient(135deg,#012d1d 0%,#024a30 50%,#012d1d 100%);position: relative;overflow: hidden} .restaurant-image::before {content: '';position: absolute;top: 0;left: 0;right: 0;bottom: 0;background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.08"><circle cx="30" cy="30" r="4"/></g></g></svg>');opacity: 0.6} .restaurant-image::after {content: '';position: absolute;bottom: 0;left: 0;right: 0;height: 50%;background: linear-gradient(to top,rgba(0,0,0,0.3),transparent)} /* Nav tab styles */ .nav-tab {transition: all 0.2s ease;position: relative} .nav-tab::after {content: '';position: absolute;bottom: 0;left: 50%;width: 0;height: 2px;background: #012d1d;transition: all 0.3s ease;transform: translateX(-50%)} .nav-tab:hover::after,.nav-tab.active::after {width: 60%} /* Button press effect */ .btn-press {transition: transform 0.1s ease,box-shadow 0.2s ease} .btn-press:active {transform: scale(0.96)} /* Skeleton loading animation */ .skeleton {background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size: 200% 100%;animation: shimmer 1.5s infinite} @keyframes shimmer {0% {background-position: 200% 0} 100% {background-position: -200% 0} } /* Glass card effect */ .glass-card {background: rgba(255,255,255,0.8);backdrop-filter: blur(12px);border: 1px solid rgba(255,255,255,0.3)} /* Modern section spacing */ section {margin-bottom: 2rem} /* Smooth page transitions */ * {scroll-behavior: smooth} </style>
+</head>
+<body class="bg-background text-on-surface font-body">
+<!-- Header and Navigation are handled by SmartNav component -->
+<div class="h-20 md:h-24"></div> 
+
+<main class="pb-24 px-4 sm:px-6 max-w-7xl mx-auto animate-premium">
+  <!-- Location Selector - Contextual for Marketplace -->
+  <div class="mb-8 slide-in stagger-1">
+    <div class="flex items-center gap-4 py-2 px-1 cursor-pointer group" onclick="showAddressModal()">
+      <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors">
+        <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">location_on</span>
+      </div>
+      <div>
+        <h2 class="text-[11px] font-bold text-on-surface-variant uppercase tracking-widest mb-0.5">Delivery Address</h2>
+        <div class="flex items-center gap-2">
+          <span id="displayAddress" class="text-base font-bold text-on-surface group-hover:text-primary transition-colors">Select delivery location</span>
+          <span class="material-symbols-outlined text-on-surface-variant text-sm group-hover:text-primary">expand_more</span>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Search Bar Section -->
+<section class="mb-8 slide-in stagger-1">
+<div class="search-container relative max-w-2xl mx-auto">
+<span class="absolute left-5 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant/60 z-10">search</span>
+<input class="search-input w-full pl-14 pr-6 py-4 bg-surface border border-outline/30 rounded-2xl font-body text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary/50" placeholder="Search sellers, products, or cuisines..." type="text" id="searchInput" onkeyup="filterRestaurants()">
+</div>
+</section>
+
+<!-- Seller Categories -->
+<section class="mb-10 slide-in stagger-2">
+<div class="flex items-center justify-between mb-5">
+<h2 class="font-headline text-lg font-semibold text-on-surface">Browse by Category</h2>
+<button class="text-sm font-medium text-primary hover:text-primary-dark transition-colors flex items-center gap-1">
+  See all <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<div class="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
+<button class="filter-chip active btn-press flex items-center gap-2 px-5 py-3 rounded-xl bg-surface border border-outline/50 whitespace-nowrap" onclick="filterByCategory('all')">
+<span class="material-symbols-outlined text-lg">apps</span>
+<span class="text-sm font-medium">All</span>
+</button>
+<button class="filter-chip btn-press flex items-center gap-2 px-5 py-3 rounded-xl bg-surface border border-outline/50 whitespace-nowrap" onclick="filterByCategory('food')">
+<span class="material-symbols-outlined text-lg">lunch_dining</span>
+<span class="text-sm font-medium">Food</span>
+</button>
+<button class="filter-chip btn-press flex items-center gap-2 px-5 py-3 rounded-xl bg-surface border border-outline/50 whitespace-nowrap" onclick="filterByCategory('groceries')">
+<span class="material-symbols-outlined text-lg">shopping_basket</span>
+<span class="text-sm font-medium">Retail</span>
+</button>
+<button class="filter-chip btn-press flex items-center gap-2 px-5 py-3 rounded-xl bg-surface border border-outline/50 whitespace-nowrap" onclick="filterByCategory('electronics')">
+<span class="material-symbols-outlined text-lg">devices</span>
+<span class="text-sm font-medium">Electronics</span>
+</button>
+<button class="filter-chip btn-press flex items-center gap-2 px-5 py-3 rounded-xl bg-surface border border-outline/50 whitespace-nowrap" onclick="filterByCategory('fashion')">
+<span class="material-symbols-outlined text-lg">checkroom</span>
+<span class="text-sm font-medium">Fashion</span>
+</button>
+<button class="filter-chip btn-press flex items-center gap-2 px-5 py-3 rounded-xl bg-surface border border-outline/50 whitespace-nowrap" onclick="filterByCategory('beauty')">
+<span class="material-symbols-outlined text-lg">spa</span>
+<span class="text-sm font-medium">Beauty</span>
+</button>
+<button class="filter-chip btn-press flex items-center gap-2 px-5 py-3 rounded-xl bg-surface border border-outline/50 whitespace-nowrap" onclick="filterByCategory('home')">
+<span class="material-symbols-outlined text-lg">home</span>
+<span class="text-sm font-medium">Home</span>
+</button>
+<button class="filter-chip btn-press flex items-center gap-2 px-5 py-3 rounded-xl bg-surface border border-outline/50 whitespace-nowrap" onclick="filterByCategory('services')">
+<span class="material-symbols-outlined text-lg">build</span>
+<span class="text-sm font-medium">Services</span>
+</button>
+<button class="filter-chip btn-press flex items-center gap-2 px-5 py-3 rounded-xl bg-surface border border-outline/50 whitespace-nowrap" onclick="filterByCategory('healthcare')">
+<span class="material-symbols-outlined text-lg">local_hospital</span>
+<span class="text-sm font-medium">Health</span>
+</button>
+</div>
+</section>
+
+<!-- Featured Banner -->
+<section class="mb-10 slide-in stagger-3">
+<div class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-secondary p-8 shadow-xl">
+<!-- Decorative elements -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-3xl"></div>
+<div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4 blur-2xl"></div>
+
+<div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+<div class="flex-1">
+<div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full mb-4">
+<span class="material-symbols-outlined text-sm text-white">local_fire_department</span>
+<span class="text-xs font-semibold text-white tracking-wide uppercase">Limited Time</span>
+</div>
+<h2 class="font-headline text-3xl md:text-4xl font-bold text-white mb-2 leading-tight">30% Off<br>Your First Order</h2>
+
+<p class="text-white/80 text-sm mb-6 max-w-xs">Discover local favorites with code <span class="font-mono font-bold text-white bg-white/20 px-2 py-1 rounded">FIRST30</span></p>
+<button class="btn-press bg-white text-primary px-6 py-3 rounded-xl text-sm font-semibold hover:bg-white/90 transition-all shadow-lg">
+Order Now <span class="material-symbols-outlined text-sm ml-1">arrow_forward</span>
+</button>
+</div>
+<!-- Floating food icons -->
+<div class="hidden md:flex items-center gap-4">
+<div class="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center floating">
+<span class="material-symbols-outlined text-3xl text-white/80">restaurant</span>
+</div>
+<div class="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center floating" style="animation-delay: 0.5s;">
+<span class="material-symbols-outlined text-2xl text-white/80">local_pizza</span>
+</div>
+<div class="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center floating" style="animation-delay: 1s;">
+<span class="material-symbols-outlined text-xl text-white/80">bakery_dining</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Map View Section -->
+<section class="mb-10">
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h2 class="font-headline text-lg font-semibold text-on-surface">Nearby Sellers</h2>
+      <p class="text-sm text-on-surface-variant mt-1">Discover sellers in your area</p>
+    </div>
+    <button class="btn-press flex items-center gap-2 bg-surface border border-outline/50 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-surface-variant transition-all" onclick="toggleMap()">
+      <span class="material-symbols-outlined text-primary text-lg">map</span>
+      <span class="hidden sm:inline">View Map</span>
+    </button>
+  </div>
+  <div id="mapContainer" class="rounded-3xl shadow-lg overflow-hidden h-80 border border-outline/20" style="display: none;">
+    <div id="map" class="w-full h-full"></div>
+  </div>
+</section>
+
+<!-- Sellers Grid -->
+<section class="mb-12">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h2 class="font-headline text-xl font-bold text-on-surface">Popular Sellers</h2>
+<p class="text-sm text-on-surface-variant mt-1">Top-rated sellers in your area</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="btn-press p-2.5 rounded-xl bg-surface border border-outline/50 hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined text-on-surface-variant">tune</span>
+</button>
+<button class="btn-press p-2.5 rounded-xl bg-surface border border-outline/50 hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined text-on-surface-variant">sort</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" id="restaurantsGrid">
+  <!-- Loading skeleton -->
+  <div class="col-span-full flex flex-col items-center justify-center py-16">
+    <div class="w-12 h-12 border-3 border-primary/30 border-t-primary rounded-full animate-spin mb-4"></div>
+    <p class="text-on-surface-variant text-sm">Discovering sellers near you...</p>
+  </div>
+</div>
+</section>
+
+<!-- Recommendations - Loaded dynamically -->
+<section class="mb-8">
+<div class="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-6 border border-primary/20">
+<h2 class="font-headline text-lg font-bold text-primary mb-4">Recommended for You</h2>
+
+<div id="recommendationsList" class="space-y-3">
+  <p class="text-on-surface-variant text-sm text-center py-4">Explore our sellers to get personalized recommendations</p>
+</div>
+</div>
+</section>
+
+<!-- Recent Orders Section -->
+<section class="mb-10" id="recentOrdersSection">
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h2 class="font-headline text-lg font-semibold text-on-surface">Your Orders</h2>
+      <p class="text-sm text-on-surface-variant mt-1">Track and reorder your recent purchases</p>
+    </div>
+    <a href="/orders" class="text-sm font-medium text-primary hover:text-primary-dark transition-colors flex items-center gap-1">
+      View All <span class="material-symbols-outlined text-sm">arrow_forward</span>
+    </a>
+  </div>
+  <div id="recentOrdersList" class="space-y-3">
+    <!-- Orders will be loaded here -->
+    <div class="bg-surface rounded-xl p-6 text-center border border-outline/30">
+      <span class="material-symbols-outlined text-4xl text-on-surface-variant mb-2">receipt_long</span>
+      <p class="text-on-surface-variant text-sm">No orders yet. Start shopping!</p>
+    </div>
+  </div>
+</section>
+
+<!-- Favorites Section -->
+<section class="mb-10" id="favoritesSection">
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h2 class="font-headline text-lg font-semibold text-on-surface">Your Favorites</h2>
+      <p class="text-sm text-on-surface-variant mt-1">Quick access to your loved sellers</p>
+    </div>
+  </div>
+  <div id="favoritesList" class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+    <!-- Favorites will be loaded here -->
+    <div class="bg-surface rounded-xl p-6 text-center border border-outline/30 min-w-[200px]">
+      <span class="material-symbols-outlined text-4xl text-on-surface-variant mb-2">favorite_border</span>
+      <p class="text-on-surface-variant text-sm">No favorites yet</p>
+    </div>
+  </div>
+</section>
+
+<!-- Active Promotions -->
+<section class="mb-10">
+  <div class="flex items-center justify-between mb-5">
+    <h2 class="font-headline text-lg font-semibold text-on-surface">Special Offers</h2>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="promotionsList">
+    <div class="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl p-4 text-white">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="material-symbols-outlined">local_offer</span>
+        <span class="text-xs font-semibold uppercase">Limited Time</span>
+      </div>
+      <h3 class="font-bold text-lg mb-1">Free Delivery</h3>
+      <p class="text-sm text-white/80">On orders over TSh 50,000</p>
+      <button class="mt-3 bg-white text-orange-600 px-4 py-2 rounded-lg text-sm font-semibold">Order Now</button>
+    </div>
+    <div class="bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl p-4 text-white">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="material-symbols-outlined">card_giftcard</span>
+        <span class="text-xs font-semibold uppercase">New Users</span>
+      </div>
+      <h3 class="font-bold text-lg mb-1">20% Off First Order</h3>
+      <p class="text-sm text-white/80">Use code: WELCOME20</p>
+      <button class="mt-3 bg-white text-purple-600 px-4 py-2 rounded-lg text-sm font-semibold">Claim Now</button>
+    </div>
+    <div class="bg-gradient-to-br from-green-500 to-teal-500 rounded-xl p-4 text-white">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="material-symbols-outlined">loyalty</span>
+        <span class="text-xs font-semibold uppercase">Loyalty</span>
+      </div>
+      <h3 class="font-bold text-lg mb-1">Earn Points</h3>
+      <p class="text-sm text-white/80">Get 1 point per TSh 1,000 spent</p>
+      <button class="mt-3 bg-white text-green-600 px-4 py-2 rounded-lg text-sm font-semibold">Learn More</button>
+    </div>
+  </div>
+</section>
+
+<!-- Recently Viewed -->
+<section class="mb-10" id="recentlyViewedSection">
+  <div class="flex items-center justify-between mb-5">
+    <h2 class="font-headline text-lg font-semibold text-on-surface">Recently Viewed</h2>
+    <button onclick="clearRecentlyViewed()" class="text-sm text-on-surface-variant hover:text-primary transition-colors">Clear</button>
+  </div>
+  <div id="recentlyViewedList" class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+    <!-- Recently viewed items will be loaded here -->
+  </div>
+</section>
+
+<!-- Quick Actions -->
+<section class="mb-8">
+  <h2 class="font-headline text-lg font-semibold text-on-surface mb-4">Quick Actions</h2>
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <a href="/orders" class="bg-surface p-4 rounded-xl border border-outline/30 hover:border-primary/30 hover:shadow-md transition-all text-center">
+      <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-2">
+        <span class="material-symbols-outlined text-primary">receipt_long</span>
+      </div>
+      <p class="font-medium text-sm">My Orders</p>
+    </a>
+    <a href="/profile" class="bg-surface p-4 rounded-xl border border-outline/30 hover:border-primary/30 hover:shadow-md transition-all text-center">
+      <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+        <span class="material-symbols-outlined text-blue-600">person</span>
+      </div>
+      <p class="font-medium text-sm">Profile</p>
+    </a>
+    <a href="/chat" class="bg-surface p-4 rounded-xl border border-outline/30 hover:border-primary/30 hover:shadow-md transition-all text-center">
+      <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+        <span class="material-symbols-outlined text-green-600">chat</span>
+      </div>
+      <p class="font-medium text-sm">Support</p>
+    </a>
+    <button onclick="showAddressModal()" class="bg-surface p-4 rounded-xl border border-outline/30 hover:border-primary/30 hover:shadow-md transition-all text-center">
+      <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+        <span class="material-symbols-outlined text-orange-600">location_on</span>
+      </div>
+      <p class="font-medium text-sm">Addresses</p>
+    </button>
+  </div>
+</section>
+</main>
+    <!-- Menu Modal -->
+<div class="menu-modal fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden" id="menuModal">
+<div class="menu-content bg-surface h-[90vh] overflow-y-auto mt-[10vh] rounded-t-[3rem] relative">
+<div class="menu-header sticky top-0 bg-surface p-6 border-b border-outline z-10">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<button id="backBtn" class="close-btn hover:opacity-80 transition-opacity active:scale-95 duration-200" onclick="closeMenu()">
+<span class="material-symbols-outlined">close</span>
+</button>
+<div>
+<h3 class="font-headline text-xl font-bold text-on-surface" id="restaurantName">Restaurant Name</h3>
+<p class="text-on-surface-variant text-sm">African • Continental</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1 text-warning text-sm">
+<span class="material-symbols-outlined text-sm">star</span>
+<span class="font-semibold">4.8</span>
+</div>
+<span class="text-on-surface-variant text-sm">• 25-35 min</span>
+</div>
+</div>
+</div>
+
+<div class="menu-items p-6">
+<!-- Menu Categories -->
+<div class="mb-6">
+<div class="flex gap-2 overflow-x-auto hide-scrollbar mb-4">
+<button class="bg-primary text-on-primary px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap">Popular</button>
+<button class="bg-surface border border-outline px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-variant transition">Main Course</button>
+<button class="bg-surface border border-outline px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-variant transition">Appetizers</button>
+<button class="bg-surface border border-outline px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-variant transition">Desserts</button>
+<button class="bg-surface border border-outline px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-variant transition">Drinks</button>
+</div>
+</div>
+
+<!-- Menu Items - Loaded dynamically -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="menuItemsList">
+  <div class="col-span-full text-center py-8">
+    <div class="inline-block w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+    <p class="text-on-surface-variant">Loading menu...</p>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Cart Sidebar -->
+<div class="cart-sidebar fixed right-0 top-0 bottom-0 w-96 bg-surface shadow-2xl transform translate-x-full transition-transform duration-300 z-50" id="cartSidebar">
+<div class="cart-header p-6 border-b border-outline">
+<div class="flex items-center justify-between">
+<h3 class="font-headline text-lg font-bold text-on-surface">Your Cart</h3>
+<button class="close-btn hover:opacity-80 transition-opacity active:scale-95 duration-200" onclick="toggleCart()">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</div>
+<div class="cart-items p-6 flex-1 overflow-y-auto" id="cartItems">
+<div class="text-center py-8">
+<span class="material-symbols-outlined text-6xl text-on-surface-variant mb-4">shopping_cart</span>
+<p class="text-on-surface-variant">Your cart is empty</p>
+<p class="text-on-surface-variant text-sm">Add items from restaurants to get started</p>
+</div>
+</div>
+<div class="cart-footer p-6 border-t border-outline">
+<div class="mb-4">
+<div class="flex justify-between items-center mb-2">
+<span class="text-on-surface-variant">Subtotal</span>
+<span class="font-semibold text-on-surface" id="cartSubtotal">TZS 0</span>
+</div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-on-surface-variant">Delivery Fee</span>
+<span class="font-semibold text-on-surface" id="deliveryFee">TZS 3,000</span>
+</div>
+<div class="flex justify-between items-center pt-2 border-t border-outline">
+<span class="font-headline text-lg font-bold text-on-surface">Total</span>
+<span class="font-headline text-lg font-bold text-primary" id="cartTotal">TZS 3,000</span>
+</div>
+</div>
+<button class="checkout-btn w-full bg-primary text-on-primary py-4 rounded-2xl font-headline font-bold hover:bg-primary-dark transition-all active:scale-95" onclick="window.location.href='/checkout'">
+  Proceed to Checkout
+</button>
+</div>
+</div>
+
+<!-- Bottom Navigation handled by SmartNav -->
+
+        <script>
+    // State management
+    let cart = [];
+    let currentSeller = null;
+    let sellers = [];
+    
+    // Load sellers from Firebase on page load
+    async function loadSellers() {
+      try {
+        // Try loading from Firebase first
+        if (typeof window.loadSellersFromFirebase === 'function') {
+          const firebaseSellers = await window.loadSellersFromFirebase();
+          if (firebaseSellers && firebaseSellers.length > 0) {
+            sellers = firebaseSellers;
+            console.log(`Loaded ${sellers.length} sellers from Firebase`);
+            renderRestaurants();
+            return;
+          }
+        }
+        
+        // Fallback: Load from API or use demo data
+        console.log('Loading sellers from API/demo data');
+        // You can add API call here or use existing DataService
+        renderRestaurants();
+      } catch (error) {
+        console.error('Error loading sellers:', error);
+        renderRestaurants();
+      }
+    }
+    let deliveryCoords = null;
+    try {
+      deliveryCoords = JSON.parse(localStorage.getItem('smartsoko_delivery_coords') || 'null');
+    } catch (e) {
+      console.error('Error parsing delivery coords:', e);
+      deliveryCoords = null;
+    }
+
+    // XSS sanitization helper
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      SmartNav.init({ activePage: 'cart', role: 'customer' });
+      
+      // Load sellers from Firebase
+      loadSellers();
+      
+      loadRestaurants().then(() => {
+        // Handle direct seller link
+        const urlParams = new URLSearchParams(window.location.search);
+        const sellerId = urlParams.get('seller');
+        if (sellerId) {
+          const seller = sellers.find(s => s.id === sellerId);
+          if (seller) openMenu(seller.id, seller.name);
+        }
+      });
+      // Load cart using CartService
+      if (window.CartService) {
+        cart = CartService.getCart();
+      } else {
+        // Fallback to localStorage with normalization
+        const savedCart = localStorage.getItem('smartsoko_cart');
+        if (savedCart) {
+          try {
+            cart = JSON.parse(savedCart).map(item => ({
+              id: item.id || item.productId || item.name,
+              name: item.name,
+              price: item.price,
+              quantity: item.quantity || item.qty || 1,
+              imageUrl: item.imageUrl || null,
+              merchantId: item.merchantId || item.sellerId || null,
+              sellerName: item.sellerName || null,
+              sellerLat: item.sellerLat ?? null,
+              sellerLng: item.sellerLng ?? null
+            }));
+          } catch (e) {
+            console.error('Error parsing cart from localStorage', e);
+          }
+        }
+      }
+      
+      setupEventListeners();
+      updateCartUI();
+      loadRecentlyViewed();
+      loadSavedAddress();
+      
+      // Load user-specific data if logged in
+      const auth = window.auth;
+      if (auth && auth.currentUser) {
+        loadRecentOrders();
+        loadFavorites();
+      }
+      
+      // Listen for auth state changes to load user data
+      if (auth && typeof auth.onAuthStateChanged === 'function') {
+        auth.onAuthStateChanged((user) => {
+          if (user) {
+            loadRecentOrders();
+            loadFavorites();
+          }
+        });
+      }
+    });
+
+    function loadSavedAddress() {
+      const savedAddress = localStorage.getItem('smartsoko_address') || localStorage.getItem('smartsoko_user_address');
+      if (savedAddress) {
+        const displayEl = document.getElementById('displayAddress');
+        if (displayEl) {
+          displayEl.textContent = savedAddress.substring(0, 35) + (savedAddress.length > 35 ? '...' : '');
+        }
+      }
+    }
+
+    function setupEventListeners() {
+      // Add scroll animations
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('slide-in');
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll('section').forEach(section => {
+        observer.observe(section);
+      });
+    }
+
+    // Seller functions - Using DataService
+    async function loadRestaurants() {
+      try {
+        // Check if DataService is available
+        if (typeof DataService === 'undefined') {
+          console.warn('DataService not loaded yet, retrying...');
+          setTimeout(loadRestaurants, 500);
+          return;
+        }
+        const data = await DataService.getSellers();
+        sellers = data.data || [];
+        renderRestaurants();
+      } catch (error) {
+        console.error('Error loading sellers:', error);
+        document.getElementById('restaurantsGrid').innerHTML = '<p class="text-red-500 text-center py-8">Failed to load sellers. Please try again.</p>';
+      }
+    }
+
+    // Replace openMenu to use DataService
+    async function openMenu(id, name) {
+      // Check if DataService is available
+      if (typeof DataService === 'undefined') {
+        console.error('DataService not available');
+        showNotification('Error loading menu. Please refresh the page.');
+        return;
+      }
+      
+      currentSeller = sellers.find(s => s.id === id) || { id, name };
+      document.getElementById('restaurantName').innerText = name;
+      document.getElementById('menuModal').classList.remove('hidden');
+      
+      const menuList = document.getElementById('menuItemsList');
+      menuList.innerHTML = '<div class="col-span-full text-center py-8"><div class="inline-block w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div></div>';
+      
+      try {
+        const data = await DataService.getProducts(id);
+        const items = data.data || [];
+        
+        if (items.length === 0) {
+          menuList.innerHTML = '<p class="col-span-full text-center py-8 text-on-surface-variant">No items found for this restaurant.</p>';
+          return;
+        }
+        
+        // Use grid layout for better visual appeal
+        menuList.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4';
+        
+        menuList.innerHTML = items.map(item => `
+          <div class="bg-surface rounded-2xl overflow-hidden border border-outline/20 hover:border-primary/30 hover:shadow-lg transition-all group cursor-pointer" onclick="addToCart({id: '${item.id}', name: '${escapeHtml(item.name)}', price: ${item.price}, imageUrl: '${escapeHtml(item.imageUrl)}', sellerId: '${id}', sellerName: '${escapeHtml(name)}'})">
+            <!-- Large Image Area -->
+            <div class="aspect-[4/3] w-full overflow-hidden bg-surface-container relative">
+              ${item.imageUrl ? `<img src="${item.imageUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-primary-fixed to-primary-fixed-dim flex items-center justify-center\'><span class=\'material-symbols-outlined text-5xl text-primary\'>restaurant</span></div>'">` : `<div class="w-full h-full bg-gradient-to-br from-primary-fixed to-primary-fixed-dim flex items-center justify-center"><span class="material-symbols-outlined text-5xl text-primary">restaurant</span></div>`}
+              <!-- Category Badge -->
+              <span class="absolute top-3 left-3 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm">${item.category || 'Food'}</span>
+            </div>
+            <!-- Content -->
+            <div class="p-4">
+              <h3 class="font-bold text-lg text-on-surface mb-1 line-clamp-1">${item.name}</h3>
+              <p class="text-sm text-on-surface-variant line-clamp-2 mb-3">${item.description || 'Fresh and delicious'}</p>
+              <div class="flex items-center justify-between">
+                <p class="font-bold text-xl text-primary">TZS ${item.price?.toLocaleString()}</p>
+                <button class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center hover:bg-primary-dark transition-all active:scale-90 shadow-lg shadow-primary/20">
+                  <span class="material-symbols-outlined">add</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Error loading menu:', error);
+        menuList.innerHTML = '<p class="text-red-500 text-center py-8">Failed to load menu.</p>';
+      }
+    }
+
+    function renderRestaurants(filteredSellers = null) {
+      const grid = document.getElementById('restaurantsGrid');
+      const sellersToRender = filteredSellers || sellers;
+      
+      const categoryIcons = {
+        'food': 'restaurant',
+        'dairy': 'local_drink',
+        'fruits': 'nutrition',
+        'groceries': 'shopping_basket',
+        'bakery': 'bakery_dining',
+        'electronics': 'devices',
+        'fashion': 'checkroom',
+        'beauty': 'spa',
+        'home': 'home',
+        'hardware': 'hardware',
+        'sports': 'sports',
+        'services': 'build',
+        'healthcare': 'local_hospital',
+        'education': 'school',
+        'transport': 'local_shipping',
+        'repair': 'handyman'
+      };
+      
+      // Get favorites from localStorage for quick check
+      const favorites = JSON.parse(localStorage.getItem('favoriteSellers') || '[]');
+      
+      grid.innerHTML = sellersToRender.map((seller, index) => `
+        <div class="group bg-surface rounded-2xl overflow-hidden card-hover cursor-pointer border border-outline/20 relative" style="animation: slideIn 0.5s ease ${index * 0.05}s forwards; opacity: 0;">
+          <!-- Card Image -->
+          <div class="restaurant-image h-44 flex items-center justify-center relative" onclick="openMenu('${seller.id}', '${seller.name}')">
+            <span class="material-symbols-outlined text-5xl text-white/90 relative z-10 drop-shadow-lg">${categoryIcons[seller.category] || 'storefront'}</span>
+            <!-- Status Badge -->
+            <div class="absolute top-3 right-3 ${seller.isOpen ? 'bg-success' : 'bg-warning'} text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg backdrop-blur-sm">
+              ${seller.isOpen ? 'Open' : 'Closed'}
+            </div>
+            <!-- Favorite Button -->
+            <button onclick="event.stopPropagation(); toggleFavoriteLocal('${seller.id}')" class="absolute top-3 left-3 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:bg-white transition-all z-20" title="Add to favorites">
+              <span class="material-symbols-outlined text-lg ${favorites.includes(seller.id) ? 'text-red-500' : 'text-gray-400'}" id="fav-${seller.id}" style="font-variation-settings: 'FILL' ${favorites.includes(seller.id) ? 1 : 0};">favorite</span>
+            </button>
+            <!-- Gradient overlay at bottom -->
+            <div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/20 to-transparent"></div>
+          </div>
+          <!-- Card Content -->
+          <div class="p-4" onclick="openMenu('${seller.id}', '${seller.name}')">
+            <!-- Header Row -->
+            <div class="flex items-start justify-between mb-2">
+              <div class="flex-1 min-w-0">
+                <h3 class="font-headline text-base font-bold text-on-surface truncate">${seller.name}</h3>
+                <p class="text-on-surface-variant text-xs mt-0.5">${(seller.category || 'food').charAt(0).toUpperCase() + (seller.category || 'food').slice(1)}</p>
+              </div>
+              <!-- Rating Badge -->
+              <div class="flex items-center gap-1 bg-warning/10 px-2 py-1 rounded-lg">
+                <span class="material-symbols-outlined text-xs text-warning" style="font-variation-settings: 'FILL' 1;">star</span>
+                <span class="text-xs font-semibold text-on-surface">${seller.rating || '4.5'}</span>
+              </div>
+            </div>
+            <!-- Info Row -->
+            <div class="flex items-center gap-3 text-xs text-on-surface-variant mt-3">
+              <div class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">schedule</span>
+                <span>${seller.deliveryTime || '25-35 min'}</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">local_shipping</span>
+                <span>TSh ${seller.deliveryFee?.toLocaleString() || '—'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Local favorite toggle for UI only (syncs with Firebase when logged in)
+    function toggleFavoriteLocal(sellerId) {
+      const auth = window.auth;
+      const currentUser = auth ? auth.currentUser : null;
+      let favorites = JSON.parse(localStorage.getItem('favoriteSellers') || '[]');
+      
+      const index = favorites.indexOf(sellerId);
+      const favIcon = document.getElementById(`fav-${sellerId}`);
+      
+      if (index > -1) {
+        favorites.splice(index, 1);
+        if (favIcon) {
+          favIcon.classList.remove('text-red-500');
+          favIcon.classList.add('text-gray-400');
+          favIcon.style.fontVariationSettings = "'FILL' 0";
+        }
+        showNotification('Removed from favorites');
+      } else {
+        favorites.push(sellerId);
+        if (favIcon) {
+          favIcon.classList.add('text-red-500');
+          favIcon.classList.remove('text-gray-400');
+          favIcon.style.fontVariationSettings = "'FILL' 1";
+        }
+        showNotification('Added to favorites!');
+      }
+      
+      localStorage.setItem('favoriteSellers', JSON.stringify(favorites));
+      
+      // Also sync with Firebase if logged in
+      if (currentUser) {
+        toggleFavorite(sellerId);
+      }
+    }
+
+    // Filter functions
+    function filterRestaurants() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = sellers.filter(seller => 
+        seller.name.toLowerCase().includes(searchTerm) ||
+        (seller.category || '').toLowerCase().includes(searchTerm)
+      );
+      renderRestaurants(filtered);
+    }
+
+    function filterByCategory(category) {
+      // Update active state
+      document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.classList.remove('active', 'bg-primary', 'text-on-primary');
+        chip.classList.add('bg-surface', 'border-outline');
+      });
+      
+      event.target.closest('.filter-chip').classList.add('active', 'bg-primary', 'text-on-primary');
+      event.target.closest('.filter-chip').classList.remove('bg-surface', 'border-outline');
+
+      // Filter sellers
+      if (category === 'all') {
+        renderRestaurants();
+      } else {
+        const filtered = sellers.filter(seller => 
+          (seller.category || '').toLowerCase().includes(category.toLowerCase())
+        );
+        renderRestaurants(filtered);
+      }
+    }
+
+    // Menu functions
+    function renderProductsLoading() {
+      const list = document.getElementById('menuItemsList');
+      list.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4';
+      list.innerHTML = `
+        <div class="col-span-full text-center py-8">
+          <div class="inline-block w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p class="text-on-surface-variant">Loading menu...</p>
+        </div>
+      `;
+    }
+
+    function renderProducts(products) {
+      const list = document.getElementById('menuItemsList');
+      if (!products || products.length === 0) {
+        list.innerHTML = '<p class="col-span-full text-center py-8 text-on-surface-variant">No products available.</p>';
+        return;
+      }
+
+      // Use grid layout for better visual appeal
+      list.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4';
+      
+      list.innerHTML = products.map(product => {
+        const safeId = escapeHtml(product.id);
+        const safeName = escapeHtml(product.name);
+        const safeDescription = escapeHtml(product.description) || 'Fresh and delicious';
+        const safeImageUrl = escapeHtml(product.imageUrl);
+        const safePrice = product.price || 0;
+        const safeSellerId = escapeHtml(product.sellerId) || '';
+        const safeSellerName = escapeHtml(product.sellerName) || '';
+        const safeCategory = escapeHtml(product.category) || 'Food';
+        return `
+        <div class="bg-surface rounded-2xl overflow-hidden border border-outline/20 hover:border-primary/30 hover:shadow-lg transition-all group cursor-pointer" onclick="addToCart({id: '${safeId}', name: '${safeName}', price: ${safePrice}, imageUrl: '${safeImageUrl}', sellerId: '${safeSellerId}', sellerName: '${safeSellerName}'})">
+          <!-- Large Image Area -->
+          <div class="h-40 w-full overflow-hidden bg-surface-container relative">
+            ${product.imageUrl ? `<img src="${safeImageUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-primary-fixed to-primary-fixed-dim flex items-center justify-center\'><span class=\'material-symbols-outlined text-5xl text-primary\'>restaurant</span></div>'">` : `<div class="w-full h-full bg-gradient-to-br from-primary-fixed to-primary-fixed-dim flex items-center justify-center"><span class="material-symbols-outlined text-5xl text-primary">restaurant</span></div>`}
+            <!-- Category Badge -->
+            <span class="absolute top-3 left-3 bg-black/60 text-white px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm">${safeCategory}</span>
+          </div>
+          <!-- Content -->
+          <div class="p-4">
+            <h3 class="font-bold text-lg text-on-surface mb-1 line-clamp-1">${safeName}</h3>
+            <p class="text-sm text-on-surface-variant line-clamp-2 mb-3">${safeDescription}</p>
+            <div class="flex items-center justify-between">
+              <p class="font-bold text-xl text-primary">TZS ${safePrice.toLocaleString()}</p>
+              <button class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center hover:bg-primary-dark transition-all active:scale-90 shadow-lg shadow-primary/20">
+                <span class="material-symbols-outlined">add</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `}).join('');
+    }
+
+    function closeMenu() {
+      document.getElementById('menuModal').classList.add('hidden');
+      document.getElementById('backBtn')?.style.setProperty('display', 'none');
+      document.body.style.overflow = 'auto';
+    }
+
+    // Cart functions
+    function toggleCart() {
+      const sidebar = document.getElementById('cartSidebar');
+      sidebar.classList.toggle('translate-x-full');
+    }
+
+    function addToCart(product) {
+      // Handle both old (name, price) and new (product object) calls
+      if (typeof product === 'string') {
+        product = { name: arguments[0], price: arguments[1] };
+      }
+      
+      const existingItem = cart.find(item => item.id === product.id || item.name === product.name);
+      const sellerDetails = sellers.find(seller => seller.id === currentSeller?.id) || currentSeller || {};
+      const sellerLat = sellerDetails.lat ?? sellerDetails.latitude ?? sellerDetails.location?.lat ?? null;
+      const sellerLng = sellerDetails.lng ?? sellerDetails.longitude ?? sellerDetails.location?.lng ?? null;
+      
+      if (existingItem) {
+        existingItem.quantity++;
+      } else {
+        cart.push({
+          id: product.id || `${currentSeller?.id || 'seller'}-${product.name}`,
+          name: product.name,
+          price: product.price,
+          quantity: 1,
+          imageUrl: product.imageUrl || null,
+          sellerId: currentSeller?.id || product.sellerId || null,
+          sellerName: currentSeller?.name || product.sellerName || null,
+          sellerLat,
+          sellerLng
+        });
+      }
+      
+      updateCartUI();
+      saveCartToLocalStorage();
+      if (window.SmartNav) SmartNav.updateCartBadge();
+      showNotification(`${product.name} added to cart!`);
+    }
+
+    function saveCartToLocalStorage() {
+      if (window.CartService) {
+        CartService.saveCart(cart);
+      } else {
+        const storageCart = cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          imageUrl: item.imageUrl || null,
+          sellerId: item.sellerId || null,
+          sellerName: item.sellerName || null,
+          sellerLat: item.sellerLat ?? null,
+          sellerLng: item.sellerLng ?? null
+        }));
+        localStorage.setItem('smartsoko_cart', JSON.stringify(storageCart));
+      }
+    }
+
+
+    function removeFromCart(itemName) {
+      cart = cart.filter(item => item.name !== itemName);
+      updateCartUI();
+      saveCartToLocalStorage();
+      if (window.SmartNav) SmartNav.updateCartBadge();
+    }
+
+
+    function updateQuantity(itemName, change) {
+      const item = cart.find(item => item.name === itemName);
+      if (item) {
+        item.quantity += change;
+        if (item.quantity <= 0) {
+          removeFromCart(itemName);
+        } else {
+          updateCartUI();
+          saveCartToLocalStorage();
+          if (window.SmartNav) SmartNav.updateCartBadge();
+        }
+
+      }
+    }
+
+    function updateCartUI() {
+      const cartItems = document.getElementById('cartItems');
+      const cartCount = document.getElementById('cartCount');
+      const bottomCartCount = document.getElementById('bottomCartCount');
+      const subtotal = document.getElementById('subtotal');
+      const total = document.getElementById('total');
+      
+      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+      if (cartCount) cartCount.textContent = totalItems;
+      if (bottomCartCount) bottomCartCount.textContent = totalItems;
+      
+      // Update any elements with .cart-badge-count class (from SmartNav)
+      document.querySelectorAll('.cart-badge-count').forEach(el => {
+        el.textContent = totalItems;
+        el.style.display = totalItems > 0 ? 'flex' : 'none';
+      });
+
+      
+      if (cart.length === 0) {
+        cartItems.innerHTML = `
+          <div class="text-center py-8">
+            <span class="material-symbols-outlined text-6xl text-on-surface-variant mb-4">shopping_cart</span>
+            <p class="text-on-surface-variant">Your cart is empty</p>
+            <p class="text-on-surface-variant text-sm">Add items from restaurants to get started</p>
+          </div>
+        `;
+      } else {
+        cartItems.innerHTML = cart.map(item => `
+          <div class="cart-item bg-surface p-4 rounded-xl mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-semibold text-on-surface">${item.name}</h4>
+              <button onclick="removeFromCart('${item.name}')" class="text-error hover:opacity-80 transition">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <button onclick="updateQuantity('${item.name}', -1)" class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center hover:bg-outline transition">
+                  <span class="material-symbols-outlined text-sm">remove</span>
+                </button>
+                <span class="font-semibold text-on-surface w-8 text-center">${item.quantity}</span>
+                <button onclick="updateQuantity('${item.name}', 1)" class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center hover:bg-primary-dark transition">
+                  <span class="material-symbols-outlined text-sm">add</span>
+                </button>
+              </div>
+              <p class="font-bold text-primary">TZS ${(item.price * item.quantity).toLocaleString()}</p>
+            </div>
+          </div>
+        `).join('');
+      }
+      
+      const subtotalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      // Get delivery fee from first item's seller or use default
+      const firstItem = cart[0] || {};
+      const deliveryFee = firstItem.sellerDeliveryFee || 3000;
+      const totalAmount = subtotalAmount + deliveryFee;
+      
+      const cartSubtotal = document.getElementById('cartSubtotal');
+      const cartTotal = document.getElementById('cartTotal');
+      
+      if (cartSubtotal) cartSubtotal.textContent = `TZS ${subtotalAmount.toLocaleString()}`;
+      if (cartTotal) cartTotal.textContent = `TZS ${totalAmount.toLocaleString()}`;
+    }
+
+    // Checkout function - Using API
+    async function geocodeAddress(address) {
+      if (!address || !MAPBOX_CONFIG?.accessToken) return null;
+      try {
+        const query = encodeURIComponent(address);
+        const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${query}.json?types=address,place,locality&limit=1&access_token=${MAPBOX_CONFIG.accessToken}`);
+        if (!response.ok) return null;
+        const data = await response.json();
+        if (!data.features || !data.features[0]) return null;
+        const [lng, lat] = data.features[0].center;
+        return { lat, lng };
+      } catch (error) {
+        console.warn('Address geocoding failed:', error);
+        return null;
+      }
+    }
+
+    async function proceedToCheckout() {
+      if (cart.length === 0) {
+        showNotification('Your cart is empty!');
+        return;
+      }
+
+      const addressText = localStorage.getItem('smartsoko_address') || localStorage.getItem('smartsoko_user_address') || '';
+      const phoneText = localStorage.getItem('smartsoko_phone') || localStorage.getItem('smartsoko_user_phone') || '';
+      const customerName = localStorage.getItem('smartsoko_name') || '';
+      
+      // Validate required fields
+      if (!addressText) {
+        showNotification('Please select a delivery address', 'error');
+        showAddressModal();
+        return;
+      }
+      if (!phoneText) {
+        showNotification('Please enter your phone number', 'error');
+        return;
+      }
+      if (!customerName) {
+        showNotification('Please enter your name', 'error');
+        return;
+      }
+      const subtotalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      // Get delivery fee from first item's seller or use default
+      const primaryItem = cart[0] || {};
+      const deliveryFeeAmount = primaryItem.sellerDeliveryFee || 3000;
+      const totalAmount = subtotalAmount + deliveryFeeAmount;
+
+      let resolvedDeliveryCoords = deliveryCoords;
+      if (!resolvedDeliveryCoords && addressText && addressText !== 'Delivery Address') {
+        resolvedDeliveryCoords = await geocodeAddress(addressText);
+      }
+      if (resolvedDeliveryCoords) {
+        deliveryCoords = resolvedDeliveryCoords;
+        localStorage.setItem('smartsoko_delivery_coords', JSON.stringify(resolvedDeliveryCoords));
+      }
+
+      const orderData = {
+        customerName,
+        customerPhone: phoneText,
+        contactPhone: phoneText,
+        customerAddress: addressText,
+        deliveryAddress: addressText,
+        customerId: (window.auth && window.auth.currentUser && window.auth.currentUser.uid) || `guest-${Date.now()}`,
+        sellerId: primaryItem.sellerId || currentSeller?.id || null,
+        sellerName: primaryItem.sellerName || currentSeller?.name || 'Seller',
+        items: cart,
+        subtotal: subtotalAmount,
+        deliveryFee: deliveryFeeAmount,
+        total: totalAmount,
+        restaurantName: currentSeller?.name || primaryItem.sellerName || null,
+        deliveryLat: resolvedDeliveryCoords?.lat ?? null,
+        deliveryLng: resolvedDeliveryCoords?.lng ?? null,
+        customerLat: resolvedDeliveryCoords?.lat ?? null,
+        customerLng: resolvedDeliveryCoords?.lng ?? null,
+        sellerLat: primaryItem.sellerLat ?? null,
+        sellerLng: primaryItem.sellerLng ?? null,
+        pickupLat: primaryItem.sellerLat ?? null,
+        pickupLng: primaryItem.sellerLng ?? null,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        // Check if we're on static hosting (no API server)
+        const useApi = API_ROUTES.BASE_URL !== null;
+        
+        if (useApi) {
+          // Try API first when available
+          try {
+            const response = await apiHelpers.post(API_ROUTES.CUSTOMER.ORDERS, orderData);
+            showNotification('Order placed successfully!');
+            cart = [];
+            updateCartUI();
+            toggleCart();
+            if (response?.id) {
+              window.location.href = `/track-order?orderId=${encodeURIComponent(response.id)}`;
+              return;
+            }
+          } catch (apiError) {
+            console.log('API failed, falling back to Firestore:', apiError);
+          }
+        }
+        
+        // Use Firestore directly (primary method for static hosting)
+        const { addDoc, collection, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const db = window.db;
+        if (!db) throw new Error('Database not initialized');
+        const docRef = await addDoc(collection(db, 'orders'), {
+          ...orderData,
+          createdAt: serverTimestamp()
+        });
+        showNotification('Order placed successfully!');
+        cart = [];
+        updateCartUI();
+        toggleCart();
+        window.location.href = `/track-order?orderId=${encodeURIComponent(docRef.id)}`;
+        
+      } catch (error) {
+        console.error('Error placing order:', error);
+        showNotification('Error placing order. Please try again.');
+      }
+    }
+
+    // Load recent orders for the logged-in customer
+    async function loadRecentOrders() {
+      const auth = window.auth;
+      const currentUser = auth ? auth.currentUser : null;
+      if (!currentUser) return;
+      
+      const ordersList = document.getElementById('recentOrdersList');
+      if (!ordersList) return;
+      
+      try {
+        const { collection, query, where, orderBy, limit, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const db = window.db;
+        if (!db) return;
+        
+        // Try with ordering first (requires composite index)
+        let ordersSnap;
+        try {
+          const ordersQuery = query(
+            collection(db, 'orders'),
+            where('customerId', '==', currentUser.uid),
+            orderBy('createdAt', 'desc'),
+            limit(5)
+          );
+          ordersSnap = await getDocs(ordersQuery);
+        } catch (indexError) {
+          // Fallback: query without ordering, sort client-side
+          console.warn('Firestore index missing, using fallback query');
+          const fallbackQuery = query(
+            collection(db, 'orders'),
+            where('customerId', '==', currentUser.uid),
+            limit(20)
+          );
+          ordersSnap = await getDocs(fallbackQuery);
+        }
+        
+        if (ordersSnap.empty) {
+          ordersList.innerHTML = `
+            <div class="bg-surface rounded-xl p-6 text-center border border-outline/30">
+              <span class="material-symbols-outlined text-4xl text-on-surface-variant mb-2">receipt_long</span>
+              <p class="text-on-surface-variant text-sm">No orders yet. Start shopping!</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // Sort client-side if we used fallback
+        let orders = ordersSnap.docs;
+        if (orders.length > 5) {
+          orders = orders.sort((a, b) => {
+            const dateA = a.data().createdAt?.toDate?.() || new Date(a.data().createdAt || 0);
+            const dateB = b.data().createdAt?.toDate?.() || new Date(b.data().createdAt || 0);
+            return dateB - dateA;
+          }).slice(0, 5);
+        }
+        
+        ordersList.innerHTML = orders.map(doc => {
+          const order = doc.data();
+          const statusColors = {
+            pending: 'bg-yellow-100 text-yellow-700',
+            preparing: 'bg-blue-100 text-blue-700',
+            ready_for_delivery: 'bg-green-100 text-green-700',
+            delivered: 'bg-gray-100 text-gray-700',
+            cancelled: 'bg-red-100 text-red-700'
+          };
+          
+          return `
+            <div class="bg-surface rounded-xl p-4 border border-outline/30 hover:border-primary/30 transition-all">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <p class="font-semibold">Order #${doc.id.slice(-6)}</p>
+                  <p class="text-sm text-on-surface-variant">${order.sellerName || 'Seller'}</p>
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-medium ${statusColors[order.status] || 'bg-gray-100 text-gray-700'}">
+                  ${order.status ? order.status.replace(/_/g, ' ').toUpperCase() : 'PENDING'}
+                </span>
+              </div>
+              <div class="flex justify-between items-center mt-3 pt-3 border-t border-outline/20">
+                <span class="text-sm text-on-surface-variant">
+                  ${order.createdAt ? (order.createdAt.toDate ? order.createdAt.toDate().toLocaleDateString() : new Date(order.createdAt).toLocaleDateString()) : ''}
+                </span>
+                <span class="font-bold text-primary">TSh ${(order.total || 0).toLocaleString()}</span>
+              </div>
+              <div class="flex gap-2 mt-3">
+                <a href="/track-order?orderId=${doc.id}" class="flex-1 text-center py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition-colors">
+                  Track Order
+                </a>
+                <button onclick="reorder('${doc.id}')" class="flex-1 py-2 bg-surface-variant text-on-surface rounded-lg text-sm font-medium hover:bg-outline/50 transition-colors">
+                  Reorder
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+      } catch (error) {
+        console.error('Error loading recent orders:', error);
+      }
+    }
+
+    // Reorder function
+    async function reorder(orderId) {
+      try {
+        const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const db = window.db;
+        const orderDocRef = doc(db, 'orders', orderId);
+        const orderSnap = await getDoc(orderDocRef);
+        if (!orderSnap.exists()) {
+          showNotification('Order not found');
+          return;
+        }
+        
+        const order = orderSnap.data();
+        if (order.items && order.items.length > 0) {
+          // Add items to cart
+          order.items.forEach(item => {
+            const existingItem = cart.find(c => c.name === item.name);
+            if (existingItem) {
+              existingItem.quantity += item.quantity || 1;
+            } else {
+              cart.push({
+                id: `${order.sellerId}-${item.name}`,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity || 1,
+                sellerId: order.sellerId,
+                sellerName: order.sellerName
+              });
+            }
+          });
+          
+          updateCartUI();
+          saveCartToLocalStorage();
+          showNotification('Items added to cart!');
+          toggleCart();
+        }
+      } catch (error) {
+        console.error('Error reordering:', error);
+        showNotification('Failed to reorder');
+      }
+    }
+
+    // Favorites functionality
+    async function toggleFavorite(sellerId) {
+      const auth = window.auth;
+      const currentUser = auth ? auth.currentUser : null;
+      if (!currentUser) {
+        showNotification('Please login to add favorites');
+        return;
+      }
+      
+      const { doc, getDoc, deleteDoc, setDoc, serverTimestamp, collection } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+      const db = window.db;
+      const favDocRef = doc(db, 'favorites', `${currentUser.uid}_${sellerId}`);
+      
+      try {
+        const favDoc = await getDoc(favDocRef);
+        if (favDoc.exists()) {
+          await deleteDoc(favDocRef);
+          showNotification('Removed from favorites');
+        } else {
+          await setDoc(favDocRef, {
+            userId: currentUser.uid,
+            sellerId: sellerId,
+            createdAt: serverTimestamp()
+          });
+          showNotification('Added to favorites!');
+        }
+        loadFavorites();
+      } catch (error) {
+        console.error('Error toggling favorite:', error);
+      }
+    }
+
+    async function loadFavorites() {
+      const auth = window.auth;
+      const currentUser = auth ? auth.currentUser : null;
+      if (!currentUser) return;
+      
+      try {
+        const { collection, query, where, limit, getDocs, documentId } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const db = window.db;
+        const favQuery = query(
+          collection(db, 'favorites'),
+          where('userId', '==', currentUser.uid),
+          limit(10)
+        );
+        const favSnap = await getDocs(favQuery);
+        
+        const favList = document.getElementById('favoritesList');
+        
+        if (favSnap.empty) {
+          favList.innerHTML = `
+            <div class="bg-surface rounded-xl p-6 text-center border border-outline/30 min-w-[200px]">
+              <span class="material-symbols-outlined text-4xl text-on-surface-variant mb-2">favorite_border</span>
+              <p class="text-on-surface-variant text-sm">No favorites yet</p>
+            </div>
+          `;
+          return;
+        }
+        
+        const sellerIds = favSnap.docs.map(doc => doc.data().sellerId);
+        
+        // Get seller details - reuse already imported functions
+        const sellersRef = collection(db, 'sellers');
+        const sellersQuery = query(sellersRef, where(documentId(), 'in', sellerIds.slice(0, 10)));
+        const sellersSnap = await getDocs(sellersQuery);
+        
+        favList.innerHTML = sellersSnap.docs.map(doc => {
+          const seller = doc.data();
+          return `
+            <div class="bg-surface rounded-xl p-4 border border-outline/30 min-w-[200px] cursor-pointer hover:border-primary/30 transition-all" onclick="openMenu('${doc.id}', '${seller.name}')">
+              <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-3">
+                <span class="material-symbols-outlined text-primary text-2xl">store</span>
+              </div>
+              <h3 class="font-semibold text-sm mb-1 truncate">${seller.name}</h3>
+              <p class="text-xs text-on-surface-variant">${seller.category || 'General'}</p>
+              <div class="flex items-center gap-1 mt-2">
+                <span class="material-symbols-outlined text-yellow-500 text-sm">star</span>
+                <span class="text-xs font-medium">${seller.rating || '4.5'}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+      } catch (error) {
+        console.error('Error loading favorites:', error);
+      }
+    }
+
+    // Recently viewed functionality
+    function addToRecentlyViewed(seller) {
+      let recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+      
+      // Remove if already exists
+      recentlyViewed = recentlyViewed.filter(item => item.id !== seller.id);
+      
+      // Add to beginning
+      recentlyViewed.unshift({
+        id: seller.id,
+        name: seller.name,
+        category: seller.category,
+        rating: seller.rating,
+        viewedAt: new Date().toISOString()
+      });
+      
+      // Keep only last 10
+      recentlyViewed = recentlyViewed.slice(0, 10);
+      
+      localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
+      loadRecentlyViewed();
+    }
+
+    function loadRecentlyViewed() {
+      const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+      const container = document.getElementById('recentlyViewedList');
+      const section = document.getElementById('recentlyViewedSection');
+      
+      if (recentlyViewed.length === 0) {
+        section.style.display = 'none';
+        return;
+      }
+      
+      section.style.display = 'block';
+      container.innerHTML = recentlyViewed.map(seller => `
+        <div class="bg-surface rounded-xl p-4 border border-outline/30 min-w-[180px] cursor-pointer hover:border-primary/30 transition-all" onclick="openMenu('${seller.id}', '${seller.name}')">
+          <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mb-2">
+            <span class="material-symbols-outlined text-primary">store</span>
+          </div>
+          <h3 class="font-medium text-sm mb-1 truncate">${seller.name}</h3>
+          <p class="text-xs text-on-surface-variant">${seller.category || 'General'}</p>
+        </div>
+      `).join('');
+    }
+
+    function clearRecentlyViewed() {
+      localStorage.removeItem('recentlyViewed');
+      loadRecentlyViewed();
+    }
+
+    // Address modal
+    function showAddressModal() {
+      const savedAddress = localStorage.getItem('smartsoko_address') || '';
+      const newAddress = prompt('Enter your delivery address:', savedAddress);
+      if (newAddress && newAddress !== savedAddress) {
+        localStorage.setItem('smartsoko_address', newAddress);
+        showNotification('Address updated!');
+      }
+    }
+
+    // Update openMenu to track recently viewed
+    const originalOpenMenu = openMenu;
+    openMenu = function(id, name) {
+      const seller = sellers.find(s => s.id === id);
+      if (seller) {
+        addToRecentlyViewed(seller);
+      }
+      originalOpenMenu(id, name);
+    };
+
+    // Utility functions
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-24 right-6 bg-primary text-on-primary px-4 py-3 rounded-full shadow-lg z-50 slide-in';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('menuModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeMenu();
+      }
+    });
+
+    // Close cart when clicking outside
+    document.addEventListener('click', function(e) {
+      const cartSidebar = document.getElementById('cartSidebar');
+      const cartIcon = document.querySelector('.cart-icon');
+      
+      if (cartSidebar && !cartSidebar.contains(e.target) && (!cartIcon || !cartIcon.contains(e.target)) && !cartSidebar.classList.contains('translate-x-full')) {
+        toggleCart();
+      }
+    });
+
+    // Map functionality
+    let map;
+    let markers = [];
+
+    function initMap() {
+      // Use token from config
+      if (MAPBOX_CONFIG.accessToken === 'YOUR_MAPBOX_ACCESS_TOKEN_HERE') {
+        console.warn('⚠️ Please set your Mapbox access token in web/config/mapbox-config.js');
+      }
+      
+      mapboxgl.accessToken = MAPBOX_CONFIG.accessToken;
+      
+      const defaultLocation = [39.2083, -6.7924]; // [lng, lat] for Mapbox
+
+      map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: defaultLocation,
+        zoom: 12
+      });
+
+      map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+      map.on('load', () => {
+        loadSellersOnMap();
+      });
+    }
+
+    async function loadSellersOnMap() {
+      try {
+        // Use DataService instead of apiHelpers for static hosting compatibility
+        const result = await DataService.getSellers({ limit: 50 });
+        const sellers = result.data || [];
+        
+        if (!Array.isArray(sellers)) {
+          console.error('Invalid sellers data:', result);
+          return;
+        }
+
+        // Clear existing markers
+        markers.forEach(marker => marker.remove());
+        markers = [];
+
+        sellers.forEach(seller => {
+          // Use default coordinates if not provided
+          const lng = seller.lng || 39.2083 + (Math.random() - 0.5) * 0.1;
+          const lat = seller.lat || -6.7924 + (Math.random() - 0.5) * 0.1;
+
+          // Create custom marker element
+          const el = document.createElement('div');
+          el.className = 'custom-marker';
+          el.innerHTML = `<div style="
+            width: 40px; 
+            height: 40px; 
+            background: #012d1d; 
+            border-radius: 50%; 
+            border: 3px solid white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+          ">🏪</div>`;
+
+          el.addEventListener('click', () => {
+            // Show popup
+            const popup = new mapboxgl.Popup({ offset: 25 })
+              .setHTML(`
+                <div style="padding: 8px;">
+                  <h3 style="font-weight: bold; color: #012d1d; margin: 0;">${seller.name}</h3>
+                  <p style="color: #666; margin: 4px 0;">${seller.category || 'Restaurant'}</p>
+                  <p style="margin: 4px 0;">Rating: ⭐ ${seller.rating || 'N/A'}</p>
+                  <button onclick="openMenu('${seller.id}', '${seller.name}')" style="
+                    margin-top: 8px; 
+                    background: #012d1d; 
+                    color: white; 
+                    border: none; 
+                    padding: 6px 12px; 
+                    border-radius: 4px; 
+                    cursor: pointer;
+                  ">View Menu</button>
+                </div>
+              `);
+            
+            marker.setPopup(popup);
+            popup.addTo(map);
+          });
+
+          const marker = new mapboxgl.Marker(el)
+            .setLngLat([lng, lat])
+            .addTo(map);
+
+          markers.push(marker);
+        });
+
+        // Fit map to show all markers
+        if (markers.length > 0) {
+          const bounds = new mapboxgl.LngLatBounds();
+          markers.forEach(marker => bounds.extend(marker.getLngLat()));
+          map.fitBounds(bounds, { padding: 50 });
+        }
+
+      } catch (error) {
+        console.error('Error loading sellers on map:', error);
+      }
+    }
+
+    function toggleMap() {
+      const mapContainer = document.getElementById('mapContainer');
+      const isVisible = mapContainer.style.display !== 'none';
+
+      if (isVisible) {
+        mapContainer.style.display = 'none';
+      } else {
+        mapContainer.style.display = 'block';
+        if (!map) {
+          initMap();
+        }
+      }
+    }
+  </script>
+    <!-- Address Management Modal -->
+    <div id="addressModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center">
+      <div class="bg-surface rounded-2xl p-6 w-full max-w-md mx-4 shadow-xl max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-headline text-xl font-bold text-on-surface">Delivery Address</h3>
+          <button onclick="closeAddressModal()" class="p-2 hover:bg-surface-variant rounded-lg transition-colors">
+            <span class="material-symbols-outlined text-on-surface-variant">close</span>
+          </button>
+        </div>
+        
+        <!-- Auto-locate Button -->
+        <button onclick="getCurrentLocation()" id="locateBtn" class="w-full mb-4 py-3 px-4 bg-primary/10 border border-primary/30 rounded-xl flex items-center justify-center gap-2 text-primary font-medium hover:bg-primary/20 transition-colors">
+          <span class="material-symbols-outlined">my_location</span>
+          <span>Use Current Location</span>
+        </button>
+        <div id="locateLoading" class="hidden mb-4 py-3 px-4 bg-surface-variant rounded-xl flex items-center justify-center gap-2 text-on-surface-variant">
+          <span class="material-symbols-outlined animate-spin">refresh</span>
+          <span>Detecting your location...</span>
+        </div>
+        
+        <div class="space-y-4">
+          <!-- Address Input with Autocomplete -->
+          <div class="relative">
+            <label class="block text-sm font-medium text-on-surface-variant mb-1">Search Address</label>
+            <div class="relative">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant/60">search</span>
+              <input type="text" id="addressInput" class="w-full pl-12 pr-4 py-3 bg-surface-variant border border-outline/30 rounded-xl focus:outline-none focus:border-primary/50" placeholder="Type to search address..." autocomplete="off">
+              <!-- Loading indicator -->
+              <span id="searchLoading" class="hidden absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant animate-spin">refresh</span>
+            </div>
+            
+            <!-- Location Suggestions Dropdown -->
+            <div id="locationSuggestions" class="hidden absolute top-full left-0 right-0 mt-1 bg-surface border border-outline/30 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
+              <!-- Suggestions will be populated here -->
+            </div>
+          </div>
+          
+          <!-- Selected Address Display -->
+          <div>
+            <label class="block text-sm font-medium text-on-surface-variant mb-1">Selected Address</label>
+            <textarea id="selectedAddressDisplay" rows="2" class="w-full px-4 py-3 bg-surface-variant/50 border border-outline/30 rounded-xl resize-none text-sm" readonly placeholder="Address will appear here..."></textarea>
+            <input type="hidden" id="selectedAddressLat">
+            <input type="hidden" id="selectedAddressLng">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-on-surface-variant mb-1">Phone Number</label>
+            <input type="tel" id="phoneInput" class="w-full px-4 py-3 bg-surface-variant border border-outline/30 rounded-xl focus:outline-none focus:border-primary/50" placeholder="Enter your phone number" required>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-on-surface-variant mb-1">Delivery Instructions (Optional)</label>
+            <input type="text" id="instructionsInput" class="w-full px-4 py-3 bg-surface-variant border border-outline/30 rounded-xl focus:outline-none focus:border-primary/50" placeholder="e.g., Ring doorbell, Leave at gate...">
+          </div>
+        </div>
+        
+        <div class="flex gap-3 mt-6">
+          <button onclick="closeAddressModal()" class="flex-1 py-3 border border-outline/50 rounded-xl font-medium text-on-surface hover:bg-surface-variant transition-colors">
+            Cancel
+          </button>
+          <button onclick="saveAddress()" class="flex-1 py-3 bg-primary text-on-primary rounded-xl font-medium hover:bg-primary-dark transition-colors">
+            Save Address
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Results Modal -->
+    <div id="searchResultsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-start justify-center pt-24">
+      <div class="bg-surface rounded-2xl p-6 w-full max-w-2xl mx-4 shadow-xl max-h-[70vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-4 sticky top-0 bg-surface pb-2">
+          <h3 class="font-headline text-xl font-bold text-on-surface">Search Results</h3>
+          <button onclick="closeSearchResults()" class="p-2 hover:bg-surface-variant rounded-lg transition-colors">
+            <span class="material-symbols-outlined text-on-surface-variant">close</span>
+          </button>
+        </div>
+        <div id="searchResultsContent" class="space-y-4">
+          <!-- Results will be populated here -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+    // Address modal functions
+    let locationSearchTimeout;
+    let currentLocationCoords = null;
+
+    function showAddressModal() {
+      const modal = document.getElementById('addressModal');
+      const savedAddress = localStorage.getItem('smartsoko_address') || '';
+      const savedPhone = localStorage.getItem('smartsoko_phone') || '';
+      const savedInstructions = localStorage.getItem('smartsoko_instructions') || '';
+      const savedLat = localStorage.getItem('smartsoko_address_lat');
+      const savedLng = localStorage.getItem('smartsoko_address_lng');
+      
+      document.getElementById('addressInput').value = '';
+      document.getElementById('selectedAddressDisplay').value = savedAddress;
+      document.getElementById('selectedAddressLat').value = savedLat || '';
+      document.getElementById('selectedAddressLng').value = savedLng || '';
+      document.getElementById('phoneInput').value = savedPhone;
+      document.getElementById('instructionsInput').value = savedInstructions;
+      
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      
+      // Setup autocomplete listener
+      setupAddressAutocomplete();
+    }
+
+    function closeAddressModal() {
+      const modal = document.getElementById('addressModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      // Hide suggestions
+      document.getElementById('locationSuggestions')?.classList.add('hidden');
+    }
+
+    // Get current location using Geolocation API
+    function getCurrentLocation() {
+      const locateBtn = document.getElementById('locateBtn');
+      const locateLoading = document.getElementById('locateLoading');
+      
+      if (!navigator.geolocation) {
+        showNotification('Geolocation is not supported by your browser');
+        return;
+      }
+      
+      locateBtn.classList.add('hidden');
+      locateLoading.classList.remove('hidden');
+      
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          currentLocationCoords = { lat: latitude, lng: longitude };
+          
+          // Reverse geocode to get address
+          const address = await reverseGeocode(latitude, longitude);
+          
+          if (address) {
+            document.getElementById('selectedAddressDisplay').value = address;
+            document.getElementById('selectedAddressLat').value = latitude;
+            document.getElementById('selectedAddressLng').value = longitude;
+            showNotification('Location detected!');
+          } else {
+            showNotification('Could not determine address from location');
+          }
+          
+          locateLoading.classList.add('hidden');
+          locateBtn.classList.remove('hidden');
+        },
+        (error) => {
+          locateLoading.classList.add('hidden');
+          locateBtn.classList.remove('hidden');
+          
+          let message = 'Unable to retrieve your location';
+          switch(error.code) {
+            case error.PERMISSION_DENIED:
+              message = 'Please allow location access in your browser settings';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              message = 'Location information unavailable';
+              break;
+            case error.TIMEOUT:
+              message = 'Location request timed out';
+              break;
+          }
+          showNotification(message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    }
+
+    // Reverse geocode coordinates to address
+    async function reverseGeocode(lat, lng) {
+      if (!MAPBOX_CONFIG?.accessToken || MAPBOX_CONFIG.accessToken === 'YOUR_MAPBOX_ACCESS_TOKEN_HERE') {
+        return null; // Return null if Mapbox not configured, will require user input
+      }
+      
+      try {
+        const response = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_CONFIG.accessToken}&types=address,place,locality&limit=1`
+        );
+        
+        if (!response.ok) throw new Error('Geocoding failed');
+        
+        const data = await response.json();
+        if (data.features && data.features.length > 0) {
+          return data.features[0].place_name;
+        }
+      } catch (error) {
+        console.error('Reverse geocode error:', error);
+      }
+      return null;
+    }
+
+    // Setup address autocomplete
+    function setupAddressAutocomplete() {
+      const addressInput = document.getElementById('addressInput');
+      
+      // Remove old listener if exists
+      const newInput = addressInput.cloneNode(true);
+      addressInput.parentNode.replaceChild(newInput, addressInput);
+      
+      newInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        
+        // Clear previous timeout
+        clearTimeout(locationSearchTimeout);
+        
+        // Hide suggestions if query is empty
+        if (query.length < 2) {
+          document.getElementById('locationSuggestions').classList.add('hidden');
+          return;
+        }
+        
+        // Show loading
+        document.getElementById('searchLoading').classList.remove('hidden');
+        
+        // Debounce search
+        locationSearchTimeout = setTimeout(() => {
+          searchLocations(query);
+        }, 300);
+      });
+      
+      // Close suggestions when clicking outside
+      document.addEventListener('click', (e) => {
+        const suggestions = document.getElementById('locationSuggestions');
+        const input = document.getElementById('addressInput');
+        if (!suggestions.contains(e.target) && e.target !== input) {
+          suggestions.classList.add('hidden');
+        }
+      });
+    }
+
+    // Search locations using Mapbox Geocoding API
+    async function searchLocations(query) {
+      const loading = document.getElementById('searchLoading');
+      const suggestions = document.getElementById('locationSuggestions');
+      
+      if (!MAPBOX_CONFIG?.accessToken || MAPBOX_CONFIG.accessToken === 'YOUR_MAPBOX_ACCESS_TOKEN_HERE') {
+        loading.classList.add('hidden');
+        // Show mock suggestions for demo
+        showMockSuggestions(query);
+        return;
+      }
+      
+      try {
+        // Bias search to Dar es Salaam region (approximate bbox)
+        const bbox = '38.8,-7.2,39.5,-6.6'; // Dar es Salaam area
+        
+        const response = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_CONFIG.accessToken}&types=address,place,locality,neighborhood&bbox=${bbox}&limit=5&country=tz`
+        );
+        
+        loading.classList.add('hidden');
+        
+        if (!response.ok) throw new Error('Search failed');
+        
+        const data = await response.json();
+        displayLocationSuggestions(data.features || []);
+        
+      } catch (error) {
+        console.error('Location search error:', error);
+        loading.classList.add('hidden');
+        showMockSuggestions(query);
+      }
+    }
+
+    // Display location suggestions
+    function displayLocationSuggestions(features) {
+      const suggestions = document.getElementById('locationSuggestions');
+      
+      if (features.length === 0) {
+        suggestions.classList.add('hidden');
+        return;
+      }
+      
+      suggestions.innerHTML = features.map(feature => {
+        const placeName = feature.place_name;
+        const context = feature.context || [];
+        const locality = context.find(c => c.id.includes('locality'))?.text || '';
+        const neighborhood = context.find(c => c.id.includes('neighborhood'))?.text || '';
+        
+        return `
+          <div onclick="selectLocation('${placeName.replace(/'/g, "\\'")}', ${feature.center[1]}, ${feature.center[0]})" 
+               class="px-4 py-3 hover:bg-surface-variant cursor-pointer border-b border-outline/20 last:border-0">
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-on-surface-variant mt-0.5">location_on</span>
+              <div>
+                <p class="font-medium text-sm text-on-surface">${placeName.split(',')[0]}</p>
+                <p class="text-xs text-on-surface-variant">${placeName.split(',').slice(1).join(',')}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      suggestions.classList.remove('hidden');
+    }
+
+    // Select a location from suggestions
+    function selectLocation(address, lat, lng) {
+      document.getElementById('selectedAddressDisplay').value = address;
+      document.getElementById('selectedAddressLat').value = lat;
+      document.getElementById('selectedAddressLng').value = lng;
+      document.getElementById('addressInput').value = '';
+      document.getElementById('locationSuggestions').classList.add('hidden');
+      document.getElementById('searchLoading').classList.add('hidden');
+      
+      currentLocationCoords = { lat, lng };
+    }
+
+    function saveAddress() {
+      const address = document.getElementById('selectedAddressDisplay').value.trim();
+      const lat = document.getElementById('selectedAddressLat').value;
+      const lng = document.getElementById('selectedAddressLng').value;
+      const phone = document.getElementById('phoneInput').value.trim();
+      const instructions = document.getElementById('instructionsInput').value.trim();
+      
+      if (!address) {
+        showNotification('Please search and select an address');
+        return;
+      }
+      
+      localStorage.setItem('smartsoko_address', address);
+      localStorage.setItem('smartsoko_user_address', address);
+      if (lat) localStorage.setItem('smartsoko_address_lat', lat);
+      if (lng) localStorage.setItem('smartsoko_address_lng', lng);
+      if (phone) {
+        localStorage.setItem('smartsoko_phone', phone);
+        localStorage.setItem('smartsoko_user_phone', phone);
+      }
+      if (instructions) localStorage.setItem('smartsoko_instructions', instructions);
+      
+      // Save delivery coords for checkout
+      if (lat && lng) {
+        deliveryCoords = { lat: parseFloat(lat), lng: parseFloat(lng) };
+        localStorage.setItem('smartsoko_delivery_coords', JSON.stringify(deliveryCoords));
+      }
+      
+      showNotification('Address saved successfully!');
+      closeAddressModal();
+      
+      // Update displayed address
+      const displayEl = document.getElementById('displayAddress');
+      if (displayEl) {
+        displayEl.textContent = address.substring(0, 35) + (address.length > 35 ? '...' : '');
+      }
+    }
+
+    // Close modals on outside click
+    document.getElementById('addressModal')?.addEventListener('click', function(e) {
+      if (e.target === this) closeAddressModal();
+    });
+
+    // Search results modal
+    function showSearchResults(results) {
+      const modal = document.getElementById('searchResultsModal');
+      const content = document.getElementById('searchResultsContent');
+      
+      if (results.length === 0) {
+        content.innerHTML = `
+          <div class="text-center py-8">
+            <span class="material-symbols-outlined text-6xl text-on-surface-variant mb-4">search_off</span>
+            <p class="text-on-surface-variant">No results found</p>
+          </div>
+        `;
+      } else {
+        content.innerHTML = results.map(seller => `
+          <div class="flex items-center gap-4 p-4 bg-surface-variant rounded-xl cursor-pointer hover:bg-outline/20 transition-colors" onclick="openMenu('${seller.id}', '${seller.name}'); closeSearchResults();">
+            <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary text-2xl">store</span>
+            </div>
+            <div class="flex-1">
+              <h4 class="font-semibold text-on-surface">${seller.name}</h4>
+              <p class="text-sm text-on-surface-variant">${seller.category || 'General'} • ${seller.rating || '4.5'} ★</p>
+            </div>
+            <span class="material-symbols-outlined text-on-surface-variant">arrow_forward</span>
+          </div>
+        `).join('');
+      }
+      
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeSearchResults() {
+      const modal = document.getElementById('searchResultsModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    document.getElementById('searchResultsModal')?.addEventListener('click', function(e) {
+      if (e.target === this) closeSearchResults();
+    });
+
+    // Enhanced filter function with search results modal
+    function filterRestaurants() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+      
+      if (searchTerm.length === 0) {
+        renderRestaurants();
+        return;
+      }
+      
+      const filtered = sellers.filter(seller => 
+        seller.name.toLowerCase().includes(searchTerm) ||
+        (seller.category || '').toLowerCase().includes(searchTerm) ||
+        (seller.description || '').toLowerCase().includes(searchTerm)
+      );
+      
+      // If searching, show results in modal
+      if (searchTerm.length >= 2) {
+        showSearchResults(filtered);
+      } else {
+        renderRestaurants(filtered);
+      }
+    }
+    </script>
+</body>
+</html>
+                    
+                              
+                  
+                                                      
+    
+        

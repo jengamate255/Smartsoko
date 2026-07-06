@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+  <!-- Performance: Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  <meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Organic Curator - Cart &amp; Checkout</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="design-system.css">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="js/cart-service.js"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error-container": "#93000a",
+              "surface-bright": "#fbf9f5",
+              "inverse-primary": "#a5d0b9",
+              "outline-variant": "#c1c8c2",
+              "secondary-fixed": "#ffdcc4",
+              "surface-dim": "#dbdad6",
+              "on-surface": "#1b1c1a",
+              "on-primary-container": "#86af99",
+              "secondary-fixed-dim": "#ffb781",
+              "tertiary-container": "#503700",
+              "outline": "#717973",
+              "on-secondary-fixed-variant": "#703800",
+              "primary-container": "#1b4332",
+              "error": "#ba1a1a",
+              "primary-fixed-dim": "#a5d0b9",
+              "primary": "#064E3B",
+              "on-background": "#1b1c1a",
+              "inverse-on-surface": "#f2f0ed",
+              "surface-container-low": "#f5f3ef",
+              "on-tertiary-fixed-variant": "#5e4100",
+              "primary-fixed": "#c1ecd4",
+              "inverse-surface": "#30312e",
+              "on-primary": "#ffffff",
+              "on-secondary-fixed": "#301400",
+              "error-container": "#ffdad6",
+              "secondary-container": "#fd8603",
+              "on-primary-fixed-variant": "#274e3d",
+              "secondary": "#934b00",
+              "surface-container": "#efeeea",
+              "tertiary": "#342300",
+              "on-error": "#ffffff",
+              "surface-variant": "#e4e2de",
+              "tertiary-fixed": "#ffdea9",
+              "on-primary-fixed": "#002114",
+              "background": "#fbf9f5",
+              "surface": "#fbf9f5",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-container": "#d89b00",
+              "tertiary-fixed-dim": "#ffba27",
+              "on-tertiary-fixed": "#271900",
+              "on-secondary": "#ffffff",
+              "surface-container-high": "#eae8e4",
+              "surface-tint": "#3f6653",
+              "on-tertiary": "#ffffff",
+              "on-surface-variant": "#414844",
+              "on-secondary-container": "#5f2f00",
+              "surface-container-highest": "#e4e2de"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Be Vietnam Pro"],
+              "label": ["Be Vietnam Pro"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style> .material-symbols-outlined {font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24} body {font-family: 'Be Vietnam Pro',sans-serif} h1,h2,h3 {font-family: 'Plus Jakarta Sans',sans-serif} </style>
+<style> body {min-height: max(884px,100dvh)} </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-32" data-delivery-fee="2000" data-tax-rate="0.18" data-currency="TZS">
+<header class="fixed top-0 w-full z-50 bg-[#fbf9f5]/80 backdrop-blur-xl flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#064E3B]">arrow_back</span>
+<h1 class="font-plus-jakarta text-lg font-bold tracking-tight text-[#064E3B]">Cart</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#064E3B]">notifications</span>
+</div>
+</header>
+<main class="pt-20 px-6 max-w-2xl mx-auto space-y-12">
+<section class="space-y-6" id="cart-items">
+<div class="flex justify-between items-end">
+<h2 class="text-2xl font-bold tracking-tight">Your Selection</h2>
+<span id="itemCount" class="text-on-surface-variant text-sm font-medium">0 Items</span>
+</div>
+<div id="cartContainer" class="space-y-4">
+<!-- Cart items loaded dynamically -->
+<div id="emptyCartMsg" class="text-center py-12">
+<div class="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mx-auto mb-4">
+<span class="material-symbols-outlined text-4xl text-primary/30">shopping_cart</span>
+</div>
+<p class="text-on-surface-variant">Your cart is empty</p>
+<a href="index.html" class="inline-block mt-4 bg-primary text-on-primary px-6 py-2 rounded-full font-medium hover:opacity-90 transition-all">
+Start Shopping
+</a>
+</div>
+</div>
+</section>
+<section class="space-y-6" id="delivery">
+<h2 class="text-2xl font-bold tracking-tight">Delivery Details</h2>
+<div class="bg-surface-container-low rounded-xl p-6 space-y-6">
+<div class="flex items-start gap-4">
+<div class="bg-primary-fixed p-3 rounded-full text-on-primary-fixed">
+<span class="material-symbols-outlined">location_on</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-center">
+<span class="font-bold text-primary">Home Address</span>
+<button class="text-primary text-sm font-bold uppercase tracking-wider">Change</button>
+</div>
+<p class="text-on-surface-variant text-sm mt-1 leading-relaxed" id="deliveryAddress">
+                            <span id="addressLine1">Loading...</span><br/>
+                            <span id="addressLine2"></span>
+                        </p>
+</div>
+</div>
+<div class="space-y-3">
+<span class="text-xs font-bold text-on-surface-variant uppercase tracking-[0.1em]">Preferred Time Slot</span>
+<div class="grid grid-cols-2 gap-3">
+<div id="timeSlots" class="grid grid-cols-2 gap-3">
+                        <!-- Time slots loaded dynamically -->
+                        </div>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-surface-container-highest rounded-xl p-8 space-y-4" id="summary">
+<div class="flex justify-between text-on-surface-variant">
+<span>Subtotal</span>
+<span id="subtotal" class="font-medium">TZS 0</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Delivery Fee (<span id="deliveryDistance">2km</span>)</span>
+<span id="deliveryFee" class="font-medium">TZS 0</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>VAT (<span id="taxRate">18%</span>)</span>
+<span id="taxes" class="font-medium">TZS 0</span>
+</div>
+<div class="pt-4 mt-2 border-t border-outline-variant/30 flex justify-between items-center">
+<span class="text-lg font-bold">Grand Total</span>
+<span id="grandTotal" class="text-2xl font-extrabold text-primary">TZS 0</span>
+</div>
+</section>
+</main>
+<footer class="fixed bottom-0 left-0 w-full bg-[#fbf9f5]/80 backdrop-blur-xl px-6 pb-8 pt-4 z-50 rounded-t-[3rem] shadow-[0_-8px_24px_rgba(27,28,26,0.06)]">
+<div class="max-w-2xl mx-auto flex flex-col gap-4">
+<button class="w-full bg-secondary-container text-on-secondary-container hover:bg-secondary py-5 rounded-full font-bold text-lg shadow-lg flex items-center justify-center gap-3 transition-all active:scale-95">
+                Place Order
+                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<div class="flex justify-around items-center px-4">
+<div class="flex flex-col items-center justify-center text-[#414844] px-5 py-2 hover:bg-[#eae8e4] rounded-full transition-all">
+<span class="material-symbols-outlined">home</span>
+<span class="font-plus-jakarta text-[10px] font-medium tracking-wide">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#414844] px-5 py-2 hover:bg-[#eae8e4] rounded-full transition-all">
+<span class="material-symbols-outlined">search</span>
+<span class="font-plus-jakarta text-[10px] font-medium tracking-wide">Search</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#c1ecd4] text-[#002114] rounded-full px-5 py-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+<span class="font-plus-jakarta text-[10px] font-medium tracking-wide">Cart</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#414844] px-5 py-2 hover:bg-[#eae8e4] rounded-full transition-all">
+<span class="material-symbols-outlined">person</span>
+<span class="font-plus-jakarta text-[10px] font-medium tracking-wide">Profile</span>
+</div>
+</div>
+</div>
+</footer>
+
+<script>
+// Cart State - use CartService when available
+let cart = [];
+
+// XSS sanitization helper
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+function loadCartData() {
+  if (window.CartService) {
+    cart = CartService.getCart();
+  } else {
+    cart = JSON.parse(localStorage.getItem('smartsoko_cart')) || [];
+  }
+  return cart;
+}
+
+// Load and render cart
+function loadCart() {
+  loadCartData();
+  const container = document.getElementById('cartContainer');
+  const emptyMsg = document.getElementById('emptyCartMsg');
+  const itemCount = document.getElementById('itemCount');
+  
+  const totalItems = cart.reduce((sum, item) => sum + (item.quantity || item.qty || 1), 0);
+  itemCount.textContent = `${totalItems} Item${totalItems !== 1 ? 's' : ''}`;
+  
+  if (cart.length === 0) {
+    emptyMsg.style.display = 'block';
+    updateSummary(0);
+    return;
+  }
+  
+  emptyMsg.style.display = 'none';
+  
+  container.innerHTML = cart.map((item, index) => {
+    const safeName = escapeHtml(item.name);
+    const safeSellerName = escapeHtml(item.sellerName) || 'Local Seller';
+    const safeImageUrl = escapeHtml(item.imageUrl);
+    return `
+    <div class="bg-surface-container-lowest rounded-xl p-6 flex gap-4 relative overflow-hidden group">
+      <div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container">
+        ${item.imageUrl ? 
+          `<img src="${safeImageUrl}" class="w-full h-full object-cover" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'material-symbols-outlined text-3xl text-primary flex items-center justify-center h-full\'>restaurant</span>'">` :
+          `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-fixed to-primary-fixed-dim"><span class="material-symbols-outlined text-3xl text-primary">restaurant</span></div>`
+        }
+      </div>
+      <div class="flex-grow flex flex-col justify-between">
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="font-bold text-lg leading-tight">${safeName}</h3>
+            <p class="text-on-surface-variant text-sm">${safeSellerName}</p>
+          </div>
+          <span class="font-bold text-secondary">TZS ${((item.price || 0) * (item.quantity || item.qty || 1)).toLocaleString()}</span>
+        </div>
+        <div class="flex justify-between items-center mt-2">
+          <div class="flex items-center bg-surface-container-low rounded-full px-3 py-1 gap-4">
+            <button onclick="updateQuantity(${index}, -1)" class="w-6 h-6 flex items-center justify-center text-primary hover:bg-white rounded-full transition-colors">
+              <span class="material-symbols-outlined text-sm">remove</span>
+            </button>
+            <span class="font-bold text-sm">${item.quantity || item.qty || 1}</span>
+            <button onclick="updateQuantity(${index}, 1)" class="w-6 h-6 flex items-center justify-center text-primary hover:bg-white rounded-full transition-colors">
+              <span class="material-symbols-outlined text-sm">add</span>
+            </button>
+          </div>
+          <button onclick="removeItem(${index})" class="text-on-surface-variant hover:text-error transition-colors p-1 hover:bg-error/10 rounded-full">
+            <span class="material-symbols-outlined text-xl">delete</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  `}).join('');
+  
+  const subtotal = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || item.qty || 1)), 0);
+  updateSummary(subtotal);
+}
+
+function updateQuantity(index, delta) {
+  const item = cart[index];
+  if (item) {
+    const itemId = item.id;
+    if (window.CartService) {
+      CartService.updateQuantity(itemId, delta);
+      loadCartData();
+    } else {
+      item.quantity = (item.quantity || item.qty || 1) + delta;
+      if (item.quantity <= 0) {
+        cart.splice(index, 1);
+      }
+      localStorage.setItem('smartsoko_cart', JSON.stringify(cart));
+    }
+  }
+  loadCart();
+  if (window.SmartNav) SmartNav.updateCartBadge();
+}
+
+function removeItem(index) {
+  const item = cart[index];
+  if (item) {
+    if (window.CartService) {
+      CartService.removeItem(item.id);
+      loadCartData();
+    } else {
+      cart.splice(index, 1);
+      localStorage.setItem('smartsoko_cart', JSON.stringify(cart));
+    }
+  }
+  loadCart();
+  if (window.SmartNav) SmartNav.updateCartBadge();
+}
+
+function saveCart() {
+  if (window.CartService) {
+    CartService.saveCart(cart);
+  } else {
+    localStorage.setItem('smartsoko_cart', JSON.stringify(cart));
+  }
+}
+
+// Configuration from data attributes
+function getConfig() {
+  const body = document.body;
+  return {
+    deliveryFee: parseInt(body.dataset.deliveryFee) || 2000,
+    taxRate: parseFloat(body.dataset.taxRate) || 0.18,
+    currency: body.dataset.currency || 'TZS'
+  };
+}
+
+function updateSummary(subtotal) {
+  const config = getConfig();
+  const taxes = Math.round(subtotal * config.taxRate);
+  const total = subtotal + config.deliveryFee + taxes;
+  
+  document.getElementById('subtotal').textContent = `${config.currency} ${subtotal.toLocaleString()}`;
+  document.getElementById('deliveryFee').textContent = `${config.currency} ${config.deliveryFee.toLocaleString()}`;
+  document.getElementById('taxes').textContent = `${config.currency} ${taxes.toLocaleString()}`;
+  document.getElementById('grandTotal').textContent = `${config.currency} ${total.toLocaleString()}`;
+  document.getElementById('taxRate').textContent = `${(config.taxRate * 100).toFixed(0)}%`;
+}
+
+// Load delivery address from localStorage or geolocation
+function loadAddress() {
+  const savedAddress = JSON.parse(localStorage.getItem('smartsoko_delivery_address'));
+  
+  if (savedAddress) {
+    document.getElementById('addressLine1').textContent = savedAddress.line1 || 'Home';
+    document.getElementById('addressLine2').textContent = savedAddress.line2 || 'Dar es Salaam, Tanzania';
+  } else {
+    // Default to generic loading state that prompts user
+    document.getElementById('addressLine1').textContent = 'Set delivery address';
+    document.getElementById('addressLine2').textContent = 'Tap "Change" to add your location';
+  }
+}
+
+// Generate dynamic time slots
+function loadTimeSlots() {
+  const slotsContainer = document.getElementById('timeSlots');
+  const now = new Date();
+  const currentHour = now.getHours();
+  
+  const slots = [];
+  
+  // Today slots (if before 20:00)
+  if (currentHour < 20) {
+    slots.push({
+      label: 'Today',
+      time: '18:00 - 20:00',
+      value: 'today_evening',
+      available: currentHour < 18
+    });
+  }
+  
+  // Tomorrow slots
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const dayName = tomorrow.toLocaleDateString('en-US', { weekday: 'short' });
+  
+  slots.push(
+    { label: `${dayName}`, time: '09:00 - 12:00', value: 'tomorrow_morning', available: true },
+    { label: `${dayName}`, time: '14:00 - 17:00', value: 'tomorrow_afternoon', available: true }
+  );
+  
+  slotsContainer.innerHTML = slots.map((slot, index) => `
+    <button onclick="selectTimeSlot('${slot.value}')" 
+            class="time-slot-btn ${index === 0 ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface hover:bg-surface-container-highest'} 
+                   rounded-full py-3 px-4 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${!slot.available ? 'opacity-50 cursor-not-allowed' : ''}"
+            ${!slot.available ? 'disabled' : ''}
+            data-slot="${slot.value}">
+      <span class="material-symbols-outlined text-lg">schedule</span>
+      <span>${slot.label}, ${slot.time}</span>
+    </button>
+  `).join('');
+}
+
+function selectTimeSlot(slotValue) {
+  localStorage.setItem('smartsoko_delivery_slot', slotValue);
+  document.querySelectorAll('.time-slot-btn').forEach(btn => {
+    if (btn.dataset.slot === slotValue) {
+      btn.classList.remove('bg-surface-container-high', 'text-on-surface');
+      btn.classList.add('bg-primary', 'text-on-primary');
+    } else {
+      btn.classList.remove('bg-primary', 'text-on-primary');
+      btn.classList.add('bg-surface-container-high', 'text-on-surface');
+    }
+  });
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  loadCart();
+  loadAddress();
+  loadTimeSlots();
+  
+  // Restore selected time slot
+  const savedSlot = localStorage.getItem('smartsoko_delivery_slot');
+  if (savedSlot) selectTimeSlot(savedSlot);
+});
+</script>
+</body></html>

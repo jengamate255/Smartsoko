@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Setup Sample Data</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <h2>Setting up sample data...</h2>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBKliW4sQwBFEYMptJ8VuWYHTJ73DbHoE",
+      authDomain: "fooddelievry-dce15.firebaseapp.com",
+      projectId: "fooddelievry-dce15",
+      storageBucket: "fooddelievry-dce15.firebasestorage.app",
+      messagingSenderId: "727819507148",
+      appId: "1:727819507148:web:372bee2608d5c7a9587969"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    async function setupData() {
+      // Add a sample restaurant
+      const restaurantRef = await db.collection('restaurants').add({
+        name: "QuickMart",
+        description: "Your neighborhood store for daily essentials",
+        category: "Supermarket",
+        deliveryFee: 2000,
+        deliveryTimeMinutes: 25,
+        isOpen: true,
+        rating: 4.5,
+        lat: -6.7924,
+        lng: 39.2083,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Add milk item
+      await db.collection('menu_items').add({
+        restaurantId: restaurantRef.id,
+        name: "Milk 1 Liter",
+        description: "Fresh milk 1 liter",
+        price: 2000,
+        category: "Dairy",
+        isAvailable: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Add more items
+      await db.collection('menu_items').add({
+        restaurantId: restaurantRef.id,
+        name: "Bread",
+        description: "Fresh loaf of bread",
+        price: 1500,
+        category: "Bakery",
+        isAvailable: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      await db.collection('menu_items').add({
+        restaurantId: restaurantRef.id,
+        name: "Eggs (6 pack)",
+        description: "Farm fresh eggs",
+        price: 3000,
+        category: "Dairy",
+        isAvailable: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      await db.collection('menu_items').add({
+        restaurantId: restaurantRef.id,
+        name: "Water 1.5L",
+        description: "Pure drinking water",
+        price: 1000,
+        category: "Drinks",
+        isAvailable: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      await db.collection('menu_items').add({
+        restaurantId: restaurantRef.id,
+        name: "Rice 1kg",
+        description: "Premium quality rice",
+        price: 2500,
+        category: "Groceries",
+        isAvailable: true,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      document.body.innerHTML = "<h2>✅ Sample data added successfully!</h2><p>Restaurant: QuickMart</p><p>Items: Milk, Bread, Eggs, Water, Rice</p><p><a href='index.html'>Go to Admin Panel</a></p>";
+    }
+
+    setupData();
+  </script>
+</body>
+</html>

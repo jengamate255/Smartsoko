@@ -1,0 +1,18 @@
+{
+  "scripts": {
+    "start": "npm --prefix food_delivery_app start",
+    "start:secure": "npm --prefix food_delivery_app run start:secure",
+    "start:dev": "npm --prefix food_delivery_app run start:dev",
+    "dev": "npm --prefix food_delivery_app run dev",
+    "dev:secure": "npm --prefix food_delivery_app run dev:secure",
+    "build": "npm --prefix food_delivery_app run build",
+    "test": "npm --prefix food_delivery_app test"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.8.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "json5": "^2.2.3"
+  }
+}

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Performance: Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Android Bridge Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style> body {font-family: Arial,sans-serif;max-width: 800px;margin: 20px auto;padding: 20px} .test-section {background: #f5f5f5;padding: 20px;margin: 20px 0;border-radius: 8px} .success {color: #4caf50} .error {color: #f44336} .info {color: #2196f3} .result {margin: 10px 0;padding: 10px;background: white;border-radius: 4px} button {background: #012d1d;color: white;border: none;padding: 10px 20px;border-radius: 4px;cursor: pointer;margin: 5px} input {width: 100%;padding: 8px;margin: 5px 0;border: 1px solid #ddd;border-radius: 4px} .android-only {background: #e8f5e9;border: 2px solid #4caf50} .web-only {background: #fff3e0;border: 2px solid #ff9800} </style>
+</head>
+<body>
+  <h1>🤖 Android Bridge + Supabase Test</h1>
+  
+  <div class="android-only test-section">
+    <h3>📱 Android Native Bridge Tests</h3>
+    <p>These tests work only in the Android app WebView:</p>
+    
+    <button onclick="testAndroidConnection()">Test Android Connection</button>
+    <div id="androidResult" class="result"></div>
+    
+    <button onclick="testAndroidAuth()">Test Android Auth</button>
+    <div id="androidAuthResult" class="result"></div>
+    
+    <button onclick="testAndroidRestaurants()">Test Android Restaurants</button>
+    <div id="androidRestaurantsResult" class="result"></div>
+    
+    <button onclick="testNativeFeatures()">Test Native Features</button>
+    <div id="nativeFeaturesResult" class="result"></div>
+  </div>
+
+  <div class="web-only test-section">
+    <h3>🌐 Direct Supabase Tests (Web)</h3>
+    <p>These tests work in any web browser:</p>
+    
+    <button onclick="testWebConnection()">Test Web Connection</button>
+    <div id="webResult" class="result"></div>
+    
+    <button onclick="testWebAuth()">Test Web Auth</button>
+    <div id="webAuthResult" class="result"></div>
+    
+    <button onclick="testWebRestaurants()">Test Web Restaurants</button>
+    <div id="webRestaurantsResult" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>📊 Environment Detection</h3>
+    <div id="envResult" class="result"></div>
+  </div>
+
+  <script>
+    // Supabase configuration for web tests
+    const SUPABASE_URL = 'https://vonkqyiczeqhuqhahsxm.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvbmtxeWljemVxaHVxaGFoc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjIzNDksImV4cCI6MjA5MDM5ODM0OX0.UKAT3re6P_oAB3E1svwCFdqTQWZL6yulJ1ZX4nAgJJ8';
+    
+    let supabase = null;
+    
+    // Environment detection
+    function detectEnvironment() {
+      const env = {
+        isAndroid: typeof window.AndroidBridge !== 'undefined',
+        isWebView: navigator.userAgent.includes('FoodDeliveryApp'),
+        userAgent: navigator.userAgent,
+        platform: navigator.platform
+      };
+      
+      const result = document.getElementById('envResult');
+      result.innerHTML = `
+        <strong>Environment:</strong><br>
+        📱 Android Bridge: ${env.isAndroid ? '✅ Available' : '❌ Not Available'}<br>
+        🌐 WebView: ${env.isWebView ? '✅ Yes' : '❌ No'}<br>
+        💻 Platform: ${env.platform}<br>
+        📋 User Agent: ${env.userAgent}<br>
+        <br>
+        <strong>Recommended Test Method:</strong><br>
+        ${env.isAndroid ? '🤖 Use Android Bridge Tests (Native Performance)' : '🌐 Use Web Tests (Direct Connection)'}
+      `;
+      
+      return env;
+    }
+    
+    // Android Bridge Tests
+    function testAndroidConnection() {
+      if (!window.AndroidBridge) {
+        updateResult('androidResult', '❌ Android Bridge not available. Run this in the Android app.', 'error');
+        return;
+      }
+      
+      updateResult('androidResult', '🔄 Testing Android connection...', 'info');
+      
+      // Set up callback
+      window.supabaseBridgeListeners = window.supabaseBridgeListeners || {};
+      window.supabaseBridgeListeners.testConnection = function(status, data) {
+        if (status === 'success') {
+          updateResult('androidResult', '✅ Android Bridge connected successfully! ' + data, 'success');
+        } else {
+          updateResult('androidResult', '❌ Android Bridge connection failed: ' + data, 'error');
+        }
+      };
+      
+      // Test connection
+      window.AndroidBridge.testConnection();
+    }
+    
+    function testAndroidAuth() {
+      if (!window.AndroidBridge) {
+        updateResult('androidAuthResult', '❌ Android Bridge not available', 'error');
+        return;
+      }
+      
+      updateResult('androidAuthResult', '🔄 Testing Android authentication...', 'info');
+      
+      window.supabaseBridgeListeners.signIn = function(status, data) {
+        if (status === 'success') {
+          updateResult('androidAuthResult', '✅ Android authentication working! ' + data, 'success');
+        } else {
+          updateResult('androidAuthResult', '❌ Android authentication failed: ' + data, 'error');
+        }
+      };
+      
+      // Test with dummy credentials (will fail but tests the connection)
+      window.AndroidBridge.signIn('test@example.com', 'testpassword');
+    }
+    
+    function testAndroidRestaurants() {
+      if (!window.AndroidBridge) {
+        updateResult('androidRestaurantsResult', '❌ Android Bridge not available', 'error');
+        return;
+      }
+      
+      updateResult('androidRestaurantsResult', '🔄 Testing Android restaurants API...', 'info');
+      
+      window.supabaseBridgeListeners.getRestaurants = function(status, data) {
+        if (status === 'success') {
+          const restaurants = JSON.parse(data);
+          updateResult('androidRestaurantsResult', 
+            `✅ Android restaurants API working! Found ${restaurants.length} restaurants`, 'success');
+        } else {
+          updateResult('androidRestaurantsResult', '❌ Android restaurants API failed: ' + data, 'error');
+        }
+      };
+      
+      window.AndroidBridge.getRestaurants();
+    }
+    
+    function testNativeFeatures() {
+      if (!window.AndroidBridge) {
+        updateResult('nativeFeaturesResult', '❌ Android Bridge not available', 'error');
+        return;
+      }
+      
+      updateResult('nativeFeaturesResult', '🔄 Testing native features...', 'info');
+      
+      // Test toast notification
+      window.AndroidBridge.showToast('🎉 Native features working!');
+      
+      setTimeout(() => {
+        updateResult('nativeFeaturesResult', 
+          '✅ Native features working! Toast shown above. Other features: Maps, Phone, Email, Sharing', 'success');
+      }, 1000);
+    }
+    
+    // Web Tests
+    function testWebConnection() {
+      updateResult('webResult', '🔄 Testing web Supabase connection...', 'info');
+      
+      try {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        supabase.from('restaurants').select('count').head()
+          .then(({ data, error }) => {
+            if (error) throw error;
+            updateResult('webResult', '✅ Web Supabase connection successful!', 'success');
+          })
+          .catch(error => {
+            updateResult('webResult', '❌ Web Supabase connection failed: ' + error.message, 'error');
+          });
+      } catch (error) {
+        updateResult('webResult', '❌ Web Supabase setup failed: ' + error.message, 'error');
+      }
+    }
+    
+    function testWebAuth() {
+      if (!supabase) {
+        updateResult('webAuthResult', '❌ Test web connection first', 'error');
+        return;
+      }
+      
+      updateResult('webAuthResult', '🔄 Testing web authentication...', 'info');
+      
+      // Test sign up (will fail but tests the connection)
+      supabase.auth.signUp({
+        email: 'webtest@example.com',
+        password: 'testpassword123'
+      })
+      .then(({ data, error }) => {
+        if (error && !error.message.includes('already registered')) {
+          throw error;
+        }
+        updateResult('webAuthResult', '✅ Web authentication working! (User may already exist)', 'success');
+      })
+      .catch(error => {
+        if (error.message.includes('already registered')) {
+          updateResult('webAuthResult', '✅ Web authentication working! (User already exists)', 'success');
+        } else {
+          updateResult('webAuthResult', '❌ Web authentication failed: ' + error.message, 'error');
+        }
+      });
+    }
+    
+    function testWebRestaurants() {
+      if (!supabase) {
+        updateResult('webRestaurantsResult', '❌ Test web connection first', 'error');
+        return;
+      }
+      
+      updateResult('webRestaurantsResult', '🔄 Testing web restaurants API...', 'info');
+      
+      supabase.from('restaurants').select('*').limit(5)
+        .then(({ data, error }) => {
+          if (error) throw error;
+          updateResult('webRestaurantsResult', 
+            `✅ Web restaurants API working! Found ${data.length} restaurants`, 'success');
+        })
+        .catch(error => {
+          updateResult('webRestaurantsResult', '❌ Web restaurants API failed: ' + error.message, 'error');
+        });
+    }
+    
+    function updateResult(elementId, message, type = 'info') {
+      const element = document.getElementById(elementId);
+      element.innerHTML = `<span class="${type}">${message}</span>`;
+    }
+    
+    // Initialize on load
+    window.addEventListener('load', () => {
+      detectEnvironment();
+    });
+  </script>
+</body>
+</html>

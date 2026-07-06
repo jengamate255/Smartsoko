@@ -1,0 +1,63 @@
+query ListPublicRecipes @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public as it only returns public recipes.") {
+  recipes(where: { isPublic: { eq: true } }) {
+    id
+    title
+    description
+    prepTimeMinutes
+    cookTimeMinutes
+    servings
+    imageUrl
+    author {
+      displayName
+    }
+    categories_via_RecipeCategory {
+      name
+    }
+  }
+}
+
+query MyMealPlanEntries @auth(level: USER) {
+  mealPlanEntries(where: { userId: { eq_expr: "auth.uid" } }, orderBy: [{ planDate: ASC }]) {
+    id
+    planDate
+    mealType
+    notes
+    recipe {
+      title
+      imageUrl
+    }
+  }
+}
+
+mutation AddRecipeToMealPlan($planDate: Date!, $mealType: String!, $recipeId: UUID!) @auth(level: USER) {
+  mealPlanEntry_insert(
+    data: {
+      planDate: $planDate,
+      mealType: $mealType,
+      recipeId: $recipeId,
+      userId_expr: "auth.uid"
+    }
+  ) {
+    id
+  }
+}
+
+mutation CreateNewRecipe($title: String!, $instructions: String!, $isPublic: Boolean!, $description: String, $prepTimeMinutes: Int, $cookTimeMinutes: Int, $servings: Int, $imageUrl: String) @auth(level: USER) {
+  recipe_insert(
+    data: {
+      title: $title,
+      instructions: $instructions,
+      isPublic: $isPublic,
+      description: $description,
+      prepTimeMinutes: $prepTimeMinutes,
+      cookTimeMinutes: $cookTimeMinutes,
+      servings: $servings,
+      imageUrl: $imageUrl,
+      authorId_expr: "auth.uid",
+      createdAt_expr: "request.time",
+      updatedAt_expr: "request.time"
+    }
+  ) {
+    id
+  }
+}

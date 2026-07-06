@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartSoko — Set up your account</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="dist/tailwind.css" as="style">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link rel="stylesheet" href="design-system.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script type="module" src="config/firebase-config.js"></script>
+  <script src="js/onboarding-guard.js"></script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body min-h-screen">
+  <div class="min-h-screen flex flex-col items-center justify-center p-4 py-10">
+    <div class="w-full max-w-lg">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">SmartSoko</p>
+          <h1 class="font-headline text-xl font-bold text-primary">Finish your profile</h1>
+        </div>
+        <span id="roleBadge" class="px-3 py-1 rounded-full bg-primary-container text-on-primary-container text-xs font-bold uppercase">…</span>
+      </div>
+
+      <div class="h-1.5 bg-surface-container-high rounded-full overflow-hidden mb-8">
+        <div id="progressBar" class="h-full bg-primary transition-all duration-300 rounded-full" style="width: 0%"></div>
+      </div>
+
+      <div class="bg-surface rounded-3xl border border-outline/20 shadow-xl overflow-hidden">
+        <div id="stepMount" class="p-6 sm:p-8"></div>
+        <div class="px-6 sm:px-8 pb-8 flex gap-3">
+          <button type="button" id="btnBack" class="hidden flex-1 py-3 rounded-2xl border border-outline-variant font-semibold text-on-surface hover:bg-surface-container transition">
+            Back
+          </button>
+          <button type="button" id="btnNext" class="flex-1 py-3 rounded-2xl bg-primary text-on-primary font-headline font-bold hover:opacity-90 transition">
+            Next
+          </button>
+        </div>
+      </div>
+
+      <p class="text-center text-sm text-on-surface-variant mt-6">
+        <button type="button" id="btnSignOut" class="underline hover:text-primary">Sign out</button>
+      </p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+    import { signOut } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+
+    const OV = window.SmartSokoOnboarding.ONBOARDING_VERSION;
+
+    let state = {
+      role: 'customer',
+      step: 0,
+      userData: {},
+      uid: null,
+      email: null
+    };
+
+    const MERCHANT_CATEGORIES = [
+      { v: 'food', l: 'Food & restaurants' },
+      { v: 'groceries', l: 'Groceries' },
+      { v: 'bakery', l: 'Bakery' },
+      { v: 'dairy', l: 'Dairy' },
+      { v: 'fruits', l: 'Fruits & produce' },
+      { v: 'other', l: 'Other' }
+    ];
+
+    const VEHICLE_TYPES = ['Bicycle', 'Moped', 'Motorcycle', 'Car'];
+
+    function stepsForRole(role) {
+      const r = window.SmartSokoOnboarding.normalizeRole(role);
+      if (r === 'merchant') return ['welcome', 'business', 'contact', 'done'];
+      if (r === 'driver') return ['welcome', 'vehicle', 'service', 'done'];
+      if (r === 'admin') return ['welcome', 'confirm', 'done'];
+      return ['welcome', 'profile', 'delivery', 'done'];
+    }
+
+    function renderStep() {
+      const role = state.role;
+      const steps = stepsForRole(role);
+      const i = state.step;
+      const key = steps[i];
+      const mount = document.getElementById('stepMount');
+      const pct = ((i + 1) / steps.length) * 100;
+      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('roleBadge').textContent = role;
+
+      const back = document.getElementById('btnBack');
+      back.classList.toggle('hidden', i === 0);
+      const next = document.getElementById('btnNext');
+      next.textContent = i === steps.length - 1 ? 'Go to app' : 'Next';
+
+      const d = state.userData;
+      const name = d.fullName || d.name || '';
+      const phone = d.phone || '';
+
+      if (key === 'welcome') {
+        const WELCOME = {
+          customer: { t: 'Welcome to SmartSoko', s: 'A few quick details and you can start ordering from local sellers.' },
+          merchant: { t: 'Welcome, partner', s: 'Tell us about your business so customers can find you.' },
+          driver: { t: 'Welcome, driver', s: 'Set up your vehicle and area so we can assign deliveries.' },
+          admin: { t: 'Admin access', s: 'Confirm your profile. You will manage the platform from here.' }
+        };
+        const copy = WELCOME[role] || WELCOME.customer;
+        mount.innerHTML = `
+          <div class="text-center py-4">
+            <div class="w-16 h-16 rounded-2xl bg-primary-container flex items-center justify-center mx-auto mb-4">
+              <span class="material-symbols-outlined text-3xl text-primary">waving_hand</span>
+            </div>
+            <h2 class="font-headline text-2xl font-bold text-on-surface mb-2">${copy.t}</h2>
+            <p class="text-on-surface-variant">${copy.s}</p>
+          </div>`;
+        return;
+      }
+
+      if (key === 'profile' && role === 'customer') {
+        mount.innerHTML = `
+          <h2 class="font-headline text-lg font-bold text-on-surface mb-1">Your details</h2>
+          <p class="text-sm text-on-surface-variant mb-6">Used for delivery and support.</p>
+          <label class="block text-sm font-semibold mb-2">Full name</label>
+          <input id="f_fullName" type="text" value="${escapeAttr(name)}" class="w-full px-4 py-3 rounded-xl border border-outline/30 bg-surface-container-low mb-4 focus:border-primary focus:outline-none" placeholder="Your name" />
+          <label class="block text-sm font-semibold mb-2">Phone</label>
+          <input id="f_phone" type="tel" value="${escapeAttr(phone)}" class="w-full px-4 py-3 rounded-xl border border-outline/30 bg-surface-container-low focus:border-primary focus:outline-none" placeholder="+255 …" />`;
+        return;
+      }
+
+      if (key === 'delivery' && role === 'customer') {
+        mount.innerHTML = `
+          <h2 class="font-headline text-lg font-bold text-on-surface mb-1">Default delivery area</h2>
+          <p class="text-sm text-on-surface-variant mb-6">Neighborhood, landmark, or full address.</p>
+          <textarea id="f_address" rows="3" class="w-full px-4 py-3 rounded-xl border border-outline/30 bg-surface-container-low mb-3 focus:border-primary focus:outline-none" placeholder="e.g. Masaki, near Slipway">${escapeAttr(d.deliveryArea || d.location || '')}</textarea>
+          <button type="button" id="btnGeo" class="w-full py-3 rounded-xl border border-primary/30 text-primary font-semibold hover:bg-primary/5 transition flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-xl">my_location</span>
+            Use current location
+          </button>`;
+        mount.querySelector('#btnGeo').onclick = () => {
+          if (!navigator.geolocation) return alert('Geolocation not supported.');
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              mount.querySelector('#f_address').value =
+                pos.coords.latitude.toFixed(5) + ', ' + pos.coords.longitude.toFixed(5);
+            },
+            () => alert('Could not read location. Enter manually.')
+          );
+        };
+        return;
+      }
+
+      if (key === 'business' && role === 'merchant') {
+        const opts = MERCHANT_CATEGORIES.map(c => `<option value="${c.v}" ${d.businessCategory === c.v ? 'selected' : ''}>${c.l}</option>`).join('');
+        mount.innerHTML = `
+          <h2 class="font-headline text-lg font-bold text-on-surface mb-1">Business</h2>
+          <p class="text-sm text-on-surface-variant mb-6">Shown to customers on SmartSoko.</p>
+          <label class="block text-sm font-semibold mb-2">Business name</label>
+          <input id="f_bizName" type="text" value="${escapeAttr(d.businessName || '')}" class="w-full px-4 py-3 rounded-xl border border-outline/30 bg-surface-container-low mb-4 focus:border-primary focus:outline-none" />
+          <label class="block text-sm font-semibold mb-2">Category</label>
+          <select id="f_bizCat" class="w-full px-4 py-3 rounded-xl border border-outline/30 bg-surface-container-low mb-4 focus:border-primary focus:outline-none">${opts}</select>
+          <label class="block text-sm font-semibold mb-2">Short description</label>
+          <textarea id="f_bizDesc" rows="2" class="w-full px-4 py-3 rounded-xl border border-outline/30 bg-surface-container-low focus:border-primary focus:outline-none" placeholder="What do you sell?">${escapeAttr(d.businessDescription || '')}</textarea>`;
+        return;
+      }
+
+      if (key === 'contact' && role === 'merchant') {
+        mount.innerHTML = `
+          <h2 class="font-headline text-lg font-bold text-on-surface mb-1">Contact & location</h2>
+          <p class="text-sm text-on-surface-variant mb-6">For orders and driver pickup.</p>
+          <label class="block text-sm font-semibold mb-2">Business phone</label>
+          <input id="f_bizPhone" type="tel" value="${escapeAttr(d.businessPhone || phone)}" class="w-full px-4 py-3 rounded-xl border border-outline/30 bg-surface-container-low mb-4 focus:border-primary focus:outline-none" />
+          <label class="block text-sm font-semibold mb-2">City / area</label>
+          <input id="f_bizCity" type="text" value="${escapeAttr(d.businessCity || '')}" class="w-full px-4 py-3 rounded-xl border border-outline/30 bg-surface-container-low focus:border-primary focus:outline-none" placeholder="Dar es Salaam, …" />`;
+        return;
+      }
+
+      if (key === 'vehicle' && role === 'driver') {
+        const vOpts = VEHICLE_TYPES.map(v => `<option value="${v}" ${d.vehicleType === v ? 'selected' : ''}>${v}</option>`).join('');
+        mount.innerHTML = `
+          <h2 class="font-headline text-lg font-bold text-on-surface mb-1">Vehicle</h2>
+          <p class="text-sm text-on-surface-variant mb-6">Helps match you to suitable orders.</p>
+          <label class="block text-sm font-semibold mb-2">Your name</label>
+          <input id="f_drvName" type="text" value="${escapeAttr(name)}" class="w-full px-4 py-3 rounded-xl border border-outline/30 bg-surface-container-low mb-4 focus:border-primary focus:outline-none" />
+          <label class="block text-sm font-semibold mb-2">Vehicle type</label>
+          <select id="f_vehicleType" class="w-full px-4 py-3 rounded-xl border border-outline/30 bg-surface-container-low mb-4 focus:border-primary focus:outline-none">${vOpts}</select>
+          <label class="block text-sm font-semibold mb-2">Plate / ID (optional)</label>
+          <input id="f_plate" type="text" value="${escapeAttr(d.vehiclePlate || '')}" class="w-full px-4 py-3 rounded-xl border border-outline/30 bg-surface-container-low focus:border-primary focus:outline-none" />`;
+        return;
+      }
+
+      if (key === 'service' && role === 'driver') {
+        mount.innerHTML = `
+          <h2 class="font-headline text-lg font-bold text-on-surface mb-1">Service area</h2>
+          <p class="text-sm text-on-surface-variant mb-6">Where you usually accept deliveries.</p>
+          <label class="block text-sm font-semibold mb-2">Primary area</label>
+          <input id="f_serviceArea" type="text" value="${escapeAttr(d.serviceArea || '')}" class="w-full px-4 py-3 rounded-xl border border-outline/30 bg-surface-container-low mb-4 focus:border-primary focus:outline-none" placeholder="City or districts" />
+          <label class="block text-sm font-semibold mb-2">Phone for dispatch</label>
+          <input id="f_drvPhone" type="tel" value="${escapeAttr(phone)}" class="w-full px-4 py-3 rounded-xl border border-outline/30 bg-surface-container-low focus:border-primary focus:outline-none" />`;
+        return;
+      }
+
+      if (key === 'confirm' && role === 'admin') {
+        mount.innerHTML = `
+          <h2 class="font-headline text-lg font-bold text-on-surface mb-1">Confirm admin profile</h2>
+          <p class="text-sm text-on-surface-variant mb-6">This account can access sensitive dashboards.</p>
+          <label class="block text-sm font-semibold mb-2">Display name</label>
+          <input id="f_adminName" type="text" value="${escapeAttr(name)}" class="w-full px-4 py-3 rounded-xl border border-outline/30 bg-surface-container-low mb-6 focus:border-primary focus:outline-none" />
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" id="f_adminAck" class="mt-1 rounded border-outline" ${d.adminPoliciesAck ? 'checked' : ''} />
+            <span class="text-sm text-on-surface">I will follow SmartSoko security and data-handling guidelines.</span>
+          </label>`;
+        return;
+      }
+
+      if (key === 'done') {
+        const home = window.SmartSokoOnboarding.getRoleHome(role);
+        mount.innerHTML = `
+          <div class="text-center py-6">
+            <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+              <span class="material-symbols-outlined text-3xl text-green-600">check_circle</span>
+            </div>
+            <h2 class="font-headline text-xl font-bold text-on-surface mb-2">You are all set</h2>
+            <p class="text-on-surface-variant text-sm mb-6">We saved your details. Continue to your dashboard.</p>
+            <p class="text-xs text-on-surface-variant">Next: <a href="${home}" class="text-primary font-semibold">${home}</a></p>
+          </div>`;
+        return;
+      }
+
+      mount.innerHTML = '<p class="text-on-surface-variant">Unknown step.</p>';
+    }
+
+    function escapeAttr(s) {
+      if (!s) return '';
+      return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    }
+
+    function validateStep() {
+      const role = state.role;
+      const steps = stepsForRole(role);
+      const key = steps[state.step];
+      const mount = document.getElementById('stepMount');
+
+      if (key === 'profile') {
+        const n = mount.querySelector('#f_fullName')?.value?.trim();
+        if (!n) { alert('Please enter your name.'); return false; }
+      }
+      if (key === 'delivery') {
+        const a = mount.querySelector('#f_address')?.value?.trim();
+        if (!a) { alert('Please enter a delivery area or address.'); return false; }
+      }
+      if (key === 'business') {
+        if (!mount.querySelector('#f_bizName')?.value?.trim()) { alert('Enter your business name.'); return false; }
+      }
+      if (key === 'contact') {
+        if (!mount.querySelector('#f_bizPhone')?.value?.trim()) { alert('Enter a business phone number.'); return false; }
+        if (!mount.querySelector('#f_bizCity')?.value?.trim()) { alert('Enter city or area.'); return false; }
+      }
+      if (key === 'vehicle') {
+        if (!mount.querySelector('#f_drvName')?.value?.trim()) { alert('Enter your name.'); return false; }
+      }
+      if (key === 'service') {
+        if (!mount.querySelector('#f_serviceArea')?.value?.trim()) { alert('Enter your primary service area.'); return false; }
+      }
+      if (key === 'confirm') {
+        if (!mount.querySelector('#f_adminAck')?.checked) { alert('Please confirm the admin acknowledgment.'); return false; }
+      }
+      return true;
+    }
+
+    async function persistStepData() {
+      const db = window.db;
+      const uid = state.uid;
+      if (!db || !uid) return;
+
+      const role = state.role;
+      const steps = stepsForRole(role);
+      const key = steps[state.step];
+      const mount = document.getElementById('stepMount');
+      const userRef = doc(db, 'users', uid);
+      const patch = {};
+
+      if (key === 'profile') {
+        patch.fullName = mount.querySelector('#f_fullName').value.trim();
+        patch.phone = mount.querySelector('#f_phone').value.trim();
+      }
+      if (key === 'delivery') {
+        patch.deliveryArea = mount.querySelector('#f_address').value.trim();
+        patch.location = patch.deliveryArea;
+      }
+      if (key === 'business') {
+        patch.businessName = mount.querySelector('#f_bizName').value.trim();
+        patch.businessCategory = mount.querySelector('#f_bizCat').value;
+        patch.businessDescription = mount.querySelector('#f_bizDesc').value.trim();
+      }
+      if (key === 'contact') {
+        patch.businessPhone = mount.querySelector('#f_bizPhone').value.trim();
+        patch.businessCity = mount.querySelector('#f_bizCity').value.trim();
+      }
+      if (key === 'vehicle') {
+        patch.fullName = mount.querySelector('#f_drvName').value.trim();
+        patch.vehicleType = mount.querySelector('#f_vehicleType').value;
+        patch.vehiclePlate = mount.querySelector('#f_plate').value.trim();
+      }
+      if (key === 'service') {
+        patch.serviceArea = mount.querySelector('#f_serviceArea').value.trim();
+        patch.phone = mount.querySelector('#f_drvPhone').value.trim();
+      }
+      if (key === 'confirm') {
+        patch.fullName = mount.querySelector('#f_adminName').value.trim();
+        patch.adminPoliciesAck = true;
+      }
+
+      if (Object.keys(patch).length) {
+        await setDoc(userRef, patch, { merge: true });
+        state.userData = { ...state.userData, ...patch };
+      }
+    }
+
+    async function completeOnboarding() {
+      const db = window.db;
+      const uid = state.uid;
+      const auth = window.auth;
+      const role = state.role;
+
+      const userRef = doc(db, 'users', uid);
+      const common = {
+        onboardingComplete: true,
+        onboardingVersion: OV,
+        onboardingCompletedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      if (role === 'merchant') {
+        const d = state.userData;
+        await setDoc(doc(db, 'sellers', uid), {
+          ownerId: uid,
+          name: d.businessName || 'My store',
+          category: d.businessCategory || 'other',
+          description: d.businessDescription || '',
+          phone: d.businessPhone || d.phone || '',
+          city: d.businessCity || '',
+          isOpen: false,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+
+      if (role === 'driver') {
+        const d = state.userData;
+        await setDoc(doc(db, 'drivers', uid), {
+          full_name: d.fullName || '',
+          phone: d.phone || '',
+          vehicle_type: (d.vehicleType || '').toLowerCase(),
+          plate: d.vehiclePlate || '',
+          service_area: d.serviceArea || '',
+          status: 'offline',
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+
+      await setDoc(userRef, common, { merge: true });
+      localStorage.setItem('smartsoko_onboarding', 'complete');
+
+      const home = window.SmartSokoOnboarding.getRoleHome(role);
+      window.location.href = home + (home.includes('?') ? '&' : '?') + 'onboarded=1';
+    }
+
+    async function boot() {
+      const auth = window.auth;
+      const db = window.db;
+      if (!auth || !db) {
+        setTimeout(boot, 200);
+        return;
+      }
+
+      const u = auth.currentUser;
+      if (!u) {
+        window.location.href = '/login?reason=auth_required';
+        return;
+      }
+
+      state.uid = u.uid;
+      state.email = u.email;
+
+      const userSnap = await getDoc(doc(db, 'users', u.uid));
+      const data = userSnap.exists() ? userSnap.data() : {};
+      state.userData = data;
+      state.role = window.SmartSokoOnboarding.normalizeRole(data.role || 'customer');
+
+      if (!window.SmartSokoOnboarding.needsOnboarding(data)) {
+        window.location.href = window.SmartSokoOnboarding.getRoleHome(state.role);
+        return;
+      }
+
+      renderStep();
+
+      document.getElementById('btnNext').onclick = async () => {
+        const steps = stepsForRole(state.role);
+        if (state.step >= steps.length - 1) {
+          await completeOnboarding();
+          return;
+        }
+        if (!validateStep()) return;
+        await persistStepData();
+        state.step++;
+        renderStep();
+      };
+
+      document.getElementById('btnBack').onclick = () => {
+        if (state.step > 0) {
+          state.step--;
+          renderStep();
+        }
+      };
+
+      document.getElementById('btnSignOut').onclick = async () => {
+        await signOut(auth);
+        window.location.href = '/login';
+      };
+    }
+
+    document.addEventListener('firebase-initialized', boot);
+    setTimeout(boot, 300);
+  </script>
+</body>
+</html>

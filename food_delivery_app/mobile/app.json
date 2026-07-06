@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "SmartSoko Merchant",
+    "slug": "smartsoko-merchant",
+    "version": "1.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#012d1d"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.smartsoko.merchant",
+      "buildNumber": "1.1.0"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#012d1d"
+      },
+      "package": "com.smartsoko.merchant",
+      "versionCode": 2
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#012d1d"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "smartsoko-merchant"
+      }
+    }
+  }
+}

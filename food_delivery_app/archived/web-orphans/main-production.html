@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <!-- Performance: Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodDelivery TZ - Tanzania's Premier Food Delivery</title>
+  <meta name="description" content="Complete Food Delivery System with M-Pesa Payments">
+  <meta name="theme-color" content="#012d1d">
+  
+  <!-- Production CSS (replaces Tailwind CDN) -->
+  <link rel="stylesheet" href="production-styles.css">
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Firebase Modular SDK -->
+  <script type="module" src="config/firebase-config.js?v=3"></script>
+  
+  <style> /* Additional styles specific to this page */ .hero-section {min-height: 100vh;background: linear-gradient(135deg,#012d1d 0%,#934b00 100%);position: relative;display: flex;align-items: center} .hero-content {position: relative;z-index: 2} .floating-card {animation: float 6s ease-in-out infinite} @keyframes float {0%,100% {transform: translateY(0px)} 50% {transform: translateY(-20px)} } .feature-card {background: rgba(255,255,255,0.95);backdrop-filter: blur(10px);border: 1px solid rgba(255,255,255,0.2)} .stat-card {background: linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05));backdrop-filter: blur(10px);border: 1px solid rgba(255,255,255,0.2)} .app-preview {background: #1a1a1a;border-radius: 2rem;padding: 0.5rem;box-shadow: 0 20px 40px rgba(0,0,0,0.3)} .app-screen {background: white;border-radius: 1.5rem;overflow: hidden} .gradient-text {background: linear-gradient(135deg,#012d1d,#934b00);-webkit-background-clip: text;-webkit-text-fill-color: transparent;background-clip: text} .pulse-button {animation: pulse 2s infinite} @keyframes pulse {0% {box-shadow: 0 0 0 0 rgba(255,102,0,0.7)} 70% {box-shadow: 0 0 0 10px rgba(255,102,0,0)} 100% {box-shadow: 0 0 0 0 rgba(255,102,0,0)} } /* Responsive adjustments */ @media (max-width: 768px) {.hero-section {min-height: 100vh;padding: 2rem 0} .floating-card {animation: none} } </style>
+</head>
+<body class="bg-gray-50">
+  <!-- Navigation -->
+  <nav class="nav-top">
+    <div class="container">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-4">
+          <h1 class="text-2xl font-bold text-primary">🍴 FoodDelivery TZ</h1>
+          <div class="hidden md:flex gap-6">
+            <a href="#features" class="text-gray-600 hover:text-primary transition-colors">Features</a>
+            <a href="#how-it-works" class="text-gray-600 hover:text-primary transition-colors">How It Works</a>
+            <a href="#download" class="text-gray-600 hover:text-primary transition-colors">Download</a>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <a href="/customer" class="btn btn-secondary">
+            <i class="fas fa-user mr-2"></i>Customer App
+          </a>
+          <a href="/driver" class="btn btn-primary">
+            <i class="fas fa-motorcycle mr-2"></i>Driver App
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div class="hero-content">
+          <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">
+            Food Delivery<br>
+            <span class="text-yellow-300">Made for Tanzania</span>
+          </h1>
+          <p class="text-xl text-white/90 mb-8">
+            Order from your favorite restaurants and get delivery in minutes. 
+            Pay with M-Pesa, Tigo Pesa, or cash on delivery.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a href="/customer" class="btn bg-white text-primary hover:bg-gray-100 px-8 py-4 rounded-lg text-lg font-semibold pulse-button">
+              <i class="fas fa-mobile-alt mr-2"></i>
+              Order Food Now
+            </a>
+            <a href="/driver" class="btn bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-4 rounded-lg text-lg font-semibold">
+              <i class="fas fa-motorcycle mr-2"></i>
+              Become a Driver
+            </a>
+          </div>
+          
+          <!-- Stats -->
+          <div class="grid grid-cols-3 gap-6 mt-12">
+            <div class="text-center">
+              <div class="text-3xl font-bold text-white">50K+</div>
+              <div class="text-white/80">Active Users</div>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl font-bold text-white">200+</div>
+              <div class="text-white/80">Restaurants</div>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl font-bold text-white">4.8★</div>
+              <div class="text-white/80">App Rating</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- App Preview -->
+        <div class="floating-card hidden md:block">
+          <div class="app-preview w-80 h-96 mx-auto">
+            <div class="app-screen h-full p-4">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="font-semibold">FoodDelivery TZ</h3>
+                <div class="w-3 h-3 bg-green-400 rounded-full pulse-dot"></div>
+              </div>
+              <div class="p-4">
+                <p class="text-gray-600 text-sm mb-4">Order food from all regions</p>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-gray-500">4.8 ⭐ • 1K+ users</span>
+                  <a href="/customer" class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm hover:bg-blue-700 transition-all">
+                    Open
+                  </a>
+                </div>
+              </div>
+              <div class="space-y-3">
+                <div class="bg-gray-100 p-3 rounded-lg">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-orange-200 rounded-lg"></div>
+                    <div>
+                      <div class="font-medium text-sm">Restaurant Name</div>
+                      <div class="text-xs text-gray-500">20-30 min • TZS 5,000</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-gray-100 p-3 rounded-lg">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-200 rounded-lg"></div>
+                    <div>
+                      <div class="font-medium text-sm">Another Restaurant</div>
+                      <div class="text-xs text-gray-500">15-25 min • TZS 3,000</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-20">
+    <div class="container">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold mb-4">Why Choose FoodDelivery TZ?</h2>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          We're built for Tanzanians, with local payment methods and restaurants you love.
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="feature-card p-8 rounded-2xl card-hover">
+          <div class="w-16 h-16 bg-primary-fixed rounded-2xl flex items-center justify-center mb-6">
+            <i class="fas fa-mobile-money text-2xl text-primary"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-4">M-Pesa & Tigo Pesa</h3>
+          <p class="text-gray-600">
+            Pay with your preferred mobile money service. Fast, secure, and instant.
+          </p>
+        </div>
+        
+        <div class="feature-card p-8 rounded-2xl card-hover">
+          <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
+            <i class="fas fa-clock text-2xl text-blue-600"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-4">Fast Delivery</h3>
+          <p class="text-gray-600">
+            Get your food delivered in 30 minutes or less. Track your order in real-time.
+          </p>
+        </div>
+        
+        <div class="feature-card p-8 rounded-2xl card-hover">
+          <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-6">
+            <i class="fas fa-store text-2xl text-green-600"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-4">Local Restaurants</h3>
+          <p class="text-gray-600">
+            Support local businesses. Order from your favorite Tanzanian restaurants.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section id="how-it-works" class="py-20 bg-gray-100">
+    <div class="container">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold mb-4">How It Works</h2>
+        <p class="text-xl text-gray-600">Get your favorite food delivered in 3 simple steps</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="text-3xl font-bold text-white">1</span>
+          </div>
+          <h3 class="text-xl font-semibold mb-4">Browse Restaurants</h3>
+          <p class="text-gray-600">
+            Explore hundreds of local restaurants and their menus
+          </p>
+        </div>
+        
+        <div class="text-center">
+          <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="text-3xl font-bold text-white">2</span>
+          </div>
+          <h3 class="text-xl font-semibold mb-4">Place Order</h3>
+          <p class="text-gray-600">
+            Add items to cart and pay with M-Pesa, Tigo Pesa, or cash
+          </p>
+        </div>
+        
+        <div class="text-center">
+          <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="text-3xl font-bold text-white">3</span>
+          </div>
+          <h3 class="text-xl font-semibold mb-4">Get Delivery</h3>
+          <p class="text-gray-600">
+            Track your order in real-time and enjoy your meal
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download Section -->
+  <section id="download" class="py-20">
+    <div class="container">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold mb-4">Download the App</h2>
+        <p class="text-xl text-gray-600">Available for Android and iOS</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+        <div class="text-center">
+          <div class="bg-gray-900 p-8 rounded-2xl mb-6">
+            <i class="fas fa-mobile-alt text-6xl text-white mb-4"></i>
+            <h3 class="text-2xl font-bold text-white mb-2">Customer App</h3>
+            <p class="text-gray-300 mb-6">Order food from anywhere</p>
+            <a href="/customer" class="btn btn-primary w-full">
+              <i class="fas fa-download mr-2"></i>
+              Download Now
+            </a>
+          </div>
+        </div>
+        
+        <div class="text-center">
+          <div class="bg-gray-900 p-8 rounded-2xl mb-6">
+            <i class="fas fa-motorcycle text-6xl text-white mb-4"></i>
+            <h3 class="text-2xl font-bold text-white mb-2">Driver App</h3>
+            <p class="text-gray-300 mb-6">Earn money delivering food</p>
+            <a href="/driver" class="btn btn-primary w-full">
+              <i class="fas fa-download mr-2"></i>
+              Download Now
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-12">
+    <div class="container">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <h3 class="text-2xl font-bold mb-4">🍴 FoodDelivery TZ</h3>
+          <p class="text-gray-400">
+            Tanzania's premier food delivery service. Fast, reliable, and made for you.
+          </p>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-4">Quick Links</h4>
+          <ul class="space-y-2 text-gray-400">
+            <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
+            <li><a href="#how-it-works" class="hover:text-white transition-colors">How It Works</a></li>
+            <li><a href="#download" class="hover:text-white transition-colors">Download</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-4">Support</h4>
+          <ul class="space-y-2 text-gray-400">
+            <li><a href="/profile" class="hover:text-white transition-colors">Help Center</a></li>
+            <li><a href="#contact" class="hover:text-white transition-colors">Contact Us</a></li>
+            <li><a href="/profile" class="hover:text-white transition-colors">Terms of Service</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-4">Connect</h4>
+          <div class="flex gap-4">
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors">
+              <i class="fab fa-facebook text-xl"></i>
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors">
+              <i class="fab fa-twitter text-xl"></i>
+            </a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors">
+              <i class="fab fa-instagram text-xl"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+        <p>&copy; 2024 FoodDelivery TZ. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Initialize navigation when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      initNavigation();
+      initScrollAnimations();
+      initSearch();
+    });
+
+    function initNavigation() {
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+    }
+
+    function initScrollAnimations() {
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('slide-in');
+          }
+        });
+      }, observerOptions);
+
+      // Observe sections for animation
+      document.querySelectorAll('section').forEach(section => {
+        observer.observe(section);
+      });
+    }
+
+    function initSearch() {
+      const searchInput = document.querySelector('input[type="text"]');
+      if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+          const searchTerm = e.target.value.toLowerCase();
+          console.log('Searching for:', searchTerm);
+          // Add search logic here
+        });
+      }
+    }
+
+    // Category interactions
+    document.querySelectorAll('.card-hover').forEach(card => {
+      card.addEventListener('click', function() {
+        console.log('Category selected');
+        // Add category selection logic
+      });
+    });
+  </script>
+</body>
+</html>

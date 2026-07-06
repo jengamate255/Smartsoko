@@ -1,0 +1,133 @@
+{
+  "version": 2,
+  "buildCommand": null,
+  "outputDirectory": "web",
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/customer",
+      "destination": "/customer.html"
+    },
+    {
+      "source": "/merchant",
+      "destination": "/merchant.html"
+    },
+    {
+      "source": "/driver",
+      "destination": "/driver.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/login.html"
+    },
+    {
+      "source": "/home",
+      "destination": "/home.html"
+    },
+    {
+      "source": "/cart",
+      "destination": "/customer.html"
+    },
+    {
+      "source": "/checkout",
+      "destination": "/checkout.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/profile.html"
+    },
+    {
+      "source": "/orders",
+      "destination": "/orders.html"
+    },
+    {
+      "source": "/chat",
+      "destination": "/chat.html"
+    },
+    {
+      "source": "/smartsoko",
+      "destination": "/smartsoko-home.html"
+    },
+    {
+      "source": "/smartsoko/products",
+      "destination": "/smartsoko-products.html"
+    },
+    {
+      "source": "/smartsoko/vendor",
+      "destination": "/smartsoko-vendor.html"
+    },
+    {
+      "source": "/smartsoko/cart",
+      "destination": "/smartsoko-cart.html"
+    },
+    {
+      "source": "/smartsoko/checkout",
+      "destination": "/smartsoko-checkout.html"
+    },
+    {
+      "source": "/discovery",
+      "destination": "/discovery.html"
+    },
+    {
+      "source": "/product",
+      "destination": "/product.html"
+    },
+    {
+      "source": "/restaurant",
+      "destination": "/restaurant.html"
+    },
+    {
+      "source": "/seller",
+      "destination": "/seller.html"
+    },
+    {
+      "source": "/supabase",
+      "destination": "/supabase.html"
+    },
+    {
+      "source": "/",
+      "destination": "/main.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    },
+    {
+      "source": "/js/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/css/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}

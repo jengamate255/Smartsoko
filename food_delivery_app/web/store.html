@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartSoko Store</title>
+  <meta name="description" content="Discover amazing products on SmartSoko">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="dist/tailwind.css" as="style">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script type="module" src="config/firebase-config.js?v=3"></script>
+  <style>
+    .material-symbols-outlined {font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+    body {font-family: 'Be Vietnam Pro', sans-serif;}
+    h1,h2,h3,h4 {font-family: 'Plus Jakarta Sans', sans-serif;}
+    .store-banner {height: 220px; background-size: cover; background-position: center;}
+    .product-card {transition: transform 0.2s ease, box-shadow 0.2s ease;}
+    .product-card:hover {transform: translateY(-4px); box-shadow: 0 12px 24px -6px rgba(0,0,0,0.15);}
+    .collection-chip {transition: all 0.2s ease;}
+    .collection-chip:hover {transform: scale(1.05);}
+    .collection-chip.active {ring: 2px;}
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Loading State -->
+  <div id="loadingState" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
+    <div class="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+    <p class="text-gray-500 text-sm">Loading store...</p>
+  </div>
+
+  <!-- Error State -->
+  <div id="errorState" class="hidden fixed inset-0 bg-white z-50 flex flex-col items-center justify-center p-6">
+    <span class="material-symbols-outlined text-6xl text-gray-300 mb-4">storefront</span>
+    <h2 class="text-xl font-bold text-gray-800 mb-2">Store Not Found</h2>
+    <p class="text-gray-500 text-center mb-6">The store you're looking for doesn't exist or has been removed.</p>
+    <a href="/home" class="bg-green-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-green-700 transition-colors">
+      Browse Stores
+    </a>
+  </div>
+
+  <!-- Main Store Content -->
+  <div id="storeContent" class="hidden">
+    <!-- Banner -->
+    <div id="storeBanner" class="store-banner relative">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+      <div class="absolute bottom-0 left-0 right-0 p-6">
+        <div class="max-w-6xl mx-auto flex items-end gap-4">
+          <div id="storeLogo" class="w-20 h-20 rounded-2xl bg-white shadow-lg flex items-center justify-center text-3xl overflow-hidden">
+            <span class="material-symbols-outlined text-4xl text-gray-400">store</span>
+          </div>
+          <div class="text-white flex-1">
+            <h1 id="storeName" class="text-2xl md:text-3xl font-bold mb-1">Store Name</h1>
+            <p id="storeCategory" class="text-sm opacity-90">Category</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Store Info Bar -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-4 text-sm text-gray-600">
+          <span id="storeStatus" class="flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+            Open
+          </span>
+          <span id="productCount" class="flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">inventory_2</span>
+            0 products
+          </span>
+        </div>
+        <div class="flex gap-2">
+          <button id="messageSellerBtn" onclick="openStoreChat()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">chat</span>
+            Message Seller
+          </button>
+          <button id="followStoreBtn" onclick="toggleFollowStore()" class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">favorite_border</span>
+            Follow
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-6 pb-24">
+      <!-- About -->
+      <div id="aboutSection" class="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-gray-100">
+        <h2 class="text-lg font-bold mb-2">About</h2>
+        <p id="storeDescription" class="text-gray-600 text-sm leading-relaxed">Store description...</p>
+      </div>
+
+      <!-- Collections Filter -->
+      <div id="collectionsSection" class="mb-6">
+        <h2 class="text-lg font-bold mb-3">Collections</h2>
+        <div id="collectionsList" class="flex gap-2 overflow-x-auto pb-2">
+          <button onclick="filterByCollection('all')" class="collection-chip active px-4 py-2 rounded-full bg-green-600 text-white text-sm font-medium whitespace-nowrap">All Products</button>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold">Products</h2>
+          <div class="flex gap-2">
+            <select id="sortProducts" onchange="sortProducts()" class="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
+              <option value="default">Sort by</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="name">Name</option>
+            </select>
+          </div>
+        </div>
+        <div id="productsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <!-- Products rendered here -->
+        </div>
+        <div id="noProducts" class="hidden text-center py-12">
+          <span class="material-symbols-outlined text-5xl text-gray-300 mb-3">inventory_2</span>
+          <p class="text-gray-500">No products in this collection yet</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Product Detail Modal -->
+  <div id="productModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div class="relative">
+        <img id="modalProductImage" src="" alt="" class="w-full h-56 object-cover rounded-t-2xl">
+        <button onclick="closeProductModal()" class="absolute top-3 right-3 bg-white/90 backdrop-blur rounded-full p-2 shadow-lg hover:bg-white transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="p-6">
+        <h3 id="modalProductName" class="text-xl font-bold mb-2">Product Name</h3>
+        <p id="modalProductPrice" class="text-2xl font-bold text-green-600 mb-3">TSh 0</p>
+        <p id="modalProductDesc" class="text-gray-600 text-sm mb-4">Description</p>
+
+        <!-- Variants -->
+        <div id="modalVariants" class="mb-4 hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Select Variant</label>
+          <div id="modalVariantOptions" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- Stock Info -->
+        <div id="modalStockInfo" class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+          <span class="material-symbols-outlined text-sm">inventory_2</span>
+          <span id="modalStockText">In stock</span>
+        </div>
+
+        <div class="flex gap-3">
+          <button onclick="addToCartFromModal()" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-sm">shopping_cart</span>
+            Add to Cart
+          </button>
+          <button onclick="openStoreChat()" class="px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+            <span class="material-symbols-outlined">chat</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/store-engine.js"></script>
+</body>
+</html>

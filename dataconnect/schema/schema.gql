@@ -1,0 +1,468 @@
+# SmartSoko Food Delivery Schema
+# Data Connect GraphQL Schema for PostgreSQL backend
+
+# ============================================
+# USERS & AUTHENTICATION
+# ============================================
+type User @table {
+  id: UUID! @default(expr: "uuidV4()")
+  firebaseUid: String! @unique
+  email: String! @unique
+  phone: String @unique
+  displayName: String!
+  photoUrl: String
+  role: String! @default(expr: "'customer'")
+  isActive: Boolean! @default(expr: "true")
+  createdAt: Timestamp! @default(expr: "now()")
+  updatedAt: Timestamp! @default(expr: "now()")
+}
+
+# ============================================
+# MERCHANTS / RESTAURANTS / SELLERS
+# ============================================
+type Merchant @table {
+  id: UUID! @default(expr: "uuidV4()")
+  ownerId: String! @unique # Firebase UID of merchant owner
+  businessName: String!
+  businessType: String! # restaurant, grocery, bakery, etc.
+  description: String
+  logoUrl: String
+  coverImageUrl: String
+  
+  # Contact & Location
+  email: String
+  phone: String!
+  address: String!
+  city: String!
+  country: String! @default(expr: "'Tanzania'")
+  latitude: Float
+  longitude: Float
+  
+  # Business Details
+  isOpen: Boolean! @default(expr: "true")
+  isVerified: Boolean! @default(expr: "false")
+  rating: Float @default(expr: "0")
+  ratingCount: Int @default(expr: "0")
+  
+  # Delivery Settings
+  deliveryFee: Float @default(expr: "0")
+  minOrderAmount: Float @default(expr: "0")
+  deliveryTimeMinutes: Int @default(expr: "30")
+  deliveryRadiusKm: Float @default(expr: "5")
+  
+  # Operating Hours (JSON string for flexibility)
+  operatingHours: String
+  
+  # Metadata
+  cuisineType: String # African, Fast Food, etc.
+  tags: [String]
+  
+  createdAt: Timestamp! @default(expr: "now()")
+  updatedAt: Timestamp! @default(expr: "now()")
+}
+
+# ============================================
+# PRODUCT CATEGORIES
+# ============================================
+type ProductCategory @table {
+  id: UUID! @default(expr: "uuidV4()")
+  name: String! @unique
+  description: String
+  icon: String
+  imageUrl: String
+  sortOrder: Int @default(expr: "0")
+  isActive: Boolean! @default(expr: "true")
+  createdAt: Timestamp! @default(expr: "now()")
+}
+
+# ============================================
+# PRODUCTS / MENU ITEMS
+# ============================================
+type Product @table {
+  id: UUID! @default(expr: "uuidV4()")
+  merchantId: UUID!
+  merchant: Merchant!
+  categoryId: UUID
+  category: ProductCategory
+  
+  # Product Details
+  name: String!
+  description: String
+  price: Float!
+  compareAtPrice: Float # Original price for discounts
+  currency: String! @default(expr: "'TZS'")
+  
+  # Images
+  imageUrl: String
+  galleryImages: [String]
+  
+  # Inventory
+  sku: String
+  isAvailable: Boolean! @default(expr: "true")
+  isFeatured: Boolean! @default(expr: "false")
+  stockQuantity: Int @default(expr: "0")
+  trackInventory: Boolean! @default(expr: "false")
+  
+  # Options (e.g., size, toppings as JSON)
+  options: String
+  
+  # Metadata
+  tags: [String]
+  preparationTimeMinutes: Int @default(expr: "10")
+  calories: Int
+  
+  # Stats
+  rating: Float @default(expr: "0")
+  ratingCount: Int @default(expr: "0")
+  orderCount: Int @default(expr: "0")
+  
+  createdAt: Timestamp! @default(expr: "now()")
+  updatedAt: Timestamp! @default(expr: "now()")
+}
+
+# ============================================
+# CUSTOMERS / DELIVERY ADDRESSES
+# ============================================
+type Customer @table {
+  id: UUID! @default(expr: "uuidV4()")
+  userId: String! @unique # Firebase UID
+  user: User
+  
+  # Preferences
+  favoriteMerchants: [String] # Array of merchant IDs
+  dietaryPreferences: [String]
+  
+  # Default Address
+  defaultAddressId: UUID
+  
+  createdAt: Timestamp! @default(expr: "now()")
+  updatedAt: Timestamp! @default(expr: "now()")
+}
+
+type Address @table {
+  id: UUID! @default(expr: "uuidV4()")
+  customerId: UUID!
+  customer: Customer!
+  
+  label: String! # Home, Work, etc.
+  recipientName: String!
+  phone: String!
+  
+  addressLine1: String!
+  addressLine2: String
+  city: String!
+  region: String
+  country: String! @default(expr: "'Tanzania'")
+  postalCode: String
+  
+  latitude: Float
+  longitude: Float
+  
+  deliveryInstructions: String
+  isDefault: Boolean! @default(expr: "false")
+  
+  createdAt: Timestamp! @default(expr: "now()")
+}
+
+# ============================================
+# DRIVERS / DELIVERY PERSONNEL
+# ============================================
+type Driver @table {
+  id: UUID! @default(expr: "uuidV4()")
+  userId: String! @unique # Firebase UID
+  user: User
+  
+  # Profile
+  licenseNumber: String
+  vehicleType: String! # motorcycle, bicycle, car
+  vehiclePlate: String
+  
+  # Status
+  isOnline: Boolean! @default(expr: "false")
+  isVerified: Boolean! @default(expr: "false")
+  currentLatitude: Float
+  currentLongitude: Float
+  lastLocationAt: Timestamp
+  
+  # Stats
+  rating: Float @default(expr: "0")
+  ratingCount: Int @default(expr: "0")
+  totalDeliveries: Int @default(expr: "0")
+  totalEarnings: Float @default(expr: "0")
+  
+  createdAt: Timestamp! @default(expr: "now()")
+  updatedAt: Timestamp! @default(expr: "now()")
+}
+
+# ============================================
+# ORDERS
+# ============================================
+type Order @table {
+  id: UUID! @default(expr: "uuidV4()")
+  orderNumber: String! @unique
+  
+  # Customer
+  customerId: UUID!
+  customer: Customer!
+  customerUserId: String! # Firebase UID for quick access
+  
+  # Merchant
+  merchantId: UUID!
+  merchant: Merchant!
+  
+  # Delivery
+  addressId: UUID!
+  address: Address!
+  driverId: UUID
+  driver: Driver
+  
+  # Order Details
+  status: String! @default(expr: "'pending'")
+  # pending, confirmed, preparing, ready, picked_up, in_transit, delivered, cancelled, refunded
+  
+  # Financial
+  subtotal: Float!
+  deliveryFee: Float!
+  serviceFee: Float! @default(expr: "0")
+  taxAmount: Float! @default(expr: "0")
+  discountAmount: Float! @default(expr: "0")
+  tipAmount: Float! @default(expr: "0")
+  totalAmount: Float!
+  currency: String! @default(expr: "'TZS'")
+  
+  # Payment
+  paymentMethod: String! # cash, card, mobile_money, wallet
+  paymentStatus: String! @default(expr: "'pending'")
+  # pending, paid, failed, refunded
+  paidAt: Timestamp
+  
+  # Timestamps for tracking
+  placedAt: Timestamp! @default(expr: "now()")
+  confirmedAt: Timestamp
+  preparedAt: Timestamp
+  pickedUpAt: Timestamp
+  deliveredAt: Timestamp
+  cancelledAt: Timestamp
+  
+  # Delivery tracking
+  estimatedDeliveryAt: Timestamp
+  actualDeliveryAt: Timestamp
+  
+  # Notes
+  customerNote: String
+  merchantNote: String
+  driverNote: String
+  
+  # Cancellation reason
+  cancellationReason: String
+  cancelledBy: String # customer, merchant, driver, system
+  
+  createdAt: Timestamp! @default(expr: "now()")
+  updatedAt: Timestamp! @default(expr: "now()")
+}
+
+# ============================================
+# ORDER ITEMS
+# ============================================
+type OrderItem @table {
+  id: UUID! @default(expr: "uuidV4()")
+  orderId: UUID!
+  order: Order!
+  
+  productId: UUID!
+  product: Product!
+  
+  # Snapshot of product at time of order
+  productName: String!
+  productImageUrl: String
+  unitPrice: Float!
+  
+  quantity: Int!
+  
+  # Options selected (JSON)
+  selectedOptions: String
+  
+  # Calculated
+  subtotal: Float!
+  
+  # Special instructions
+  specialInstructions: String
+  
+  createdAt: Timestamp! @default(expr: "now()")
+}
+
+# ============================================
+# REVIEWS & RATINGS
+# ============================================
+type Review @table {
+  id: UUID! @default(expr: "uuidV4()")
+  
+  # Reviewer
+  customerId: UUID!
+  customer: Customer!
+  
+  # What is being reviewed
+  orderId: UUID! @unique
+  order: Order!
+  merchantId: UUID
+  merchant: Merchant
+  driverId: UUID
+  driver: Driver
+  
+  # Ratings (1-5)
+  merchantRating: Int
+  driverRating: Int
+  foodRating: Int
+  deliveryRating: Int
+  overallRating: Int!
+  
+  # Review content
+  title: String
+  comment: String
+  
+  # Merchant reply
+  merchantReply: String
+  merchantRepliedAt: Timestamp
+  
+  # Photos
+  photoUrls: [String]
+  
+  isVisible: Boolean! @default(expr: "true")
+  
+  createdAt: Timestamp! @default(expr: "now()")
+  updatedAt: Timestamp! @default(expr: "now()")
+}
+
+# ============================================
+# DELIVERY TRACKING / LOCATION UPDATES
+# ============================================
+type DeliveryLocation @table {
+  id: UUID! @default(expr: "uuidV4()")
+  orderId: UUID!
+  order: Order!
+  driverId: UUID!
+  driver: Driver!
+  
+  latitude: Float!
+  longitude: Float!
+  accuracy: Float
+  heading: Float
+  speed: Float
+  
+  recordedAt: Timestamp! @default(expr: "now()")
+}
+
+# ============================================
+# NOTIFICATIONS
+# ============================================
+type Notification @table {
+  id: UUID! @default(expr: "uuidV4()")
+  userId: String! # Firebase UID
+  user: User
+  
+  type: String! # order_update, promotion, system
+  title: String!
+  body: String!
+  data: String # JSON string with additional data
+  
+  imageUrl: String
+  actionUrl: String
+  
+  isRead: Boolean! @default(expr: "false")
+  readAt: Timestamp
+  
+  sentAt: Timestamp! @default(expr: "now()")
+  createdAt: Timestamp! @default(expr: "now()")
+}
+
+# ============================================
+# PROMOTIONS / COUPONS
+# ============================================
+type Promotion @table {
+  id: UUID! @default(expr: "uuidV4()")
+  code: String! @unique
+  
+  name: String!
+  description: String
+  
+  # Discount
+  discountType: String! # percentage, fixed_amount
+  discountValue: Float!
+  maxDiscountAmount: Float
+  minOrderAmount: Float @default(expr: "0")
+  
+  # Limits
+  usageLimit: Int
+  usageCount: Int @default(expr: "0")
+  usageLimitPerUser: Int @default(expr: "1")
+  
+  # Applicability
+  applicableTo: String! @default(expr: "'all'") # all, specific_merchants, specific_products
+  merchantIds: [String]
+  productIds: [String]
+  
+  # Schedule
+  startsAt: Timestamp!
+  endsAt: Timestamp!
+  
+  isActive: Boolean! @default(expr: "true")
+  
+  createdAt: Timestamp! @default(expr: "now()")
+  updatedAt: Timestamp! @default(expr: "now()")
+}
+
+# ============================================
+# CART (Optional - for persistent cart)
+# ============================================
+type Cart @table(key: ["customerId"]) {
+  customerId: UUID! @unique
+  customer: Customer!
+  
+  items: String! # JSON array of cart items
+  
+  merchantId: UUID
+  merchant: Merchant
+  
+  subtotal: Float! @default(expr: "0")
+  deliveryFee: Float @default(expr: "0")
+  total: Float! @default(expr: "0")
+  
+  updatedAt: Timestamp! @default(expr: "now()")
+}
+
+# ============================================
+# WALLET / PAYMENTS (Optional)
+# ============================================
+type Wallet @table {
+  id: UUID! @default(expr: "uuidV4()")
+  userId: String! @unique
+  user: User
+  
+  balance: Float! @default(expr: "0")
+  currency: String! @default(expr: "'TZS'")
+  
+  isActive: Boolean! @default(expr: "true")
+  
+  createdAt: Timestamp! @default(expr: "now()")
+  updatedAt: Timestamp! @default(expr: "now()")
+}
+
+type WalletTransaction @table {
+  id: UUID! @default(expr: "uuidV4()")
+  walletId: UUID!
+  wallet: Wallet!
+  
+  type: String! # deposit, withdrawal, payment, refund, earnings
+  amount: Float!
+  currency: String! @default(expr: "'TZS'")
+  
+  description: String
+  referenceId: String # Order ID, Payment ID, etc.
+  
+  status: String! @default(expr: "'completed'")
+  # pending, completed, failed, cancelled
+  
+  metadata: String # JSON
+  
+  createdAt: Timestamp! @default(expr: "now()")
+}

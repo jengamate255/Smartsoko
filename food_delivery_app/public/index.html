@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food Delivery Admin</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
+    .header { background: linear-gradient(135deg, #064e3b, #10b981); color: white; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 24px; }
+    .refresh-btn { background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+    
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 24px; }
+    .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .stat-card h3 { color: #666; font-size: 13px; margin-bottom: 8px; text-transform: uppercase; }
+    .stat-card .value { font-size: 28px; font-weight: bold; color: #333; }
+    .stat-card .change { font-size: 12px; color: #4caf50; }
+    
+    .tabs { display: flex; gap: 8px; margin: 0 24px; flex-wrap: wrap; }
+    .tab { padding: 12px 24px; background: white; border: none; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 14px; }
+    .tab.active { background: #064e3b; color: white; }
+    
+    .content { margin: 0 24px 24px; background: white; border-radius: 0 12px 12px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; }
+    .content-header { padding: 16px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    .content-header h2 { font-size: 18px; }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #eee; }
+    th { background: #f9f9f9; font-weight: 600; color: #666; font-size: 13px; text-transform: uppercase; }
+    tr:hover { background: #fafafa; }
+    
+    .status { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .status.pending { background: #fff3e0; color: #ff9800; }
+    .status.confirmed { background: #e3f2fd; color: #2196f3; }
+    .status.preparing { background: #f3e5f5; color: #9c27b0; }
+    .status.pickedUp { background: #e1bee7; color: #7b1fa2; }
+    .status.delivered { background: #e8f5e9; color: #4caf50; }
+    .status.cancelled { background: #ffebee; color: #f44336; }
+    
+    .actions { display: flex; gap: 8px; }
+    .btn { padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; }
+    .btn-accept { background: #4caf50; color: white; }
+    .btn-complete { background: #2196f3; color: white; }
+    .btn-cancel { background: #f44336; color: white; }
+    .btn-edit { background: #ff9800; color: white; }
+    
+    .form-group { padding: 20px; }
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }
+    .form-group input, .form-group select { padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; width: 100%; font-size: 14px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #333; font-size: 13px; }
+    .form-actions { display: flex; gap: 12px; }
+    .form-actions .btn-primary { background: #064e3b; color: white; padding: 10px 24px; }
+    .form-actions .btn-secondary { background: #6c757d; color: white; padding: 10px 24px; }
+    
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; padding: 20px; }
+    .menu-card { background: #f9f9f9; padding: 16px; border-radius: 12px; position: relative; }
+    .menu-card h4 { margin-bottom: 8px; font-size: 16px; }
+    .menu-card .category { font-size: 12px; color: #666; margin-bottom: 8px; }
+    .menu-card .price { font-size: 20px; font-weight: bold; color: #064e3b; }
+    .menu-card .actions { margin-top: 12px; }
+    
+    .drivers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; padding: 20px; }
+    .driver-card { background: #f9f9f9; padding: 16px; border-radius: 12px; display: flex; gap: 16px; align-items: center; }
+    .driver-avatar { width: 50px; height: 50px; background: #2196f3; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold; }
+    .driver-info h4 { margin-bottom: 4px; }
+    .driver-info p { font-size: 13px; color: #666; }
+    .driver-status { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .driver-status.online { background: #e8f5e9; color: #4caf50; }
+    .driver-status.offline { background: #f5f5f5; color: #999; }
+    
+    .chart-placeholder { height: 200px; background: linear-gradient(135deg, #f9f9f9, #eee); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; margin: 20px; }
+    
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🍔 Food Delivery Admin</h1>
+    <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+  </div>
+  
+  <div class="stats">
+    <div class="stat-card">
+      <h3>Total Orders</h3>
+      <div class="value" id="totalOrders">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Pending Orders</h3>
+      <div class="value" id="pendingOrders">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Delivered Today</h3>
+      <div class="value" id="deliveredToday">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Revenue Today</h3>
+      <div class="value" id="revenueToday">TZS 0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Total Revenue</h3>
+      <div class="value" id="totalRevenue">TZS 0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Active Drivers</h3>
+      <div class="value" id="activeDrivers">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Total Restaurants</h3>
+      <div class="value" id="totalRestaurants">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Total Users</h3>
+      <div class="value" id="totalUsers">0</div>
+    </div>
+  </div>
+  
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('orders')">Orders</button>
+    <button class="tab" onclick="switchTab('restaurants')">Restaurants</button>
+    <button class="tab" onclick="switchTab('menu')">Menu Items</button>
+    <button class="tab" onclick="switchTab('drivers')">Drivers</button>
+    <button class="tab" onclick="switchTab('users')">Users</button>
+  </div>
+  
+  <!-- Orders Tab -->
+  <div class="content" id="ordersTab">
+    <div class="content-header">
+      <h2>All Orders</h2>
+      <div>
+        <select id="orderFilter" onchange="filterOrders()" style="padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
+          <option value="all">All Orders</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Payment</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="ordersTable"></tbody>
+    </table>
+  </div>
+
+  <!-- Restaurants Tab -->
+  <div class="content" id="restaurantsTab" style="display:none;">
+    <div class="content-header">
+      <h2>Restaurants</h2>
+      <button class="btn btn-accept" onclick="showRestaurantForm()">+ Add Restaurant</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Delivery Fee</th>
+          <th>Delivery Time</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="restaurantsTable"></tbody>
+    </table>
+    
+    <!-- Add Restaurant Form -->
+    <div id="restaurantForm" class="form-group hidden">
+      <h3 style="margin-bottom: 16px;">Add New Restaurant</h3>
+      <div class="form-row">
+        <div><label>Restaurant Name</label><input type="text" id="restName" placeholder="e.g., QuickMart"></div>
+        <div><label>Description</label><input type="text" id="restDesc" placeholder="Description"></div>
+        <div><label>Category</label><input type="text" id="restCategory" placeholder="e.g., Supermarket"></div>
+      </div>
+      <div class="form-row">
+        <div><label>Delivery Fee (TZS)</label><input type="number" id="restDeliveryFee" placeholder="2000"></div>
+        <div><label>Delivery Time (min)</label><input type="number" id="restDeliveryTime" placeholder="30"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="addRestaurant()">Add Restaurant</button>
+        <button class="btn btn-secondary" onclick="hideForms()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu Items Tab -->
+  <div class="content" id="menuTab" style="display:none;">
+    <div class="content-header">
+      <h2>Menu Items</h2>
+      <button class="btn btn-accept" onclick="showMenuForm()">+ Add Item</button>
+    </div>
+    <div class="menu-grid" id="menuItemsGrid"></div>
+    
+    <!-- Add Menu Form -->
+    <div id="menuForm" class="form-group hidden">
+      <h3 style="margin-bottom: 16px;">Add New Menu Item</h3>
+      <div class="form-row">
+        <select id="menuRestaurant"><option value="">Select Restaurant</option></select>
+        <input type="text" id="menuName" placeholder="Item Name">
+        <input type="text" id="menuDesc" placeholder="Description">
+      </div>
+      <div class="form-row">
+        <input type="number" id="menuPrice" placeholder="Price (TZS)">
+        <input type="text" id="menuCategory" placeholder="Category">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="addMenuItem()">Add Item</button>
+        <button class="btn btn-secondary" onclick="hideForms()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drivers Tab -->
+  <div class="content" id="driversTab" style="display:none;">
+    <div class="content-header">
+      <h2>Drivers</h2>
+    </div>
+    <div class="drivers-grid" id="driversGrid"></div>
+  </div>
+
+  <!-- Users Tab -->
+  <div class="content" id="usersTab" style="display:none;">
+    <div class="content-header">
+      <h2>Users</h2>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Phone</th>
+          <th>Name</th>
+          <th>Orders</th>
+          <th>Joined</th>
+        </tr>
+      </thead>
+      <tbody id="usersTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBKliW4sQwBFEYMptJ8VuWYHTJ73DbHoE",
+      authDomain: "fooddelievry-dce15.firebaseapp.com",
+      projectId: "fooddelievry-dce15",
+      storageBucket: "fooddelievry-dce15.firebasestorage.app",
+      messagingSenderId: "727819507148",
+      appId: "1:727819507148:web:372bee2608d5c7a9587969"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let allOrders = [], restaurants = [], menuItems = [], drivers = [], users = [];
+
+    function loadData() {
+      loadOrders();
+      loadRestaurants();
+      loadMenuItems();
+      loadDrivers();
+      loadUsers();
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      document.getElementById('ordersTab').style.display = tab === 'orders' ? 'block' : 'none';
+      document.getElementById('restaurantsTab').style.display = tab === 'restaurants' ? 'block' : 'none';
+      document.getElementById('menuTab').style.display = tab === 'menu' ? 'block' : 'none';
+      document.getElementById('driversTab').style.display = tab === 'drivers' ? 'block' : 'none';
+      document.getElementById('usersTab').style.display = tab === 'users' ? 'block' : 'none';
+      
+      hideForms();
+    }
+
+    // Orders
+    function loadOrders() {
+      db.collection('orders').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
+        allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        updateStats();
+        renderOrders(allOrders);
+      });
+    }
+
+    function updateStats() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayOrders = allOrders.filter(o => o.createdAt && o.createdAt.toDate() >= today);
+
+      document.getElementById('totalOrders').textContent = allOrders.length;
+      document.getElementById('pendingOrders').textContent = allOrders.filter(o => o.status === 'pending').length;
+      document.getElementById('deliveredToday').textContent = todayOrders.filter(o => o.status === 'delivered').length;
+      
+      const todayRevenue = todayOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+      const totalRevenue = allOrders.filter(o => o.status === 'delivered').reduce((sum, o) => sum + (o.total || 0), 0);
+      
+      document.getElementById('revenueToday').textContent = 'TZS ' + todayRevenue.toLocaleString();
+      document.getElementById('totalRevenue').textContent = 'TZS ' + totalRevenue.toLocaleString();
+    }
+
+    function filterOrders() {
+      const filter = document.getElementById('orderFilter').value;
+      const filtered = filter === 'all' ? allOrders : allOrders.filter(o => o.status === filter);
+      renderOrders(filtered);
+    }
+
+    function renderOrders(orders) {
+      document.getElementById('ordersTable').innerHTML = orders.map(order => `
+        <tr>
+          <td>#${order.id.substring(0, 8)}</td>
+          <td>${order.phone || 'N/A'}</td>
+          <td>${order.items?.slice(0, 2).map(i => i.name).join(', ') || 'N/A'}${order.items?.length > 2 ? '...' : ''}</td>
+          <td>TZS ${(order.total || 0).toLocaleString()}</td>
+          <td><span class="status ${order.status}">${order.status || 'pending'}</span></td>
+          <td><span class="status ${order.paymentStatus === 'completed' ? 'delivered' : 'pending'}">${order.paymentStatus || 'pending'}</span></td>
+          <td>${order.createdAt ? order.createdAt.toDate().toLocaleDateString() : 'N/A'}</td>
+          <td class="actions">
+            ${order.status === 'pending' ? `<button class="btn btn-accept" onclick="updateOrderStatus('${order.id}', 'confirmed')">Accept</button>` : ''}
+            ${order.status === 'confirmed' ? `<button class="btn btn-complete" onclick="updateOrderStatus('${order.id}', 'delivered')">Complete</button>` : ''}
+            ${order.status !== 'delivered' && order.status !== 'cancelled' ? `<button class="btn btn-cancel" onclick="updateOrderStatus('${order.id}', 'cancelled')">Cancel</button>` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateOrderStatus(orderId, status) {
+      db.collection('orders').doc(orderId).update({ status: status, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+
+    // Restaurants
+    function loadRestaurants() {
+      db.collection('restaurants').onSnapshot(snapshot => {
+        restaurants = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        document.getElementById('totalRestaurants').textContent = restaurants.length;
+        renderRestaurants();
+        updateRestaurantSelect();
+      });
+    }
+
+    function renderRestaurants() {
+      document.getElementById('restaurantsTable').innerHTML = restaurants.map(rest => `
+        <tr>
+          <td>${rest.name}</td>
+          <td>${rest.category || 'N/A'}</td>
+          <td>TZS ${(rest.deliveryFee || 0).toLocaleString()}</td>
+          <td>${rest.deliveryTimeMinutes || 30} min</td>
+          <td><span class="status ${rest.isOpen ? 'delivered' : 'cancelled'}">${rest.isOpen ? 'Open' : 'Closed'}</span></td>
+          <td class="actions">
+            <button class="btn btn-edit" onclick="toggleRestaurant('${rest.id}', ${!rest.isOpen})">${rest.isOpen ? 'Close' : 'Open'}</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function showRestaurantForm() {
+      hideForms();
+      document.getElementById('restaurantForm').classList.remove('hidden');
+    }
+
+    async function addRestaurant() {
+      const name = document.getElementById('restName').value;
+      if (!name) return alert('Please enter restaurant name');
+      
+      await db.collection('restaurants').add({
+        name, description: document.getElementById('restDesc').value,
+        category: document.getElementById('restCategory').value,
+        deliveryFee: parseInt(document.getElementById('restDeliveryFee').value) || 0,
+        deliveryTimeMinutes: parseInt(document.getElementById('restDeliveryTime').value) || 30,
+        isOpen: true, rating: 0,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      hideForms();
+    }
+
+    function toggleRestaurant(id, isOpen) {
+      db.collection('restaurants').doc(id).update({ isOpen });
+    }
+
+    // Menu Items
+    function loadMenuItems() {
+      db.collection('menu_items').onSnapshot(snapshot => {
+        menuItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderMenuItems();
+      });
+    }
+
+    function renderMenuItems() {
+      document.getElementById('menuItemsGrid').innerHTML = menuItems.map(item => `
+        <div class="menu-card">
+          <h4>${item.name}</h4>
+          <p class="category">${item.category || 'Uncategorized'}</p>
+          <div class="price">TZS ${(item.price || 0).toLocaleString()}</div>
+          <p style="font-size:12px;color:#666;margin-top:8px">${item.description || ''}</p>
+          <div class="actions">
+            <button class="btn btn-edit" onclick="toggleMenuItem('${item.id}', ${!item.isAvailable})">${item.isAvailable ? 'Disable' : 'Enable'}</button>
+            <button class="btn btn-cancel" onclick="deleteMenuItem('${item.id}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateRestaurantSelect() {
+      document.getElementById('menuRestaurant').innerHTML = '<option value="">Select Restaurant</option>' + 
+        restaurants.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+    }
+
+    function showMenuForm() {
+      hideForms();
+      document.getElementById('menuForm').classList.remove('hidden');
+    }
+
+    async function addMenuItem() {
+      const restaurantId = document.getElementById('menuRestaurant').value;
+      const name = document.getElementById('menuName').value;
+      if (!restaurantId || !name) return alert('Please fill required fields');
+
+      await db.collection('menu_items').add({
+        restaurantId, name, description: document.getElementById('menuDesc').value,
+        price: parseInt(document.getElementById('menuPrice').value) || 0,
+        category: document.getElementById('menuCategory').value || 'General',
+        isAvailable: true, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      hideForms();
+    }
+
+    function toggleMenuItem(id, isAvailable) {
+      db.collection('menu_items').doc(id).update({ isAvailable });
+    }
+
+    function deleteMenuItem(id) {
+      if (confirm('Delete this item?')) db.collection('menu_items').doc(id).delete();
+    }
+
+    // Drivers
+    function loadDrivers() {
+      db.collection('riders').onSnapshot(snapshot => {
+        drivers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const active = drivers.filter(d => d.isOnline).length;
+        document.getElementById('activeDrivers').textContent = active;
+        renderDrivers();
+      });
+    }
+
+    function renderDrivers() {
+      document.getElementById('driversGrid').innerHTML = drivers.map(driver => `
+        <div class="driver-card">
+          <div class="driver-avatar">${(driver.name || driver.phone || 'D').charAt(0).toUpperCase()}</div>
+          <div class="driver-info" style="flex:1">
+            <h4>${driver.name || 'Driver'}</h4>
+            <p>${driver.phone || ''}</p>
+            <p>Deliveries: ${driver.totalDeliveries || 0} | Earnings: TZS ${(driver.totalEarnings || 0).toLocaleString()}</p>
+          </div>
+          <span class="driver-status ${driver.isOnline ? 'online' : 'offline'}">${driver.isOnline ? 'Online' : 'Offline'}</span>
+        </div>
+      `).join('') || '<p style="padding:20px;color:#666">No drivers registered</p>';
+    }
+
+    // Users
+    function loadUsers() {
+      db.collection('users').onSnapshot(snapshot => {
+        users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        document.getElementById('totalUsers').textContent = users.length;
+        renderUsers();
+      });
+    }
+
+    function renderUsers() {
+      document.getElementById('usersTable').innerHTML = users.map(user => `
+        <tr>
+          <td>${user.phone || 'N/A'}</td>
+          <td>${user.name || 'N/A'}</td>
+          <td>${user.ordersCount || 0}</td>
+          <td>${user.createdAt ? user.createdAt.toDate().toLocaleDateString() : 'N/A'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function hideForms() {
+      document.getElementById('restaurantForm').classList.add('hidden');
+      document.getElementById('menuForm').classList.add('hidden');
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

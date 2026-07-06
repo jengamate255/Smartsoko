@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Store Settings — SmartSoko</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="dist/tailwind.css" as="style">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link rel="stylesheet" href="design-system.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script src="js/onboarding-guard.js"></script>
+  <script type="module" src="config/firebase-config.js"></script>
+  <script src="auth-check.js" defer></script>
+  <script type="module" src="js/data-service.js?v=4"></script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+    .section-card { transition: all 0.2s; }
+    .section-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .danger-zone { border: 2px dashed #ef4444; }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body min-h-screen">
+  <div class="min-h-screen flex flex-col">
+    <header class="bg-surface border-b border-outline/10 px-6 py-4">
+      <div class="max-w-4xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <a href="/merchant" class="text-on-surface-variant hover:text-primary transition">
+            <span class="material-symbols-outlined">arrow_back</span>
+          </a>
+          <div>
+            <h1 class="font-headline text-xl font-bold text-on-surface">Store Settings</h1>
+            <p class="text-sm text-on-surface-variant">Manage your store profile and preferences</p>
+          </div>
+        </div>
+        <div id="storeStatusBadge" class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold">Loading...</div>
+      </div>
+    </header>
+
+    <div class="flex-1 max-w-4xl mx-auto w-full p-6 space-y-6">
+      <!-- Loading State -->
+      <div id="loadingState" class="flex items-center justify-center py-20">
+        <div class="text-center">
+          <svg class="animate-spin h-10 w-10 text-primary mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+          <p class="text-on-surface-variant">Loading store settings...</p>
+        </div>
+      </div>
+
+      <div id="settingsContent" class="hidden space-y-6">
+        <!-- No Store Banner -->
+        <div id="noStoreBanner" class="hidden p-6 bg-amber-50 dark:bg-amber-900/20 rounded-3xl border border-amber-200/50">
+          <div class="flex items-start gap-4">
+            <span class="material-symbols-outlined text-amber-600 text-3xl">storefront</span>
+            <div>
+              <h3 class="font-headline font-bold text-amber-800 dark:text-amber-200 mb-1">No Store Found</h3>
+              <p class="text-sm text-amber-600 dark:text-amber-400 mb-4">You haven't created a store yet. Create one to start selling.</p>
+              <a href="/create-store" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary font-semibold hover:opacity-90 transition">
+                <span class="material-symbols-outlined text-lg">add_business</span>
+                Create Store
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Basic Info -->
+        <div id="basicInfoSection" class="section-card bg-surface rounded-3xl border border-outline/20 p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary">store</span>
+            </div>
+            <div>
+              <h2 class="font-headline font-bold text-lg">Basic Information</h2>
+              <p class="text-sm text-on-surface-variant">Your store name, description, and category</p>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-on-surface mb-1">Store Name</label>
+              <input type="text" id="editStoreName" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" maxlength="100">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-on-surface mb-1">Store URL Slug</label>
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-on-surface-variant bg-surface-container-high px-3 py-3 rounded-2xl font-mono">/store.html?slug=</span>
+                <input type="text" id="editStoreSlug" class="flex-1 px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition font-mono" pattern="[a-z0-9-]+">
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-on-surface mb-1">Category</label>
+              <select id="editStoreCategory" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition">
+                <option value="food">Restaurant & Food</option>
+                <option value="bakery">Bakery</option>
+                <option value="dairy">Dairy</option>
+                <option value="fruits">Fruits & Vegetables</option>
+                <option value="groceries">Groceries</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-on-surface mb-1">Description</label>
+              <textarea id="editStoreDescription" rows="3" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition resize-none" maxlength="2000"></textarea>
+            </div>
+            <button onclick="saveBasicInfo()" class="px-6 py-2.5 rounded-2xl bg-primary text-on-primary font-semibold hover:opacity-90 transition">Save Changes</button>
+          </div>
+        </div>
+
+        <!-- Contact & Location -->
+        <div class="section-card bg-surface rounded-3xl border border-outline/20 p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+              <span class="material-symbols-outlined text-blue-600">contact_phone</span>
+            </div>
+            <div>
+              <h2 class="font-headline font-bold text-lg">Contact & Location</h2>
+              <p class="text-sm text-on-surface-variant">How customers can find and reach you</p>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-on-surface mb-1">Address</label>
+              <input type="text" id="editAddress" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-on-surface mb-1">Place / Area Name</label>
+              <input type="text" id="editPlaceName" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="e.g. Kariakoo Market">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Latitude</label>
+                <input type="number" id="editLat" step="any" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="-6.7924">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Longitude</label>
+                <input type="number" id="editLng" step="any" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="39.2083">
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-on-surface mb-1">Delivery Radius (km)</label>
+              <input type="number" id="editDeliveryRadius" min="0" max="100" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="5">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-on-surface mb-1">Delivery Areas (comma separated)</label>
+              <input type="text" id="editDeliveryAreas" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="e.g. Kariakoo, Posta, Kisutu">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Phone</label>
+                <input type="tel" id="editPhone" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Email</label>
+                <input type="email" id="editEmail" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition">
+              </div>
+            </div>
+            <button onclick="saveContact()" class="px-6 py-2.5 rounded-2xl bg-primary text-on-primary font-semibold hover:opacity-90 transition">Save Changes</button>
+          </div>
+        </div>
+
+        <!-- Store Hours -->
+        <div class="section-card bg-surface rounded-3xl border border-outline/20 p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+              <span class="material-symbols-outlined text-indigo-600">schedule</span>
+            </div>
+            <div>
+              <h2 class="font-headline font-bold text-lg">Store Hours</h2>
+              <p class="text-sm text-on-surface-variant">Set your weekly schedule and holidays</p>
+            </div>
+          </div>
+          <div class="space-y-3" id="weeklyHours">
+            <div class="flex items-center gap-3" data-day="monday">
+              <span class="w-24 text-sm font-semibold text-on-surface">Monday</span>
+              <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="day-toggle w-4 h-4 rounded text-primary"> <span class="text-xs text-on-surface-variant">Closed</span></label>
+              <input type="time" class="day-open flex-1 px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none" value="08:00">
+              <span class="text-on-surface-variant text-sm">to</span>
+              <input type="time" class="day-close flex-1 px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none" value="20:00">
+            </div>
+            <div class="flex items-center gap-3" data-day="tuesday">
+              <span class="w-24 text-sm font-semibold text-on-surface">Tuesday</span>
+              <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="day-toggle w-4 h-4 rounded text-primary"> <span class="text-xs text-on-surface-variant">Closed</span></label>
+              <input type="time" class="day-open flex-1 px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none" value="08:00">
+              <span class="text-on-surface-variant text-sm">to</span>
+              <input type="time" class="day-close flex-1 px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none" value="20:00">
+            </div>
+            <div class="flex items-center gap-3" data-day="wednesday">
+              <span class="w-24 text-sm font-semibold text-on-surface">Wednesday</span>
+              <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="day-toggle w-4 h-4 rounded text-primary"> <span class="text-xs text-on-surface-variant">Closed</span></label>
+              <input type="time" class="day-open flex-1 px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none" value="08:00">
+              <span class="text-on-surface-variant text-sm">to</span>
+              <input type="time" class="day-close flex-1 px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none" value="20:00">
+            </div>
+            <div class="flex items-center gap-3" data-day="thursday">
+              <span class="w-24 text-sm font-semibold text-on-surface">Thursday</span>
+              <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="day-toggle w-4 h-4 rounded text-primary"> <span class="text-xs text-on-surface-variant">Closed</span></label>
+              <input type="time" class="day-open flex-1 px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none" value="08:00">
+              <span class="text-on-surface-variant text-sm">to</span>
+              <input type="time" class="day-close flex-1 px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none" value="20:00">
+            </div>
+            <div class="flex items-center gap-3" data-day="friday">
+              <span class="w-24 text-sm font-semibold text-on-surface">Friday</span>
+              <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="day-toggle w-4 h-4 rounded text-primary"> <span class="text-xs text-on-surface-variant">Closed</span></label>
+              <input type="time" class="day-open flex-1 px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none" value="08:00">
+              <span class="text-on-surface-variant text-sm">to</span>
+              <input type="time" class="day-close flex-1 px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none" value="20:00">
+            </div>
+            <div class="flex items-center gap-3" data-day="saturday">
+              <span class="w-24 text-sm font-semibold text-on-surface">Saturday</span>
+              <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="day-toggle w-4 h-4 rounded text-primary"> <span class="text-xs text-on-surface-variant">Closed</span></label>
+              <input type="time" class="day-open flex-1 px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none" value="09:00">
+              <span class="text-on-surface-variant text-sm">to</span>
+              <input type="time" class="day-close flex-1 px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none" value="23:00">
+            </div>
+            <div class="flex items-center gap-3" data-day="sunday">
+              <span class="w-24 text-sm font-semibold text-on-surface">Sunday</span>
+              <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="day-toggle w-4 h-4 rounded text-primary"> <span class="text-xs text-on-surface-variant">Closed</span></label>
+              <input type="time" class="day-open flex-1 px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none" value="09:00">
+              <span class="text-on-surface-variant text-sm">to</span>
+              <input type="time" class="day-close flex-1 px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none" value="23:00">
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-outline/10">
+            <label class="block text-sm font-semibold text-on-surface mb-2">Holiday Closures (dates your store will be closed)</label>
+            <div id="holidayList" class="flex flex-wrap gap-2 mb-2">
+              <div class="flex gap-2">
+                <input type="date" id="newHolidayDate" class="px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none">
+                <input type="text" id="newHolidayReason" class="px-3 py-2 rounded-xl border border-outline-variant bg-surface text-sm focus:border-primary outline-none" placeholder="Reason (optional)" maxlength="100">
+                <button onclick="addHoliday()" class="px-3 py-2 rounded-xl bg-primary/10 text-primary font-semibold text-sm hover:bg-primary/20 transition">Add</button>
+              </div>
+            </div>
+            <div id="holidaysContainer" class="flex flex-wrap gap-2"></div>
+          </div>
+          <button onclick="saveHours()" class="mt-4 px-6 py-2.5 rounded-2xl bg-primary text-on-primary font-semibold hover:opacity-90 transition">Save Hours</button>
+        </div>
+
+        <!-- Delivery Settings -->
+        <div class="section-card bg-surface rounded-3xl border border-outline/20 p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+              <span class="material-symbols-outlined text-green-600">local_shipping</span>
+            </div>
+            <div>
+              <h2 class="font-headline font-bold text-lg">Delivery Settings</h2>
+              <p class="text-sm text-on-surface-variant">Pricing and delivery preferences</p>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Delivery Fee (TSh)</label>
+                <input type="number" id="editDeliveryFee" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" min="0">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Min Order (TSh)</label>
+                <input type="number" id="editMinOrder" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" min="0">
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-on-surface mb-1">Est. Delivery Time (min)</label>
+              <input type="number" id="editDeliveryTime" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" min="1">
+            </div>
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" id="editIsOpen" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary">
+              <span class="text-sm font-medium text-on-surface">Store is currently open for orders</span>
+            </label>
+            <button onclick="saveDelivery()" class="px-6 py-2.5 rounded-2xl bg-primary text-on-primary font-semibold hover:opacity-90 transition">Save Changes</button>
+          </div>
+        </div>
+
+        <!-- Branding -->
+        <div class="section-card bg-surface rounded-3xl border border-outline/20 p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
+              <span class="material-symbols-outlined text-purple-600">palette</span>
+            </div>
+            <div>
+              <h2 class="font-headline font-bold text-lg">Branding</h2>
+              <p class="text-sm text-on-surface-variant">Logo, banner, and brand colors</p>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-on-surface mb-1">Logo URL</label>
+              <input type="url" id="editLogoUrl" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="https://...">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-on-surface mb-1">Banner URL</label>
+              <input type="url" id="editBannerUrl" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="https://...">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Primary Color</label>
+                <input type="color" id="editPrimaryColor" class="w-full h-10 rounded-lg cursor-pointer border border-outline-variant">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1">Secondary Color</label>
+                <input type="color" id="editSecondaryColor" class="w-full h-10 rounded-lg cursor-pointer border border-outline-variant">
+              </div>
+            </div>
+            <button onclick="saveBranding()" class="px-6 py-2.5 rounded-2xl bg-primary text-on-primary font-semibold hover:opacity-90 transition">Save Changes</button>
+          </div>
+        </div>
+
+        <!-- SEO -->
+        <div class="section-card bg-surface rounded-3xl border border-outline/20 p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center">
+              <span class="material-symbols-outlined text-teal-600">search</span>
+            </div>
+            <div>
+              <h2 class="font-headline font-bold text-lg">SEO</h2>
+              <p class="text-sm text-on-surface-variant">Search engine optimization</p>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold text-on-surface mb-1">SEO Description</label>
+              <textarea id="editSeoDescription" rows="2" maxlength="160" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition resize-none" placeholder="Brief description for search engines..."></textarea>
+            </div>
+            <button onclick="saveSeo()" class="px-6 py-2.5 rounded-2xl bg-primary text-on-primary font-semibold hover:opacity-90 transition">Save Changes</button>
+          </div>
+        </div>
+
+        <!-- Preview Store Link -->
+        <div class="section-card bg-surface rounded-3xl border border-outline/20 p-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-green-600">open_in_new</span>
+              </div>
+              <div>
+                <h2 class="font-headline font-bold text-lg">Preview Store</h2>
+                <p class="text-sm text-on-surface-variant">See how your store looks to customers</p>
+              </div>
+            </div>
+            <a id="previewStoreBtn" href="#" target="_blank" class="px-5 py-2.5 rounded-2xl bg-green-600 text-white font-semibold hover:opacity-90 transition flex items-center gap-2">
+              <span class="material-symbols-outlined text-lg">visibility</span>
+              Preview
+            </a>
+          </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="section-card danger-zone bg-surface rounded-3xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="material-symbols-outlined text-red-500">warning</span>
+            <h2 class="font-headline font-bold text-lg text-red-600">Danger Zone</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant mb-4">Once you delete your store, there is no going back. This action cannot be undone.</p>
+          <button onclick="deleteStore()" class="px-6 py-2.5 rounded-2xl bg-red-600 text-white font-semibold hover:bg-red-700 transition flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">delete_forever</span>
+            Delete Store
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/store-settings.js"></script>
+</body>
+</html>

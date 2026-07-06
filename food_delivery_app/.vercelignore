@@ -1,0 +1,11 @@
+node_modules/
+.kilo/
+.agents/
+.claude/
+.github/
+.git/
+.env
+.env.*
+temp_build_project/
+Smartsoko/
+dist/

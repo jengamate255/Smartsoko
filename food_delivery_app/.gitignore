@@ -1,0 +1,160 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Firebase
+firebase_options.dart
+google-services.json
+GoogleService-Info.plist
+
+# Secrets
+*firebase-adminsdk*.json
+serviceAccountKey.json
+service-account-base64.txt
+google-services*.json
+lib/config/app_config.dart
+node_modules/
+
+# Deployment exclusions - reduce file count (keep android wrappers for APK builds)
+android/
+android-wrapper/
+# Keep android role apps for APK builds - only exclude build outputs
+android-customer/.gradle/
+android-customer/.idea/
+android-customer/build/
+android-driver/.gradle/
+android-driver/.idea/
+android-driver/build/
+android-merchant/.gradle/
+android-merchant/.idea/
+android-merchant/build/
+ios/
+linux/
+macos/
+windows/
+web-customer/
+web-driver/
+web-supabase/
+test/
+tests/
+functions/
+assets/
+build/
+.git/
+.firebase/
+.dart_tool/
+.idea/
+.kiro/
+.metadata/
+.qoder/
+.github/
+
+# Logs and temp files
+*.log
+flutter_*.log
+pubspec.lock
+package-lock.json
+nul
+
+# Documentation (keep all for deployment reference)
+# Individual docs can be excluded as needed
+
+# Scripts not needed for web deployment (except deployment scripts)
+*.bat
+!vercel-deploy.bat
+!deploy-*.bat
+!build-*.bat
+!build-*.sh
+*.sh
+!deploy-*.sh
+!vercel-deploy.sh
+
+# Local Netlify folder
+.netlify
+
+.vercel

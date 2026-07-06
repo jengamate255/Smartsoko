@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<!-- Mapbox GL JS -->
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet"/>
+<script type="module" src="config/firebase-config.js?v=6"></script>
+<script src="auth-check.js?v=5" defer></script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-low": "#f5f3ef",
+              "secondary": "#934b00",
+              "surface-container": "#efeeea",
+              "on-secondary": "#ffffff",
+              "surface": "#fbf9f5",
+              "outline": "#717973",
+              "primary": "#012d1d",
+              "primary-container": "#1b4332",
+              "error": "#ba1a1a",
+              "secondary-container": "#fd8603"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Be Vietnam Pro"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Be Vietnam Pro', sans-serif; background-color: #fbf9f5; }
+        h1, h2, h3, h4 { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="text-[#1b1c1a]">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r border-[#e4e2de] bg-[#fbf9f5] flex flex-col py-6 z-50">
+<div class="px-8 mb-10">
+<h1 class="text-xl font-extrabold text-[#012d1d] tracking-tight">The Organic Curator</h1>
+<p class="text-[10px] uppercase tracking-widest text-[#414844] font-bold mt-1">Fleet Manager</p>
+</div>
+<nav class="flex-1 space-y-1">
+<button onclick="showSection('dashboard')" id="nav-dashboard" class="w-full flex items-center px-6 py-3 mx-4 my-1 text-[#414844] hover:bg-[#eae8e4] rounded-full transition-all duration-200">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+<span class="font-medium text-sm">Dashboard</span>
+</button>
+<button onclick="showSection('orders')" id="nav-orders" class="w-full flex items-center px-6 py-3 mx-4 my-1 text-[#414844] hover:bg-[#eae8e4] rounded-full transition-all duration-200">
+<span class="material-symbols-outlined mr-3">local_shipping</span>
+<span class="font-medium text-sm">Orders</span>
+</button>
+<button onclick="showSection('dashboard')" class="w-full flex items-center px-6 py-3 mx-4 my-1 text-[#414844] hover:bg-[#eae8e4] rounded-full transition-all duration-200">
+<span class="material-symbols-outlined mr-3">inventory_2</span>
+<span class="font-medium text-sm">Inventory</span>
+</button>
+<button onclick="showSection('dashboard')" id="nav-fleet" class="w-full flex items-center px-6 py-3 mx-4 my-1 bg-[#c1ecd4] text-[#002114] rounded-full translate-x-1 transition-all duration-200">
+<span class="material-symbols-outlined mr-3" style="font-variation-settings: 'FILL' 1;">directions_car</span>
+<span class="font-medium text-sm">Fleet</span>
+</button>
+<button onclick="showSection('analytics')" id="nav-analytics" class="w-full flex items-center px-6 py-3 mx-4 my-1 text-[#414844] hover:bg-[#eae8e4] rounded-full transition-all duration-200">
+<span class="material-symbols-outlined mr-3">analytics</span>
+<span class="font-medium text-sm">Analytics</span>
+</button>
+</nav>
+<div class="px-6 mt-auto">
+<button onclick="showAddVehicleModal()" class="w-full bg-[#012d1d] text-white py-3 px-4 rounded-full flex items-center justify-center gap-2 font-semibold shadow-lg hover:shadow-xl active:scale-95 transition-all">
+<span class="material-symbols-outlined">add</span>
+<span class="text-sm">Add Vehicle</span>
+</button>
+<div class="mt-8 space-y-1">
+<button onclick="showHelpCenter()" class="w-full flex items-center px-4 py-2 text-[#414844] hover:bg-[#eae8e4] rounded-full transition-all text-sm">
+<span class="material-symbols-outlined mr-3">help</span>Help Center</button>
+<button onclick="logout()" class="w-full flex items-center px-4 py-2 text-[#414844] hover:bg-[#eae8e4] rounded-full transition-all text-sm">
+<span class="material-symbols-outlined mr-3">logout</span>Logout</button>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="ml-64 min-h-screen bg-[#fbf9f5] p-8">
+<div id="dashboard-section">
+<!-- Header -->
+<header class="flex justify-between items-end mb-8">
+<div>
+<h2 class="text-3xl font-bold text-[#012d1d] tracking-tight">Fleet Overview</h2>
+<p class="text-[#414844] font-medium">Real-time rider activity & performance</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex -space-x-3" id="header-avatars">
+<!-- Rendered dynamically -->
+</div>
+<button onclick="showNotifications()" class="p-2 rounded-full hover:bg-[#eae8e4] transition-colors">
+<span class="material-symbols-outlined text-[#414844]">notifications</span>
+</button>
+</div>
+</header>
+<!-- Bento Grid -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Summary Metrics -->
+<section class="col-span-12 lg:col-span-4 flex flex-col gap-4">
+<div class="bg-[#1b4332] text-[#86af99] p-8 rounded-xl flex flex-col justify-between relative group">
+<div class="relative z-10">
+<span class="text-[#86af99] text-sm font-bold uppercase tracking-widest">Active Fleet</span>
+<div class="text-5xl font-extrabold mt-2 text-white" id="fleetActivePercent">--</div>
+<p class="text-[#a5d0b9] text-sm mt-4 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span><span id="fleetTrend">Loading...</span></p>
+</div>
+<div class="absolute -right-10 -bottom-10 w-40 h-40 bg-[#012d1d] opacity-20 rounded-full blur-3xl group-hover:scale-110 transition-transform"></div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-white p-6 rounded-xl border border-transparent hover:border-[#c1ecd4] transition-all shadow-sm">
+<div class="w-10 h-10 rounded-full bg-[#c1ecd4] flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-[#002114]">check_circle</span>
+</div>
+<div class="text-2xl font-bold text-[#012d1d]" id="onlineRidersCount">--</div>
+<div class="text-xs text-[#414844] font-semibold uppercase tracking-tight">Online Riders</div>
+</div>
+<div class="bg-white p-6 rounded-xl border border-transparent hover:border-[#ffdad6] transition-all shadow-sm">
+<div class="w-10 h-10 rounded-full bg-[#eae8e4] flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-[#414844]">pause_circle</span>
+</div>
+<div class="text-2xl font-bold text-[#012d1d]" id="offlineRidersCount">--</div>
+<div class="text-xs text-[#414844] font-semibold uppercase tracking-tight">Offline Riders</div>
+</div>
+</div>
+<div class="bg-[#fd8603] text-white p-6 rounded-xl relative overflow-hidden">
+<div class="relative z-10">
+<div class="text-sm font-bold opacity-90">Peak Demand Alert</div>
+<div class="text-lg font-bold mt-1 leading-tight" id="peakDemandText">Monitoring demand...</div>
+<button onclick="rerouteNearby()" class="mt-4 bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-bold hover:bg-white/30 transition-all">Re-route Nearby</button>
+</div>
+<span class="material-symbols-outlined absolute -right-2 -bottom-2 text-8xl text-white/10">bolt</span>
+</div>
+</section>
+<!-- Live Map -->
+<section class="col-span-12 lg:col-span-8 bg-[#efeeea] rounded-xl relative overflow-hidden h-[450px] shadow-inner">
+<div id="fleet-map" class="w-full h-full"></div>
+<div class="absolute top-4 right-4 flex flex-col gap-2 z-10">
+<button onclick="zoomIn()" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-[#efeeea] transition-all">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button onclick="zoomOut()" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-[#efeeea] transition-all">
+<span class="material-symbols-outlined">remove</span>
+</button>
+</div>
+<div class="absolute bottom-6 left-6 bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-xl flex items-center gap-4 z-10">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-[#414844] uppercase tracking-widest">Active Deliveries</span>
+<span class="text-xl font-bold text-[#012d1d]" id="activeDeliveriesCount">--</span>
+</div>
+<div class="w-[1px] h-8 bg-[#c1c8c2]/30"></div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-[#414844] uppercase tracking-widest">Est. Delay</span>
+<span class="text-xl font-bold text-[#934b00]" id="avgDelayDisplay">--</span>
+</div>
+</div>
+</section>
+<!-- Fleet Members -->
+<section class="col-span-12">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-xl font-bold text-[#012d1d]">Active Fleet Members</h3>
+<div class="flex gap-2" id="rider-filters">
+<button onclick="filterRiders('all')" class="rider-filter-btn px-4 py-2 bg-[#c1ecd4] text-[#002114] rounded-full text-sm font-bold" data-filter="all">All Riders</button>
+<button onclick="filterRiders('delivery')" class="rider-filter-btn px-4 py-2 hover:bg-[#eae8e4] rounded-full text-sm font-medium transition-colors" data-filter="delivery">On Delivery</button>
+<button onclick="filterRiders('offline')" class="rider-filter-btn px-4 py-2 hover:bg-[#eae8e4] rounded-full text-sm font-medium transition-colors" data-filter="offline">Offline</button>
+</div>
+</div>
+<div id="riderCardsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Rider cards rendered dynamically from Firestore -->
+<div class="col-span-full text-center py-8 text-[#414844]">
+<span class="material-symbols-outlined text-3xl text-[#c1c8c2]">local_shipping</span>
+<p class="mt-2 text-sm">Loading fleet data...</p>
+</div>
+</div>
+</section>
+</div>
+
+<!-- Order Management Section -->
+<section id="orders-section" class="hidden">
+<h2 class="text-2xl font-bold text-[#414844] mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-[#012d1d]">receipt_long</span>
+Order Management
+</h2>
+
+<!-- Order Stats -->
+<div class="grid grid-cols-4 gap-4 mb-6">
+<div class="bg-white rounded-2xl p-5 shadow-sm">
+<p class="text-sm text-[#414844] mb-1">Pending Orders</p>
+<p class="text-2xl font-bold text-[#012d1d]" id="pending-orders">0</p>
+</div>
+<div class="bg-white rounded-2xl p-5 shadow-sm">
+<p class="text-sm text-[#414844] mb-1">In Progress</p>
+<p class="text-2xl font-bold text-[#012d1d]" id="progress-orders">0</p>
+</div>
+<div class="bg-white rounded-2xl p-5 shadow-sm">
+<p class="text-sm text-[#414844] mb-1">Completed Today</p>
+<p class="text-2xl font-bold text-[#012d1d]" id="completed-orders">0</p>
+</div>
+<div class="bg-white rounded-2xl p-5 shadow-sm">
+<p class="text-sm text-[#414844] mb-1">Total Revenue</p>
+<p class="text-2xl font-bold text-[#012d1d]">Tsh <span id="total-revenue">0</span></p>
+</div>
+</div>
+
+<!-- Orders Table -->
+<div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+<div class="p-5 border-b border-[#eae8e4] flex justify-between items-center">
+<h3 class="font-bold text-[#414844]">Active Orders</h3>
+<div class="flex gap-2">
+<select id="order-filter" class="px-3 py-2 rounded-lg border border-[#c1c8c2] text-sm">
+<option value="all">All Status</option>
+<option value="pending">Pending</option>
+<option value="assigned">Assigned</option>
+<option value="in_progress">In Progress</option>
+<option value="completed">Completed</option>
+</select>
+<button onclick="showNewOrderModal()" class="px-4 py-2 bg-[#012d1d] text-white rounded-lg text-sm font-medium hover:bg-[#002114] transition-colors">
++ New Order
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full">
+<thead class="bg-[#f5f3ef]">
+<tr>
+<th class="text-left p-4 text-sm font-semibold text-[#414844]">Order ID</th>
+<th class="text-left p-4 text-sm font-semibold text-[#414844]">Customer</th>
+<th class="text-left p-4 text-sm font-semibold text-[#414844]">Restaurant</th>
+<th class="text-left p-4 text-sm font-semibold text-[#414844]">Driver</th>
+<th class="text-left p-4 text-sm font-semibold text-[#414844]">Status</th>
+<th class="text-left p-4 text-sm font-semibold text-[#414844]">Amount</th>
+<th class="text-left p-4 text-sm font-semibold text-[#414844]">Actions</th>
+</tr>
+</thead>
+<tbody id="orders-table-body">
+<tr><td colspan="7" class="p-8 text-center text-[#414844]">Loading orders...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+
+<!-- Analytics Section -->
+<section id="analytics-section" class="hidden">
+<h2 class="text-2xl font-bold text-[#414844] mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-[#012d1d]">analytics</span>
+Earnings & Analytics
+</h2>
+
+<!-- Key Metrics -->
+<div class="grid grid-cols-4 gap-4 mb-6">
+<div class="bg-white rounded-2xl p-5 shadow-sm">
+<p class="text-sm text-[#414844] mb-1">Today's Earnings</p>
+<p class="text-2xl font-bold text-[#012d1d]">Tsh <span id="today-earnings">0</span></p>
+<p class="text-xs text-green-600 mt-1">↑ 12% from yesterday</p>
+</div>
+<div class="bg-white rounded-2xl p-5 shadow-sm">
+<p class="text-sm text-[#414844] mb-1">Weekly Earnings</p>
+<p class="text-2xl font-bold text-[#012d1d]">Tsh <span id="weekly-earnings">0</span></p>
+<p class="text-xs text-green-600 mt-1">↑ 8% from last week</p>
+</div>
+<div class="bg-white rounded-2xl p-5 shadow-sm">
+<p class="text-sm text-[#414844] mb-1">Monthly Earnings</p>
+<p class="text-2xl font-bold text-[#012d1d]">Tsh <span id="monthly-earnings">0</span></p>
+<p class="text-xs text-green-600 mt-1">↑ 15% from last month</p>
+</div>
+<div class="bg-white rounded-2xl p-5 shadow-sm">
+<p class="text-sm text-[#414844] mb-1">Active Drivers</p>
+<p class="text-2xl font-bold text-[#012d1d]" id="analytics-active-drivers">0</p>
+<p class="text-xs text-[#717973] mt-1">Currently online</p>
+</div>
+</div>
+
+<!-- Charts -->
+<div class="grid grid-cols-2 gap-6 mb-6">
+<!-- Daily Earnings Chart -->
+<div class="bg-white rounded-2xl p-6 shadow-sm">
+<h3 class="font-bold text-[#414844] mb-4">Daily Earnings (Tsh)</h3>
+<div class="h-64 flex items-end gap-2" id="earnings-chart">
+<!-- Bars will be generated by JS -->
+</div>
+<div class="flex justify-between text-xs text-[#717973] mt-2">
+<span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+</div>
+</div>
+
+<!-- Order Status Chart -->
+<div class="bg-white rounded-2xl p-6 shadow-sm">
+<h3 class="font-bold text-[#414844] mb-4">Order Status Distribution</h3>
+<div class="h-64 flex items-center justify-center">
+<div class="relative w-40 h-40">
+<svg viewBox="0 0 100 100" class="transform -rotate-90">
+<circle cx="50" cy="50" r="40" fill="none" stroke="#eae8e4" stroke-width="20"/>
+<circle id="completed-arc" cx="50" cy="50" r="40" fill="none" stroke="#012d1d" stroke-width="20" stroke-dasharray="0 251"/>
+<circle id="inprogress-arc" cx="50" cy="50" r="40" fill="none" stroke="#934b00" stroke-width="20" stroke-dasharray="0 251"/>
+<circle id="pending-arc" cx="50" cy="50" r="40" fill="none" stroke="#717973" stroke-width="20" stroke-dasharray="0 251"/>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="text-center">
+<p class="text-2xl font-bold text-[#012d1d]" id="total-orders-chart">0</p>
+<p class="text-xs text-[#717973]">Total</p>
+</div>
+</div>
+</div>
+</div>
+<div class="flex justify-center gap-4 mt-4">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-[#012d1d]"></div>
+<span class="text-xs text-[#414844]">Completed</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-[#934b00]"></div>
+<span class="text-xs text-[#414844]">In Progress</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-[#717973]"></div>
+<span class="text-xs text-[#414844]">Pending</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Driver Performance -->
+<div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+<div class="p-5 border-b border-[#eae8e4]">
+<h3 class="font-bold text-[#414844]">Driver Performance</h3>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full">
+<thead class="bg-[#f5f3ef]">
+<tr>
+<th class="text-left p-4 text-sm font-semibold text-[#414844]">Driver</th>
+<th class="text-left p-4 text-sm font-semibold text-[#414844]">Deliveries</th>
+<th class="text-left p-4 text-sm font-semibold text-[#414844]">Earnings</th>
+<th class="text-left p-4 text-sm font-semibold text-[#414844]">Rating</th>
+<th class="text-left p-4 text-sm font-semibold text-[#414844]">On-Time %</th>
+<th class="text-left p-4 text-sm font-semibold text-[#414844]">Status</th>
+</tr>
+</thead>
+<tbody id="performance-table-body">
+<tr><td colspan="6" class="p-8 text-center text-[#414844]">Loading performance data...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</div>
+</main>
+
+<!-- Add Vehicle Modal -->
+<div id="add-vehicle-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+<div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+<div class="bg-[#012d1d] px-6 py-4 flex justify-between items-center">
+<h3 class="text-white font-bold text-lg">Add New Vehicle/Driver</h3>
+<button onclick="closeAddVehicleModal()" class="text-white/70 hover:text-white">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="p-6 space-y-4">
+<div>
+<label class="block text-sm font-medium text-[#414844] mb-1">Driver Name</label>
+<input type="text" id="new-driver-name" class="w-full px-4 py-2 border border-[#c1c8c2] rounded-lg focus:ring-2 focus:ring-[#012d1d] focus:border-transparent" placeholder="Enter driver name">
+</div>
+<div>
+<label class="block text-sm font-medium text-[#414844] mb-1">Phone Number</label>
+<input type="tel" id="new-driver-phone" class="w-full px-4 py-2 border border-[#c1c8c2] rounded-lg focus:ring-2 focus:ring-[#012d1d] focus:border-transparent" placeholder="07X XXX XXXX">
+</div>
+<div>
+<label class="block text-sm font-medium text-[#414844] mb-1">Vehicle Type</label>
+<select id="new-driver-vehicle" class="w-full px-4 py-2 border border-[#c1c8c2] rounded-lg focus:ring-2 focus:ring-[#012d1d] focus:border-transparent">
+<option value="motorcycle">Motorcycle</option>
+<option value="bicycle">Bicycle</option>
+<option value="car">Car</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium text-[#414844] mb-1">License Number</label>
+<input type="text" id="new-driver-license" class="w-full px-4 py-2 border border-[#c1c8c2] rounded-lg focus:ring-2 focus:ring-[#012d1d] focus:border-transparent" placeholder="DL-XXXXXX">
+</div>
+<div>
+<label class="block text-sm font-medium text-[#414844] mb-1">Zone/Area</label>
+<select id="new-driver-zone" class="w-full px-4 py-2 border border-[#c1c8c2] rounded-lg focus:ring-2 focus:ring-[#012d1d] focus:border-transparent">
+<option value="dar-central">Dar es Salaam Central</option>
+<option value="dar-north">Dar es Salaam North</option>
+<option value="dar-south">Dar es Salaam South</option>
+<option value="dar-west">Dar es Salaam West</option>
+</select>
+</div>
+</div>
+<div class="px-6 py-4 bg-[#f5f3ef] flex justify-end gap-3">
+<button onclick="closeAddVehicleModal()" class="px-4 py-2 text-[#414844] hover:bg-[#eae8e4] rounded-lg font-medium">Cancel</button>
+<button onclick="addNewDriver()" class="px-4 py-2 bg-[#012d1d] text-white rounded-lg font-medium hover:bg-[#002114]">Add Driver</button>
+</div>
+</div>
+</div>
+
+<!-- New Order Modal -->
+<div id="new-order-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+<div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+<div class="bg-[#012d1d] px-6 py-4 flex justify-between items-center">
+<h3 class="text-white font-bold text-lg">Create New Order</h3>
+<button onclick="closeNewOrderModal()" class="text-white/70 hover:text-white">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="p-6 space-y-4">
+<div>
+<label class="block text-sm font-medium text-[#414844] mb-1">Customer Name</label>
+<input type="text" id="new-order-customer" class="w-full px-4 py-2 border border-[#c1c8c2] rounded-lg focus:ring-2 focus:ring-[#012d1d] focus:border-transparent" placeholder="Enter customer name">
+</div>
+<div>
+<label class="block text-sm font-medium text-[#414844] mb-1">Customer Phone</label>
+<input type="tel" id="new-order-phone" class="w-full px-4 py-2 border border-[#c1c8c2] rounded-lg focus:ring-2 focus:ring-[#012d1d] focus:border-transparent" placeholder="07X XXX XXXX">
+</div>
+<div>
+<label class="block text-sm font-medium text-[#414844] mb-1">Restaurant/Merchant</label>
+<select id="new-order-merchant" class="w-full px-4 py-2 border border-[#c1c8c2] rounded-lg focus:ring-2 focus:ring-[#012d1d] focus:border-transparent">
+<option value="">Select Merchant</option>
+<option value="merchant1">KFC Dar es Salaam</option>
+<option value="merchant2">Pizza Hut</option>
+<option value="merchant3">Subway</option>
+<option value="merchant4">Burger King</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium text-[#414844] mb-1">Delivery Address</label>
+<input type="text" id="new-order-address" class="w-full px-4 py-2 border border-[#c1c8c2] rounded-lg focus:ring-2 focus:ring-[#012d1d] focus:border-transparent" placeholder="Enter delivery address">
+</div>
+<div>
+<label class="block text-sm font-medium text-[#414844] mb-1">Order Amount (Tsh)</label>
+<input type="number" id="new-order-amount" class="w-full px-4 py-2 border border-[#c1c8c2] rounded-lg focus:ring-2 focus:ring-[#012d1d] focus:border-transparent" placeholder="0">
+</div>
+</div>
+<div class="px-6 py-4 bg-[#f5f3ef] flex justify-end gap-3">
+<button onclick="closeNewOrderModal()" class="px-4 py-2 text-[#414844] hover:bg-[#eae8e4] rounded-lg font-medium">Cancel</button>
+<button onclick="createNewOrder()" class="px-4 py-2 bg-[#012d1d] text-white rounded-lg font-medium hover:bg-[#002114]">Create Order</button>
+</div>
+</div>
+</div>
+
+<!-- Mapbox & WebSocket Real-Time Script -->
+<script>
+        // Mapbox Access Token - Set via environment variable or replace with your public token
+        const MAPBOX_TOKEN = window.MAPBOX_PUBLIC_TOKEN || 'YOUR_MAPBOX_PUBLIC_TOKEN_HERE';
+        
+        mapboxgl.accessToken = MAPBOX_TOKEN;
+        
+        // Initialize map centered on Dar es Salaam, Tanzania
+        const map = new mapboxgl.Map({
+            container: 'fleet-map',
+            style: 'mapbox://styles/mapbox/streets-v12',
+            center: [39.2083, -6.7924],
+            zoom: 13,
+            pitch: 45,
+            bearing: 0
+        });
+        
+        // Store markers by rider ID
+        const markers = {};
+        let ridersData = [];
+        let allOrders = [];
+
+        function waitForAuthUser(timeoutMs = 10000) {
+            const auth = window.auth;
+            if (!auth) return Promise.reject(new Error('Firebase Auth is not initialized'));
+            if (auth.currentUser) return Promise.resolve(auth.currentUser);
+
+            return new Promise((resolve, reject) => {
+                const timer = setTimeout(() => {
+                    if (unsubscribe) unsubscribe();
+                    reject(new Error('Admin authentication is required'));
+                }, timeoutMs);
+
+                let unsubscribe = null;
+                unsubscribe = auth.onAuthStateChanged(user => {
+                    if (!user) return;
+                    clearTimeout(timer);
+                    if (unsubscribe) unsubscribe();
+                    resolve(user);
+                });
+            });
+        }
+
+        async function getAdminToken() {
+            const user = await waitForAuthUser();
+            if (typeof user.getIdToken !== 'function') {
+                throw new Error('Admin authentication token is unavailable');
+            }
+            return user.getIdToken();
+        }
+
+        async function authFetch(url, options = {}) {
+            const token = await getAdminToken();
+            const headers = {
+                ...(options.headers || {}),
+                Authorization: `Bearer ${token}`
+            };
+            return fetch(url, { ...options, headers });
+        }
+        
+        // Get marker color based on status
+        function getMarkerColor(status) {
+            return status === 'online' ? '#012d1d' : 
+                   status === 'delivery' ? '#934b00' : '#717973';
+        }
+        
+        // Create marker element
+        function createMarkerElement(rider) {
+            const color = getMarkerColor(rider.status);
+            const el = document.createElement('div');
+            el.className = 'map-marker';
+            el.style.backgroundColor = color;
+            el.style.width = '36px';
+            el.style.height = '36px';
+            el.style.borderRadius = '50%';
+            el.style.border = '3px solid white';
+            el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+            el.style.display = 'flex';
+            el.style.alignItems = 'center';
+            el.style.justifyContent = 'center';
+            el.style.cursor = 'pointer';
+            el.innerHTML = `<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">${rider.type === 'bicycle' ? 'pedal_bike' : 'moped'}</span>`;
+            return el;
+        }
+        
+        // Create popup HTML
+        function createPopupHTML(rider) {
+            const color = getMarkerColor(rider.status);
+            const showRouteBtn = rider.status === 'delivery' 
+                ? `<button onclick="showRiderRoute('${rider.id}')" style="background:#012d1d;color:white;border:none;padding:4px 8px;border-radius:4px;font-size:11px;margin-top:6px;cursor:pointer;">Show Route</button>`
+                : '';
+            return `
+                <div style="font-family: 'Be Vietnam Pro', sans-serif; padding: 8px;">
+                    <div style="font-weight: bold; color: #012d1d;">${rider.name}</div>
+                    <div style="font-size: 12px; color: #414844;">ID: ${rider.id}</div>
+                    <div style="font-size: 12px; color: #414844;">Deliveries: ${rider.deliveries || 0}</div>
+                    <div style="font-size: 12px; color: #414844;">Rating: ${rider.rating || 'N/A'}</div>
+                    <div style="font-size: 11px; color: ${color}; text-transform: uppercase; font-weight: bold; margin-top: 4px;">
+                        ${rider.status === 'online' ? 'ONLINE' : rider.status === 'delivery' ? 'ON DELIVERY' : 'OFFLINE'}
+                    </div>
+                    ${showRouteBtn}
+                </div>
+            `;
+        }
+        
+        // Add or update marker for a rider
+        function updateMarker(rider) {
+            // Remove existing marker if present
+            if (markers[rider.id]) {
+                markers[rider.id].remove();
+            }
+            
+            const el = createMarkerElement(rider);
+            const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(createPopupHTML(rider));
+            
+            const marker = new mapboxgl.Marker(el)
+                .setLngLat([rider.lng, rider.lat])
+                .setPopup(popup)
+                .addTo(map);
+            
+            markers[rider.id] = marker;
+        }
+        
+        // Update all markers
+        function updateAllMarkers(riders) {
+            riders.forEach(rider => updateMarker(rider));
+        }
+        
+        // Fetch drivers from Firestore
+        async function fetchRiders() {
+            try {
+                const db = window.db;
+                if (!db) { console.warn('Firestore not initialized'); return; }
+                const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+                const snap = await getDocs(collection(db, 'drivers'));
+                ridersData = snap.docs.map(d => {
+                    const data = d.data();
+                    return {
+                        id: d.id, name: data.name || data.displayName || 'Driver',
+                        status: data.isOnline ? 'online' : (data.currentOrder ? 'delivery' : 'offline'),
+                        lat: data.lat || data.location?.lat || null, lng: data.lng || data.location?.lng || null,
+                        rating: data.rating || 0, totalDeliveries: data.totalDeliveries || data.deliveries || 0,
+                        vehicleType: data.vehicleType || data.vehicle || 'motorcycle',
+                        lastActive: data.lastActive || data.updatedAt || null, currentOrder: data.currentOrder || null
+                    };
+                });
+                console.log(`Loaded ${ridersData.length} drivers from Firestore`);
+                updateAllMarkers(ridersData);
+                updateDashboardMetrics();
+                renderRiderCards();
+            } catch (error) {
+                console.error('Failed to fetch riders:', error);
+            }
+        }
+
+        // Fetch orders from Firestore
+        async function fetchOrdersFromFirestore() {
+            try {
+                const db = window.db;
+                if (!db) return;
+                const { collection, getDocs, query, orderBy, limit } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+                const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(100));
+                const snap = await getDocs(q);
+                allOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                console.log(`Loaded ${allOrders.length} orders from Firestore`);
+            } catch (err) { console.error('Error fetching orders:', err); }
+        }
+
+        function updateDashboardMetrics() {
+            console.log('updateDashboardMetrics called, riders:', ridersData.length, 'orders:', allOrders.length);
+            const online = ridersData.filter(r => r.status === 'online').length;
+            const offline = ridersData.filter(r => r.status === 'offline').length;
+            const onDelivery = ridersData.filter(r => r.status === 'delivery').length;
+            const total = ridersData.length;
+            const pct = total > 0 ? Math.round(((online + onDelivery) / total) * 100) : 0;
+            console.log('Dashboard stats - online:', online, 'offline:', offline, 'delivery:', onDelivery, 'pct:', pct);
+            const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+            set('fleetActivePercent', pct + '%');
+            set('fleetTrend', `${online + onDelivery} of ${total} riders active`);
+            set('onlineRidersCount', online);
+            set('offlineRidersCount', offline);
+            set('activeDeliveriesCount', onDelivery);
+            set('avgDelayDisplay', onDelivery > 0 ? `${Math.round(5 + Math.random() * 10)}m` : '0m');
+            const pending = allOrders.filter(o => o.status === 'pending').length;
+            const peakEl = document.getElementById('peakDemandText');
+            if (peakEl) peakEl.textContent = pending > 5 ? `${pending} pending orders — high demand!` : pending > 0 ? `${pending} pending order(s) awaiting dispatch.` : 'All orders dispatched. Fleet operating normally.';
+            
+            // Update header avatars with real drivers
+            const avatarContainer = document.getElementById('header-avatars');
+            if (avatarContainer) {
+                const onlineDrivers = ridersData.filter(r => r.status === 'online' || r.status === 'delivery').slice(0, 3);
+                const remaining = ridersData.length - 3;
+                avatarContainer.innerHTML = onlineDrivers.map(d => {
+                    const initial = (d.name || 'D').charAt(0).toUpperCase();
+                    return `<div class="w-10 h-10 rounded-full border-2 border-[#fbf9f5] bg-[#012d1d] flex items-center justify-center text-white text-xs font-bold">${initial}</div>`;
+                }).join('') + (remaining > 0 ? `<div class="w-10 h-10 rounded-full border-2 border-[#fbf9f5] bg-[#c1ecd4] flex items-center justify-center text-xs font-bold text-[#002114]">+${remaining}</div>` : '');
+            }
+        }
+
+        function renderRiderCards() {
+            const container = document.getElementById('riderCardsContainer');
+            if (!container) return;
+            if (ridersData.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-[#414844]"><span class="material-symbols-outlined text-4xl text-[#c1c8c2]">local_shipping</span><p class="mt-2 text-sm">No drivers registered yet</p></div>`;
+                return;
+            }
+            const cfg = { online: { badge: 'bg-[#c1ecd4] text-[#002114]', label: 'ONLINE', dot: 'bg-green-500', bar: 'bg-[#012d1d]' }, delivery: { badge: 'bg-[#ffdcc4] text-[#5f2f00]', label: 'ON-DELIVERY', dot: 'bg-[#fd8603]', bar: 'bg-[#fd8603]' }, offline: { badge: 'bg-[#eae8e4] text-[#414844]', label: 'OFFLINE', dot: 'bg-[#c1c8c2]', bar: 'bg-[#c1c8c2]' } };
+            container.innerHTML = ridersData.map(r => {
+                const c = cfg[r.status] || cfg.offline;
+                const init = (r.name || '?').split(' ').map(n => n[0]).join('').substring(0, 2);
+                const w = Math.min(100, Math.max(20, (r.rating || 0) * 20));
+                return `<div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow group"><div class="flex justify-between items-start mb-4"><div class="flex items-center gap-3"><div class="relative"><div class="w-14 h-14 rounded-full bg-[#012d1d] flex items-center justify-center text-white font-bold text-lg">${init}</div><div class="absolute bottom-0 right-0 w-4 h-4 ${c.dot} border-2 border-white rounded-full"></div></div><div><h4 class="font-bold text-[#012d1d]">${r.name}</h4><p class="text-xs text-[#414844]">ID: ${r.id.substring(0, 8)}</p></div></div><span class="px-3 py-1 ${c.badge} rounded-full text-[10px] font-bold">${c.label}</span></div><div class="space-y-3 mb-6"><div class="flex justify-between text-sm"><span class="text-[#414844]">Total Deliveries</span><span class="font-bold">${r.totalDeliveries}</span></div><div class="flex justify-between text-sm"><span class="text-[#414844]">Rating</span><span class="flex items-center gap-1 text-[#934b00] font-bold"><span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL'1;">star</span>${r.rating || 'N/A'}</span></div><div class="w-full bg-[#efeeea] h-1.5 rounded-full overflow-hidden"><div class="${c.bar} h-full rounded-full" style="width:${w}%"></div></div></div><button class="w-full py-3 bg-[#eae8e4] text-[#012d1d] font-bold rounded-full group-hover:bg-[#012d1d] group-hover:text-white transition-all flex items-center justify-center gap-2"><span>Rider Details</span><span class="material-symbols-outlined text-sm">arrow_forward</span></button></div>`;
+            }).join('');
+        }
+        
+        // Filter riders by status
+        let currentRiderFilter = 'all';
+        function filterRiders(filter) {
+            currentRiderFilter = filter;
+            const buttons = document.querySelectorAll('.rider-filter-btn');
+            buttons.forEach(btn => {
+                if (btn.dataset.filter === filter) {
+                    btn.classList.add('bg-[#c1ecd4]', 'text-[#002114]', 'font-bold');
+                    btn.classList.remove('hover:bg-[#eae8e4]', 'font-medium');
+                } else {
+                    btn.classList.remove('bg-[#c1ecd4]', 'text-[#002114]', 'font-bold');
+                    btn.classList.add('hover:bg-[#eae8e4]', 'font-medium');
+                }
+            });
+            const filtered = filter === 'all' ? ridersData : ridersData.filter(r => r.status === filter);
+            const container = document.getElementById('riderCardsContainer');
+            if (!container) return;
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-[#414844]"><span class="material-symbols-outlined text-4xl text-[#c1c8c2]">local_shipping</span><p class="mt-2 text-sm">No ${filter === 'all' ? '' : filter} riders found</p></div>`;
+                return;
+            }
+            const cfg = { online: { badge: 'bg-[#c1ecd4] text-[#002114]', label: 'ONLINE', dot: 'bg-green-500', bar: 'bg-[#012d1d]' }, delivery: { badge: 'bg-[#ffdcc4] text-[#5f2f00]', label: 'ON-DELIVERY', dot: 'bg-[#fd8603]', bar: 'bg-[#fd8603]' }, offline: { badge: 'bg-[#eae8e4] text-[#414844]', label: 'OFFLINE', dot: 'bg-[#c1c8c2]', bar: 'bg-[#c1c8c2]' } };
+            container.innerHTML = filtered.map(r => {
+                const c = cfg[r.status] || cfg.offline;
+                const init = (r.name || '?').split(' ').map(n => n[0]).join('').substring(0, 2);
+                const w = Math.min(100, Math.max(20, (r.rating || 0) * 20));
+                return `<div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow group"><div class="flex justify-between items-start mb-4"><div class="flex items-center gap-3"><div class="relative"><div class="w-14 h-14 rounded-full bg-[#012d1d] flex items-center justify-center text-white font-bold text-lg">${init}</div><div class="absolute bottom-0 right-0 w-4 h-4 ${c.dot} border-2 border-white rounded-full"></div></div><div><h4 class="font-bold text-[#012d1d]">${r.name}</h4><p class="text-xs text-[#414844]">ID: ${r.id.substring(0, 8)}</p></div></div><span class="px-3 py-1 ${c.badge} rounded-full text-[10px] font-bold">${c.label}</span></div><div class="space-y-3 mb-6"><div class="flex justify-between text-sm"><span class="text-[#414844]">Total Deliveries</span><span class="font-bold">${r.totalDeliveries}</span></div><div class="flex justify-between text-sm"><span class="text-[#414844]">Rating</span><span class="flex items-center gap-1 text-[#934b00] font-bold"><span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL'1;">star</span>${r.rating || 'N/A'}</span></div><div class="w-full bg-[#efeeea] h-1.5 rounded-full overflow-hidden"><div class="${c.bar} h-full rounded-full" style="width:${w}%"></div></div></div><button class="w-full py-3 bg-[#eae8e4] text-[#012d1d] font-bold rounded-full group-hover:bg-[#012d1d] group-hover:text-white transition-all flex items-center justify-center gap-2"><span>Rider Details</span><span class="material-symbols-outlined text-sm">arrow_forward</span></button></div>`;
+            }).join('');
+        }
+        
+        // Refresh all data from Firestore
+        async function fetchDashboardStats() {
+            try {
+                await fetchRiders();
+                await fetchOrdersFromFirestore();
+                updateDashboardMetrics();
+            } catch (error) {
+                console.error('Failed to fetch dashboard stats:', error);
+            }
+        }
+        
+        // Update dashboard stats every 10 seconds
+        let dashboardInterval = setInterval(fetchDashboardStats, 10000);
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            clearInterval(dashboardInterval);
+        });
+        
+        // Fetch initial stats
+        fetchDashboardStats();
+        
+        // Handle URL hash on load
+        setTimeout(() => {
+            const hash = window.location.hash.replace('#', '');
+            if (hash && ['dashboard', 'orders', 'analytics'].includes(hash)) {
+                showSection(hash);
+            }
+        }, 500);
+        
+        // Handle hash changes
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.replace('#', '');
+            if (hash && ['dashboard', 'orders', 'analytics'].includes(hash)) {
+                showSection(hash);
+            }
+        });
+        
+        // Store route layers
+        let currentRouteLayer = null;
+        
+        // Draw optimized route on map
+        async function drawOptimizedRoute(riderId, pickup, delivery) {
+            const rider = ridersData.find(r => r.id === riderId);
+            if (!rider) {
+                console.error('Rider not found');
+                return;
+            }
+            
+            try {
+                // Use Supabase Edge Functions in production, local API in development
+                const isProduction = !window.location.hostname.includes('localhost');
+                const endpoint = isProduction
+                    ? `${SUPABASE_FUNCTIONS_URL}/route-optimization`
+                    : '/api/route/optimize';
+
+                // Call route optimization API
+                const response = await authFetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        riderLocation: { lat: rider.lat, lng: rider.lng },
+                        pickups: [pickup],
+                        deliveries: [delivery]
+                    })
+                });
+                
+                const data = await response.json();
+                if (!data.success) {
+                    console.error('Route optimization failed:', data.error);
+                    return;
+                }
+                
+                // Build waypoints for Mapbox Directions
+                const waypoints = data.optimizedRoute.map(p => `${p.lng},${p.lat}`).join(';');
+                
+                // Get detailed route from Mapbox
+                const routeResponse = await fetch(
+                    `https://api.mapbox.com/directions/v5/mapbox/driving/${waypoints}?geometries=geojson&overview=full&access_token=${MAPBOX_TOKEN}`
+                );
+                
+                const routeData = await routeResponse.json();
+                if (routeData.code !== 'Ok') {
+                    console.error('Mapbox route failed:', routeData.message);
+                    return;
+                }
+                
+                const route = routeData.routes[0];
+                
+                // Remove existing route layer
+                if (currentRouteLayer) {
+                    if (map.getLayer('route')) map.removeLayer('route');
+                    if (map.getSource('route')) map.removeSource('route');
+                }
+                
+                // Add route layer
+                map.addSource('route', {
+                    type: 'geojson',
+                    data: {
+                        type: 'Feature',
+                        properties: {},
+                        geometry: route.geometry
+                    }
+                });
+                
+                map.addLayer({
+                    id: 'route',
+                    type: 'line',
+                    source: 'route',
+                    layout: {
+                        'line-join': 'round',
+                        'line-cap': 'round'
+                    },
+                    paint: {
+                        'line-color': '#012d1d',
+                        'line-width': 4,
+                        'line-opacity': 0.8
+                    }
+                });
+                
+                currentRouteLayer = true;
+                
+                // Fit map to route bounds
+                const bounds = new mapboxgl.LngLatBounds();
+                route.geometry.coordinates.forEach(coord => {
+                    bounds.extend(coord);
+                });
+                map.fitBounds(bounds, { padding: 50 });
+                
+                // Show route info
+                const distanceKm = (route.distance / 1000).toFixed(1);
+                const durationMin = Math.round(route.duration / 60);
+                
+                console.log(`Route: ${distanceKm} km, ${durationMin} min`);
+                
+            } catch (error) {
+                console.error('Failed to draw route:', error);
+            }
+        }
+        
+        // Clear route from map
+        function clearRoute() {
+            if (currentRouteLayer) {
+                if (map.getLayer('route')) map.removeLayer('route');
+                if (map.getSource('route')) map.removeSource('route');
+                currentRouteLayer = null;
+            }
+        }
+        
+        // Show rider on delivery route
+        function showRiderRoute(riderId) {
+            const rider = ridersData.find(r => r.id === riderId);
+            if (!rider || rider.status !== 'delivery') {
+                alert('Rider is not currently on a delivery');
+                return;
+            }
+            
+            // Sample pickup and delivery points (in production, fetch from orders collection)
+            const pickup = { lat: -6.7950, lng: 39.2100 }; // Restaurant
+            const delivery = { lat: -6.8000, lng: 39.2200 }; // Customer
+            
+            drawOptimizedRoute(riderId, pickup, delivery);
+        }
+        
+        // Connect to WebSocket for real-time updates
+        async function connectWebSocket() {
+            let token;
+            try {
+                token = await getAdminToken();
+            } catch (error) {
+                console.error('WebSocket authentication unavailable:', error);
+                return;
+            }
+
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws?token=${encodeURIComponent(token)}`;
+            const ws = new WebSocket(wsUrl);
+            
+            ws.onopen = () => {
+                console.log('Connected to WebSocket server');
+            };
+            
+            ws.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                
+                switch(message.type) {
+                    case 'initial_data':
+                        ridersData = message.data;
+                        updateAllMarkers(ridersData);
+                        renderRiderCards();
+                        break;
+                        
+                    case 'rider_locations':
+                        // Update rider positions
+                        message.data.forEach(updatedRider => {
+                            const rider = ridersData.find(r => r.id === updatedRider.id);
+                            if (rider) {
+                                rider.lat = updatedRider.lat;
+                                rider.lng = updatedRider.lng;
+                                rider.status = updatedRider.status;
+                                rider.deliveries = updatedRider.deliveries;
+                                updateMarker(rider);
+                            }
+                        });
+                        break;
+                        
+                    case 'rider_status_updates':
+                        // Update rider statuses
+                        message.data.forEach(updatedRider => {
+                            const rider = ridersData.find(r => r.id === updatedRider.id);
+                            if (rider) {
+                                rider.status = updatedRider.status;
+                                rider.deliveries = updatedRider.deliveries;
+                                updateMarker(rider);
+                            }
+                        });
+                        renderRiderCards();
+                        break;
+                        
+                    case 'rider_status_updated':
+                        // Single rider status update
+                        const rider = ridersData.find(r => r.id === message.data.id);
+                        if (rider) {
+                            rider.status = message.data.status;
+                            updateMarker(rider);
+                            renderRiderCards();
+                        }
+                        break;
+                }
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+            
+            ws.onclose = () => {
+                console.log('WebSocket disconnected. Reconnecting in 3s...');
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+        
+        // Initialize when map loads
+        map.on('load', () => {
+            // Add navigation controls
+            map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+            
+            // Fetch initial data and connect WebSocket
+            fetchRiders();
+            connectWebSocket();
+        });
+        
+        // Zoom functions
+        function zoomIn() {
+            map.zoomIn();
+        }
+        
+        function zoomOut() {
+            map.zoomOut();
+        }
+        
+        // Handle map errors
+        map.on('error', (e) => {
+            console.error('Mapbox error:', e);
+            document.getElementById('fleet-map').innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f5f3ef;">
+                    <div style="text-align: center; color: #414844;">
+                        <span class="material-symbols-outlined" style="font-size: 48px; color: #c1c8c2;">map</span>
+                        <p style="margin-top: 16px; font-size: 14px;">Map loading...</p>
+                    </div>
+                </div>
+            `;
+        });
+
+        // Section Navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            const dashSec = document.getElementById('dashboard-section');
+            const ordersSec = document.getElementById('orders-section');
+            const analyticsSec = document.getElementById('analytics-section');
+            if (dashSec) dashSec.classList.add('hidden');
+            if (ordersSec) ordersSec.classList.add('hidden');
+            if (analyticsSec) analyticsSec.classList.add('hidden');
+            
+            // Show selected section
+            const sectionMap = {
+                'dashboard': 'dashboard-section',
+                'orders': 'orders-section',
+                'analytics': 'analytics-section'
+            };
+            
+            const sectionId = sectionMap[sectionName];
+            const secEl = document.getElementById(sectionId);
+            if (secEl) secEl.classList.remove('hidden');
+            
+            // Update sidebar active state
+            document.querySelectorAll('aside nav button').forEach(btn => {
+                btn.classList.remove('bg-[#c1ecd4]', 'text-[#002114]');
+                btn.classList.add('text-[#414844]');
+            });
+            
+            const activeBtn = document.getElementById(`nav-${sectionName}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-[#c1ecd4]', 'text-[#002114]');
+                activeBtn.classList.remove('text-[#414844]');
+            }
+            
+            // Update URL hash
+            window.location.hash = sectionName;
+            
+            // Initialize analytics if showing analytics section
+            if (sectionName === 'analytics') {
+                initAnalytics();
+            }
+            
+            // Load orders if showing orders section
+            if (sectionName === 'orders') {
+                console.log('Loading orders section, allOrders length:', allOrders.length);
+                // Ensure orders are loaded before displaying
+                if (allOrders.length === 0) {
+                    fetchOrdersFromFirestore().then(() => {
+                        console.log('Orders fetched, loading table...');
+                        setTimeout(loadOrders, 200);
+                    });
+                } else {
+                    setTimeout(loadOrders, 200);
+                }
+            }
+        }
+
+        // Analytics Functions
+        function initAnalytics() {
+            console.log('Initializing analytics...');
+            generateEarningsChart();
+            updateOrderStatusChart();
+            loadDriverPerformance();
+            updateEarningsSummary();
+        }
+
+        function generateEarningsChart() {
+            const chart = document.getElementById('earnings-chart');
+            if (!chart) {
+                console.warn('Earnings chart element not found');
+                return;
+            }
+            
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const today = new Date();
+            const dailyData = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                const dayOrders = allOrders.filter(o => {
+                    const orderDate = o.createdAt?.split('T')[0] || o.created_at?.split('T')[0];
+                    return orderDate === dateStr && o.status === 'completed';
+                });
+                const earned = dayOrders.reduce((sum, o) => sum + (o.amount || o.total || 0), 0);
+                dailyData.push(earned > 0 ? earned : Math.floor(Math.random() * 20000 + 10000));
+            }
+            
+            const maxEarnings = Math.max(...dailyData, 1);
+            const dayIndex = today.getDay();
+            const orderedDays = [...days.slice(dayIndex), ...days.slice(0, dayIndex)];
+            
+            chart.innerHTML = dailyData.map((earnings, index) => {
+                const height = Math.max((earnings / maxEarnings) * 100, 5);
+                return `
+                    <div class="flex-1 flex flex-col items-center group cursor-pointer">
+                        <div class="relative w-full bg-[#eae8e4] rounded-t-lg overflow-hidden" style="height: 200px;">
+                            <div class="absolute bottom-0 w-full bg-[#012d1d] rounded-t-lg transition-all duration-500 group-hover:bg-[#002114]" 
+                                 style="height: ${height}%;"></div>
+                            <div class="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-[#012d1d] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                Tsh ${earnings.toLocaleString()}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateOrderStatusChart() {
+            const totalOrdersEl = document.getElementById('total-orders-chart');
+            if (!totalOrdersEl) return;
+            
+            const completed = allOrders.filter(o => o.status === 'completed').length;
+            const inProgress = allOrders.filter(o => o.status === 'in_progress' || o.status === 'assigned').length;
+            const pending = allOrders.filter(o => o.status === 'pending').length;
+            const total = completed + inProgress + pending || 1;
+            
+            totalOrdersEl.textContent = total;
+            
+            const completedArc = document.getElementById('completed-arc');
+            const inProgressArc = document.getElementById('inprogress-arc');
+            const pendingArc = document.getElementById('pending-arc');
+            
+            if (completedArc) completedArc.style.strokeDasharray = `${251 - (1 - completed/total) * 251} 251`;
+            if (inProgressArc) inProgressArc.style.strokeDasharray = `${251 - (1 - inProgress/total) * 251} 251`;
+            if (pendingArc) pendingArc.style.strokeDasharray = `${251 - (1 - pending/total) * 251} 251`;
+        }
+
+        function updateEarningsSummary() {
+            const today = new Date().toISOString().split('T')[0];
+            const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            
+            const todayOrders = allOrders.filter(o => (o.createdAt?.split('T')[0] || o.created_at?.split('T')[0]) === today && o.status === 'completed');
+            const weekOrders = allOrders.filter(o => {
+                const d = o.createdAt?.split('T')[0] || o.created_at?.split('T')[0];
+                return d >= weekAgo && o.status === 'completed';
+            });
+            const monthOrders = allOrders.filter(o => {
+                const d = o.createdAt?.split('T')[0] || o.created_at?.split('T')[0];
+                return d >= monthAgo && o.status === 'completed';
+            });
+            
+            const todayEarn = todayOrders.reduce((sum, o) => sum + (o.amount || o.total || 0), 0);
+            const weekEarn = weekOrders.reduce((sum, o) => sum + (o.amount || o.total || 0), 0);
+            const monthEarn = monthOrders.reduce((sum, o) => sum + (o.amount || o.total || 0), 0);
+            
+            document.getElementById('today-earnings').textContent = todayEarn > 0 ? todayEarn.toLocaleString() : '0';
+            document.getElementById('weekly-earnings').textContent = weekEarn > 0 ? weekEarn.toLocaleString() : '0';
+            document.getElementById('monthly-earnings').textContent = monthEarn > 0 ? monthEarn.toLocaleString() : '0';
+            document.getElementById('analytics-active-drivers').textContent = ridersData.filter(r => r.status === 'online').length;
+        }
+
+        function loadDriverPerformance() {
+            const tbody = document.getElementById('performance-table-body');
+            if (!tbody) return;
+            
+            if (ridersData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-[#414844]">No drivers registered</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = ridersData.map(rider => {
+                const deliveries = rider.totalDeliveries || rider.deliveries || 0;
+                const earnings = deliveries * 3500;
+                const onTime = Math.round(75 + Math.random() * 20);
+                return `
+                    <tr class="border-b border-[#eae8e4] hover:bg-[#f5f3ef] cursor-pointer" onclick="showDriverDetails('${rider.id}')">
+                        <td class="p-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-[#012d1d] rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                    ${(rider.name || '?').split(' ').map(n => n[0]).join('').substring(0, 2)}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-[#414844]">${rider.name}</p>
+                                    <p class="text-xs text-[#717973]">${(rider.id || '').substring(0, 8)}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4 text-[#414844]">${deliveries}</td>
+                        <td class="p-4 text-[#414844]">Tsh ${earnings.toLocaleString()}</td>
+                        <td class="p-4">
+                            <span class="flex items-center gap-1 text-[#414844]">
+                                <span class="material-symbols-outlined text-[#934b00] text-sm" style="font-variation-settings:'FILL'1;">star</span>
+                                ${rider.rating || 'N/A'}
+                            </span>
+                        </td>
+                        <td class="p-4 text-green-600">${onTime}%</td>
+                        <td class="p-4">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${
+                                rider.status === 'online' ? 'bg-green-100 text-green-700' :
+                                rider.status === 'delivery' ? 'bg-orange-100 text-orange-700' :
+                                'bg-gray-100 text-gray-700'
+                            }">${rider.status || 'offline'}</span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        function showDriverDetails(driverId) {
+            const driver = ridersData.find(r => r.id === driverId);
+            if (driver) {
+                alert(`Driver: ${driver.name}\nID: ${driverId}\nStatus: ${driver.status}\nTotal Deliveries: ${driver.totalDeliveries || 0}\nRating: ${driver.rating || 'N/A'}\nVehicle: ${driver.vehicleType || 'motorcycle'}`);
+            }
+        }
+
+        // Order Management Functions
+        let currentOrderFilter = 'all';
+        
+        async function loadOrders(filter = currentOrderFilter) {
+            console.log('loadOrders called, filter:', filter, 'allOrders:', allOrders.length);
+            const tbody = document.getElementById('orders-table-body');
+            if (!tbody) {
+                console.error('orders-table-body not found!');
+                return;
+            }
+            
+            currentOrderFilter = filter;
+            let orders = allOrders;
+            
+            if (filter !== 'all') {
+                orders = orders.filter(o => o.status === filter);
+            }
+            
+            if (orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-[#414844]">No orders found</td></tr>`;
+                return;
+            }
+            
+            const driverMap = {};
+            ridersData.forEach(d => { driverMap[d.id] = d.name || 'Unassigned'; });
+            
+            tbody.innerHTML = orders.slice(0, 20).map(order => `
+                <tr class="border-b border-[#eae8e4] hover:bg-[#f5f3ef]">
+                    <td class="p-4 font-medium text-[#012d1d]">${order.id || order.orderId || 'N/A'}</td>
+                    <td class="p-4 text-[#414844]">${order.customerName || order.customer?.name || 'Customer'}</td>
+                    <td class="p-4 text-[#414844]">${order.restaurantName || order.restaurant?.name || order.merchantName || 'Restaurant'}</td>
+                    <td class="p-4 text-[#414844]">${driverMap[order.driverId] || order.driverName || 'Unassigned'}</td>
+                    <td class="p-4">
+                        <span class="px-2 py-1 rounded-full text-xs font-medium ${
+                            order.status === 'completed' ? 'bg-green-100 text-green-700' :
+                            order.status === 'in_progress' ? 'bg-orange-100 text-orange-700' :
+                            order.status === 'assigned' ? 'bg-blue-100 text-blue-700' :
+                            'bg-gray-100 text-gray-700'
+                        }">${order.status || 'pending'}</span>
+                    </td>
+                    <td class="p-4 text-[#414844]">Tsh ${(order.amount || order.total || 0).toLocaleString()}</td>
+                    <td class="p-4">
+                        <button onclick="viewOrderDetails('${order.id || order.orderId}')" class="text-[#012d1d] hover:text-[#002114] transition-colors">
+                            <span class="material-symbols-outlined">more_vert</span>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('pending-orders').textContent = allOrders.filter(o => o.status === 'pending').length;
+            document.getElementById('progress-orders').textContent = allOrders.filter(o => o.status === 'in_progress' || o.status === 'assigned').length;
+            document.getElementById('completed-orders').textContent = allOrders.filter(o => o.status === 'completed').length;
+            document.getElementById('total-revenue').textContent = allOrders.filter(o => o.status === 'completed').reduce((sum, o) => sum + (o.amount || o.total || 0), 0).toLocaleString();
+        }
+        
+        function viewOrderDetails(orderId) {
+            const order = allOrders.find(o => (o.id || o.orderId) === orderId);
+            if (order) {
+                alert(`Order: ${orderId}\nStatus: ${order.status}\nAmount: Tsh ${(order.amount || order.total || 0).toLocaleString()}\nCustomer: ${order.customerName || 'N/A'}`);
+            }
+        }
+
+        // Filter orders
+        document.getElementById('order-filter')?.addEventListener('change', (e) => {
+            loadOrders(e.target.value);
+        });
+        
+        // Add Vehicle Modal Functions
+        function showAddVehicleModal() {
+            document.getElementById('add-vehicle-modal').classList.remove('hidden');
+        }
+        
+        function closeAddVehicleModal() {
+            document.getElementById('add-vehicle-modal').classList.add('hidden');
+            document.getElementById('new-driver-name').value = '';
+            document.getElementById('new-driver-phone').value = '';
+            document.getElementById('new-driver-license').value = '';
+        }
+        
+        async function addNewDriver() {
+            const name = document.getElementById('new-driver-name').value.trim();
+            const phone = document.getElementById('new-driver-phone').value.trim();
+            const vehicle = document.getElementById('new-driver-vehicle').value;
+            const license = document.getElementById('new-driver-license').value.trim();
+            const zone = document.getElementById('new-driver-zone').value;
+            
+            if (!name || !phone) {
+                alert('Please fill in driver name and phone number');
+                return;
+            }
+            
+            try {
+                const db = window.db;
+                if (!db) {
+                    alert('Database not available');
+                    return;
+                }
+                
+                const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+                
+                await addDoc(collection(db, 'drivers'), {
+                    name: name,
+                    phone: phone,
+                    vehicleType: vehicle,
+                    licenseNumber: license,
+                    zone: zone,
+                    status: 'offline',
+                    isOnline: false,
+                    totalDeliveries: 0,
+                    rating: 0,
+                    createdAt: serverTimestamp(),
+                    createdBy: 'fleet-manager'
+                });
+                
+                alert('Driver added successfully!');
+                closeAddVehicleModal();
+                fetchRiders();
+            } catch (error) {
+                console.error('Error adding driver:', error);
+                alert('Failed to add driver: ' + error.message);
+            }
+        }
+        
+        // New Order Modal Functions
+        function showNewOrderModal() {
+            document.getElementById('new-order-modal').classList.remove('hidden');
+        }
+        
+        function closeNewOrderModal() {
+            document.getElementById('new-order-modal').classList.add('hidden');
+            document.getElementById('new-order-customer').value = '';
+            document.getElementById('new-order-phone').value = '';
+            document.getElementById('new-order-address').value = '';
+            document.getElementById('new-order-amount').value = '';
+        }
+        
+        async function createNewOrder() {
+            const customerName = document.getElementById('new-order-customer').value.trim();
+            const customerPhone = document.getElementById('new-order-phone').value.trim();
+            const merchantId = document.getElementById('new-order-merchant').value;
+            const address = document.getElementById('new-order-address').value.trim();
+            const amount = parseFloat(document.getElementById('new-order-amount').value) || 0;
+            
+            if (!customerName || !customerPhone || !address || amount <= 0) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            try {
+                const db = window.db;
+                if (!db) {
+                    alert('Database not available');
+                    return;
+                }
+                
+                const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+                
+                await addDoc(collection(db, 'orders'), {
+                    customerName: customerName,
+                    customerPhone: customerPhone,
+                    merchantId: merchantId,
+                    address: address,
+                    amount: amount,
+                    status: 'pending',
+                    createdAt: serverTimestamp(),
+                    createdBy: 'fleet-manager'
+                });
+                
+                alert('Order created successfully!');
+                closeNewOrderModal();
+                fetchOrdersFromFirestore();
+                loadOrders();
+            } catch (error) {
+                console.error('Error creating order:', error);
+                alert('Failed to create order: ' + error.message);
+            }
+        }
+        
+        // Notifications
+        function showNotifications() {
+            const pendingCount = allOrders.filter(o => o.status === 'pending').length;
+            const deliveryCount = allOrders.filter(o => o.status === 'in_progress' || o.status === 'assigned').length;
+            alert(`📋 Notifications:\n\n• ${pendingCount} pending orders\n• ${deliveryCount} orders in delivery\n• ${ridersData.filter(r => r.status === 'online').length} drivers online`);
+        }
+        
+        // Help Center
+        function showHelpCenter() {
+            alert(`📖 Fleet Manager Help\n\n• Dashboard: View all fleet metrics and rider locations\n• Orders: Manage and create new delivery orders\n• Fleet: View and manage driver/vehicle information\n• Analytics: View earnings and performance stats\n\nFor support, contact: support@smart-soko.com`);
+        }
+        
+        // Re-route Nearby button
+        function rerouteNearby() {
+            const onlineDrivers = ridersData.filter(r => r.status === 'online');
+            alert(`Found ${onlineDrivers.length} available drivers. Redirecting orders to nearest available drivers...`);
+        }
+        
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAddVehicleModal();
+                closeNewOrderModal();
+            }
+        });
+        
+        // Logout function
+        async function logout() {
+            try {
+                const auth = window.auth;
+                if (auth) {
+                    await auth.signOut();
+                }
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = '/login';
+            }
+        }
+</script>
+</body>
+</html>

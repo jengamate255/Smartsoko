@@ -1,0 +1,4 @@
+#Mon Mar 30 20:40:42 EAT 2026
+base.0=D\:\\Project\\food delivery\\food_delivery_app\\android-wrapper\\build\\intermediates\\dex\\release\\mergeDexRelease\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex

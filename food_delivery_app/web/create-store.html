@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Your Store — SmartSoko</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="dist/tailwind.css" as="style">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link rel="stylesheet" href="design-system.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script src="js/onboarding-guard.js"></script>
+  <script type="module" src="config/firebase-config.js"></script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+    .step-indicator { transition: all 0.3s ease; }
+    .step-indicator.active { background-color: var(--primary); color: white; }
+    .step-indicator.completed { background-color: var(--primary); color: white; }
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .upload-zone { border: 2px dashed var(--outline-variant); transition: all 0.2s; }
+    .upload-zone:hover, .upload-zone.dragover { border-color: var(--primary); background: var(--primary-container); }
+    .preview-image { width: 120px; height: 120px; object-fit: cover; border-radius: 12px; }
+    .color-swatch { width: 36px; height: 36px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: all 0.2s; }
+    .color-swatch.selected { border-color: var(--primary); transform: scale(1.15); }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body min-h-screen">
+  <div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-surface border-b border-outline/10 px-6 py-4">
+      <div class="max-w-4xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <a href="/merchant" class="text-on-surface-variant hover:text-primary transition">
+            <span class="material-symbols-outlined">arrow_back</span>
+          </a>
+          <div>
+            <h1 class="font-headline text-xl font-bold text-on-surface">Create Your Store</h1>
+            <p class="text-sm text-on-surface-variant">Set up your Shopify-style storefront</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 text-sm font-medium text-on-surface-variant">
+          <span id="stepCounter">Step 1 of 5</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex-1 max-w-4xl mx-auto w-full p-6">
+      <!-- Progress Steps -->
+      <div class="flex items-center gap-2 mb-10">
+        <div class="step-indicator active w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center text-sm font-bold" data-step="1">1</div>
+        <div class="flex-1 h-1 bg-outline/20 rounded"><div class="h-full bg-primary rounded transition-all duration-500" id="progressFill" style="width:0%"></div></div>
+        <div class="step-indicator w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center text-sm font-bold" data-step="2">2</div>
+        <div class="flex-1 h-1 bg-outline/20 rounded"><div class="h-full bg-primary rounded transition-all duration-500" id="progressFill2" style="width:0%"></div></div>
+        <div class="step-indicator w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center text-sm font-bold" data-step="3">3</div>
+        <div class="flex-1 h-1 bg-outline/20 rounded"><div class="h-full bg-primary rounded transition-all duration-500" id="progressFill3" style="width:0%"></div></div>
+        <div class="step-indicator w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center text-sm font-bold" data-step="4">4</div>
+        <div class="flex-1 h-1 bg-outline/20 rounded"><div class="h-full bg-primary rounded transition-all duration-500" id="progressFill4" style="width:0%"></div></div>
+        <div class="step-indicator w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center text-sm font-bold" data-step="5">5</div>
+      </div>
+
+      <!-- Step 1: Store Basics -->
+      <div class="step-panel active fade-in" id="step1">
+        <div class="bg-surface rounded-3xl border border-outline/20 shadow-xl overflow-hidden">
+          <div class="p-8">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary">store</span>
+              </div>
+              <div>
+                <h2 class="text-xl font-headline font-bold">Store Basics</h2>
+                <p class="text-sm text-on-surface-variant">Tell us about your business</p>
+              </div>
+            </div>
+
+            <div class="space-y-5">
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1.5">Store Name *</label>
+                <input type="text" id="storeName" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="e.g. Mama's Kitchen" maxlength="100">
+                <p class="text-xs text-on-surface-variant mt-1">Your store URL will be: <span id="slugPreview" class="font-mono text-primary">/store?slug=your-store-name</span></p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1.5">Category *</label>
+                <select id="storeCategory" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition">
+                  <option value="">Select a category...</option>
+                  <option value="food">Restaurant & Food</option>
+                  <option value="bakery">Bakery</option>
+                  <option value="dairy">Dairy</option>
+                  <option value="fruits">Fruits & Vegetables</option>
+                  <option value="groceries">Groceries</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1.5">Description</label>
+                <textarea id="storeDescription" rows="4" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition resize-none" placeholder="Describe what you sell and what makes your store special..." maxlength="2000"></textarea>
+                <p class="text-xs text-on-surface-variant mt-1"><span id="descCharCount">0</span>/2000</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1.5">Tags (comma separated)</label>
+                <input type="text" id="storeTags" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="e.g. organic, fresh, local, halal">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Location & Contact -->
+      <div class="step-panel fade-in" id="step2">
+        <div class="bg-surface rounded-3xl border border-outline/20 shadow-xl overflow-hidden">
+          <div class="p-8">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-blue-600">location_on</span>
+              </div>
+              <div>
+                <h2 class="text-xl font-headline font-bold">Location & Contact</h2>
+                <p class="text-sm text-on-surface-variant">Where are you located and how can customers reach you?</p>
+              </div>
+            </div>
+
+            <div class="space-y-5">
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1.5">Address *</label>
+                <input type="text" id="storeAddress" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="e.g. Mwenge, Dar es Salaam" maxlength="500">
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1.5">Place / Area Name</label>
+                <input type="text" id="storePlaceName" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="e.g. Kariakoo Market">
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-semibold text-on-surface mb-1.5">Phone</label>
+                  <input type="tel" id="storePhone" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="+255 7XX XXX XXX">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-on-surface mb-1.5">Email</label>
+                  <input type="email" id="storeEmail" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="store@example.com">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-semibold text-on-surface mb-1.5">Opening Time</label>
+                  <input type="time" id="storeOpenTime" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" value="08:00">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-on-surface mb-1.5">Closing Time</label>
+                  <input type="time" id="storeCloseTime" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" value="20:00">
+                </div>
+              </div>
+
+              <!-- Hidden lat/lng for map (can be set later from dashboard) -->
+              <input type="hidden" id="storeLat" value="">
+              <input type="hidden" id="storeLng" value="">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Pricing & Delivery -->
+      <div class="step-panel fade-in" id="step3">
+        <div class="bg-surface rounded-3xl border border-outline/20 shadow-xl overflow-hidden">
+          <div class="p-8">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-12 h-12 rounded-2xl bg-green-500/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-green-600">local_shipping</span>
+              </div>
+              <div>
+                <h2 class="text-xl font-headline font-bold">Pricing & Delivery</h2>
+                <p class="text-sm text-on-surface-variant">Set your delivery preferences and pricing</p>
+              </div>
+            </div>
+
+            <div class="space-y-5">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-semibold text-on-surface mb-1.5">Delivery Fee (TSh)</label>
+                  <input type="number" id="deliveryFee" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="3000" min="0">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-on-surface mb-1.5">Min Order Amount (TSh)</label>
+                  <input type="number" id="minOrderAmount" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="5000" min="0">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1.5">Est. Delivery Time (minutes)</label>
+                <input type="number" id="deliveryTime" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="30" min="1" max="180">
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1.5">Delivery Radius (km, 0 = pickup only)</label>
+                <input type="number" id="deliveryRadius" class="w-full px-4 py-3 rounded-2xl border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="5" min="0" max="100">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Branding & Appearance -->
+      <div class="step-panel fade-in" id="step4">
+        <div class="bg-surface rounded-3xl border border-outline/20 shadow-xl overflow-hidden">
+          <div class="p-8">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-purple-600">palette</span>
+              </div>
+              <div>
+                <h2 class="text-xl font-headline font-bold">Branding & Appearance</h2>
+                <p class="text-sm text-on-surface-variant">Make your store look great</p>
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1.5">Store Logo</label>
+                <div id="logoUpload" class="upload-zone rounded-2xl p-8 text-center cursor-pointer">
+                  <div id="logoPlaceholder">
+                    <span class="material-symbols-outlined text-4xl text-on-surface-variant mb-2">add_photo_alternate</span>
+                    <p class="text-sm text-on-surface-variant">Click to upload a logo<br><span class="text-xs">Recommended: 400x400px PNG or JPG</span></p>
+                  </div>
+                  <div id="logoPreview" class="hidden">
+                    <img id="logoImage" class="preview-image mx-auto mb-2" alt="Logo preview">
+                    <button type="button" id="logoRemove" class="text-sm text-red-500 hover:underline">Remove</button>
+                  </div>
+                  <input type="file" id="logoInput" accept="image/png,image/jpeg,image/webp" class="hidden">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1.5">Store Banner</label>
+                <div id="bannerUpload" class="upload-zone rounded-2xl p-8 text-center cursor-pointer">
+                  <div id="bannerPlaceholder">
+                    <span class="material-symbols-outlined text-4xl text-on-surface-variant mb-2">panorama</span>
+                    <p class="text-sm text-on-surface-variant">Click to upload a banner<br><span class="text-xs">Recommended: 1200x400px PNG or JPG</span></p>
+                  </div>
+                  <div id="bannerPreview" class="hidden">
+                    <img id="bannerImage" class="w-full h-32 object-cover rounded-xl mb-2" alt="Banner preview">
+                    <button type="button" id="bannerRemove" class="text-sm text-red-500 hover:underline">Remove</button>
+                  </div>
+                  <input type="file" id="bannerInput" accept="image/png,image/jpeg,image/webp" class="hidden">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-on-surface mb-1.5">Brand Color</label>
+                <div class="flex gap-3 flex-wrap" id="colorPicker">
+                  <div class="color-swatch selected" style="background:#064e3b" data-color="#064e3b"></div>
+                  <div class="color-swatch" style="background:#1e40af" data-color="#1e40af"></div>
+                  <div class="color-swatch" style="background:#7c3aed" data-color="#7c3aed"></div>
+                  <div class="color-swatch" style="background:#dc2626" data-color="#dc2626"></div>
+                  <div class="color-swatch" style="background:#ea580c" data-color="#ea580c"></div>
+                  <div class="color-swatch" style="background:#ca8a04" data-color="#ca8a04"></div>
+                  <div class="color-swatch" style="background:#059669" data-color="#059669"></div>
+                  <div class="color-swatch" style="background:#0891b2" data-color="#0891b2"></div>
+                  <div class="color-swatch" style="background:#db2777" data-color="#db2777"></div>
+                  <div class="color-swatch" style="background:#4f46e5" data-color="#4f46e5"></div>
+                </div>
+                <div class="mt-3 flex items-center gap-3">
+                  <label class="text-sm text-on-surface-variant">Custom:</label>
+                  <input type="color" id="customColor" class="w-10 h-10 rounded-lg border border-outline-variant cursor-pointer" value="#064e3b">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: Review & Launch -->
+      <div class="step-panel fade-in" id="step5">
+        <div class="bg-surface rounded-3xl border border-outline/20 shadow-xl overflow-hidden">
+          <div class="p-8">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-amber-600">celebration</span>
+              </div>
+              <div>
+                <h2 class="text-xl font-headline font-bold">Review & Launch</h2>
+                <p class="text-sm text-on-surface-variant">Almost there! Review your store details</p>
+              </div>
+            </div>
+
+            <div id="storeSummary" class="space-y-4">
+              <div class="flex items-center gap-4 p-4 bg-surface-container rounded-2xl">
+                <div id="summaryLogo" class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary">M</div>
+                <div>
+                  <h3 id="summaryName" class="font-headline font-bold text-lg">Store Name</h3>
+                  <p id="summaryCategory" class="text-sm text-on-surface-variant">Category</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 bg-surface-container rounded-2xl">
+                  <p class="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-1">Address</p>
+                  <p id="summaryAddress" class="text-sm font-medium">—</p>
+                </div>
+                <div class="p-4 bg-surface-container rounded-2xl">
+                  <p class="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-1">Place / Area</p>
+                  <p id="summaryPlaceName" class="text-sm font-medium">—</p>
+                </div>
+                <div class="p-4 bg-surface-container rounded-2xl">
+                  <p class="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-1">Contact</p>
+                  <p id="summaryPhone" class="text-sm font-medium">—</p>
+                  <p id="summaryEmail" class="text-xs text-on-surface-variant">—</p>
+                </div>
+                <div class="p-4 bg-surface-container rounded-2xl">
+                  <p class="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-1">Delivery Radius</p>
+                  <p id="summaryDeliveryRadius" class="text-sm font-medium">—</p>
+                </div>
+                <div class="p-4 bg-surface-container rounded-2xl">
+                  <p class="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-1">Delivery Fee</p>
+                  <p id="summaryDeliveryFee" class="text-sm font-medium">TSh 0</p>
+                </div>
+                <div class="p-4 bg-surface-container rounded-2xl">
+                  <p class="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-1">Min Order</p>
+                  <p id="summaryMinOrder" class="text-sm font-medium">TSh 0</p>
+                </div>
+              </div>
+
+              <div class="p-4 bg-surface-container rounded-2xl">
+                <p class="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-1">Description</p>
+                <p id="summaryDescription" class="text-sm">—</p>
+              </div>
+            </div>
+
+            <div class="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-200/50">
+              <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-amber-600">info</span>
+                <div>
+                  <p class="text-sm font-semibold text-amber-800 dark:text-amber-200">Ready to go live!</p>
+                  <p class="text-xs text-amber-600 dark:text-amber-400">Your store will be visible to customers immediately after creation.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="flex items-center justify-between mt-8">
+        <button type="button" id="btnBack" class="px-8 py-3 rounded-2xl border border-outline-variant font-semibold text-on-surface hover:bg-surface-container transition hidden">
+          <span class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">arrow_back</span>
+            Back
+          </span>
+        </button>
+        <div></div>
+        <button type="button" id="btnNext" class="px-8 py-3 rounded-2xl bg-primary text-on-primary font-headline font-bold hover:opacity-90 transition flex items-center gap-2">
+          Next
+          <span class="material-symbols-outlined text-lg">arrow_forward</span>
+        </button>
+        <button type="button" id="btnLaunch" class="px-10 py-3 rounded-2xl bg-gradient-to-r from-green-600 to-emerald-500 text-white font-headline font-bold hover:opacity-90 transition flex items-center gap-2 hidden">
+          <span class="material-symbols-outlined">rocket_launch</span>
+          Launch Store
+        </button>
+        <button type="button" id="btnLoading" class="px-10 py-3 rounded-2xl bg-primary/50 text-on-primary font-headline font-bold flex items-center gap-2 hidden" disabled>
+          <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+          Creating...
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/data-service.js?v=4"></script>
+  <script type="module" src="js/create-store.js?v=3"></script>
+</body>
+</html>

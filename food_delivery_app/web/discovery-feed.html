@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>SmartSoko — Gundua Soko</title>
+  <meta name="theme-color" content="#E63946">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/soko-genz.css">
+  <style>
+    :root {
+      --bongo-grad: linear-gradient(135deg, #E63946 0%, #ff6600 50%, #F4A261 100%);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Be Vietnam Pro', 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      min-height: 100dvh;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .feed-viewport {
+      position: relative;
+      width: 100vw; height: 100dvh;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .feed-card {
+      position: relative;
+      width: 100%;
+      height: 100dvh;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      display: flex;
+      align-items: stretch;
+      background: #111;
+    }
+    .feed-card img, .feed-card .fallback {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .feed-card .fallback {
+      background: var(--bongo-grad);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .feed-card .fallback .material-symbols-outlined { font-size: 120px; opacity: .55; }
+    .feed-card .gradient {
+      position: absolute; inset: 0;
+      background: linear-gradient(0deg, rgba(0,0,0,.85) 0%, rgba(0,0,0,.1) 50%, rgba(0,0,0,.6) 100%);
+      pointer-events: none;
+    }
+    .feed-card .top {
+      position: absolute; top: 0; left: 0; right: 0;
+      padding: 56px 16px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 5;
+    }
+    .feed-card .top h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 20px; font-weight: 800; margin: 0;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .feed-card .top h1::before {
+      content: ''; width: 6px; height: 22px; border-radius: 4px;
+      background: var(--bongo-grad);
+    }
+    .feed-card .info {
+      position: absolute; left: 0; right: 80px; bottom: 0;
+      padding: 24px 16px 96px;
+      z-index: 4;
+    }
+    .feed-card .info .seller {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(8px);
+      color: #fff; font-size: 11px; font-weight: 700;
+      padding: 4px 10px; border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .feed-card .info h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 26px; font-weight: 800; margin: 0 0 6px;
+      line-height: 1.1;
+    }
+    .feed-card .info p {
+      font-size: 13px; opacity: .85; margin: 0 0 12px;
+      line-height: 1.4;
+    }
+    .feed-card .info .price {
+      font-weight: 800; font-size: 18px;
+      background: var(--bongo-grad);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .feed-card .actions {
+      position: absolute; right: 12px; bottom: 100px;
+      display: flex; flex-direction: column; gap: 14px;
+      z-index: 5;
+    }
+    .feed-card .action {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      cursor: pointer;
+    }
+    .feed-card .action .bubble {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      transition: transform .15s ease, background .15s ease;
+    }
+    .feed-card .action:active .bubble { transform: scale(0.9); }
+    .feed-card .action.liked .bubble { background: var(--bongo-grad); }
+    .feed-card .action .label { font-size: 10px; font-weight: 700; }
+    .feed-card .action .count { font-size: 11px; font-weight: 800; }
+    .feed-card .add-pill {
+      position: absolute; left: 16px; right: 16px; bottom: 16px;
+      z-index: 5;
+    }
+    .feed-card .add-pill button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 18px;
+      border: none;
+      background: var(--bongo-grad);
+      color: #fff;
+      font-weight: 800;
+      font-size: 15px;
+      font-family: inherit;
+      box-shadow: 0 12px 30px rgba(230,57,70,0.4);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      cursor: pointer;
+    }
+    .feed-card .add-pill button:hover { transform: translateY(-1px); }
+    .feed-card .add-pill .material-symbols-outlined { font-size: 20px; }
+    .lang-toggle {
+      position: fixed; top: 14px; right: 14px; z-index: 100;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+      border-radius: 999px; padding: 4px;
+      display: flex; gap: 2px;
+    }
+    .lang-toggle button {
+      border: none; background: transparent; color: #fff;
+      padding: 6px 12px; border-radius: 999px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      font-family: inherit;
+    }
+    .lang-toggle button.active { background: var(--bongo-grad); }
+    .swipe-hint {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      font-size: 11px; color: rgba(255,255,255,0.7);
+      background: rgba(0,0,0,0.4);
+      padding: 6px 14px; border-radius: 999px;
+      animation: sokoFade 1.5s ease;
+      pointer-events: none;
+      z-index: 6;
+    }
+    @keyframes heartPop {
+      0%   { transform: scale(0); opacity: 1; }
+      50%  { transform: scale(1.4); opacity: 1; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .heart-pop {
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      font-size: 100px;
+      color: var(--soko-red);
+      pointer-events: none;
+      z-index: 9;
+    }
+    .heart-pop.go { animation: heartPop 0.8s ease forwards; }
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0;
+      padding: 12px 14px; z-index: 100;
+      display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.55), transparent);
+    }
+    .top-bar a {
+      color: #fff; text-decoration: none;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(8px);
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="/customer" aria-label="Back">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </a>
+  </div>
+
+  <div class="lang-toggle">
+    <button id="langSw" class="active" onclick="I18N.setLang('sw');location.reload()">SW</button>
+    <button id="langEn" onclick="I18N.setLang('en');location.reload()">EN</button>
+  </div>
+
+  <div class="feed-viewport" id="feedViewport">
+    <!-- Cards injected by JS -->
+  </div>
+
+  <div class="swipe-hint" data-i18n="feed.swipeHint">Swipe up for more</div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/cart-service.js"></script>
+  <script src="js/soko-features.js"></script>
+  <script>
+    const FALLBACK = [
+      { id:'f1', name:'Vitumbua vya Mama Amina',  price: 1000, sellerName:'Mama Amina', description:'Vitambaa vitamu vya kila asubuhi — hupikwa masoko Mwenge.', category:'Bakery',  emoji:'🥞' },
+      { id:'f2', name:'Mishkaki Masoko Kariakoo',  price: 2500, sellerName:'Baba Juma',  description:'Nyama ya ng\'ombe iliyochomwa vizuri, na pilipili ya kutosha.', category:'Food',    emoji:'🍢' },
+      { id:'f3', name:'Wali wa Maharage',            price: 3000, sellerName:'Mama Salma', description:'Wali mweupe na maharage ya kupika, mboga za majani.', category:'Food',   emoji:'🍚' },
+      { id:'f4', name:'Chipsi Mayai',                price: 2000, sellerName:'Mama Rehema',description:'Chips za kuchoma, mayai, vitunguu, na ketchup.',  category:'Food',     emoji:'🍳' },
+      { id:'f5', name:'Samaki wa Kupaka',            price: 6500, sellerName:'Baba Hassan',description:'Samaki mpya wa bahari, viungo vya Zanzibar.',     category:'Food',     emoji:'🐟' },
+      { id:'f6', name:'Ndafu Fresh',                 price: 1500, sellerName:'Mama Zainab',description:'Ndafu wa kuchoma, mchuzi wa kokwa.',              category:'Food',     emoji:'🥥' },
+      { id:'f7', name:'Pilau ya Zanzibar',           price: 4500, sellerName:'Mama Fatma', description:'Pilau ya viungo, nyama ya ng\'ombe, kashata.',    category:'Food',     emoji:'🍛' },
+      { id:'f8', name:'Mandazi ya Asubuhi',          price: 500,  sellerName:'Mama Aisha', description:'Mandazi mapya, ya joto, chai safi.',              category:'Bakery',   emoji:'🍩' },
+    ];
+
+    function imgFor(item) {
+      return item.imageUrl || `https://source.unsplash.com/featured/?${encodeURIComponent(item.category || 'food')},tanzania,african`;
+    }
+
+    const liked = new Set();
+    function toggleLike(card, id, btn) {
+      const wasLiked = liked.has(id);
+      if (wasLiked) liked.delete(id); else liked.add(id);
+      btn.classList.toggle('liked', !wasLiked);
+      btn.querySelector('.material-symbols-outlined').textContent = wasLiked ? 'favorite_border' : 'favorite';
+      btn.querySelector('.count').textContent = (Number(btn.querySelector('.count').textContent) || 0) + (wasLiked ? -1 : 1);
+    }
+
+    function popHeart(card) {
+      const h = document.createElement('div');
+      h.className = 'heart-pop';
+      h.innerHTML = '<span class="material-symbols-outlined" style="font-size:100px;font-variation-settings:\'FILL\' 1;">favorite</span>';
+      card.appendChild(h);
+      requestAnimationFrame(() => h.classList.add('go'));
+      setTimeout(() => h.remove(), 900);
+    }
+
+    function addToCart(item) {
+      if (window.CartService) CartService.addItem(item);
+      SokoToast.show(I18N.t('cart.addedToCart'), 'success');
+    }
+
+    function render() {
+      const v = document.getElementById('feedViewport');
+      v.innerHTML = FALLBACK.map((p, i) => `
+        <section class="feed-card" data-idx="${i}" data-id="${p.id}">
+          <img src="${imgFor(p)}" alt="${p.name}" loading="lazy" onerror="this.outerHTML='<div class=&quot;fallback&quot;><span class=&quot;material-symbols-outlined&quot;>restaurant</span></div>'">
+          <div class="gradient"></div>
+          <div class="info">
+            <span class="seller">${p.sellerName}</span>
+            <h2>${p.name}</h2>
+            <p>${p.description}</p>
+            <span class="price">TZS ${Number(p.price).toLocaleString()}</span>
+          </div>
+          <div class="actions">
+            <div class="action" onclick="toggleLike(this.closest('.feed-card'), '${p.id}', this)">
+              <div class="bubble"><span class="material-symbols-outlined">favorite_border</span></div>
+              <span class="count">${Math.floor(Math.random()*200)+10}</span>
+            </div>
+            <div class="action" onclick="SokoFeatures.shareProduct(${JSON.stringify(p).replace(/"/g, '&quot;')})">
+              <div class="bubble"><span class="material-symbols-outlined">share</span></div>
+              <span class="label">${I18N.t('cta.share')}</span>
+            </div>
+            <div class="action" onclick="SokoToast.show('Mama ${p.sellerName.split(' ')[1] || p.sellerName} anapika sasa hivi 👩🏾‍🍳', 'info')">
+              <div class="bubble"><span class="material-symbols-outlined">chat</span></div>
+              <span class="label">${I18N.t('nav.support')}</span>
+            </div>
+          </div>
+          <div class="add-pill">
+            <button onclick='addToCart(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
+              <span class="material-symbols-outlined">add_shopping_cart</span>
+              ${I18N.t('feed.addToCart')} · TZS ${Number(p.price).toLocaleString()}
+            </button>
+          </div>
+        </section>
+      `).join('');
+
+      // Wire double-tap to like
+      v.querySelectorAll('.feed-card').forEach(card => {
+        let lastTap = 0;
+        card.addEventListener('click', (e) => {
+          // ignore taps on action buttons
+          if (e.target.closest('.action') || e.target.closest('.add-pill')) return;
+          const now = Date.now();
+          if (now - lastTap < 280) {
+            const id = card.dataset.id;
+            const item = FALLBACK.find(x => x.id === id);
+            const action = card.querySelector('.action');
+            popHeart(card);
+            if (!liked.has(id)) toggleLike(card, id, action);
+          }
+          lastTap = now;
+        });
+      });
+
+      I18N.apply(document);
+    }
+
+    // Lang button reflect
+    document.addEventListener('DOMContentLoaded', () => {
+      render();
+      const lang = I18N.getLang();
+      document.getElementById('langSw').classList.toggle('active', lang === 'sw');
+      document.getElementById('langEn').classList.toggle('active', lang === 'en');
+    });
+  </script>
+</body>
+</html>

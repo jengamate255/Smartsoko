@@ -1,0 +1,120 @@
+mutation SeedData @transaction @auth(level: USER, insecureReason: "This operation is for seeding data and should only be run by authenticated users in a development environment.") {
+  user_upsertMany(data: [
+    {
+      id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+      displayName: "Alice Smith",
+      email: "alice.smith@example.com",
+      createdAt: "2023-01-01T10:00:00Z",
+      photoUrl: "https://example.com/alice.jpg"
+    },
+    {
+      id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12",
+      displayName: "Bob Johnson",
+      email: "bob.johnson@example.com",
+      createdAt: "2023-01-02T11:00:00Z",
+      photoUrl: "https://example.com/bob.jpg"
+    }
+  ])
+  category_upsertMany(data: [
+    {
+      id: "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a21",
+      name: "Breakfast",
+      description: "Quick and easy breakfast ideas",
+      userId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+    },
+    {
+      id: "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22",
+      name: "Dinner",
+      description: "Hearty dinner recipes",
+      userId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12"
+    }
+  ])
+  recipe_upsertMany(data: [
+    {
+      id: "r0eebc99-9c0b-4ef8-bb6d-6bb9bd380a31",
+      title: "Pancakes",
+      instructions: "Mix flour, eggs, milk. Cook on griddle.",
+      createdAt: "2023-01-03T12:00:00Z",
+      updatedAt: "2023-01-03T12:00:00Z",
+      isPublic: true,
+      description: "Fluffy pancakes for a perfect start to the day.",
+      prepTimeMinutes: 10,
+      cookTimeMinutes: 15,
+      servings: 4,
+      imageUrl: "https://example.com/pancakes.jpg",
+      authorId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+    },
+    {
+      id: "r0eebc99-9c0b-4ef8-bb6d-6bb9bd380a32",
+      title: "Spaghetti Bolognese",
+      instructions: "Brown meat, add sauce, cook pasta.",
+      createdAt: "2023-01-04T13:00:00Z",
+      updatedAt: "2023-01-04T13:00:00Z",
+      isPublic: true,
+      description: "Classic Italian comfort food.",
+      prepTimeMinutes: 20,
+      cookTimeMinutes: 40,
+      servings: 6,
+      imageUrl: "https://example.com/spaghetti.jpg",
+      authorId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12"
+    }
+  ])
+  recipeCategory_upsertMany(data: [
+    {
+      recipeId: "r0eebc99-9c0b-4ef8-bb6d-6bb9bd380a31",
+      categoryId: "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a21"
+    },
+    {
+      recipeId: "r0eebc99-9c0b-4ef8-bb6d-6bb9bd380a32",
+      categoryId: "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22"
+    }
+  ])
+  ingredient_upsertMany(data: [
+    {
+      id: "i0eebc99-9c0b-4ef8-bb6d-6bb9bd380a41",
+      name: "Flour",
+      quantity: 1.5,
+      unit: "cups",
+      recipeId: "r0eebc99-9c0b-4ef8-bb6d-6bb9bd380a31"
+    },
+    {
+      id: "i0eebc99-9c0b-4ef8-bb6d-6bb9bd380a42",
+      name: "Eggs",
+      quantity: 2,
+      unit: "large",
+      recipeId: "r0eebc99-9c0b-4ef8-bb6d-6bb9bd380a31"
+    },
+    {
+      id: "i0eebc99-9c0b-4ef8-bb6d-6bb9bd380a43",
+      name: "Ground Beef",
+      quantity: 1,
+      unit: "lb",
+      recipeId: "r0eebc99-9c0b-4ef8-bb6d-6bb9bd380a32"
+    },
+    {
+      id: "i0eebc99-9c0b-4ef8-bb6d-6bb9bd380a44",
+      name: "Tomato Sauce",
+      quantity: 24,
+      unit: "oz",
+      recipeId: "r0eebc99-9c0b-4ef8-bb6d-6bb9bd380a32"
+    }
+  ])
+  mealPlanEntry_upsertMany(data: [
+    {
+      id: "m0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51",
+      planDate: "2023-01-05",
+      mealType: "Breakfast",
+      notes: "Enjoy with fresh berries.",
+      userId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+      recipeId: "r0eebc99-9c0b-4ef8-bb6d-6bb9bd380a31"
+    },
+    {
+      id: "m0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52",
+      planDate: "2023-01-05",
+      mealType: "Dinner",
+      notes: "Serve with garlic bread.",
+      userId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12",
+      recipeId: "r0eebc99-9c0b-4ef8-bb6d-6bb9bd380a32"
+    }
+  ])
+}

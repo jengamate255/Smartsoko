@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <!-- Performance: Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>SmartSoko - Product Details</title>
+  <link rel="preload" href="dist/tailwind.css" as="style">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <!-- Firebase Modular SDK -->
+  <script type="module" src="config/firebase-config.js?v=3"></script>
+  <script src="nav-component.js?v=3" defer></script>
+  <style> .material-symbols-outlined {font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24} body {font-family: 'Be Vietnam Pro',sans-serif;min-height: 100vh} h1,h2,h3 {font-family: 'Plus Jakarta Sans',sans-serif} .gradient-bg {background: #012d1d} .organic-clip {border-top-left-radius: 3rem;border-bottom-right-radius: 3rem} </style>
+</head>
+<body class="bg-background text-on-surface font-body min-h-screen">
+  <!-- Navigation handled by SmartNav -->
+  <div class="h-16 md:h-20"></div>
+
+  <!-- Main Content -->
+  <main class="pb-32">
+    <!-- Hero Image Gallery -->
+    <section class="relative w-full px-4 pt-4">
+      <div class="w-full h-[400px] overflow-hidden organic-clip bg-surface-variant relative grid grid-cols-3 gap-2 p-2 group">
+        <img id="mainProductImg1" src="images/default-product.png" alt="Product view 1" class="w-full h-full object-cover rounded-xl transition-all duration-300" onerror="this.src='images/default-product.png'" loading="lazy">
+        <img id="mainProductImg2" src="images/default-product.png" alt="Product view 2" class="w-full h-full object-cover rounded-xl transition-all duration-300" onerror="this.src='images/default-product.png'" loading="lazy">
+        <img id="mainProductImg3" src="images/default-product.png" alt="Product view 3" class="w-full h-full object-cover rounded-xl transition-all duration-300" onerror="this.src='images/default-product.png'" loading="lazy">
+        <!-- Subtle dot pattern overlay -->
+        <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(circle, #012d1d 1px, transparent 1px); background-size: 20px 20px;"></div>
+        
+        <!-- Floating Edit Button (Merchant Only) -->
+        <button id="editPhotosBtn" onclick="openImageGalleryModal()" class="absolute top-4 right-4 bg-white/90 backdrop-blur shadow-lg text-primary px-4 py-2 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-primary hover:text-white transition-all hidden">
+          <span class="material-symbols-outlined text-[18px]">edit</span>
+          Edit Photos
+        </button>
+      </div>
+      <!-- Decorative blur element -->
+      <div class="absolute -bottom-6 -right-2 w-32 h-32 bg-primary/20 rounded-full blur-3xl"></div>
+    </section>
+
+    <!-- Product Identity Section -->
+    <section class="px-6 mt-8 space-y-6">
+      <div class="flex justify-between items-start">
+        <div class="space-y-2 flex-1 relative group pr-8">
+          <span id="productCategory" class="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase">Category</span>
+          <h1 id="productName" class="font-headline text-3xl font-extrabold tracking-tight text-primary leading-tight">Product Name</h1>
+          <p id="productSeller" class="text-on-surface-variant text-sm">by Seller Name</p>
+          <button onclick="openEditDetailsModal()" class="absolute top-1/2 -translate-y-1/2 -right-4 w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center text-primary opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-50 border border-gray-100" title="Edit Product Details">
+            <span class="material-symbols-outlined text-[18px]">edit_note</span>
+          </button>
+        </div>
+        <div class="text-right ml-4">
+          <span id="productPrice" class="font-headline text-3xl font-bold text-primary">TSh 0</span>
+          <p id="productUnit" class="text-on-surface-variant text-sm font-medium">per unit</p>
+        </div>
+      </div>
+
+      <!-- Rating & Stats -->
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-1 bg-yellow-100 px-3 py-1.5 rounded-full">
+          <span class="material-symbols-outlined text-warning text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+          <span class="font-bold text-sm text-on-surface">4.8</span>
+          <span class="text-xs text-on-surface-variant">(120 reviews)</span>
+        </div>
+        <div class="flex items-center gap-1 text-success text-sm">
+          <span class="material-symbols-outlined text-sm">local_shipping</span>
+          <span>In Stock</span>
+        </div>
+      </div>
+
+      <!-- Quick Info Grid -->
+      <div class="grid grid-cols-4 gap-3">
+        <div class="bg-white p-3 rounded-xl flex flex-col items-center justify-center text-center shadow-sm">
+          <span class="text-on-surface-variant text-[10px] font-bold uppercase tracking-wider">Delivery</span>
+          <span class="font-headline text-sm font-bold text-primary">25-35m</span>
+        </div>
+        <div class="bg-primary/10 p-3 rounded-xl flex flex-col items-center justify-center text-center">
+          <span class="text-on-surface-variant text-[10px] font-bold uppercase tracking-wider">Quality</span>
+          <span class="font-headline text-sm font-bold text-primary">Fresh</span>
+        </div>
+        <div class="bg-white p-3 rounded-xl flex flex-col items-center justify-center text-center shadow-sm">
+          <span class="text-on-surface-variant text-[10px] font-bold uppercase tracking-wider">Returns</span>
+          <span class="font-headline text-sm font-bold text-primary">Easy</span>
+        </div>
+        <div class="bg-white p-3 rounded-xl flex flex-col items-center justify-center text-center shadow-sm">
+          <span class="text-on-surface-variant text-[10px] font-bold uppercase tracking-wider">Payment</span>
+          <span class="font-headline text-sm font-bold text-primary">COD</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Product Details -->
+    <section class="px-6 mt-10 space-y-8">
+      <!-- Description -->
+      <div class="space-y-3">
+        <h3 class="font-headline text-lg font-bold text-primary">Description</h3>
+        <p id="productDescription" class="text-on-surface-variant leading-relaxed text-base">
+          Loading product description...
+        </p>
+      </div>
+
+      <!-- Seller Card -->
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline/20">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <span class="material-symbols-outlined text-primary">store</span>
+          </div>
+          <div class="flex-1">
+            <h4 id="sellerName" class="font-headline font-bold text-on-surface">Seller Name</h4>
+            <p class="text-on-surface-variant text-sm">⭐ 4.9 rating • Verified Seller</p>
+          </div>
+          <a href="/discovery" class="text-primary hover:text-primary-dark transition-colors" title="View all sellers">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- More from this Seller -->
+      <div class="space-y-4">
+        <h3 class="font-headline text-lg font-bold text-primary">More from this Seller</h3>
+        <div id="moreProducts" class="flex gap-4 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
+          <!-- More products will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="flex flex-wrap gap-3">
+        <div class="flex items-center gap-2 bg-surface-variant px-4 py-2 rounded-full">
+          <span class="material-symbols-outlined text-primary text-sm">verified</span>
+          <span class="text-sm font-medium text-on-surface">Quality Assured</span>
+        </div>
+        <div class="flex items-center gap-2 bg-surface-variant px-4 py-2 rounded-full">
+          <span class="material-symbols-outlined text-primary text-sm">local_shipping</span>
+          <span class="text-sm font-medium text-on-surface">Fast Delivery</span>
+        </div>
+        <div class="flex items-center gap-2 bg-surface-variant px-4 py-2 rounded-full">
+          <span class="material-symbols-outlined text-primary text-sm">refresh</span>
+          <span class="text-sm font-medium text-on-surface">Easy Returns</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="px-6 mt-10">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-headline text-lg font-bold text-primary">Customer Reviews</h3>
+        <button onclick="showAllReviews()" class="text-primary text-sm font-medium hover:text-primary-dark transition-colors">View all</button>
+      </div>
+      <div class="space-y-4">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-outline/20">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary text-sm">person</span>
+            </div>
+            <div>
+              <p class="font-semibold text-sm text-on-surface">John Doe</p>
+              <div class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-warning text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+                <span class="text-xs text-on-surface-variant">5.0</span>
+              </div>
+            </div>
+            <span class="ml-auto text-xs text-on-surface-variant">2 days ago</span>
+          </div>
+          <p class="text-on-surface-variant text-sm">Great quality product! Fast delivery and excellent packaging. Will definitely order again.</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-outline/20">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
+              <span class="material-symbols-outlined text-secondary text-sm">person</span>
+            </div>
+            <div>
+              <p class="font-semibold text-sm text-on-surface">Jane Smith</p>
+              <div class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-warning text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+                <span class="text-xs text-on-surface-variant">4.5</span>
+              </div>
+            </div>
+            <span class="ml-auto text-xs text-on-surface-variant">1 week ago</span>
+          </div>
+          <p class="text-on-surface-variant text-sm">Good value for money. The product was fresh and exactly as described.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Fixed Action Bar -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-2xl px-6 pt-4 pb-8 shadow-lg">
+    <div class="flex items-center gap-4">
+      <!-- Quantity Selector -->
+      <div class="flex items-center bg-surface-variant rounded-full p-1 h-12">
+        <button onclick="updateQuantity(-1)" class="w-10 h-10 flex items-center justify-center text-primary transition-transform active:scale-90 hover:bg-white rounded-full">
+          <span class="material-symbols-outlined">remove</span>
+        </button>
+        <span id="quantityDisplay" class="w-10 text-center font-headline font-bold text-lg">1</span>
+        <button onclick="updateQuantity(1)" class="w-10 h-10 flex items-center justify-center text-primary transition-transform active:scale-90 hover:bg-white rounded-full">
+          <span class="material-symbols-outlined">add</span>
+        </button>
+      </div>
+      
+      <!-- Add to Cart Button -->
+      <button onclick="addToCart()" class="flex-1 gradient-bg h-12 rounded-full flex items-center justify-center gap-2 text-white shadow-lg shadow-primary/20 transition-all hover:opacity-95 active:scale-95">
+        <span class="material-symbols-outlined">shopping_bag</span>
+        <span id="addToCartText" class="font-headline font-bold">Add to Cart - TSh 0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-on-surface text-white px-6 py-3 rounded-full shadow-lg z-50 text-sm font-medium hidden transition-all duration-300">
+    Item added to cart
+  </div>
+
+  <!-- Image Gallery Modal -->
+  <div id="galleryModal" class="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" id="galleryModalContent">
+      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+        <h3 class="font-headline font-bold text-xl text-primary flex items-center gap-2">
+          <span class="material-symbols-outlined">collections</span>
+          Choose Photo from Gallery
+        </h3>
+        <button onclick="closeImageGalleryModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors text-gray-500">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="p-6 overflow-y-auto flex-1">
+        <!-- Upload 3 Photos -->
+        <div class="mb-6">
+          <h4 class="font-semibold text-primary mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined">photo_library</span>
+            Upload 3 Product Photos
+          </h4>
+          <p class="text-sm text-gray-500 mb-4">Add up to 3 different views of your product</p>
+          
+          <div class="grid grid-cols-3 gap-3">
+            <!-- Photo 1 -->
+            <div class="bg-primary/5 border border-primary/20 rounded-xl p-3">
+              <p class="text-xs font-medium text-primary mb-2 text-center">Photo 1</p>
+              <input type="file" id="customPhotoUpload1" accept="image/*" class="hidden" onchange="handleCustomPhotoUpload(this, 0)">
+              <div id="customPhotoPreview1" class="hidden mb-2">
+                <img id="customPhotoPreviewImg1" src="" class="w-full h-20 object-cover rounded-lg">
+              </div>
+              <button onclick="document.getElementById('customPhotoUpload1').click()" class="w-full bg-primary text-white px-2 py-2 rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors flex items-center justify-center gap-1">
+                <span class="material-symbols-outlined text-sm">add_photo_alternate</span>
+                <span id="btnText1">Choose</span>
+              </button>
+            </div>
+            
+            <!-- Photo 2 -->
+            <div class="bg-primary/5 border border-primary/20 rounded-xl p-3">
+              <p class="text-xs font-medium text-primary mb-2 text-center">Photo 2</p>
+              <input type="file" id="customPhotoUpload2" accept="image/*" class="hidden" onchange="handleCustomPhotoUpload(this, 1)">
+              <div id="customPhotoPreview2" class="hidden mb-2">
+                <img id="customPhotoPreviewImg2" src="" class="w-full h-20 object-cover rounded-lg">
+              </div>
+              <button onclick="document.getElementById('customPhotoUpload2').click()" class="w-full bg-primary text-white px-2 py-2 rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors flex items-center justify-center gap-1">
+                <span class="material-symbols-outlined text-sm">add_photo_alternate</span>
+                <span id="btnText2">Choose</span>
+              </button>
+            </div>
+            
+            <!-- Photo 3 -->
+            <div class="bg-primary/5 border border-primary/20 rounded-xl p-3">
+              <p class="text-xs font-medium text-primary mb-2 text-center">Photo 3</p>
+              <input type="file" id="customPhotoUpload3" accept="image/*" class="hidden" onchange="handleCustomPhotoUpload(this, 2)">
+              <div id="customPhotoPreview3" class="hidden mb-2">
+                <img id="customPhotoPreviewImg3" src="" class="w-full h-20 object-cover rounded-lg">
+              </div>
+              <button onclick="document.getElementById('customPhotoUpload3').click()" class="w-full bg-primary text-white px-2 py-2 rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors flex items-center justify-center gap-1">
+                <span class="material-symbols-outlined text-sm">add_photo_alternate</span>
+                <span id="btnText3">Choose</span>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Save All Button -->
+          <button onclick="saveAllCustomPhotos()" class="w-full mt-4 bg-green-600 text-white px-4 py-3 rounded-xl font-bold hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined">save</span>
+            Save All Photos
+          </button>
+        </div>
+        
+        <!-- Stock Gallery -->
+        <div class="border-t border-gray-200 pt-4">
+          <h4 class="font-semibold text-gray-700 mb-3">Or Choose from Stock Gallery (for Photo 1)</h4>
+          <p class="text-sm text-gray-500 mb-4">Select a high-quality stock photo for your product.</p>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="galleryGrid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Product Details Modal -->
+  <div id="editDetailsModal" class="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" id="editDetailsModalContent">
+      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+        <h3 class="font-headline font-bold text-xl text-primary flex items-center gap-2">
+          <span class="material-symbols-outlined">edit_square</span>
+          Edit Product Info
+        </h3>
+        <button onclick="closeEditDetailsModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors text-gray-500">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="p-6 overflow-y-auto">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">Product Name</label>
+            <input type="text" id="editProductName" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-1">Price (TSh)</label>
+              <input type="number" id="editProductPrice" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-1">Category</label>
+              <select id="editProductCategory" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
+                <option value="food">Prepared Food</option>
+                <option value="dairy">Dairy Products</option>
+                <option value="fruits">Fruits & Veggies</option>
+                <option value="groceries">Groceries</option>
+                <option value="bakery">Bakery</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">Description</label>
+            <textarea id="editProductDescription" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+        <button onclick="closeEditDetailsModal()" class="px-5 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-200 transition-colors">Cancel</button>
+        <button onclick="saveProductDetails()" class="px-6 py-2 rounded-full font-bold text-white bg-[#064e3b] hover:bg-[#064e3b]/90 shadow-md transition-all">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let cart = JSON.parse(localStorage.getItem('smartsoko_cart') || '[]');
+    let currentProduct = null;
+    let quantity = 1;
+
+    // XSS sanitization helper
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    // Load product details from URL
+    async function loadProduct() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('id');
+      
+      if (!productId) {
+        showError('No product ID provided');
+        return;
+      }
+
+      try {
+        const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const db = window.db;
+        if (!db) throw new Error('Database not initialized');
+
+        // Try menuItems collection first (food delivery app structure), then fallback to products
+        let docSnap = await getDoc(doc(db, 'menuItems', productId));
+        
+        if (!docSnap.exists()) {
+          // Fallback to products collection
+          docSnap = await getDoc(doc(db, 'products', productId));
+        }
+        
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          // Handle both single image and multiple images
+          const imageUrls = data.imageUrls || (data.imageUrl || data.image ? [data.imageUrl || data.image] : []);
+          
+          // Normalize data from both collections
+          currentProduct = {
+            id: docSnap.id,
+            name: data.name || 'Unnamed Item',
+            description: data.description || '',
+            price: data.price || 0,
+            imageUrl: data.imageUrl || data.image || '',
+            imageUrls: imageUrls,
+            category: data.category || 'General',
+            isAvailable: data.isAvailable !== false,
+            sellerId: data.sellerId || data.restaurantId || '',
+            seller: data.seller || data.restaurantName || 'SmartSoko',
+            restaurantId: data.restaurantId || data.sellerId || ''
+          };
+          renderProduct(currentProduct);
+          loadMoreFromSeller(currentProduct.seller);
+          checkMerchantAccess(); // Check if merchant owns this product
+        } else {
+          // Fallback: check if product is in cart
+          const cartProduct = cart.find(item => item.id === productId);
+          if (cartProduct) {
+            currentProduct = cartProduct;
+            renderProduct(currentProduct);
+          } else {
+            showError('Product not found');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading product:', error);
+        showError('Failed to load product: ' + (error.message || 'Database error'));
+      }
+    }
+
+    function showError(message) {
+      const container = document.getElementById('productDetails');
+      if (container) {
+        container.innerHTML = `<p class="text-red-500 text-center py-8">${escapeHtml(message)}</p>`;
+      }
+    }
+
+    function renderProduct(product) {
+      document.getElementById('productName').textContent = product.name;
+      document.getElementById('productCategory').textContent = product.category || 'General';
+      document.getElementById('productPrice').textContent = 'TSh ' + (product.price || 0).toLocaleString();
+      document.getElementById('productSeller').textContent = 'by ' + (product.seller || 'SmartSoko');
+      document.getElementById('sellerName').textContent = product.seller || 'SmartSoko';
+      document.getElementById('productDescription').textContent = product.description || 'No description available.';
+      
+      // Handle 3 images - use imageUrls array or fall back to single imageUrl
+      const images = product.imageUrls || [product.imageUrl].filter(Boolean);
+      
+      document.getElementById('mainProductImg1').src = images[0] || 'images/default-product.png';
+      document.getElementById('mainProductImg2').src = images[1] || images[0] || 'images/default-product.png';
+      document.getElementById('mainProductImg3').src = images[2] || images[0] || 'images/default-product.png';
+      
+      updateAddToCartText();
+    }
+
+    async function loadMoreFromSeller(sellerName) {
+      if (!sellerName) return;
+      
+      try {
+        const { collection, query, where, limit, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const db = window.db;
+        if (!db) throw new Error('Database not initialized');
+        
+        // Try to get from Firebase
+        const q = query(collection(db, 'products'), where('seller', '==', sellerName), limit(4));
+        const snapshot = await getDocs(q);
+        const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        if (products.length > 0) {
+          renderMoreProducts(products);
+        } else {
+          renderMoreProducts(getFallbackMoreProducts(sellerName));
+        }
+      } catch (error) {
+        console.error('Error loading more products:', error);
+        renderMoreProducts(getFallbackMoreProducts(sellerName));
+      }
+    }
+
+    function getFallbackMoreProducts(sellerName) {
+      const sellerProducts = {
+        'Fresh Mart': [
+          { id: 'f1', name: 'Apples', price: 3000 },
+          { id: 'f2', name: 'Tomatoes', price: 1200 },
+          { id: 'f3', name: 'Potatoes', price: 1800 }
+        ],
+        'Daily Dairy': [
+          { id: 'd1', name: 'Yogurt', price: 1500 },
+          { id: 'd2', name: 'Cheese', price: 5000 },
+          { id: 'd3', name: 'Butter', price: 3500 }
+        ],
+        'Daily Bread': [
+          { id: 'b1', name: 'Croissants', price: 2500 },
+          { id: 'b2', name: 'Baguette', price: 1800 },
+          { id: 'b3', name: 'Muffins', price: 2000 }
+        ]
+      };
+      
+      return sellerProducts[sellerName] || [
+        { id: 'm1', name: 'Item 1', price: 2000 },
+        { id: 'm2', name: 'Item 2', price: 3000 },
+        { id: 'm3', name: 'Item 3', price: 1500 }
+      ];
+    }
+
+    function renderMoreProducts(products) {
+      const container = document.getElementById('moreProducts');
+      container.innerHTML = products.map(p => `
+        <a href="/product?id=${escapeHtml(p.id)}" class="min-w-[140px] bg-white rounded-2xl p-3 shadow-sm border border-outline/20 hover:shadow-md transition-all">
+          <div class="aspect-square bg-surface-variant rounded-xl mb-2 flex items-center justify-center overflow-hidden">
+            ${getProductImageHtml(p, 'small')}
+          </div>
+          <h4 class="font-semibold text-sm text-on-surface truncate">${escapeHtml(p.name)}</h4>
+          <p class="text-primary font-bold text-sm">TSh ${(p.price || 0).toLocaleString()}</p>
+        </a>
+      `).join('');
+    }
+
+    function getProductImageHtml(product, size = 'medium') {
+      const sizes = {
+        small: 'w-full h-full object-cover',
+        medium: 'w-full h-full object-cover',
+        large: 'w-full h-full object-cover'
+      };
+      
+      const imageUrl = product.imageUrl || 'images/default-product.png';
+      return `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(product.name)}" class="${sizes[size]}" onerror="this.onerror=null; this.src='images/default-product.png';">`;
+    }
+
+    function updateQuantity(delta) {
+      quantity += delta;
+      if (quantity < 1) quantity = 1;
+      if (quantity > 10) quantity = 10;
+      
+      document.getElementById('quantityDisplay').textContent = quantity;
+      updateAddToCartText();
+    }
+
+    function updateAddToCartText() {
+      if (!currentProduct) return;
+      const total = currentProduct.price * quantity;
+      document.getElementById('addToCartText').textContent = `Add to Cart - TSh ${total.toLocaleString()}`;
+    }
+
+    function addToCart() {
+      if (!currentProduct) return;
+
+      const existing = cart.find(item => item.id === currentProduct.id);
+      if (existing) {
+        existing.quantity += quantity;
+      } else {
+        cart.push({ ...currentProduct, quantity: quantity });
+      }
+
+      localStorage.setItem('smartsoko_cart', JSON.stringify(cart));
+      showToast(`${currentProduct.name} added to cart (${quantity} item${quantity > 1 ? 's' : ''})`);
+      
+      // Reset quantity
+      quantity = 1;
+      document.getElementById('quantityDisplay').textContent = quantity;
+      updateAddToCartText();
+    }
+
+    function toggleFavorite() {
+      const icon = document.getElementById('favoriteIcon');
+      if (icon.textContent === 'favorite_border') {
+        icon.textContent = 'favorite';
+        icon.style.fontVariationSettings = "'FILL' 1";
+        icon.classList.add('text-error');
+        showToast('Added to favorites');
+      } else {
+        icon.textContent = 'favorite_border';
+        icon.style.fontVariationSettings = "'FILL' 0";
+        icon.classList.remove('text-error');
+        showToast('Removed from favorites');
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.remove('hidden');
+      
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+
+    function showError(message) {
+      document.getElementById('productName').textContent = 'Error';
+      document.getElementById('productDescription').textContent = message;
+    }
+
+    function showAllReviews() {
+      showToast('All reviews feature coming soon!');
+      // Scroll to reviews section
+      document.querySelector('.px-6.mt-10').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- Image Gallery Logic ---
+    const STOCK_GALLERY = [
+      'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80', // Burger
+      'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80', // Salad
+      'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80', // Pizza
+      'https://images.unsplash.com/photo-1495147466023-ac5c588e2e94?auto=format&fit=crop&w=800&q=80', // Pancakes/Dessert
+      'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=800&q=80', // Steak/Meat
+      'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80', // Roast
+      'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&w=800&q=80', // Organic Veggies
+      'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80', // Burger alt
+      'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=800&q=80', // Pastries
+      'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80', // Donut/Coffee
+      'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=800&q=80', // Sandwich
+      'https://images.unsplash.com/photo-1460306855393-0410f61241c7?auto=format&fit=crop&w=800&q=80'  // Healthy burger
+    ];
+
+    function openImageGalleryModal() {
+      const modal = document.getElementById('galleryModal');
+      const content = document.getElementById('galleryModalContent');
+      const grid = document.getElementById('galleryGrid');
+      
+      grid.innerHTML = STOCK_GALLERY.map(url => `
+        <div onclick="selectGalleryImage('${url}')" class="aspect-square rounded-2xl overflow-hidden cursor-pointer group relative border-2 border-transparent hover:border-primary transition-all">
+          <img src="${url}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy">
+          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+            <span class="material-symbols-outlined text-white text-3xl">check_circle</span>
+          </div>
+        </div>
+      `).join('');
+      
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      // Trigger animation
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        content.classList.remove('scale-95');
+      }, 10);
+    }
+
+    function closeImageGalleryModal() {
+      const modal = document.getElementById('galleryModal');
+      const content = document.getElementById('galleryModalContent');
+      
+      modal.classList.add('opacity-0');
+      content.classList.add('scale-95');
+      
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }, 300);
+    }
+
+    async function selectGalleryImage(url) {
+      if (!currentProduct) return;
+      
+      try {
+        const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const db = window.db;
+        if (!db) throw new Error('Database not initialized');
+        
+        const productRef = doc(db, 'products', currentProduct.id);
+        const menuRef = doc(db, 'menuItems', currentProduct.id);
+        
+        // Update first image in the array
+        const currentImages = currentProduct.imageUrls || [currentProduct.imageUrl].filter(Boolean);
+        currentImages[0] = url;
+        currentProduct.imageUrls = currentImages;
+        currentProduct.imageUrl = url; // For backward compatibility
+        
+        renderProduct(currentProduct);
+        showToast('Updating image...');
+        closeImageGalleryModal();
+        
+        const updateData = { 
+          imageUrl: url,
+          imageUrls: currentImages,
+          updatedAt: serverTimestamp()
+        };
+        
+        await Promise.all([
+          updateDoc(productRef, updateData).catch(() => {}),
+          updateDoc(menuRef, updateData).catch(() => {})
+        ]);
+        
+        showToast('Image updated successfully!');
+      } catch (error) {
+        console.error('Error updating image:', error);
+        showToast('Error saving image. Are you logged in as a seller?');
+      }
+    }
+
+    // --- Custom Photo Upload Logic (3 Images) ---
+    let uploadedCustomPhotos = [null, null, null]; // Store 3 uploaded photo data URLs
+
+    function handleCustomPhotoUpload(input, index) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          showToast('Please select an image file', 'error');
+          return;
+        }
+        
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          showToast('Image must be less than 5MB', 'error');
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          uploadedCustomPhotos[index] = e.target.result; // Store data URL
+          
+          // Show preview for this photo
+          const previewContainer = document.getElementById(`customPhotoPreview${index + 1}`);
+          const previewImg = document.getElementById(`customPhotoPreviewImg${index + 1}`);
+          const btnText = document.getElementById(`btnText${index + 1}`);
+          
+          if (previewContainer && previewImg) {
+            previewImg.src = uploadedCustomPhotos[index];
+            previewContainer.classList.remove('hidden');
+          }
+          
+          if (btnText) btnText.textContent = 'Change';
+          
+          showToast(`Photo ${index + 1} loaded. Click "Save All Photos" when ready.`);
+        };
+        
+        reader.onerror = function() {
+          showToast('Error reading file', 'error');
+        };
+        
+        reader.readAsDataURL(file);
+      }
+    }
+
+    async function saveAllCustomPhotos() {
+      if (!currentProduct) {
+        showToast('No product selected', 'error');
+        return;
+      }
+      
+      // Check if at least one photo is uploaded
+      const hasAnyPhoto = uploadedCustomPhotos.some(p => p !== null);
+      if (!hasAnyPhoto) {
+        showToast('Please select at least one photo', 'error');
+        return;
+      }
+      
+      try {
+        showToast('Uploading photos to Firebase Storage...');
+        
+        const downloadURLs = [];
+        const storagePaths = [];
+        
+        // Import Firebase Storage v9 modular functions
+        const { ref, uploadBytes, getDownloadURL } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js');
+        const storage = window.storage;
+        if (!storage) throw new Error('Storage not initialized');
+        
+        // Upload each photo that was selected
+        for (let i = 0; i < 3; i++) {
+          if (uploadedCustomPhotos[i]) {
+            // Convert data URL to Blob
+            const response = await fetch(uploadedCustomPhotos[i]);
+            const blob = await response.blob();
+            
+            // Create a unique filename
+            const timestamp = Date.now();
+            const filename = `products/${currentProduct.id}/photo${i + 1}_${timestamp}.jpg`;
+            
+            // Upload to Firebase Storage
+            const storageRef = ref(storage, filename);
+            await uploadBytes(storageRef, blob, {
+              contentType: 'image/jpeg',
+              customMetadata: {
+                productId: currentProduct.id,
+                photoIndex: i + 1,
+                uploadedBy: 'merchant',
+                timestamp: new Date().toISOString()
+              }
+            });
+            
+            // Get the download URL
+            const downloadURL = await getDownloadURL(storageRef);
+            downloadURLs[i] = downloadURL;
+            storagePaths[i] = filename;
+          }
+        }
+        
+        // Import Firestore functions
+        const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const db = window.db;
+        
+        // Build update data - preserve existing images if not replaced
+        const currentImages = currentProduct.imageUrls || [currentProduct.imageUrl].filter(Boolean);
+        const updateData = {
+          imageUrls: [
+            downloadURLs[0] || currentImages[0] || 'images/default-product.png',
+            downloadURLs[1] || currentImages[1] || downloadURLs[0] || currentImages[0] || 'images/default-product.png',
+            downloadURLs[2] || currentImages[2] || downloadURLs[0] || currentImages[0] || 'images/default-product.png'
+          ],
+          imageStoragePaths: storagePaths.filter(Boolean),
+          updatedAt: serverTimestamp()
+        };
+        
+        // Also set single imageUrl for backward compatibility
+        if (downloadURLs[0]) {
+          updateData.imageUrl = downloadURLs[0];
+        }
+        
+        // Update product in Firestore
+        const productRef = doc(db, 'products', currentProduct.id);
+        const menuRef = doc(db, 'menuItems', currentProduct.id);
+        
+        currentProduct.imageUrls = updateData.imageUrls;
+        if (updateData.imageUrl) currentProduct.imageUrl = updateData.imageUrl;
+        renderProduct(currentProduct);
+        closeImageGalleryModal();
+        
+        await Promise.all([
+          updateDoc(productRef, updateData).catch(() => {}),
+          updateDoc(menuRef, updateData).catch(() => {})
+        ]);
+        
+        showToast('All photos uploaded to Firebase Storage successfully!');
+        
+        // Clear the uploads
+        uploadedCustomPhotos = [null, null, null];
+        for (let i = 1; i <= 3; i++) {
+          const previewContainer = document.getElementById(`customPhotoPreview${i}`);
+          const fileInput = document.getElementById(`customPhotoUpload${i}`);
+          const btnText = document.getElementById(`btnText${i}`);
+          if (previewContainer) previewContainer.classList.add('hidden');
+          if (fileInput) fileInput.value = '';
+          if (btnText) btnText.textContent = 'Choose';
+        }
+        
+      } catch (error) {
+        console.error('Error uploading to Firebase Storage:', error);
+        showToast('Error uploading photos: ' + (error.message || 'Unknown error'), 'error');
+      }
+    }
+
+    // --- Edit Details Logic ---
+    function openEditDetailsModal() {
+      if (!currentProduct) return;
+      
+      // Populate fields
+      document.getElementById('editProductName').value = currentProduct.name || '';
+      document.getElementById('editProductPrice').value = currentProduct.price || 0;
+      document.getElementById('editProductCategory').value = currentProduct.category || 'food';
+      document.getElementById('editProductDescription').value = currentProduct.description || '';
+      
+      const modal = document.getElementById('editDetailsModal');
+      const content = document.getElementById('editDetailsModalContent');
+      
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        content.classList.remove('scale-95');
+      }, 10);
+    }
+
+    function closeEditDetailsModal() {
+      const modal = document.getElementById('editDetailsModal');
+      const content = document.getElementById('editDetailsModalContent');
+      
+      modal.classList.add('opacity-0');
+      content.classList.add('scale-95');
+      
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }, 300);
+    }
+
+    async function saveProductDetails() {
+      if (!currentProduct) return;
+      
+      const updatedData = {
+        name: document.getElementById('editProductName').value,
+        price: parseInt(document.getElementById('editProductPrice').value) || 0,
+        category: document.getElementById('editProductCategory').value,
+        description: document.getElementById('editProductDescription').value
+      };
+      
+      try {
+        showToast('Saving details...');
+        
+        const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const db = window.db;
+        if (!db) throw new Error('Database not initialized');
+        
+        const productRef = doc(db, 'products', currentProduct.id);
+        const menuRef = doc(db, 'menuItems', currentProduct.id);
+        
+        // Optimistic UI update
+        Object.assign(currentProduct, updatedData);
+        renderProduct(currentProduct);
+        closeEditDetailsModal();
+        
+        // Try updating in both collections
+        await Promise.all([
+          updateDoc(productRef, updatedData).catch(() => {}),
+          updateDoc(menuRef, updatedData).catch(() => {})
+        ]);
+        
+        showToast('Product details updated successfully!');
+      } catch (error) {
+        console.error('Error updating details:', error);
+        showToast('Failed to save details.');
+      }
+    }
+
+    // Check if current user is merchant and owns this product
+    async function checkMerchantAccess() {
+      const auth = window.auth;
+      if (!auth || !auth.currentUser) return false;
+      
+      try {
+        const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const db = window.db;
+        if (!db) return false;
+        
+        // Check user role
+        const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+        if (!userDoc.exists()) return false;
+        
+        const userData = userDoc.data();
+        if (userData.role !== 'merchant') return false;
+        
+        // Check if user owns this product
+        if (currentProduct && (currentProduct.sellerId === auth.currentUser.uid || currentProduct.restaurantId === auth.currentUser.uid)) {
+          // Show edit button
+          const editBtn = document.getElementById('editPhotosBtn');
+          if (editBtn) editBtn.classList.remove('hidden');
+          return true;
+        }
+        
+        return false;
+      } catch (error) {
+        console.error('Error checking merchant access:', error);
+        return false;
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      SmartNav.init({ activePage: 'discover', role: 'customer', breadcrumbs: ['Home', 'Discover', 'Product'] });
+      loadProduct();
+    });
+  </script>
+</body>
+</html>

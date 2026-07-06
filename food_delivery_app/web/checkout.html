@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartSoko - Checkout</title>
+  <meta name="description" content="Complete your order at SmartSoko">
+  <meta name="theme-color" content="#012d1d">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link rel="stylesheet" href="design-system.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script type="module" src="config/firebase-config.js?v=3"></script>
+  <script src="js/cart-service.js?v=3"></script>
+  <script src="nav-component.js?v=3" defer></script>
+  <script src="config/api-config.js?v=3"></script>
+  <script src="config/mapbox-config.js"></script>
+  <style>
+    :root {
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-primary: 0 10px 40px -10px rgba(1,45,29,0.4);
+    }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24 }
+    .slide-in { animation: slideIn 0.5s ease forwards; opacity: 0 }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .stagger-1 { animation-delay: 0.1s }
+    .stagger-2 { animation-delay: 0.2s }
+    .stagger-3 { animation-delay: 0.3s }
+    .pulse-ring { animation: pulseRing 2s cubic-bezier(0.4, 0, 0.6, 1) infinite }
+    @keyframes pulseRing { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body">
+<div class="h-20 md:h-24"></div>
+
+<main class="pb-24 px-4 sm:px-6 max-w-4xl mx-auto">
+  <div class="mb-8 slide-in stagger-1">
+    <div class="flex items-center gap-4">
+      <button onclick="window.history.back()" class="w-10 h-10 bg-surface border border-outline/30 rounded-xl flex items-center justify-center hover:bg-surface-variant transition-colors">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <div>
+        <h1 class="font-headline text-2xl font-bold text-on-surface">Checkout</h1>
+        <p class="text-sm text-on-surface-variant mt-0.5">Review your order and complete purchase</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="emptyCartState" class="hidden text-center py-16">
+    <div class="w-20 h-20 bg-surface rounded-full flex items-center justify-center mx-auto mb-4">
+      <span class="material-symbols-outlined text-5xl text-on-surface-variant">shopping_cart</span>
+    </div>
+    <h2 class="font-headline text-xl font-bold text-on-surface mb-2">Your cart is empty</h2>
+    <p class="text-on-surface-variant mb-6">Add items to get started</p>
+    <a href="/customer" class="inline-flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition-all">
+      <span class="material-symbols-outlined">storefront</span>
+      Browse Sellers
+    </a>
+  </div>
+
+  <div id="checkoutContent" class="hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-4">
+        <!-- Location Detection Banner -->
+        <div id="locationBanner" class="bg-primary/10 border border-primary/20 rounded-2xl p-4 slide-in stagger-1">
+          <div class="flex items-center gap-3">
+            <div id="locationIcon" class="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary animate-spin">my_location</span>
+            </div>
+            <div class="flex-1">
+              <h3 id="locationStatus" class="font-semibold text-primary text-sm">Detecting your location...</h3>
+              <p id="locationSubtext" class="text-xs text-primary/70 mt-0.5">We need your location for delivery</p>
+            </div>
+            <button id="locationActionBtn" onclick="detectLocation()" class="text-sm font-medium text-primary hover:text-primary-dark transition-colors">
+              Try Again
+            </button>
+          </div>
+        </div>
+
+        <!-- Delivery Address -->
+        <div class="bg-surface rounded-2xl p-5 border border-outline/20 slide-in stagger-1">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">location_on</span>
+              </div>
+              <div>
+                <h3 class="font-headline text-sm font-bold text-on-surface">Delivery Address</h3>
+              </div>
+            </div>
+            <button onclick="editAddress()" class="text-sm font-medium text-primary hover:text-primary-dark transition-colors">
+              Edit
+            </button>
+          </div>
+          <p id="deliveryAddress" class="text-on-surface-variant text-sm ml-13">--</p>
+          <p id="deliveryPhone" class="text-on-surface-variant text-sm mt-1 ml-13">--</p>
+        </div>
+
+        <!-- Cart Items -->
+        <div class="bg-surface rounded-2xl border border-outline/20 slide-in stagger-2">
+          <div class="p-5 border-b border-outline/20">
+            <h3 class="font-headline text-sm font-bold text-on-surface">Order Items</h3>
+          </div>
+          <div id="checkoutItems" class="divide-y divide-outline/20">
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-1">
+        <div class="bg-surface rounded-2xl p-5 border border-outline/20 sticky top-24 slide-in stagger-3">
+          <h3 class="font-headline text-lg font-bold text-on-surface mb-4">Order Summary</h3>
+          
+          <div class="space-y-3 mb-4">
+            <div class="flex justify-between text-sm">
+              <span class="text-on-surface-variant">Subtotal</span>
+              <span class="font-medium text-on-surface" id="summarySubtotal">TZS 0</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-on-surface-variant">Delivery Fee</span>
+              <span class="font-medium text-on-surface" id="summaryDelivery">TZS 3,000</span>
+            </div>
+            <div class="border-t border-outline/20 pt-3">
+              <div class="flex justify-between">
+                <span class="font-headline font-bold text-on-surface">Total</span>
+                <span class="font-headline text-xl font-bold text-primary" id="summaryTotal">TZS 3,000</span>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="placeOrder()" id="placeOrderBtn" class="w-full bg-primary text-on-primary py-4 rounded-2xl font-headline font-bold text-base hover:bg-primary-dark transition-all active:scale-95 shadow-lg shadow-primary/20">
+            Place Order
+          </button>
+
+          <a href="/customer" class="block text-center mt-3 text-sm font-medium text-on-surface-variant hover:text-primary transition-colors py-2">
+            Continue Shopping
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Address Edit Modal -->
+<div id="addressModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center">
+  <div class="bg-surface rounded-2xl p-6 w-full max-w-md mx-4 shadow-xl max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-headline text-xl font-bold text-on-surface">Delivery Address</h3>
+      <button onclick="closeAddressModal()" class="p-2 hover:bg-surface-variant rounded-lg transition-colors">
+        <span class="material-symbols-outlined text-on-surface-variant">close</span>
+      </button>
+    </div>
+    <button onclick="useCurrentLocation()" id="locateBtn" class="w-full mb-4 py-3 px-4 bg-primary/10 border border-primary/30 rounded-xl flex items-center justify-center gap-2 text-primary font-medium hover:bg-primary/20 transition-colors">
+      <span class="material-symbols-outlined">my_location</span>
+      <span>Use Current Location</span>
+    </button>
+    <div id="locateLoading" class="hidden mb-4 py-3 px-4 bg-surface-variant rounded-xl flex items-center justify-center gap-2 text-on-surface-variant">
+      <span class="material-symbols-outlined animate-spin">refresh</span>
+      <span>Detecting your location...</span>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-on-surface-variant mb-1">Address</label>
+        <input type="text" id="addressInput" class="w-full px-4 py-3 bg-surface-variant border border-outline/30 rounded-xl focus:outline-none focus:border-primary/50" placeholder="Enter your delivery address...">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-on-surface-variant mb-1">Phone Number</label>
+        <input type="tel" id="phoneInput" class="w-full px-4 py-3 bg-surface-variant border border-outline/30 rounded-xl focus:outline-none focus:border-primary/50" placeholder="Enter your phone number" required>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-on-surface-variant mb-1">Name</label>
+        <input type="text" id="nameInput" class="w-full px-4 py-3 bg-surface-variant border border-outline/30 rounded-xl focus:outline-none focus:border-primary/50" placeholder="Enter your full name" required>
+      </div>
+    </div>
+    <div class="flex gap-3 mt-6">
+      <button onclick="closeAddressModal()" class="flex-1 py-3 border border-outline/50 rounded-xl font-medium text-on-surface hover:bg-surface-variant transition-colors">
+        Cancel
+      </button>
+      <button onclick="saveAddress()" class="flex-1 py-3 bg-primary text-on-primary rounded-xl font-medium hover:bg-primary-dark transition-colors">
+        Save
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let cart = [];
+  // Delivery fee will be calculated from cart items or use default
+function getDeliveryFee() {
+  const cart = JSON.parse(localStorage.getItem('smartsoko_cart') || '[]');
+  const firstItem = cart[0] || {};
+  return firstItem.sellerDeliveryFee || 3000;
+}
+  let deliveryCoords = null;
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    SmartNav.init({ activePage: 'cart', role: 'customer' });
+    loadCheckout();
+    detectLocation();
+  });
+
+  function loadCheckout() {
+    cart = window.CartService ? CartService.getCart() : JSON.parse(localStorage.getItem('smartsoko_cart') || '[]');
+
+    if (cart.length === 0) {
+      document.getElementById('emptyCartState').classList.remove('hidden');
+      document.getElementById('checkoutContent').classList.add('hidden');
+      return;
+    }
+
+    document.getElementById('emptyCartState').classList.add('hidden');
+    document.getElementById('checkoutContent').classList.remove('hidden');
+
+    // Load saved coordinates
+    try {
+      deliveryCoords = JSON.parse(localStorage.getItem('smartsoko_delivery_coords') || 'null');
+    } catch (e) {
+      deliveryCoords = null;
+    }
+
+    // Load delivery info
+    const address = localStorage.getItem('smartsoko_address') || localStorage.getItem('smartsoko_user_address') || 'No address set';
+    const phone = localStorage.getItem('smartsoko_phone') || localStorage.getItem('smartsoko_user_phone') || 'No phone set';
+    document.getElementById('deliveryAddress').textContent = address;
+    document.getElementById('deliveryPhone').textContent = phone;
+
+    const container = document.getElementById('checkoutItems');
+    container.innerHTML = cart.map(item => `
+      <div class="flex items-center gap-4 p-4">
+        <div class="w-16 h-16 rounded-xl overflow-hidden bg-surface-container flex-shrink-0">
+          ${item.imageUrl
+            ? `<img src="${escapeHtml(item.imageUrl)}" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gradient-to-br from-primary-fixed to-primary-fixed-dim flex items-center justify-center\\'><span class=\\'material-symbols-outlined text-2xl text-primary\\'>restaurant</span></div>'">`
+            : `<div class="w-full h-full bg-gradient-to-br from-primary-fixed to-primary-fixed-dim flex items-center justify-center"><span class="material-symbols-outlined text-2xl text-primary">restaurant</span></div>`}
+        </div>
+        <div class="flex-1 min-w-0">
+          <h4 class="font-semibold text-on-surface text-sm truncate">${escapeHtml(item.name)}</h4>
+          <p class="text-xs text-on-surface-variant mt-0.5">${item.sellerName ? escapeHtml(item.sellerName) : 'Seller'}</p>
+          <div class="flex items-center gap-2 mt-2">
+            <button onclick="updateQty('${escapeHtml(item.id || item.name)}', -1)" class="w-7 h-7 rounded-lg bg-surface-variant flex items-center justify-center hover:bg-outline/30 transition-colors">
+              <span class="material-symbols-outlined text-sm">remove</span>
+            </button>
+            <span class="font-semibold text-on-surface text-sm w-6 text-center">${item.quantity}</span>
+            <button onclick="updateQty('${escapeHtml(item.id || item.name)}', 1)" class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
+              <span class="material-symbols-outlined text-sm text-primary">add</span>
+            </button>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="font-bold text-primary">TZS ${(item.price * item.quantity).toLocaleString()}</p>
+          <button onclick="removeItem('${escapeHtml(item.id || item.name)}')" class="text-xs text-error mt-1 hover:opacity-80 transition-colors">Remove</button>
+        </div>
+      </div>
+    `).join('');
+
+    updateTotals();
+  }
+
+  function updateTotals() {
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const deliveryFee = getDeliveryFee();
+    const total = subtotal + deliveryFee;
+    document.getElementById('summarySubtotal').textContent = `TZS ${subtotal.toLocaleString()}`;
+    document.getElementById('summaryTotal').textContent = `TZS ${total.toLocaleString()}`;
+    // Update delivery fee display
+    const deliveryFeeEl = document.getElementById('summaryDelivery');
+    if (deliveryFeeEl) deliveryFeeEl.textContent = `TZS ${deliveryFee.toLocaleString()}`;
+  }
+
+  function updateQty(itemId, delta) {
+    const item = cart.find(i => i.id === itemId || i.name === itemId);
+    if (item) {
+      item.quantity += delta;
+      if (item.quantity <= 0) {
+        cart = cart.filter(i => i.id !== itemId && i.name !== itemId);
+      }
+      saveCart();
+      loadCheckout();
+    }
+  }
+
+  function removeItem(itemId) {
+    cart = cart.filter(i => i.id !== itemId && i.name !== itemId);
+    saveCart();
+    loadCheckout();
+  }
+
+  function saveCart() {
+    if (window.CartService) {
+      CartService.saveCart(cart);
+    } else {
+      localStorage.setItem('smartsoko_cart', JSON.stringify(cart));
+    }
+  }
+
+  function detectLocation() {
+    const banner = document.getElementById('locationBanner');
+    const icon = document.getElementById('locationIcon');
+    const status = document.getElementById('locationStatus');
+    const subtext = document.getElementById('locationSubtext');
+    const actionBtn = document.getElementById('locationActionBtn');
+
+    // Check if we already have saved location
+    const savedAddress = localStorage.getItem('smartsoko_address') || localStorage.getItem('smartsoko_user_address');
+    if (savedAddress && savedAddress !== 'No address set' && deliveryCoords) {
+      banner.style.background = 'var(--success, #00c853)';
+      banner.style.borderColor = 'var(--success, #00c853)';
+      icon.innerHTML = '<span class="material-symbols-outlined text-white" style="font-variation-settings: \'FILL\' 1;">check_circle</span>';
+      icon.style.background = 'var(--success, #00c853)';
+      status.textContent = 'Location detected';
+      status.style.color = '#fff';
+      subtext.textContent = `Delivery to: ${savedAddress.substring(0, 40)}${savedAddress.length > 40 ? '...' : ''}`;
+      subtext.style.color = 'rgba(255,255,255,0.9)';
+      actionBtn.style.display = 'none';
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      banner.style.background = 'var(--error, #dc2626)';
+      banner.style.borderColor = 'var(--error, #dc2626)';
+      icon.innerHTML = '<span class="material-symbols-outlined text-white">warning</span>';
+      icon.style.background = 'var(--error, #dc2626)';
+      status.textContent = 'Geolocation not supported';
+      status.style.color = '#fff';
+      subtext.textContent = 'Your browser does not support location detection. Please enter address manually.';
+      subtext.style.color = 'rgba(255,255,255,0.9)';
+      actionBtn.style.display = 'none';
+      return;
+    }
+
+    icon.innerHTML = '<span class="material-symbols-outlined text-primary animate-spin">my_location</span>';
+    icon.style.background = 'rgba(1, 45, 29, 0.2)';
+    status.textContent = 'Detecting your location...';
+    status.style.color = 'var(--primary, #012d1d)';
+    subtext.textContent = 'Please allow location access when prompted';
+    subtext.style.color = 'rgba(1, 45, 29, 0.7)';
+    actionBtn.style.display = 'block';
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        deliveryCoords = { lat: latitude, lng: longitude };
+        localStorage.setItem('smartsoko_delivery_coords', JSON.stringify(deliveryCoords));
+
+        const address = await reverseGeocode(latitude, longitude);
+        
+        if (address) {
+          localStorage.setItem('smartsoko_address', address);
+          localStorage.setItem('smartsoko_user_address', address);
+          
+          banner.style.background = 'rgba(16, 185, 129, 0.1)';
+          banner.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+          icon.innerHTML = '<span class="material-symbols-outlined text-emerald-600" style="font-variation-settings: \'FILL\' 1;">check_circle</span>';
+          icon.style.background = 'rgba(16, 185, 129, 0.2)';
+          status.textContent = 'Location found!';
+          status.style.color = 'rgb(5, 150, 105)';
+          subtext.textContent = address.substring(0, 50) + (address.length > 50 ? '...' : '');
+          subtext.style.color = 'rgba(5, 150, 105, 0.7)';
+          actionBtn.style.display = 'none';
+
+          // Update delivery address display
+          document.getElementById('deliveryAddress').textContent = address;
+        } else {
+          banner.style.background = 'rgba(245, 158, 11, 0.1)';
+          banner.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+          icon.innerHTML = '<span class="material-symbols-outlined text-amber-600">location_on</span>';
+          icon.style.background = 'rgba(245, 158, 11, 0.2)';
+          status.textContent = 'Coordinates found, but no address';
+          status.style.color = 'rgb(180, 83, 9)';
+          subtext.textContent = 'Please enter your address manually or tap Edit';
+          subtext.style.color = 'rgba(180, 83, 9, 0.7)';
+          actionBtn.style.display = 'block';
+        }
+      },
+      (error) => {
+        let message = 'Unable to retrieve location';
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            message = 'Location access denied. Please enable in browser settings.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message = 'Location information unavailable';
+            break;
+          case error.TIMEOUT:
+            message = 'Location request timed out';
+            break;
+        }
+
+        banner.style.background = 'rgba(220, 38, 38, 0.1)';
+        banner.style.borderColor = 'rgba(220, 38, 38, 0.3)';
+        icon.innerHTML = '<span class="material-symbols-outlined text-red-600">location_off</span>';
+        icon.style.background = 'rgba(220, 38, 38, 0.2)';
+        status.textContent = 'Location unavailable';
+        status.style.color = 'rgb(185, 28, 28)';
+        subtext.textContent = message;
+        subtext.style.color = 'rgba(185, 28, 28, 0.7)';
+        actionBtn.style.display = 'block';
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 300000
+      }
+    );
+  }
+
+  async function reverseGeocode(lat, lng) {
+    // Try Mapbox first
+    const mapboxToken = MAPBOX_CONFIG?.accessToken;
+    if (mapboxToken && mapboxToken !== 'YOUR_MAPBOX_ACCESS_TOKEN_HERE') {
+      try {
+        const response = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxToken}&types=address,poi,street&limit=5&proximity=${lng},${lat}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          if (data.features && data.features.length > 0) {
+            return data.features[0].place_name;
+          }
+        }
+      } catch (error) {
+        console.warn('Mapbox reverse geocode failed:', error);
+      }
+    }
+
+    // Fallback to OpenStreetMap Nominatim (free, no API key needed)
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=en`,
+        { headers: { 'User-Agent': 'SmartSoko-Delivery-App' } }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        if (data.display_name) {
+          return data.display_name;
+        }
+      }
+    } catch (error) {
+      console.warn('Nominatim reverse geocode failed:', error);
+    }
+
+    // Last resort: generic address with coordinates
+    return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+  }
+
+  function editAddress() {
+    const modal = document.getElementById('addressModal');
+    document.getElementById('addressInput').value = localStorage.getItem('smartsoko_address') || '';
+    document.getElementById('phoneInput').value = localStorage.getItem('smartsoko_phone') || '';
+    document.getElementById('nameInput').value = localStorage.getItem('smartsoko_name') || '';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeAddressModal() {
+    const modal = document.getElementById('addressModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  async function useCurrentLocation() {
+    const locateBtn = document.getElementById('locateBtn');
+    const locateLoading = document.getElementById('locateLoading');
+
+    if (!navigator.geolocation) {
+      showNotification('Geolocation not supported by your browser');
+      return;
+    }
+
+    locateBtn.classList.add('hidden');
+    locateLoading.classList.remove('hidden');
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        deliveryCoords = { lat: latitude, lng: longitude };
+        localStorage.setItem('smartsoko_delivery_coords', JSON.stringify(deliveryCoords));
+
+        const address = await reverseGeocode(latitude, longitude);
+        document.getElementById('addressInput').value = address;
+
+        locateLoading.classList.add('hidden');
+        locateBtn.classList.remove('hidden');
+        showNotification('Location detected!');
+      },
+      (error) => {
+        locateLoading.classList.add('hidden');
+        locateBtn.classList.remove('hidden');
+        showNotification('Could not detect location. Please enter address manually.');
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  }
+
+  function saveAddress() {
+    const address = document.getElementById('addressInput').value.trim();
+    const phone = document.getElementById('phoneInput').value.trim();
+    const name = document.getElementById('nameInput').value.trim();
+
+    if (!address) {
+      showNotification('Please enter an address');
+      return;
+    }
+
+    localStorage.setItem('smartsoko_address', address);
+    localStorage.setItem('smartsoko_user_address', address);
+    if (phone) localStorage.setItem('smartsoko_phone', phone);
+    if (phone) localStorage.setItem('smartsoko_user_phone', phone);
+    if (name) localStorage.setItem('smartsoko_name', name);
+
+    closeAddressModal();
+    loadCheckout();
+    detectLocation();
+    showNotification('Address saved!');
+  }
+
+  async function placeOrder() {
+    if (cart.length === 0) {
+      showNotification('Your cart is empty!');
+      return;
+    }
+
+    const addressText = localStorage.getItem('smartsoko_address') || localStorage.getItem('smartsoko_user_address');
+    if (!addressText || addressText === 'No address set') {
+      showNotification('Please provide a delivery address');
+      detectLocation();
+      return;
+    }
+
+    const phoneText = localStorage.getItem('smartsoko_phone') || localStorage.getItem('smartsoko_user_phone') || '';
+    const customerName = localStorage.getItem('smartsoko_name') || '';
+    
+    // Validate required fields
+    if (!phoneText) {
+      showNotification('Please enter your phone number', 'error');
+      document.getElementById('phoneInput')?.focus();
+      return;
+    }
+    if (!customerName) {
+      showNotification('Please enter your name', 'error');
+      document.getElementById('nameInput')?.focus();
+      return;
+    }
+    const subtotalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const deliveryFee = getDeliveryFee();
+    const totalAmount = subtotalAmount + deliveryFee;
+    const primaryItem = cart[0] || {};
+
+    // Resolve delivery coordinates if not available
+    let resolvedDeliveryCoords = deliveryCoords;
+    if (!resolvedDeliveryCoords) {
+      try {
+        resolvedDeliveryCoords = JSON.parse(localStorage.getItem('smartsoko_delivery_coords') || 'null');
+      } catch (e) {}
+    }
+    
+    if (!resolvedDeliveryCoords) {
+      resolvedDeliveryCoords = await geocodeAddress(addressText);
+      if (resolvedDeliveryCoords) {
+        localStorage.setItem('smartsoko_delivery_coords', JSON.stringify(resolvedDeliveryCoords));
+      }
+    }
+
+    const sanitizedItems = cart.map(item => ({
+      id: item.id,
+      name: item.name,
+      price: parseFloat(item.price) || 0,
+      quantity: parseInt(item.quantity) || 1,
+      merchantId: item.merchantId || item.sellerId || null,
+      sellerName: item.sellerName || null,
+      sellerLat: item.sellerLat ?? null,
+      sellerLng: item.sellerLng ?? null
+    }));
+
+    const orderData = {
+      customerName,
+      customerPhone: phoneText,
+      contactPhone: phoneText,
+      customerAddress: addressText,
+      deliveryAddress: addressText,
+      customerId: (window.auth && window.auth.currentUser && window.auth.currentUser.uid) || `guest-${crypto.randomUUID()}`,
+      merchantId: primaryItem.merchantId || primaryItem.sellerId || null,
+      sellerName: primaryItem.sellerName || 'Seller',
+      items: sanitizedItems,
+      subtotal: subtotalAmount,
+      deliveryFee: getDeliveryFee(),
+      total: totalAmount,
+      deliveryLat: resolvedDeliveryCoords?.lat ?? null,
+      deliveryLng: resolvedDeliveryCoords?.lng ?? null,
+      customerLat: resolvedDeliveryCoords?.lat ?? null,
+      customerLng: resolvedDeliveryCoords?.lng ?? null,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+
+    const btn = document.getElementById('placeOrderBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined animate-spin inline-block mr-2 align-middle">progress_activity</span> Placing Order...';
+
+    try {
+      const useApi = typeof API_ROUTES !== 'undefined' && API_ROUTES.BASE_URL !== null;
+      
+      if (useApi) {
+        try {
+          const response = await apiHelpers.post(API_ROUTES.CUSTOMER.ORDERS, orderData);
+          if (response?.id) {
+            completeOrder(response.id);
+            return;
+          }
+        } catch (apiError) {
+          console.log('API failed, falling back to Firestore:', apiError);
+        }
+      }
+      
+      const { addDoc, collection, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+      const db = window.db;
+      if (!db) throw new Error('Database not initialized');
+      const docRef = await addDoc(collection(db, 'orders'), {
+        ...orderData,
+        createdAt: serverTimestamp()
+      });
+      completeOrder(docRef.id);
+      
+    } catch (error) {
+      console.error('Error placing order:', error);
+      showNotification('Error placing order. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Place Order';
+    }
+  }
+
+  async function geocodeAddress(address) {
+    const mapboxToken = MAPBOX_CONFIG?.accessToken;
+    if (mapboxToken && mapboxToken !== 'YOUR_MAPBOX_ACCESS_TOKEN_HERE') {
+      try {
+        const query = encodeURIComponent(address);
+        const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${query}.json?types=address,place,locality&limit=1&access_token=${mapboxToken}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.features && data.features[0]) {
+            const [lng, lat] = data.features[0].center;
+            return { lat, lng };
+          }
+        }
+      } catch (error) {
+        console.warn('Mapbox geocoding failed:', error);
+      }
+    }
+
+    // Fallback to Nominatim
+    try {
+      const query = encodeURIComponent(address);
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1&countrycodes=tz&accept-language=en`,
+        { headers: { 'User-Agent': 'SmartSoko-Delivery-App' } }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        if (data.length > 0) {
+          return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+        }
+      }
+    } catch (error) {
+      console.warn('Nominatim geocoding failed:', error);
+    }
+    return null;
+  }
+
+  function completeOrder(orderId) {
+    if (window.CartService) {
+      CartService.clearCart();
+    } else {
+      localStorage.removeItem('smartsoko_cart');
+    }
+    showNotification('Order placed successfully!');
+    window.location.href = `/track-order?orderId=${encodeURIComponent(orderId)}`;
+  }
+
+  function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-24 right-6 bg-primary text-on-primary px-4 py-3 rounded-full shadow-lg z-50 slide-in';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    setTimeout(() => { notification.remove(); }, 3000);
+  }
+
+  document.getElementById('addressModal')?.addEventListener('click', function(e) {
+    if (e.target === this) closeAddressModal();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Performance: Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - SMARTSOKO</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <!-- Design System -->
+  <link rel="stylesheet" href="smartsoko-design-system.css">
+  
+  <style> .checkout-container {display: grid;grid-template-columns: 1fr 380px;gap: var(--spacing-xl);max-width: 1200px;margin: 0 auto} .checkout-form {background-color: var(--color-white);border-radius: var(--radius-lg);padding: var(--spacing-lg);box-shadow: var(--shadow-sm)} .checkout-section {margin-bottom: var(--spacing-xl)} .section-title {font-size: var(--text-h3);margin-bottom: var(--spacing-md);display: flex;align-items: center;gap: var(--spacing-xs)} .form-grid {display: grid;grid-template-columns: 1fr 1fr;gap: var(--spacing-md)} .form-group {margin-bottom: var(--spacing-md)} .form-group.full-width {grid-column: 1 / -1} .form-label {display: block;font-weight: 600;font-size: var(--text-small);color: var(--color-charcoal);margin-bottom: var(--spacing-xs)} .form-input {width: 100%;padding: 12px 16px;border: 1px solid var(--color-taupe);border-radius: var(--radius-md);font-size: var(--text-body);font-family: var(--font-body);background-color: var(--color-cream);transition: all var(--transition-fast)} .form-input:focus {outline: none;border-color: var(--color-gold);box-shadow: 0 0 0 3px rgba(212,165,116,0.1)} .form-input.error {border-color: var(--color-error)} .error-message {color: var(--color-error);font-size: var(--text-caption);margin-top: 4px} .delivery-options {display: grid;gap: var(--spacing-sm)} .delivery-option {display: flex;align-items: center;padding: var(--spacing-md);border: 2px solid var(--color-taupe);border-radius: var(--radius-lg);cursor: pointer;transition: all var(--transition-fast)} .delivery-option:hover {border-color: var(--color-gold);background-color: rgba(212,165,116,0.05)} .delivery-option.selected {border-color: var(--color-gold);background-color: rgba(212,165,116,0.1)} .delivery-option input[type="radio"] {margin-right: var(--spacing-sm);accent-color: var(--color-gold)} .delivery-info {flex: 1} .delivery-name {font-weight: 600;font-size: var(--text-body);margin-bottom: 4px} .delivery-description {font-size: var(--text-small);color: var(--color-gray)} .delivery-price {font-weight: 600;color: var(--color-gold);font-size: var(--text-body)} .payment-methods {display: grid;grid-template-columns: repeat(auto-fit,minmax(120px,1fr));gap: var(--spacing-sm)} .payment-method {display: flex;flex-direction: column;align-items: center;padding: var(--spacing-md);border: 2px solid var(--color-taupe);border-radius: var(--radius-lg);cursor: pointer;transition: all var(--transition-fast);text-align: center} .payment-method:hover {border-color: var(--color-gold);background-color: rgba(212,165,116,0.05)} .payment-method.selected {border-color: var(--color-gold);background-color: rgba(212,165,116,0.1)} .payment-icon {font-size: 32px;color: var(--color-gold);margin-bottom: var(--spacing-xs)} .payment-name {font-weight: 600;font-size: var(--text-small);margin-bottom: 2px} .payment-desc {font-size: var(--text-caption);color: var(--color-gray)} .order-summary {position: sticky;top: 80px;height: fit-content} .summary-card {background-color: var(--color-white);border-radius: var(--radius-lg);padding: var(--spacing-lg);box-shadow: var(--shadow-sm);margin-bottom: var(--spacing-md)} .summary-title {font-size: var(--text-h3);margin-bottom: var(--spacing-md);padding-bottom: var(--spacing-sm);border-bottom: 1px solid var(--color-taupe)} .summary-item {display: flex;justify-content: space-between;align-items: center;padding: var(--spacing-xs) 0;font-size: var(--text-small)} .summary-item.total {font-size: var(--text-body);font-weight: 600;color: var(--color-charcoal);padding-top: var(--spacing-sm);border-top: 1px solid var(--color-taupe);margin-top: var(--spacing-sm)} .checkout-steps {display: flex;justify-content: space-between;margin-bottom: var(--spacing-xl);padding: var(--spacing-md);background-color: var(--color-cream);border-radius: var(--radius-lg)} .step {display: flex;flex-direction: column;align-items: center;text-align: center;flex: 1;position: relative} .step:not(:last-child)::after {content: '';position: absolute;top: 20px;right: -50%;width: 100%;height: 2px;background-color: var(--color-taupe);z-index: 1} .step.completed:not(:last-child)::after {background-color: var(--color-gold)} .step-number {width: 40px;height: 40px;border-radius: var(--radius-full);background-color: var(--color-white);border: 2px solid var(--color-taupe);display: flex;align-items: center;justify-content: center;font-weight: 600;font-size: var(--text-small);margin-bottom: var(--spacing-xs);position: relative;z-index: 2} .step.active .step-number {background-color: var(--color-gold);border-color: var(--color-gold);color: var(--color-charcoal)} .step.completed .step-number {background-color: var(--color-gold);border-color: var(--color-gold);color: var(--color-charcoal)} .step-label {font-size: var(--text-caption);color: var(--color-gray);font-weight: 500} .step.active .step-label,.step.completed .step-label {color: var(--color-charcoal)} .place-order-btn {width: 100%;padding: 16px;font-size: var(--text-body);font-weight: 600;margin-top: var(--spacing-md)} .terms-checkbox {display: flex;align-items: flex-start;gap: var(--spacing-xs);margin-top: var(--spacing-md)} .terms-checkbox input[type="checkbox"] {margin-top: 2px;accent-color: var(--color-gold)} .terms-label {font-size: var(--text-small);color: var(--color-gray);line-height: 1.4} .terms-label a {color: var(--color-gold)} @media (max-width: 1024px) {.checkout-container {grid-template-columns: 1fr} .order-summary {position: static} } @media (max-width: 768px) {.form-grid {grid-template-columns: 1fr} .checkout-steps {flex-direction: column;gap: var(--spacing-md)} .step:not(:last-child)::after {display: none} .payment-methods {grid-template-columns: repeat(2,1fr)} } </style>
+</head>
+<body>
+  <!-- Top Navigation -->
+  <nav class="nav-top">
+    <a href="smartsoko-home.html" class="nav-logo">SMARTSOKO</a>
+    
+    <div class="nav-search">
+      <div class="search-bar">
+        <span class="material-icons search-icon">search</span>
+        <input type="text" class="search-input" placeholder="Search products...">
+      </div>
+    </div>
+    
+    <div class="nav-links">
+      <a href="smartsoko-products.html" class="nav-link">Browse</a>
+      <a href="smartsoko-vendor.html" class="nav-link">Vendors</a>
+      <a href="main.html" class="nav-link">About</a>
+      <a href="profile.html" class="nav-link">Contact</a>
+    </div>
+    
+    <div class="nav-actions">
+      <button onclick="window.location.href='profile.html'" class="btn btn-ghost">
+        <span class="material-icons">favorite_border</span>
+      </button>
+      <button onclick="window.location.href='smartsoko-cart.html'" class="btn btn-primary">
+        <span class="material-icons">shopping_cart</span>
+        Cart (3)
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="section">
+    <div class="container">
+      <!-- Breadcrumb -->
+      <div style="margin-bottom: var(--spacing-md); font-size: var(--text-small);">
+        <a href="smartsoko-home.html" style="color: var(--color-gray);">Home</a>
+        <span style="margin: 0 var(--spacing-xs); color: var(--color-gray);">/</span>
+        <a href="smartsoko-cart.html" style="color: var(--color-gray);">Cart</a>
+        <span style="margin: 0 var(--spacing-xs); color: var(--color-gray);">/</span>
+        <span style="color: var(--color-charcoal);">Checkout</span>
+      </div>
+
+      <!-- Checkout Steps -->
+      <div class="checkout-steps">
+        <div class="step completed">
+          <div class="step-number">✓</div>
+          <div class="step-label">Cart</div>
+        </div>
+        <div class="step active">
+          <div class="step-number">2</div>
+          <div class="step-label">Details</div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-label">Payment</div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-label">Confirm</div>
+        </div>
+      </div>
+
+      <div class="checkout-container">
+        <!-- Checkout Form -->
+        <div class="checkout-form">
+          <!-- Delivery Information -->
+          <div class="checkout-section">
+            <h2 class="section-title">
+              <span class="material-icons" style="color: var(--color-gold);">location_on</span>
+              Delivery Information
+            </h2>
+            
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="firstName">First Name *</label>
+                <input type="text" id="firstName" class="form-input" required>
+                <span class="error-message" style="display: none;">Please enter your first name</span>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="lastName">Last Name *</label>
+                <input type="text" id="lastName" class="form-input" required>
+                <span class="error-message" style="display: none;">Please enter your last name</span>
+              </div>
+              
+              <div class="form-group full-width">
+                <label class="form-label" for="phone">Phone Number *</label>
+                <input type="tel" id="phone" class="form-input" placeholder="+255 XXX XXX XXX" required>
+                <span class="error-message" style="display: none;">Please enter a valid phone number</span>
+              </div>
+              
+              <div class="form-group full-width">
+                <label class="form-label" for="address">Delivery Address *</label>
+                <input type="text" id="address" class="form-input" placeholder="Street address, building, etc." required>
+                <span class="error-message" style="display: none;">Please enter your delivery address</span>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="city">City *</label>
+                <input type="text" id="city" class="form-input" value="Dar es Salaam" required>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="postalCode">Postal Code</label>
+                <input type="text" id="postalCode" class="form-input" placeholder="Optional">
+              </div>
+              
+              <div class="form-group full-width">
+                <label class="form-label" for="notes">Delivery Notes (Optional)</label>
+                <input type="text" id="notes" class="form-input" placeholder="e.g., Near the main gate, call upon arrival">
+              </div>
+            </div>
+          </div>
+
+          <!-- Delivery Options -->
+          <div class="checkout-section">
+            <h2 class="section-title">
+              <span class="material-icons" style="color: var(--color-gold);">local_shipping</span>
+              Delivery Options
+            </h2>
+            
+            <div class="delivery-options">
+              <div class="delivery-option selected" onclick="selectDelivery(this, 'standard')">
+                <input type="radio" name="delivery" value="standard" checked>
+                <div class="delivery-info">
+                  <div class="delivery-name">Standard Delivery</div>
+                  <div class="delivery-description">30-45 minutes • Same day</div>
+                </div>
+                <div class="delivery-price">TZS 2,000</div>
+              </div>
+              
+              <div class="delivery-option" onclick="selectDelivery(this, 'express')">
+                <input type="radio" name="delivery" value="express">
+                <div class="delivery-info">
+                  <div class="delivery-name">Express Delivery</div>
+                  <div class="delivery-description">15-20 minutes • Priority</div>
+                </div>
+                <div class="delivery-price">TZS 5,000</div>
+              </div>
+              
+              <div class="delivery-option" onclick="selectDelivery(this, 'scheduled')">
+                <input type="radio" name="delivery" value="scheduled">
+                <div class="delivery-info">
+                  <div class="delivery-name">Scheduled Delivery</div>
+                  <div class="delivery-description">Choose your time • Tomorrow</div>
+                </div>
+                <div class="delivery-price">TZS 1,500</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Method -->
+          <div class="checkout-section">
+            <h2 class="section-title">
+              <span class="material-icons" style="color: var(--color-gold);">payments</span>
+              Payment Method
+            </h2>
+            
+            <div class="payment-methods">
+              <div class="payment-method selected" onclick="selectPayment(this, 'mpesa')">
+                <span class="material-icons payment-icon">phone_android</span>
+                <div class="payment-name">M-Pesa</div>
+                <div class="payment-desc">Mobile money</div>
+              </div>
+              
+              <div class="payment-method" onclick="selectPayment(this, 'tigopesa')">
+                <span class="material-icons payment-icon">smartphone</span>
+                <div class="payment-name">Tigo Pesa</div>
+                <div class="payment-desc">Mobile money</div>
+              </div>
+              
+              <div class="payment-method" onclick="selectPayment(this, 'bank')">
+                <span class="material-icons payment-icon">account_balance</span>
+                <div class="payment-name">Bank Transfer</div>
+                <div class="payment-desc">Direct deposit</div>
+              </div>
+              
+              <div class="payment-method" onclick="selectPayment(this, 'cash')">
+                <span class="material-icons payment-icon">money</span>
+                <div class="payment-name">Cash on Delivery</div>
+                <div class="payment-desc">Pay when received</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-summary">
+          <div class="summary-card">
+            <h2 class="summary-title">Order Summary</h2>
+            
+            <div class="summary-item">
+              <span>Organic Vine Tomatoes × 2</span>
+              <span>TZS 17,000</span>
+            </div>
+            
+            <div class="summary-item">
+              <span>Mountain Spinach × 1</span>
+              <span>TZS 3,200</span>
+            </div>
+            
+            <div class="summary-item">
+              <span>Rainbow Carrots × 1</span>
+              <span>TZS 4,800</span>
+            </div>
+            
+            <div class="summary-item">
+              <span>Subtotal</span>
+              <span>TZS 25,000</span>
+            </div>
+            
+            <div class="summary-item">
+              <span>Delivery Fee</span>
+              <span id="deliveryFee">TZS 2,000</span>
+            </div>
+            
+            <div class="summary-item">
+              <span>Service Fee</span>
+              <span>TZS 500</span>
+            </div>
+            
+            <div class="summary-item total">
+              <span>Total</span>
+              <span style="color: var(--color-gold);" id="totalAmount">TZS 27,500</span>
+            </div>
+          </div>
+
+          <!-- Terms and Conditions -->
+          <div class="terms-checkbox">
+            <input type="checkbox" id="terms" checked>
+            <label for="terms" class="terms-label">
+              I agree to the <a href="profile.html" class="text-link">Terms of Service</a> and <a href="profile.html" class="text-link">Return Policy</a>. 
+              I understand that my order will be processed according to the selected delivery method.
+            </label>
+          </div>
+
+          <!-- Place Order Button -->
+          <button class="btn btn-primary place-order-btn" onclick="placeOrder()">
+            Place Order
+            <span class="material-icons" style="margin-left: var(--spacing-xs);">lock</span>
+          </button>
+
+          <!-- Security Badge -->
+          <div style="text-align: center; margin-top: var(--spacing-md); color: var(--color-gray); font-size: var(--text-caption);">
+            <span class="material-icons" style="font-size: 16px; vertical-align: middle;">lock</span>
+            Secure & Encrypted Payment
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="nav-bottom">
+    <a href="smartsoko-home.html" class="nav-item">
+      <span class="material-icons nav-icon">home</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="smartsoko-products.html" class="nav-item">
+      <span class="material-icons nav-icon">grid_view</span>
+      <span class="nav-label">Browse</span>
+    </a>
+    <a href="smartsoko-cart.html" class="nav-item">
+      <span class="material-icons nav-icon">shopping_cart</span>
+      <span class="nav-label">Cart</span>
+    </a>
+    <a href="customer.html" class="nav-item">
+      <span class="material-icons nav-icon">receipt_long</span>
+      <span class="nav-label">Orders</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <span class="material-icons nav-icon">person</span>
+      <span class="nav-label">Account</span>
+    </a>
+  </nav>
+
+  <!-- Toast Container -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // Initialize checkout
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeCheckout();
+    });
+
+    function initializeCheckout() {
+      // Add input validation
+      const requiredInputs = document.querySelectorAll('.form-input[required]');
+      requiredInputs.forEach(input => {
+        input.addEventListener('blur', () => validateInput(input));
+        input.addEventListener('input', () => clearError(input));
+      });
+    }
+
+    function validateInput(input) {
+      const value = input.value.trim();
+      const errorMessage = input.parentElement.querySelector('.error-message');
+      
+      if (!value) {
+        input.classList.add('error');
+        if (errorMessage) errorMessage.style.display = 'block';
+        return false;
+      }
+      
+      // Phone validation
+      if (input.type === 'tel' && !validatePhone(value)) {
+        input.classList.add('error');
+        if (errorMessage) {
+          errorMessage.textContent = 'Please enter a valid phone number';
+          errorMessage.style.display = 'block';
+        }
+        return false;
+      }
+      
+      input.classList.remove('error');
+      if (errorMessage) errorMessage.style.display = 'none';
+      return true;
+    }
+
+    function clearError(input) {
+      input.classList.remove('error');
+      const errorMessage = input.parentElement.querySelector('.error-message');
+      if (errorMessage) errorMessage.style.display = 'none';
+    }
+
+    function validatePhone(phone) {
+      // Simple phone validation for Tanzania numbers
+      const phoneRegex = /^(\+255|0)?[67]\d{8}$/;
+      return phoneRegex.test(phone.replace(/\s/g, ''));
+    }
+
+    function selectDelivery(element, type) {
+      // Remove selected class from all options
+      document.querySelectorAll('.delivery-option').forEach(option => {
+        option.classList.remove('selected');
+        option.querySelector('input[type="radio"]').checked = false;
+      });
+      
+      // Add selected class to clicked option
+      element.classList.add('selected');
+      element.querySelector('input[type="radio"]').checked = true;
+      
+      // Update delivery fee
+      const deliveryFees = {
+        'standard': 2000,
+        'express': 5000,
+        'scheduled': 1500
+      };
+      
+      const deliveryFee = deliveryFees[type];
+      document.getElementById('deliveryFee').textContent = `TZS ${deliveryFee.toLocaleString()}`;
+      
+      // Update total
+      updateTotal(deliveryFee);
+    }
+
+    function selectPayment(element, type) {
+      // Remove selected class from all methods
+      document.querySelectorAll('.payment-method').forEach(method => {
+        method.classList.remove('selected');
+      });
+      
+      // Add selected class to clicked method
+      element.classList.add('selected');
+      
+      console.log('Selected payment method:', type);
+    }
+
+    function updateTotal(deliveryFee) {
+      const subtotal = 25000;
+      const serviceFee = 500;
+      const total = subtotal + deliveryFee + serviceFee;
+      
+      document.getElementById('totalAmount').textContent = `TZS ${total.toLocaleString()}`;
+    }
+
+    function placeOrder() {
+      // Validate all required fields
+      const requiredInputs = document.querySelectorAll('.form-input[required]');
+      let isValid = true;
+      
+      requiredInputs.forEach(input => {
+        if (!validateInput(input)) {
+          isValid = false;
+        }
+      });
+      
+      // Check terms acceptance
+      const termsCheckbox = document.getElementById('terms');
+      if (!termsCheckbox.checked) {
+        showToast('Please accept the terms and conditions', 'warning');
+        return;
+      }
+      
+      if (!isValid) {
+        showToast('Please fill in all required fields', 'error');
+        return;
+      }
+      
+      // Show loading state
+      const placeOrderBtn = document.querySelector('.place-order-btn');
+      const originalText = placeOrderBtn.innerHTML;
+      placeOrderBtn.disabled = true;
+      placeOrderBtn.innerHTML = '<span class="material-icons" style="animation: spin 1s linear infinite;">refresh</span> Processing...';
+      
+      // Simulate order processing
+      setTimeout(() => {
+        showToast('Order placed successfully! 🎉', 'success');
+        
+        // Redirect to order confirmation
+        setTimeout(() => {
+          // In a real app, this would go to an order confirmation page
+          window.location.href = 'smartsoko-home.html';
+        }, 2000);
+      }, 2000);
+    }
+
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type}`;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Add spinning animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>
