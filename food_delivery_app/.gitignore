@@ -38,54 +38,13 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
-migrate_working_dir/
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
-.pub/
-/build/
-
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
+# Android Studio local properties
+local.properties
 
 # Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+android/app/debug
+android/app/profile
+android/app/release
 
 # Firebase
 firebase_options.dart
@@ -101,9 +60,6 @@ lib/config/app_config.dart
 node_modules/
 
 # Deployment exclusions - reduce file count (keep android wrappers for APK builds)
-android/
-android-wrapper/
-# Keep android role apps for APK builds - only exclude build outputs
 android-customer/.gradle/
 android-customer/.idea/
 android-customer/build/
@@ -113,36 +69,28 @@ android-driver/build/
 android-merchant/.gradle/
 android-merchant/.idea/
 android-merchant/build/
-ios/
-linux/
-macos/
-windows/
-web-customer/
-web-driver/
-web-supabase/
-test/
-tests/
-functions/
-assets/
+android-merchant-native/.gradle/
+android-merchant-native/.idea/
+android-merchant-native/build/
+android-merchant-fullnative/.gradle/
+android-merchant-fullnative/.idea/
+android-merchant-fullnative/build/
+
+# Build outputs
 build/
-.git/
 .firebase/
-.dart_tool/
-.idea/
 .kiro/
 .metadata/
 .qoder/
 .github/
 
 # Logs and temp files
-*.log
 flutter_*.log
 pubspec.lock
 package-lock.json
 nul
-
-# Documentation (keep all for deployment reference)
-# Individual docs can be excluded as needed
+*_output.txt
+*_log.txt
 
 # Scripts not needed for web deployment (except deployment scripts)
 *.bat
@@ -154,7 +102,19 @@ nul
 !deploy-*.sh
 !vercel-deploy.sh
 
-# Local Netlify folder
-.netlify
+# Large binaries — excluded from git (upload as release assets instead)
+*.apk
+*.exe
+archived/APK-Builds/
+vercel-deploy.zip
 
+# Local deployment folders
+.netlify
 .vercel
+
+supabase/.temp/
+
+# Build output logs
+build_out.txt
+build_log.txt
+test_log.txt
