@@ -50,6 +50,18 @@ app.use(express.static(path.join(__dirname, 'web'), {
   }
 }));
 
+// Extensionless HTML URL support
+const webDir = path.join(__dirname, 'web');
+const htmlFiles = fs.readdirSync(webDir).filter(f => f.endsWith('.html'));
+htmlFiles.forEach(f => {
+  const route = '/' + f.replace(/\.html$/, '');
+  if (route !== '/index') {
+    app.get(route, (req, res) => {
+      res.sendFile(path.join(webDir, f));
+    });
+  }
+});
+
 // Validation middleware helper
 const validate = (req, res, next) => {
   const errors = validationResult(req);

@@ -45,50 +45,17 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
       final authService = context.read<AuthService>();
       
       // Check if user already exists
-      final normalizedPhone = authService._normalizePhone(widget.phoneNumber);
-      final existingUserDoc = await authService._firestore
-          .collection(AppConfig.usersCollection)
-          .where('phone', isEqualTo: normalizedPhone)
-          .limit(1)
-          .get();
+      final existingUser = await authService.getUserByPhone(widget.phoneNumber);
 
-      if (existingUserDoc.docs.isNotEmpty) {
+      if (existingUser != null) {
         // User exists, just authenticate them
         await authService.signInWithPhone(widget.phoneNumber);
       } else {
         // New user - create with selected role
-        final newUser = User(
-          id: '',
-          phone: normalizedPhone,
-          role: _selectedRole!,
-          createdAt: DateTime.now(),
-        );
-
-        final docRef = await authService._firestore
-            .collection(AppConfig.usersCollection)
-            .add(newUser.toFirestore());
-
-        final createdUser = User(
-          id: docRef.id,
-          phone: normalizedPhone,
-          role: _selectedRole!,
-          createdAt: DateTime.now(),
-        );
-
+        final createdUser = await authService.createUserWithRole(widget.phoneNumber, _selectedRole!);
+        
         // Update the auth service user
         authService.user = createdUser;
-        
-        // Also create in Supabase for sync
-        try {
-          await authService._supabaseService.client.from('profiles').insert({
-            'id': createdUser.id,
-            'phone': normalizedPhone,
-            'role': _selectedRole!.name,
-          });
-        } catch (e) {
-          // Log but don't fail - Firebase is primary
-          AppLogger.warning('Failed to sync new user to Supabase: $e');
-        }
       }
     } catch (e) {
       if (mounted) {

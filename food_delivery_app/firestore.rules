@@ -40,6 +40,12 @@ service cloud.firestore {
       allow update: if isAuthenticated() && (resource.data.merchantId == request.auth.uid || resource.data.customerId == request.auth.uid || isAdmin());
     }
 
+    // Restaurants (alias for sellers in admin UI)
+    match /restaurants/{restaurantId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && (request.auth.uid == resource.data.ownerId || request.auth.uid == restaurantId || isAdmin());
+    }
+
     // Drivers
     match /drivers/{driverId} {
       allow read: if true;
@@ -83,6 +89,37 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAuthenticated();
       allow update, delete: if isAuthenticated() && resource.data.sellerId == request.auth.uid;
+    }
+
+    // Coupons - admin read/write
+    match /coupons/{couponId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Banners - public read, admin write
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Settings - admin read/write
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Support tickets - admin read/write
+    match /support_tickets/{ticketId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAdmin();
+    }
+
+    // Audit logs - admin read/write
+    match /audit_logs/{logId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Admin data

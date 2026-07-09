@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/shop.dart';
+import 'dart:math';
 
 class ShopService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

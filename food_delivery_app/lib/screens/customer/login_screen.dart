@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/analytics_service.dart';
+import '../../config/app_config.dart';
+import '../../utils/validators.dart';
+import '../../screens/auth/role_selection_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -31,49 +34,45 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-   Future<void> _signIn() async {
-     if (!_formKey.currentState!.validate()) return;
+  Future<void> _signIn() async {
+    if (!_formKey.currentState!.validate()) return;
 
-     setState(() => _isLoading = true);
+    setState(() => _isLoading = true);
 
-     try {
-       final authService = context.read<AuthService>();
-       final normalizedPhone = authService._normalizePhone(_phoneController.text);
-       
-       // Check if user exists first
-       final existingUserDoc = await authService._firestore
-           .collection(AppConfig.usersCollection)
-           .where('phone', isEqualTo: normalizedPhone)
-           .limit(1)
-           .get();
+    try {
+      final authService = context.read<AuthService>();
+      final phone = _phoneController.text;
+      
+      // Check if user exists first
+      final existingUser = await authService.getUserByPhone(phone);
 
-       if (existingUserDoc.docs.isNotEmpty) {
-         // Existing user - sign in directly
-         await authService.signInWithPhone(_phoneController.text);
-       } else {
-         // New user - navigate to role selection
-         if (mounted) {
-           Navigator.of(context).push(
-             MaterialPageRoute(
-               builder: (context) => RoleSelectionScreen(
-                 phoneNumber: _phoneController.text,
-               ),
-             ),
-           );
-         }
-       }
-     } catch (e) {
-       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(content: Text('Error: $e')),
-         );
-       }
-     } finally {
-       if (mounted) {
-         setState(() => _isLoading = false);
-       }
-     }
-   }
+      if (existingUser != null) {
+        // Existing user - sign in directly
+        await authService.signInWithPhone(phone);
+      } else {
+        // New user - navigate to role selection
+        if (mounted) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => RoleSelectionScreen(
+                phoneNumber: phone,
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -6,6 +6,7 @@ import '../../services/order_service.dart';
 import '../../services/restaurant_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/analytics_service.dart';
+import '../../services/nestjs_api_service.dart';
 import '../../utils/constants.dart';
 
 class CartScreen extends StatefulWidget {
@@ -85,6 +86,30 @@ class _CartScreenState extends State<CartScreen> {
         deliveryAddress: _addressController.text,
         deliveryLat: user.lat,
         deliveryLng: user.lng,
+      );
+
+      // Create delivery job in NestJS backend for driver dispatch
+      final nestjsApi = context.read<NestJSApiService>();
+      await nestjsApi.createDelivery(
+        pickupName: widget.restaurant.name,
+        pickupAddress: widget.restaurant.address,
+        pickupLat: widget.restaurant.lat,
+        pickupLng: widget.restaurant.lng,
+        dropoffName: user.name ?? 'Customer',
+        dropoffAddress: _addressController.text,
+        dropoffLat: user.lat ?? 0.0,
+        dropoffLng: user.lng ?? 0.0,
+        customerName: user.name ?? 'Customer',
+        customerPhone: user.phone,
+        items: orderItems.map((item) => {
+          'name': item.name,
+          'quantity': item.quantity,
+          'price': item.price,
+          'notes': item.notes,
+        }).toList(),
+        totalAmount: total,
+        deliveryFee: widget.restaurant.deliveryFee,
+        deliveryInstructions: '',
       );
 
       // Log order_placed event

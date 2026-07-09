@@ -1,4 +1,7 @@
 {
+  "firestore": {
+    "rules": "food_delivery_app/firestore.rules"
+  },
   "hosting": {
     "public": "food_delivery_app/web",
     "ignore": [

@@ -13,6 +13,7 @@ import 'services/location_service.dart';
 import 'services/restaurant_service.dart';
 import 'services/connectivity_service.dart';
 import 'services/analytics_service.dart';
+import 'services/nestjs_api_service.dart';
 import 'screens/customer/login_screen.dart';
 import 'screens/customer/main_screen.dart';
 import 'utils/logger.dart';
@@ -69,14 +70,17 @@ class CustomerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
+providers: [
         Provider(create: (_) => AuthService()),
         Provider(create: (_) => OrderService()),
         Provider(create: (_) => PaymentService()),
-        Provider(create: (_) => LocationService()),
+Provider(create: (_) => LocationService()),
         Provider(create: (_) => RestaurantService()),
         Provider(create: (_) => ConnectivityService()),
         Provider(create: (_) => AnalyticsService()),
+        ProxyProvider<AuthService, NestJSApiService>(
+          update: (_, authService, __) => NestJSApiService(authService),
+        ),
       ],
       child: MaterialApp(
         title: 'Food Delivery - Customer',
@@ -109,7 +113,7 @@ class AuthWrapper extends StatelessWidget {
         
         if (snapshot.hasData) {
           // Set Crashlytics user ID and role for crash reporting
-          final user = snapshot.data;
+          final user = snapshot.data!;
           FirebaseCrashlytics.instance.setUserIdentifier(user.id);
           FirebaseCrashlytics.instance.setCustomKey('role', user.role.name);
           FirebaseCrashlytics.instance.setCustomKey('app_type', 'customer');

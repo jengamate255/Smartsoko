@@ -1,73 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SmartSoko Driver</string>
-    
-    <!-- Navigation labels -->
+    <string name="mapbox_access_token">pk.eyJ1IjoiZGF2ZXkxMDEiLCJhIjoiY2p1ZWc3aWh1MDJ5cjQ0cXd1ZXh2cmd2eCJ9.iE0RngMfwyivH7OrYO_Bag</string>
     <string name="nav_home">Home</string>
-    <string name="nav_map">Map</string>
-    <string name="nav_chat">Chat</string>
+    <string name="nav_earnings">Earnings</string>
     <string name="nav_history">History</string>
     <string name="nav_profile">Profile</string>
-    
-    <!-- Home screen -->
-    <string name="welcome_back">Welcome Back</string>
     <string name="go_online">Go Online</string>
     <string name="go_offline">Go Offline</string>
-    <string name="available_orders">Available Orders</string>
-    <string name="no_orders_available">No Orders Available</string>
-    <string name="pull_to_refresh">Pull to refresh</string>
-    
-    <!-- Map screen -->
-    <string name="current_location">Current Location</string>
-    <string name="navigate_to_pickup">Navigate to Pickup</string>
-    <string name="navigate_to_delivery">Navigate to Delivery</string>
-    <string name="order_picked_up">Order Picked Up</string>
-    <string name="order_delivered">Order Delivered</string>
-    <string name="mapbox_access_token">YOUR_MAPBOX_PUBLIC_TOKEN_HERE</string>
-    
-    <!-- Chat screen -->
-    <string name="chat_with_customer">Chat with Customer</string>
-    <string name="type_a_message">Type a message...</string>
-    <string name="send">Send</string>
-    
-    <!-- History screen -->
-    <string name="order_history">Order History</string>
-    <string name="no_past_orders">No past orders yet</string>
-    <string name="your_completed_orders_will_appear_here">Your completed orders will appear here</string>
-    
-    <!-- Profile screen -->
-    <string name="profile">Profile</string>
-    <string name="today_s_earnings">Today\'s Earnings</string>
-    <string name="view_details">View Details</string>
-    <string name="statistics">Statistics</string>
-    <string name="orders_today">Orders Today</string>
-    <string name="rating">Rating</string>
-    <string name="distance">Distance</string>
-    <string name="settings">Settings</string>
-    <string name="notification_settings">Notification Settings</string>
-    <string name="payment_methods">Payment Methods</string>
-    <string name="help_support">Help &amp; Support</string>
-    <string name="logout">Logout</string>
-    <string name="don_t_have_an_account_contact_support_to_create_one">Don\'t have an account? Contact support to create one.</string>
-    <string name="sign_in">Sign In</string>
-    <string name="email">Email</string>
-    <string name="password">Password</string>
-    <string name="welcome_to_smart_soko_driver">Welcome to SmartSoko Driver</string>
-    
-    <!-- Order detail screen -->
-    <string name="order_details">Order Details</string>
-    <string name="customer_information">Customer Information</string>
-    <string name="pickup_location">Pickup Location</string>
-    <string name="delivery_location">Delivery Location</string>
-    <string name="order_items">Order Items</string>
-    <string name="order_summary">Order Summary</string>
-    <string name="subtotal">Subtotal:</string>
-    <string name="tax">Tax:</string>
-    <string name="delivery_fee">Delivery Fee:</string>
-    <string name="total">Total:</string>
-    <string name="reject">Reject</string>
     <string name="accept">Accept</string>
-    <string name="pick_up_order">Pick Up Order</string>
-    <string name="deliver_order">Deliver Order</string>
-    <string name="call_customer">Call Customer</string>
-    <string name="navigate">Navigate</string>
+    <string name="reject">Reject</string>
+    <string name="pick_up">Pick Up</string>
+    <string name="delivered">Delivered</string>
+    <string name="arrived">Arrived at Pickup</string>
+    <string name="picked_up">Picked Up</string>
+    <string name="on_the_way">On the Way</string>
+    <string name="call">Call</string>
+    <string name="message">Message</string>
+    <string name="logout">Logout</string>
+    <string name="login">Login</string>
+    <string name="verify_otp">Verify OTP</string>
+    <string name="enter_phone">Enter phone number</string>
+    <string name="tracking_active">Tracking Active</string>
+    <string name="tracking_description">SmartSoko Driver is tracking your location</string>
+    <string name="new_order_title">New Delivery Order</string>
+    <string name="earnings_today">Today\'s Earnings</string>
+    <string name="deliveries_completed">Deliveries Completed</string>
+    <string name="weekly_summary">Weekly Summary</string>
+    <string name="no_orders">No orders yet</string>
+    <string name="go_online_hint">Go online to receive orders</string>
 </resources>

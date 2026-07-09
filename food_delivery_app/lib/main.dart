@@ -15,6 +15,7 @@ import 'services/restaurant_service.dart';
 import 'services/connectivity_service.dart';
 import 'services/supabase_service.dart';
 import 'services/analytics_service.dart';
+import 'services/nestjs_api_service.dart';
 import 'screens/app_main_screen.dart';
 import 'screens/app_login_screen.dart';
 import 'widgets/role_aware_auth_wrapper.dart';
@@ -67,7 +68,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
+providers: [
         Provider(create: (_) => AuthService()),
         Provider(create: (_) => OrderService()),
         Provider(create: (_) => PaymentService()),
@@ -79,6 +80,9 @@ class MyApp extends StatelessWidget {
         Provider(create: (_) => ConnectivityService()),
         Provider(create: (_) => SupabaseService()),
         Provider(create: (_) => AnalyticsService()),
+        ProxyProvider<AuthService, NestJSApiService>(
+          update: (_, authService, __) => NestJSApiService(authService),
+        ),
       ],
       child: MaterialApp(
         title: AppConfig.appName,

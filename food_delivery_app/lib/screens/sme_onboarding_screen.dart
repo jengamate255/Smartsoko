@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../models/shop.dart';
 import '../../services/shop_service.dart';
 import '../../services/auth_service.dart';
@@ -25,6 +26,7 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
   final _contactFormKey = GlobalKey<FormState>();
   final _productsFormKey = GlobalKey<FormState>();
   final _paymentFormKey = GlobalKey<FormState>();
+  final _deliveryFormKey = GlobalKey<FormState>();
   final _termsFormKey = GlobalKey<FormState>();
 
   // Controllers
@@ -251,8 +253,8 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
         address: _addressController.text.trim(),
         lat: _latitude,
         lng: _longitude,
-        ownerId: authService.currentUser?.id ?? '',
-        ownerName: authService.currentUser?.name ?? '',
+        ownerId: authService.currentUser?.uid ?? '',
+        ownerName: authService.currentUser?.displayName ?? '',
         ownerPhone: _phoneController.text.trim(),
         type: _selectedType,
         category: _selectedCategory,

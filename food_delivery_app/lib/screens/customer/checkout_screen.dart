@@ -9,6 +9,7 @@ import '../../services/payment_service.dart';
 import '../../services/restaurant_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/analytics_service.dart';
+import '../../services/nestjs_api_service.dart';
 import '../../utils/constants.dart';
 import 'order_tracking_screen.dart';
 
@@ -274,7 +275,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }).toList();
 
       // Create order
-      final orderId = await orderService.createOrder(
+      final order = await orderService.createOrder(
         userId: user.id,
         restaurantId: widget.restaurant.id,
         items: orderItems,
@@ -287,19 +288,43 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       );
 
       // Store orderId for navigation
-      _orderId = orderId;
+      _orderId = order.id;
+
+      // Create delivery job in NestJS backend for driver dispatch
+      final nestjsApi = context.read<NestJSApiService>();
+      await nestjsApi.createDelivery(
+        pickupName: widget.restaurant.name,
+        pickupAddress: widget.restaurant.address,
+        pickupLat: widget.restaurant.lat,
+        pickupLng: widget.restaurant.lng,
+        dropoffName: user.name ?? '',
+        dropoffAddress: _addressController.text,
+        dropoffLat: user.lat ?? 0.0,
+        dropoffLng: user.lng ?? 0.0,
+        customerName: user.name ?? '',
+        customerPhone: user.phone,
+        items: orderItems.map((item) => {
+          'name': item.name,
+          'quantity': item.quantity,
+          'price': item.price,
+          'notes': item.notes,
+        }).toList(),
+        totalAmount: _total,
+        deliveryFee: widget.restaurant.deliveryFee,
+        deliveryInstructions: '',
+      );
 
       // Log order_placed event
       final analytics = context.read<AnalyticsService>();
       await analytics.logOrderPlaced(
-        orderId: orderId,
+        orderId: order.id,
         orderTotal: _total,
         itemCount: orderItems.fold(0, (sum, item) => sum + item.quantity),
       );
 
       // Initiate M-Pesa payment
       final payment = await paymentService.initiateMpesaPayment(
-        orderId: orderId,
+        orderId: order.id,
         userId: user.id,
         amount: _total,
         phone: _phoneController.text,
