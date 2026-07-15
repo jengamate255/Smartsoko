@@ -1,0 +1,36 @@
+import { User } from '../../users/entities/user.entity';
+import { ServiceType } from './service-type.entity';
+import { TripLocation } from './trip-location.entity';
+import { ChatMessage } from '../../chat/entities/chat-message.entity';
+export declare class Trip {
+    id: string;
+    customer_id: string;
+    driver_id: string;
+    service_type_id: string;
+    status: string;
+    pickup_latitude: number;
+    pickup_longitude: number;
+    dropoff_latitude: number;
+    dropoff_longitude: number;
+    pickup_address: string;
+    dropoff_address: string;
+    estimated_price: number;
+    final_price: number;
+    distance_km: number;
+    duration_min: number;
+    payment_method: string;
+    payment_status: string;
+    cancellation_reason: string;
+    rating: number;
+    review: string;
+    requested_at: Date;
+    accepted_at: Date;
+    started_at: Date;
+    completed_at: Date;
+    cancelled_at: Date;
+    customer: User;
+    driver: User;
+    service_type: ServiceType;
+    trip_locations: TripLocation[];
+    chat_messages: ChatMessage[];
+}

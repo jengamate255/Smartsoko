@@ -103,7 +103,7 @@ if (NODE_ENV === 'production') {
 }
 
 // Static file serving with caching
-app.use(express.static(path.join(__dirname, 'web'), {
+app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: NODE_ENV === 'production' ? '1d' : 0,
   etag: true,
   lastModified: true,
@@ -442,9 +442,14 @@ app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
+// Customer route — serves the full SmartSoko marketplace homepage
+app.get('/customer', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'home.html'));
+});
+
 // Handle specific HTML routes (extensionless URLs; static still serves *.html)
 const routes = [
-  'login', 'home', 'customer', 'merchant', 'driver', 'admin',
+  'login', 'home', 'merchant', 'driver', 'admin',
   'discovery', 'profile', 'cart', 'orders', 'product',
   'restaurant', 'chat', 'track-order', 'checkout', '404',
   'store',
@@ -455,11 +460,11 @@ const routes = [
 
 routes.forEach(route => {
   app.get(`/${route}`, (req, res) => {
-    const filePath = path.join(__dirname, 'web', `${route}.html`);
+    const filePath = path.join(__dirname, 'public', `${route}.html`);
     if (fs.existsSync(filePath)) {
       res.sendFile(filePath);
     } else {
-      res.status(404).sendFile(path.join(__dirname, 'web', '404.html'));
+      res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
     }
   });
 });
@@ -1644,7 +1649,7 @@ app.use('/api', (req, res) => {
 
 // HTML 404 handler.
 app.use((req, res) => {
-  res.status(404).sendFile(path.join(__dirname, 'web', '404.html'));
+  res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
 // Error handling middleware.

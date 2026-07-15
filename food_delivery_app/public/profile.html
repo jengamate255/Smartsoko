@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <!-- Performance: Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>SmartSoko - My Account</title>
+  <link rel="preload" href="dist/tailwind.css" as="style">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link rel="stylesheet" href="design-system.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+  <!-- Firebase Modular SDK -->
+  <script type="module" src="config/firebase-config.js?v=3"></script>
+  <script src="auth-check.js?v=4" defer></script>
+  
+  <style> .material-symbols-outlined {font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24} body {min-height: max(884px,100dvh)} </style>
+</head>
+<body class="bg-background font-body text-on-surface">
+
+<!-- Navigation handled by SmartNav -->
+<div class="h-16 md:h-20"></div>
+
+<main class="pb-32 px-6 max-w-lg mx-auto animate-premium">
+
+    <!-- Avatar + Name -->
+    <div class="flex flex-col items-center text-center mb-10">
+      <div id="avatarContainer" class="w-24 h-24 rounded-full bg-primary-container flex items-center justify-center mb-4 shadow-lg ring-4 ring-primary-fixed">
+        <span class="material-symbols-outlined text-5xl text-on-primary" style="font-variation-settings:'FILL' 1;">person</span>
+      </div>
+      <h2 id="displayName" class="font-headline text-2xl font-extrabold text-primary">Loading…</h2>
+      <p id="userEmail" class="text-on-surface-variant text-sm mt-1"></p>
+      <span id="roleChip" class="mt-3 px-4 py-1 rounded-full bg-primary-fixed text-on-primary-fixed text-xs font-bold uppercase tracking-wider">Customer</span>
+    </div>
+
+    <!-- Info Card -->
+    <div class="bg-surface-container-low rounded-xl mb-6 overflow-hidden divide-y divide-outline-variant/30">
+      <div class="flex items-center gap-4 px-5 py-4">
+        <span class="material-symbols-outlined text-on-surface-variant">mail</span>
+        <div>
+          <p class="text-xs text-on-surface-variant">Email</p>
+          <p id="infoEmail" class="font-semibold text-on-surface text-sm">—</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 px-5 py-4">
+        <span class="material-symbols-outlined text-on-surface-variant">badge</span>
+        <div>
+          <p class="text-xs text-on-surface-variant">Role</p>
+          <p id="infoRole" class="font-semibold text-on-surface text-sm capitalize">—</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 px-5 py-4">
+        <span class="material-symbols-outlined text-on-surface-variant">calendar_today</span>
+        <div>
+          <p class="text-xs text-on-surface-variant">Member since</p>
+          <p id="infoJoined" class="font-semibold text-on-surface text-sm">—</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Role-specific links -->
+    <div id="roleLinks" class="mb-6 space-y-3"></div>
+
+    <!-- Quick Actions -->
+    <div class="bg-surface-container-low rounded-xl mb-6 overflow-hidden divide-y divide-outline-variant/30">
+      <a href="orders.html" class="flex items-center gap-4 px-5 py-4 hover:bg-surface-container transition-colors">
+        <span class="material-symbols-outlined text-primary">receipt_long</span>
+        <span class="font-semibold text-on-surface text-sm flex-1">My Orders</span>
+        <span class="material-symbols-outlined text-on-surface-variant text-sm">chevron_right</span>
+      </a>
+      <a href="customer.html" class="flex items-center gap-4 px-5 py-4 hover:bg-surface-container transition-colors">
+        <span class="material-symbols-outlined text-primary">storefront</span>
+        <span class="font-semibold text-on-surface text-sm flex-1">Browse Sellers</span>
+        <span class="material-symbols-outlined text-on-surface-variant text-sm">chevron_right</span>
+      </a>
+    </div>
+
+    <!-- Sign Out -->
+    <button id="signOutBtn" onclick="signOut()"
+      class="w-full py-4 rounded-full border-2 border-error/40 text-error font-headline font-bold text-sm hover:bg-error/5 active:scale-95 transition-all flex items-center justify-center gap-2">
+      <span class="material-symbols-outlined">logout</span>
+      Sign Out
+    </button>
+
+    <!-- Not signed in state (hidden by default) -->
+    <div id="notSignedIn" class="hidden text-center py-12">
+      <span class="material-symbols-outlined text-5xl text-on-surface-variant mb-4">no_accounts</span>
+      <p class="text-on-surface-variant mb-6">You're not signed in.</p>
+      <a href="login.html" class="bg-primary text-on-primary px-8 py-3 rounded-full font-headline font-bold text-sm hover:opacity-90 transition-all inline-block">Sign In</a>
+    </div>
+  </main>
+
+<!-- Navigation handled by SmartNav -->
+<script src="nav-component.js" defer></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    SmartNav.init({ activePage: 'profile', role: 'customer' });
+  });
+</script>
+
+  <script type="module">
+    const auth = window.auth;
+    const db = window.db;
+    const ROLE_ICONS = { admin: 'admin_panel_settings', merchant: 'store', driver: 'electric_bike', customer: 'person' };
+    const ROLE_LINKS = {
+      admin:    [{ href: '/admin',    icon: 'admin_panel_settings', label: 'Admin Panel' }],
+      merchant: [{ href: '/merchant', icon: 'store',                label: 'Seller Dashboard' }],
+      driver:   [{ href: '/driver',   icon: 'electric_bike',        label: 'Driver Dashboard' }],
+      customer: [],
+    };
+
+    if (!auth) {
+      console.error('Firebase Auth not initialized');
+      return;
+    }
+
+    const { onAuthStateChanged, signOut } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        document.getElementById('displayName').textContent = 'Not signed in';
+        document.getElementById('avatarContainer').innerHTML = '<span class="material-symbols-outlined text-5xl text-on-primary-fixed" style="font-variation-settings:\'FILL\' 1;">person_off</span>';
+        document.getElementById('signOutBtn').classList.add('hidden');
+        document.getElementById('notSignedIn').classList.remove('hidden');
+        return;
+      }
+
+      // Fill basic auth info
+      const name = user.displayName || user.email.split('@')[0];
+      document.getElementById('displayName').textContent = name;
+      document.getElementById('userEmail').textContent = user.email;
+      document.getElementById('infoEmail').textContent = user.email;
+
+      // Load Firestore user doc
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const data = userDoc.exists() ? userDoc.data() : {};
+        const role = data.role || 'customer';
+
+        document.getElementById('roleChip').textContent = role;
+        document.getElementById('infoRole').textContent = role;
+
+        const joined = data.createdAt
+          ? new Date(data.createdAt.seconds * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+          : 'Unknown';
+        document.getElementById('infoJoined').textContent = joined;
+
+        // Avatar icon by role
+        const icon = ROLE_ICONS[role] || 'person';
+        document.getElementById('avatarContainer').innerHTML =
+          `<span class="material-symbols-outlined text-5xl text-on-primary" style="font-variation-settings:'FILL' 1;">${icon}</span>`;
+
+        // Role-specific links
+        const links = ROLE_LINKS[role] || [];
+        document.getElementById('roleLinks').innerHTML = links.map(l => `
+          <a href="${l.href}"
+            class="flex items-center gap-4 px-5 py-4 bg-primary text-on-primary rounded-xl hover:opacity-90 active:scale-95 transition-all">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">${l.icon}</span>
+            <span class="font-headline font-bold text-sm flex-1">${l.label}</span>
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </a>
+        `).join('');
+      } catch (e) {
+        console.error('Error loading user data:', e);
+      }
+    });
+
+    window.signOut = async () => {
+      await signOut(auth);
+      window.location.href = 'login.html';
+    };
+  </script>
+</body>
+</html>

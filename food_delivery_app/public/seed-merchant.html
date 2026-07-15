@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seed Test Merchant | SmartSoko</title>
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f0fdf4; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .card { background: white; padding: 2rem; border-radius: 1.5rem; box-shadow: 0 10px 40px -10px rgba(1,45,29,0.2); max-width: 500px; width: 90%; }
+    .btn { background: #064e3b; color: white; padding: 0.75rem 1.5rem; border-radius: 9999px; font-weight: 600; border: none; cursor: pointer; width: 100%; }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .status { margin-top: 1rem; padding: 1rem; border-radius: 0.75rem; font-size: 0.875rem; }
+    .status.success { background: #dcfce7; color: #166534; }
+    .status.error { background: #fee2e2; color: #991b1b; }
+    .status.info { background: #dbeafe; color: #1e40af; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 class="text-2xl font-bold text-gray-900 mb-2">Seed Test Merchant</h1>
+    <p class="text-gray-600 mb-6">This creates a test merchant account with sample products in Firestore.</p>
+    
+    <div id="credentials" class="bg-gray-50 p-4 rounded-xl mb-4 hidden">
+      <h3 class="font-semibold text-gray-900 mb-2">Created Account:</h3>
+      <p class="text-sm text-gray-700"><strong>Email:</strong> <span id="credEmail"></span></p>
+      <p class="text-sm text-gray-700"><strong>Password:</strong> <span id="credPassword"></span></p>
+      <p class="text-sm text-gray-700"><strong>Restaurant:</strong> <span id="credRestaurant"></span></p>
+    </div>
+
+    <button id="seedBtn" class="btn">Create Test Merchant</button>
+    <div id="status"></div>
+
+    <div class="mt-6 pt-4 border-t border-gray-200">
+      <a href="/login" class="text-sm text-green-700 hover:underline">Go to Login →</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBKliW4sQwBFEYMptJ8VuWYHTJ73DbHoE",
+      authDomain: "fooddelievry-dce15.firebaseapp.com",
+      projectId: "fooddelievry-dce15",
+      storageBucket: "fooddelievry-dce15.firebasestorage.app",
+      messagingSenderId: "727819507148",
+      appId: "1:727819507148:web:372bee2608d5c7a9587969"
+    };
+
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const TEST_MERCHANT = {
+      email: 'testmerchant@smartsoko.com',
+      password: 'TestMerchant123!',
+      name: 'Test Merchant',
+      restaurant: {
+        name: 'Burger Palace',
+        category: 'food',
+        description: 'Best burgers in town! Fresh ingredients, daily made.',
+        isOpen: true,
+        isActive: true,
+        rating: 4.7,
+        deliveryTime: '20-35 min',
+        deliveryFee: 2500,
+        address: '123 Main St, Dar es Salaam',
+        phone: '+255620771067'
+      },
+      products: [
+        { name: 'Classic Beef Burger', price: 12000, description: 'Juicy beef patty with lettuce, tomato, cheese', category: 'Burgers', stock: 50 },
+        { name: 'Chicken Burger', price: 10000, description: 'Grilled chicken breast with mayo and veggies', category: 'Burgers', stock: 40 },
+        { name: 'Veggie Burger', price: 9000, description: 'Plant-based patty with fresh vegetables', category: 'Burgers', stock: 30 },
+        { name: 'French Fries', price: 3500, description: 'Crispy golden fries, salted to perfection', category: 'Sides', stock: 100 },
+        { name: 'Onion Rings', price: 4000, description: 'Crispy battered onion rings', category: 'Sides', stock: 60 },
+        { name: 'Coca Cola', price: 2000, description: '500ml chilled bottle', category: 'Drinks', stock: 80 },
+        { name: 'Fresh Juice', price: 4500, description: 'Orange or mango fresh squeezed', category: 'Drinks', stock: 40 }
+      ]
+    };
+
+    async function seedMerchant() {
+      const btn = document.getElementById('seedBtn');
+      const status = document.getElementById('status');
+      const credDiv = document.getElementById('credentials');
+      
+      btn.disabled = true;
+      btn.textContent = 'Creating...';
+      status.className = 'status info';
+      status.textContent = 'Creating merchant account...';
+
+      try {
+        // Step 1: Create Auth User
+        const userCredential = await createUserWithEmailAndPassword(
+          auth, 
+          TEST_MERCHANT.email, 
+          TEST_MERCHANT.password
+        );
+        const user = userCredential.user;
+        
+        await updateProfile(user, { displayName: TEST_MERCHANT.name });
+        
+        status.textContent = 'Creating restaurant profile...';
+        
+        // Step 2: Create Restaurant in restaurants collection
+        const restaurantRef = doc(db, 'restaurants', user.uid);
+        await setDoc(restaurantRef, {
+          ...TEST_MERCHANT.restaurant,
+          ownerId: user.uid,
+          ownerEmail: TEST_MERCHANT.email,
+          ownerName: TEST_MERCHANT.name,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        
+        // Step 3: Create seller reference
+        const sellerRef = doc(db, 'sellers', user.uid);
+        await setDoc(sellerRef, {
+          restaurantId: user.uid,
+          ownerId: user.uid,
+          role: 'merchant',
+          createdAt: serverTimestamp()
+        });
+        
+        status.textContent = 'Creating products...';
+        
+        // Step 4: Create Products
+        const productsCollection = collection(db, 'products');
+        for (const product of TEST_MERCHANT.products) {
+          await addDoc(productsCollection, {
+            ...product,
+            merchantId: user.uid,
+            isActive: true,
+            isAvailable: true,
+            createdAt: serverTimestamp()
+          });
+        }
+        
+        // Step 5: Create User Document
+        const userRef = doc(db, 'users', user.uid);
+        await setDoc(userRef, {
+          email: TEST_MERCHANT.email,
+          name: TEST_MERCHANT.name,
+          role: 'merchant',
+          createdAt: serverTimestamp()
+        });
+        
+        // Show success
+        status.className = 'status success';
+        status.innerHTML = '<strong>✓ Success!</strong> Test merchant created with ' + TEST_MERCHANT.products.length + ' products.';
+        
+        credDiv.classList.remove('hidden');
+        document.getElementById('credEmail').textContent = TEST_MERCHANT.email;
+        document.getElementById('credPassword').textContent = TEST_MERCHANT.password;
+        document.getElementById('credRestaurant').textContent = TEST_MERCHANT.restaurant.name;
+        
+        btn.textContent = 'Merchant Created!';
+        
+      } catch (error) {
+        console.error('Seed error:', error);
+        status.className = 'status error';
+        
+        if (error.code === 'auth/email-already-in-use') {
+          status.innerHTML = '<strong>Merchant already exists!</strong><br>Use these credentials:<br>Email: ' + TEST_MERCHANT.email + '<br>Password: ' + TEST_MERCHANT.password;
+          credDiv.classList.remove('hidden');
+          document.getElementById('credEmail').textContent = TEST_MERCHANT.email;
+          document.getElementById('credPassword').textContent = TEST_MERCHANT.password;
+          document.getElementById('credRestaurant').textContent = TEST_MERCHANT.restaurant.name;
+          btn.textContent = 'Already Exists';
+        } else {
+          status.innerHTML = '<strong>Error:</strong> ' + error.message;
+          btn.disabled = false;
+          btn.textContent = 'Try Again';
+        }
+      }
+    }
+
+    document.getElementById('seedBtn').addEventListener('click', seedMerchant);
+  </script>
+</body>
+</html>
+

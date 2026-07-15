@@ -1,0 +1,225 @@
+<resources>
+    <string name="app_name">Smartsoko</string>
+    
+    <!-- Splash Screen -->
+    <string name="splash_tagline">Your Smart Marketplace</string>
+    <string name="loading">Loading...</string>
+    
+    <!-- Onboarding -->
+    <string name="onboarding_slide1_title">Discover Products</string>
+    <string name="onboarding_slide1_description">Browse thousands of products from local sellers</string>
+    <string name="onboarding_slide2_title">Easy Ordering</string>
+    <string name="onboarding_slide2_description">Simple checkout with multiple payment options</string>
+    <string name="onboarding_slide3_title">Live Tracking</string>
+    <string name="onboarding_slide3_description">Track your delivery in real-time like Uber</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_get_started">Get Started</string>
+    
+    <!-- Authentication -->
+    <string name="auth_phone_hint">Phone Number</string>
+    <string name="auth_send_otp">Send OTP</string>
+    <string name="auth_otp_hint">Enter OTP</string>
+    <string name="auth_verify_otp">Verify OTP</string>
+    <string name="auth_resend_otp">Resend OTP</string>
+    <string name="auth_terms_agreement">By continuing, you agree to our Terms of Service and Privacy Policy</string>
+    <string name="auth_invalid_phone">Please enter a valid phone number</string>
+    <string name="auth_invalid_otp">Please enter a valid OTP</string>
+    <string name="auth_otp_sent">OTP sent to %s</string>
+    
+    <!-- Home Screen -->
+    <string name="home_welcome">Welcome back, %s!</string>
+    <string name="home_search_hint">Search products, sellers...</string>
+    <string name="home_categories">Categories</string>
+    <string name="home_featured">Featured Products</string>
+    <string name="home_recent_orders">Recent Orders</string>
+    <string name="home_view_all">View All</string>
+    <string name="home_no_orders_yet">No recent orders</string>
+    <string name="home_start_shopping">Start Shopping</string>
+    
+    <!-- Product List -->
+    <string name="product_list_title">Products</string>
+    <string name="product_list_filter">Filter</string>
+    <string name="product_list_sort">Sort</string>
+    <string name="product_list_no_products">No products found</string>
+    <string name="product_list_try_different_search">Try adjusting your search or filter</string>
+    <string name="product_list_price_low_to_high">Price: Low to High</string>
+    <string name="product_list_price_high_to_low">Price: High to Low</string>
+    <string name="product_list_newest">Newest First</string>
+    <string name="product_list_best_selling">Best Selling</string>
+    <string name="product_list_rating">Highest Rated</string>
+    
+    <!-- Product Details -->
+    <string name="product_details_add_to_cart">Add to Cart</string>
+    <string name="product_details_buy_now">Buy Now</string>
+    <string name="product_details_description">Description</string>
+    <string name="product_details_specifications">Specifications</string>
+    <string name="product_details_seller_info">Sold by</string>
+    <string name="product_details_in_stock">In Stock</string>
+    <string name="product_details_out_of_stock">Out of Stock</string>
+    <string name="product_details_only_left">Only %d left</string>
+    <string name="product_details_quantity">Quantity</string>
+    <string name="product_details_reviews">Reviews (%d)</string>
+    <string name="product_details_write_review">Write a Review</string>
+    
+    <!-- Cart -->
+    <string name="cart_title">Shopping Cart</string>
+    <string name="cart_empty">Your cart is empty</string>
+    <string name="cart_continue_shopping">Continue Shopping</string>
+    <string name="cart_subtotal">Subtotal</string>
+    <string name="cart_delivery_fee">Delivery Fee</string>
+    <string name="cart_service_fee">Service Fee</string>
+    <string name="cart_total">Total</string>
+    <string name="cart_checkout">Proceed to Checkout</string>
+    <string name="cart_remove_item">Remove</string>
+    <string name="cart_update_quantity">Update Quantity</string>
+    <string name="cart_item_unavailable">This item is no longer available</string>
+    
+    <!-- Checkout -->
+    <string name="checkout_title">Checkout</string>
+    <string name="checkout_delivery_address">Delivery Address</string>
+    <string name="checkout_select_address">Select Address</string>
+    <string name="checkout_add_new_address">Add New Address</string>
+    <string name="checkout_payment_method">Payment Method</string>
+    <string name="checkout_select_payment">Select Payment Method</string>
+    <string name="checkout_use_last_payment">Use last payment method</string>
+    <string name="checkout_order_summary">Order Summary</string>
+    <string name="checkout_place_order">Place Order</string>
+    <string name="checkout_processing">Processing...</string>
+    <string name="checkout_address_required">Please select a delivery address</string>
+    <string name="checkout_payment_required">Please select a payment method</string>
+    <string name="checkout_success">Order placed successfully!</string>
+    <string name="checkout_failed">Failed to place order. Please try again.</string>
+    
+    <!-- Orders -->
+    <string name="orders_title">My Orders</string>
+    <string name="orders_empty">No orders yet</string>
+    <string name="orders_start_shopping">Start Shopping</string>
+    <string name="orders_status_pending">Pending</string>
+    <string name="orders_status_accepted">Accepted</string>
+    <string name="orders_status_on_the_way">On the Way</string>
+    <string name="orders_status_delivered">Delivered</string>
+    <string name="orders_status_cancelled">Cancelled</string>
+    <string name="orders_track_order">Track Order</string>
+    <string name="orders_reorder">Reorder</string>
+    <string name="orders_view_details">View Details</string>
+    <string name="orders_rate_order">Rate Order</string>
+    
+    <!-- Order Tracking -->
+    <string name="tracking_title">Track Order #%s</string>
+    <string name="tracking_driver_location">Driver Location</string>
+    <string name="tracking_eta">Estimated Arrival</string>
+    <string name="tracking_driver_name">Driver: %s</string>
+    <string name="tracking_driver_phone">Call Driver</string>
+    <string name="tracking_pickup_location">Pickup: %s</string>
+    <string name="tracking_delivery_location">Delivery: %s</string>
+    <string name="tracking_order_confirmed">Order Confirmed</string>
+    <string name="tracking_preparing">Preparing</string>
+    <string name="tracking_ready_for_pickup">Ready for Pickup</string>
+    <string name="tracking_driver_assigned">Driver Assigned</string>
+    <string name="tracking_driver_arrived_pickup">Driver at Pickup</string>
+    <string name="tracking_driver_en_route">En Route</string>
+    <string name="tracking_driver_arrived_delivery">Arrived at Delivery</string>
+    <string name="tracking_delivered">Delivered</string>
+    
+    <!-- Profile -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_edit">Edit Profile</string>
+    <string name="profile_my_orders">My Orders</string>
+    <string name="profile_saved_addresses">Saved Addresses</string>
+    <string name="profile_payment_methods">Payment Methods</string>
+    <string name="profile_notifications">Notifications</string>
+    <string name="profile_help_support">Help & Support</string>
+    <string name="profile_settings">Settings</string>
+    <string name="profile_logout">Logout</string>
+    <string name="profile_name">Name</string>
+    <string name="profile_email">Email</string>
+    <string name="profile_phone">Phone</string>
+    <string name="profile_not_logged_in">Not logged in</string>
+    <string name="profile_login_to_continue">Log in to access your account</string>
+    
+    <!-- Addresses -->
+    <string name="address_title">Saved Addresses</string>
+    <string name="address_add_new">Add New Address</string>
+    <string name="address_type_home">Home</string>
+    <string name="address_type_work">Work</string>
+    <string name="address_type_other">Other</string>
+    <string name="address_label">Label</string>
+    <string name="address_full_address">Full Address</string>
+    <string name="address_landmark">Landmark (Optional)</string>
+    <string name="address_save">Save Address</string>
+    <string name="address_set_default">Set as Default</string>
+    <string name="address_delete">Delete</string>
+    <string name="address_no_addresses">No saved addresses</string>
+    
+    <!-- Payment Methods -->
+    <string name="payment_title">Payment Methods</string>
+    <string name="payment_add_new">Add Payment Method</string>
+    <string name="payment_card">Credit/Debit Card</string>
+    <string name="payment_mobile_money">Mobile Money</string>
+    <string name="payment_cash_on_delivery">Cash on Delivery</string>
+    <string name="payment_last_used">Last used</string>
+    <string name="payment_use_this">Use This</string>
+    <string name="payment_remove">Remove</string>
+    <string name="payment_no_methods">No payment methods saved</string>
+    <string name="payment_card_number">Card Number</string>
+    <string name="payment_card_expiry">MM/YY</string>
+    <string name="payment_card_cvv">CVV</string>
+    <string name="payment_card_name">Name on Card">Cardholder Name</string>
+    <string name="payment_save_card">Save Card</string>
+    
+    <!-- Notifications -->
+    <string name="notification_order_confirmed">Order Confirmed</string>
+    <string name="notification_order_confirmed_body">Your order #%s has been confirmed and is being prepared</string>
+    <string name="notification_driver_assigned">Driver Assigned</string>
+    <string name="notification_driver_assigned_body">%s is on the way to pick up your order</string>
+    <string name="notification_out_for_delivery">Out for Delivery</string>
+    <string name="notification_out_for_delivery_body">Your order #%s is on the way!</string>
+    <string name="notification_delivered">Order Delivered</string>
+    <string name="notification_delivered_body">Your order #%s has been delivered. Enjoy!</string>
+    <string name="notification_payment_success">Payment Successful</string>
+    <string name="notification_payment_success_body">Your payment of %s for order #%s was successful</string>
+    
+    <!-- Common Actions -->
+    <string name="action_done">Done</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_close">Close</string>
+    <string name="action_confirm">Confirm</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_back">Back</string>
+    <string name="action_next">Next</string>
+    
+    <!-- Errors -->
+    <string name="error_network">Network error. Please check your connection.</string>
+    <string name="error_server">Server error. Please try again later.</string>
+    <string name="error_unknown">An unexpected error occurred.</string>
+    <string name="error_no_data">No data available.</string>
+    <string name="error_session_expired">Your session has expired. Please log in again.</string>
+    
+    <!-- Empty States -->
+    <string name="empty_no_products">No products found</string>
+    <string name="empty_no_orders">No orders yet</string>
+    <string name="empty_no_addresses">No saved addresses</string>
+    <string name="empty_no_payment_methods">No payment methods</string>
+    <string name="empty_no_notifications">No notifications</string>
+    <string name="empty_no_search_results">No results found for \"%s\"</string>
+    
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_categories">Categories</string>
+    <string name="nav_cart">Cart</string>
+    <string name="nav_orders">Orders</string>
+    <string name="nav_profile">Profile</string>
+    
+    <!-- Mapbox -->
+    <string name="mapbox_access_token"><![CDATA[YOUR_MAPBOX_ACCESS_TOKEN]]></string>
+    
+    <!-- Firebase -->
+    <string name="default_notification_channel_id">default_channel</string>
+    <string name="default_notification_channel_name">Default Notifications</string>
+    <string name="default_notification_channel_description">Default notification channel for Smartsoko</string>
+</resources>

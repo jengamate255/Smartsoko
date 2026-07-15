@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Performance: Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart - SMARTSOKO</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <!-- Design System -->
+  <link rel="stylesheet" href="smartsoko-design-system.css">
+  
+  <style> .checkout-container {display: grid;grid-template-columns: 1fr 380px;gap: var(--spacing-xl);max-width: 1200px;margin: 0 auto} .cart-items {background-color: var(--color-white);border-radius: var(--radius-lg);padding: var(--spacing-lg);box-shadow: var(--shadow-sm)} .cart-item {display: flex;gap: var(--spacing-md);padding: var(--spacing-md) 0;border-bottom: 1px solid var(--color-taupe)} .cart-item:last-child {border-bottom: none} .cart-item-image {width: 80px;height: 80px;border-radius: var(--radius-md);object-fit: cover;flex-shrink: 0} .cart-item-details {flex: 1;display: flex;flex-direction: column;justify-content: space-between} .cart-item-header {display: flex;justify-content: space-between;align-items: flex-start} .cart-item-name {font-weight: 600;font-size: var(--text-body);color: var(--color-charcoal);margin-bottom: 4px} .cart-item-vendor {font-size: var(--text-small);color: var(--color-gray);margin-bottom: var(--spacing-xs)} .cart-item-price {font-weight: 600;color: var(--color-gold);font-size: var(--text-body)} .cart-item-actions {display: flex;align-items: center;gap: var(--spacing-sm)} .quantity-selector {display: flex;align-items: center;gap: var(--spacing-xs);border: 1px solid var(--color-taupe);border-radius: var(--radius-md);padding: 2px} .quantity-btn {width: 28px;height: 28px;border: none;background-color: transparent;border-radius: var(--radius-sm);display: flex;align-items: center;justify-content: center;cursor: pointer;transition: background-color var(--transition-fast)} .quantity-btn:hover {background-color: var(--color-cream)} .quantity-value {min-width: 32px;text-align: center;font-weight: 600;font-size: var(--text-small)} .remove-btn {color: var(--color-error);background: none;border: none;padding: 4px;cursor: pointer;border-radius: var(--radius-sm);transition: background-color var(--transition-fast)} .remove-btn:hover {background-color: rgba(193,65,14,0.1)} .order-summary {position: sticky;top: 80px;height: fit-content} .summary-card {background-color: var(--color-white);border-radius: var(--radius-lg);padding: var(--spacing-lg);box-shadow: var(--shadow-sm);margin-bottom: var(--spacing-md)} .summary-title {font-size: var(--text-h3);margin-bottom: var(--spacing-md);padding-bottom: var(--spacing-sm);border-bottom: 1px solid var(--color-taupe)} .summary-row {display: flex;justify-content: space-between;align-items: center;padding: var(--spacing-xs) 0;font-size: var(--text-small)} .summary-row.total {font-size: var(--text-body);font-weight: 600;color: var(--color-charcoal);padding-top: var(--spacing-sm);border-top: 1px solid var(--color-taupe);margin-top: var(--spacing-sm)} .promo-code {background-color: var(--color-cream);border-radius: var(--radius-lg);padding: var(--spacing-md);margin-bottom: var(--spacing-md)} .promo-input-group {display: flex;gap: var(--spacing-xs)} .promo-input {flex: 1;padding: 12px;border: 1px solid var(--color-taupe);border-radius: var(--radius-md);font-size: var(--text-small);background-color: var(--color-white)} .promo-btn {padding: 12px 20px;background-color: var(--color-gold);color: var(--color-charcoal);border: none;border-radius: var(--radius-md);font-weight: 600;font-size: var(--text-small);cursor: pointer;transition: background-color var(--transition-fast)} .promo-btn:hover {background-color: var(--color-gold-dark)} .empty-cart {text-align: center;padding: var(--spacing-2xl);color: var(--color-gray)} .empty-cart-icon {font-size: 64px;color: var(--color-taupe);margin-bottom: var(--spacing-md)} .continue-shopping {margin-top: var(--spacing-lg)} @media (max-width: 1024px) {.checkout-container {grid-template-columns: 1fr} .order-summary {position: static} } @media (max-width: 768px) {.cart-item {flex-direction: column;gap: var(--spacing-sm)} .cart-item-image {width: 100%;height: 200px} .cart-item-actions {justify-content: space-between} } </style>
+</head>
+<body>
+  <!-- Top Navigation -->
+  <nav class="nav-top">
+    <a href="smartsoko-home.html" class="nav-logo">SMARTSOKO</a>
+    
+    <div class="nav-search">
+      <div class="search-bar">
+        <span class="material-icons search-icon">search</span>
+        <input type="text" class="search-input" placeholder="Search products...">
+      </div>
+    </div>
+    
+    <div class="nav-links">
+      <a href="smartsoko-products.html" class="nav-link">Browse</a>
+      <a href="smartsoko-vendor.html" class="nav-link">Vendors</a>
+      <a href="main.html" class="nav-link">About</a>
+      <a href="profile.html" class="nav-link">Contact</a>
+    </div>
+    
+    <div class="nav-actions">
+      <button onclick="window.location.href='profile.html'" class="btn btn-ghost">
+        <span class="material-icons">favorite_border</span>
+      </button>
+      <button onclick="window.location.href='smartsoko-cart.html'" class="btn btn-primary">
+        <span class="material-icons">shopping_cart</span>
+        Cart (3)
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="section">
+    <div class="container">
+      <!-- Breadcrumb -->
+      <div style="margin-bottom: var(--spacing-md); font-size: var(--text-small);">
+        <a href="smartsoko-home.html" style="color: var(--color-gray);">Home</a>
+        <span style="margin: 0 var(--spacing-xs); color: var(--color-gray);">/</span>
+        <span style="color: var(--color-charcoal);">Shopping Cart</span>
+      </div>
+
+      <div class="checkout-container">
+        <!-- Cart Items -->
+        <div class="cart-items">
+          <h1 style="font-size: var(--text-h2); margin-bottom: var(--spacing-lg);">Shopping Cart</h1>
+          
+          <!-- Cart Item 1 -->
+          <div class="cart-item">
+            <img src="https://picsum.photos/seed/tomatoes-cart/80/80" alt="Organic Tomatoes" class="cart-item-image" loading="lazy">
+            <div class="cart-item-details">
+              <div class="cart-item-header">
+                <div>
+                  <div class="cart-item-name">Organic Vine Tomatoes</div>
+                  <div class="cart-item-vendor">Kilimanjaro Fresh</div>
+                </div>
+                <button class="remove-btn" onclick="removeItem(this)">
+                  <span class="material-icons" style="font-size: 18px;">close</span>
+                </button>
+              </div>
+              <div class="cart-item-actions">
+                <div class="quantity-selector">
+                  <button class="quantity-btn" onclick="updateQuantity(this, -1)">−</button>
+                  <span class="quantity-value">2</span>
+                  <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
+                </div>
+                <div class="cart-item-price">TZS 17,000</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cart Item 2 -->
+          <div class="cart-item">
+            <img src="https://picsum.photos/seed/spinach-cart/80/80" alt="Fresh Spinach" class="cart-item-image" loading="lazy">
+            <div class="cart-item-details">
+              <div class="cart-item-header">
+                <div>
+                  <div class="cart-item-name">Mountain Spinach</div>
+                  <div class="cart-item-vendor">Kilimanjaro Fresh</div>
+                </div>
+                <button class="remove-btn" onclick="removeItem(this)">
+                  <span class="material-icons" style="font-size: 18px;">close</span>
+                </button>
+              </div>
+              <div class="cart-item-actions">
+                <div class="quantity-selector">
+                  <button class="quantity-btn" onclick="updateQuantity(this, -1)">−</button>
+                  <span class="quantity-value">1</span>
+                  <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
+                </div>
+                <div class="cart-item-price">TZS 3,200</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cart Item 3 -->
+          <div class="cart-item">
+            <img src="https://picsum.photos/seed/carrots-cart/80/80" alt="Rainbow Carrots" class="cart-item-image" loading="lazy">
+            <div class="cart-item-details">
+              <div class="cart-item-header">
+                <div>
+                  <div class="cart-item-name">Rainbow Carrots</div>
+                  <div class="cart-item-vendor">Kilimanjaro Fresh</div>
+                </div>
+                <button class="remove-btn" onclick="removeItem(this)">
+                  <span class="material-icons" style="font-size: 18px;">close</span>
+                </button>
+              </div>
+              <div class="cart-item-actions">
+                <div class="quantity-selector">
+                  <button class="quantity-btn" onclick="updateQuantity(this, -1)">−</button>
+                  <span class="quantity-value">1</span>
+                  <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
+                </div>
+                <div class="cart-item-price">TZS 4,800</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-summary">
+          <div class="summary-card">
+            <h2 class="summary-title">Order Summary</h2>
+            
+            <div class="summary-row">
+              <span>Subtotal (4 items)</span>
+              <span>TZS 25,000</span>
+            </div>
+            
+            <div class="summary-row">
+              <span>Delivery Fee</span>
+              <span>TZS 2,000</span>
+            </div>
+            
+            <div class="summary-row">
+              <span>Service Fee</span>
+              <span>TZS 500</span>
+            </div>
+            
+            <div class="summary-row total">
+              <span>Total</span>
+              <span style="color: var(--color-gold);">TZS 27,500</span>
+            </div>
+          </div>
+
+          <!-- Promo Code -->
+          <div class="promo-code">
+            <div style="font-weight: 600; margin-bottom: var(--spacing-sm); font-size: var(--text-small);">
+              Promo Code
+            </div>
+            <div class="promo-input-group">
+              <input type="text" class="promo-input" placeholder="Enter code" id="promoCode">
+              <button class="promo-btn" onclick="applyPromo()">Apply</button>
+            </div>
+          </div>
+
+          <!-- Checkout Button -->
+          <button class="btn btn-primary" style="width: 100%; font-size: var(--text-body); padding: 16px;" onclick="proceedToCheckout()">
+            Proceed to Checkout
+            <span class="material-icons" style="margin-left: var(--spacing-xs);">arrow_forward</span>
+          </button>
+
+          <!-- Security Badge -->
+          <div style="text-align: center; margin-top: var(--spacing-md); color: var(--color-gray); font-size: var(--text-caption);">
+            <span class="material-icons" style="font-size: 16px; vertical-align: middle;">lock</span>
+            Secure Checkout
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="nav-bottom">
+    <a href="smartsoko-home.html" class="nav-item">
+      <span class="material-icons nav-icon">home</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="smartsoko-products.html" class="nav-item">
+      <span class="material-icons nav-icon">grid_view</span>
+      <span class="nav-label">Browse</span>
+    </a>
+    <a href="smartsoko-cart.html" class="nav-item active">
+      <span class="material-icons nav-icon">shopping_cart</span>
+      <span class="nav-label">Cart</span>
+    </a>
+    <a href="customer.html" class="nav-item">
+      <span class="material-icons nav-icon">receipt_long</span>
+      <span class="nav-label">Orders</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <span class="material-icons nav-icon">person</span>
+      <span class="nav-label">Account</span>
+    </a>
+  </nav>
+
+  <!-- Toast Container -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // Initialize cart page
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeCart();
+    });
+
+    function initializeCart() {
+      updateCartCount();
+      calculateTotals();
+    }
+
+    function updateQuantity(button, change) {
+      const quantitySelector = button.parentElement;
+      const quantityValue = quantitySelector.querySelector('.quantity-value');
+      const cartItem = button.closest('.cart-item');
+      const priceElement = cartItem.querySelector('.cart-item-price');
+      
+      let quantity = parseInt(quantityValue.textContent);
+      quantity = Math.max(1, quantity + change);
+      quantityValue.textContent = quantity;
+      
+      // Update price (assuming price per unit is stored)
+      const basePrice = parseInt(priceElement.textContent.replace(/[^\d]/g, '')) / (quantity - change);
+      const newPrice = basePrice * quantity;
+      priceElement.textContent = `TZS ${newPrice.toLocaleString()}`;
+      
+      calculateTotals();
+      showToast('Cart updated', 'success');
+    }
+
+    function removeItem(button) {
+      const cartItem = button.closest('.cart-item');
+      cartItem.style.opacity = '0';
+      cartItem.style.transform = 'translateX(-20px)';
+      
+      setTimeout(() => {
+        cartItem.remove();
+        calculateTotals();
+        updateCartCount();
+        showToast('Item removed from cart', 'info');
+        
+        // Check if cart is empty
+        const remainingItems = document.querySelectorAll('.cart-item');
+        if (remainingItems.length === 0) {
+          showEmptyCart();
+        }
+      }, 300);
+    }
+
+    function calculateTotals() {
+      const cartItems = document.querySelectorAll('.cart-item');
+      let subtotal = 0;
+      
+      cartItems.forEach(item => {
+        const priceText = item.querySelector('.cart-item-price').textContent;
+        const price = parseInt(priceText.replace(/[^\d]/g, ''));
+        subtotal += price;
+      });
+      
+      const deliveryFee = subtotal > 20000 ? 0 : 2000;
+      const serviceFee = 500;
+      const total = subtotal + deliveryFee + serviceFee;
+      
+      // Update summary
+      const summaryRows = document.querySelectorAll('.summary-row');
+      summaryRows[0].querySelector('span:last-child').textContent = `TZS ${subtotal.toLocaleString()}`;
+      summaryRows[1].querySelector('span:last-child').textContent = deliveryFee === 0 ? 'FREE' : `TZS ${deliveryFee.toLocaleString()}`;
+      summaryRows[2].querySelector('span:last-child').textContent = `TZS ${serviceFee.toLocaleString()}`;
+      summaryRows[3].querySelector('span:last-child').textContent = `TZS ${total.toLocaleString()}`;
+      
+      // Update item count
+      const itemCount = Array.from(cartItems).reduce((sum, item) => {
+        const quantity = parseInt(item.querySelector('.quantity-value').textContent);
+        return sum + quantity;
+      }, 0);
+      
+      summaryRows[0].querySelector('span:first-child').textContent = `Subtotal (${itemCount} items)`;
+    }
+
+    function applyPromo() {
+      const promoCode = document.getElementById('promoCode').value.trim();
+      
+      if (!promoCode) {
+        showToast('Please enter a promo code', 'warning');
+        return;
+      }
+      
+      // Simulate promo validation
+      if (promoCode.toUpperCase() === 'FRESH10') {
+        showToast('Promo code applied! 10% discount', 'success');
+        // Apply discount logic here
+      } else {
+        showToast('Invalid promo code', 'error');
+      }
+    }
+
+    function proceedToCheckout() {
+      const cartItems = document.querySelectorAll('.cart-item');
+      if (cartItems.length === 0) {
+        showToast('Your cart is empty', 'warning');
+        return;
+      }
+      
+      showToast('Proceeding to checkout...', 'success');
+      setTimeout(() => {
+        // In a real app, this would navigate to checkout page
+        window.location.href = 'smartsoko-checkout.html';
+      }, 1000);
+    }
+
+    function updateCartCount() {
+      const cartItems = document.querySelectorAll('.cart-item');
+      const itemCount = Array.from(cartItems).reduce((sum, item) => {
+        const quantity = parseInt(item.querySelector('.quantity-value').textContent);
+        return sum + quantity;
+      }, 0);
+      
+      // Update cart count in navigation
+      const cartButtons = document.querySelectorAll('.nav-actions .btn-primary');
+      cartButtons.forEach(button => {
+        button.innerHTML = `<span class="material-icons">shopping_cart</span> Cart (${itemCount})`;
+      });
+    }
+
+    function showEmptyCart() {
+      const cartContainer = document.querySelector('.cart-items');
+      cartContainer.innerHTML = `
+        <div class="empty-cart">
+          <div class="empty-cart-icon">
+            <span class="material-icons" style="font-size: 64px;">shopping_cart</span>
+          </div>
+          <h2 style="font-size: var(--text-h2); margin-bottom: var(--spacing-sm); color: var(--color-charcoal);">
+            Your cart is empty
+          </h2>
+          <p style="margin-bottom: var(--spacing-lg); color: var(--color-gray);">
+            Looks like you haven't added any items to your cart yet.
+          </p>
+          <div class="continue-shopping">
+            <a href="smartsoko-products.html" class="btn btn-primary">
+              <span class="material-icons" style="margin-right: var(--spacing-xs);">shopping_bag</span>
+              Continue Shopping
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type}`;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

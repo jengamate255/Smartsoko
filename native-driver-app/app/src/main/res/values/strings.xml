@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SmartSoko Driver</string>
-    <string name="mapbox_access_token">pk.eyJ1IjoiZGF2ZXkxMDEiLCJhIjoiY2p1ZWc3aWh1MDJ5cjQ0cXd1ZXh2cmd2eCJ9.iE0RngMfwyivH7OrYO_Bag</string>
+    <string name="mapbox_access_token"><![CDATA[YOUR_MAPBOX_ACCESS_TOKEN]]></string>
     <string name="nav_home">Home</string>
     <string name="nav_earnings">Earnings</string>
     <string name="nav_history">History</string>

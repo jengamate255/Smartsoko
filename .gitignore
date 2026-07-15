@@ -81,3 +81,10 @@ nul
 serviceAccountKey.json
 *.key
 service-account-base64.txt
+
+# Android / Gradle build artifacts
+.gradle/
+**/build/
+*.apk
+*.aab
+local.properties

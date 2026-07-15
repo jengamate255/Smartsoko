@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material 3 Color Palette - Light Theme -->
+    <color name="md_theme_light_primary">#006874</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
+    <color name="md_theme_light_primaryContainer">#97F0FF</color>
+    <color name="md_theme_light_onPrimaryContainer">#002024</color>
+    <color name="md_theme_light_secondary">#545B67</color>
+    <color name="md_theme_light_onSecondary">#FFFFFF</color>
+    <color name="md_theme_light_secondaryContainer">#D8E1F0</color>
+    <color name="md_theme_light_onSecondaryContainer">#131922</color>
+    <color name="md_theme_light_tertiary">#71567D</color>
+    <color name="md_theme_light_onTertiary">#FFFFFF</color>
+    <color name="md_theme_light_tertiaryContainer">#F8D8FF</color>
+    <color name="md_theme_light_onTertiaryContainer">#2A1035</color>
+    <color name="md_theme_light_error">#BA1A1A</color>
+    <color name="md_theme_light_onError">#FFFFFF</color>
+    <color name="md_theme_light_errorContainer">#FFDAD6</color>
+    <color name="md_theme_light_onErrorContainer">#410002</color>
+    <color name="md_theme_light_background">#FEFBFF</color>
+    <color name="md_theme_light_onBackground">#1A1C1E</color>
+    <color name="md_theme_light_surface">#FEFBFF</color>
+    <color name="md_theme_light_onSurface">#1A1C1E</color>
+    <color name="md_theme_light_surfaceVariant">#DEE3E9</color>
+    <color name="md_theme_light_onSurfaceVariant">#42474D</color>
+    <color name="md_theme_light_outline">#72787E</color>
+    <color name="md_theme_light_outlineVariant">#C2C7CD</color>
+    <color name="md_theme_light_shadow">#000000</color>
+    <color name="md_theme_light_scrim">#000000</color>
+    <color name="md_theme_light_inverseSurface">#1A1C1E</color>
+    <color name="md_theme_light_inverseOnSurface">#F1F0F4</color>
+    <color name="md_theme_light_inversePrimary">#4FD8EB</color>
+    <color name="md_theme_light_surfaceTint">#006874</color>
+    
+    <!-- Status Colors for Light Theme -->
+    <color name="status_pending">#FF8F00</color>
+    <color name="status_accepted">#0288D1</color>
+    <color name="status_on_the_way">#006874</color>
+    <color name="status_delivered">#388E3C</color>
+    <color name="status_cancelled">#C62828</color>
+</resources>

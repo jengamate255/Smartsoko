@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartSoko Admin - Control Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="dist/tailwind.css" as="style">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link rel="stylesheet" href="design-system.css">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="config/firebase-config.js" type="module"></script>
+  <script src="config/admin-data.js"></script>
+  <style>
+    .material-symbols-outlined {font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+    body{min-height:100dvh}
+    .sidebar-link{transition:all .2s}
+    .sidebar-link:hover,.sidebar-link.active{background:var(--os-primary);color:#fff}
+    .stat-card{transition:transform .2s}
+    .stat-card:hover{transform:translateY(-2px)}
+    .ai-badge{background:linear-gradient(135deg,#667eea,#764ba2)}
+    .alert-critical{border-left:4px solid #ef4444}
+    .alert-warning{border-left:4px solid #f59e0b}
+    .alert-info{border-left:4px solid #3b82f6}
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#012d1d] to-[#024a2b] p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-[#012d1d]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <span class="material-symbols-outlined text-3xl text-[#012d1d]">admin_panel_settings</span>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900">SmartSoko Admin</h1>
+        <p class="text-gray-500 mt-1">Control Center with AI</p>
+      </div>
+      <div id="loginError" class="hidden mb-4 p-4 bg-red-50 text-red-700 rounded-xl text-sm"></div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" id="adminEmail" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#012d1d] focus:border-[#012d1d]" placeholder="admin@smartsoko.com">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <input type="password" id="adminPassword" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#012d1d] focus:border-[#012d1d]" placeholder="Enter password">
+        </div>
+        <button id="loginBtn" class="w-full py-3 bg-[#012d1d] text-white rounded-xl font-bold hover:bg-[#012d1d]/90 transition-all">Sign In</button>
+      </div>
+      <div class="mt-6 pt-6 border-t text-center">
+        <a href="/home" class="text-sm text-[#012d1d] hover:underline">Back to Store</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminLayout" class="hidden flex min-h-screen">
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full">
+      <div class="p-4 border-b border-gray-200">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-[#012d1d] rounded-xl flex items-center justify-center">
+            <span class="material-symbols-outlined text-white">admin_panel_settings</span>
+          </div>
+          <div>
+            <p class="font-bold text-sm">SmartSoko</p>
+            <p class="text-xs text-gray-500">AI Control Center</p>
+          </div>
+        </div>
+      </div>
+      <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+        <a href="#" onclick="showSection('dashboard')" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="dashboard">
+          <span class="material-symbols-outlined text-lg">dashboard</span> Dashboard
+        </a>
+        <a href="#" onclick="showSection('server')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="server">
+          <span class="material-symbols-outlined text-lg">dns</span> Server Status
+        </a>
+        <a href="#" onclick="showSection('logs')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="logs">
+          <span class="material-symbols-outlined text-lg">article</span> Logs
+        </a>
+        <a href="#" onclick="showSection('reports')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="reports">
+          <span class="material-symbols-outlined text-lg">description</span> Reports
+        </a>
+        <a href="#" onclick="showSection('ai-moderation')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="ai-moderation">
+          <span class="material-symbols-outlined text-lg">psychology</span> AI Moderation
+          <span class="ai-badge px-2 py-0.5 rounded-full text-[10px] text-white ml-auto">AI</span>
+        </a>
+        <a href="#" onclick="showSection('users')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="users">
+          <span class="material-symbols-outlined text-lg">people</span> Users
+        </a>
+        <a href="#" onclick="showSection('sellers')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="sellers">
+          <span class="material-symbols-outlined text-lg">store</span> Sellers
+        </a>
+        <a href="#" onclick="showSection('drivers')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="drivers">
+          <span class="material-symbols-outlined text-lg">delivery_dining</span> Drivers
+        </a>
+        <a href="#" onclick="showSection('orders')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="orders">
+          <span class="material-symbols-outlined text-lg">receipt_long</span> Orders
+        </a>
+        <a href="#" onclick="showSection('analytics')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="analytics">
+          <span class="material-symbols-outlined text-lg">analytics</span> Analytics
+        </a>
+      </nav>
+      <div class="p-3 border-t border-gray-200">
+        <div class="flex items-center gap-3 px-4 py-2">
+          <div class="w-8 h-8 bg-[#012d1d]/10 rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-sm text-[#012d1d]">person</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium truncate" id="adminName">Admin</p>
+          </div>
+          <button onclick="adminLogout()" class="text-gray-400 hover:text-gray-600">
+            <span class="material-symbols-outlined text-lg">logout</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="flex-1 ml-64">
+      <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+        <div>
+          <h1 class="text-xl font-bold" id="pageTitle">Dashboard</h1>
+          <p class="text-sm text-gray-500" id="pageSubtitle">Real-time overview</p>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full">
+            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            <span class="text-xs font-medium text-green-700" id="connectionStatus">Demo Mode</span>
+          </div>
+          <div class="flex items-center gap-2 px-3 py-1.5 ai-badge rounded-full">
+            <span class="material-symbols-outlined text-white text-sm">psychology</span>
+            <span class="text-xs font-medium text-white">AI Active</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="p-6" id="mainContent">
+        <div id="section-dashboard" class="section-content">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <div class="stat-card bg-white rounded-xl p-4 shadow-sm border-l-4 border-blue-500">
+              <p class="text-xs text-gray-500">Total Orders</p>
+              <p class="text-xl font-bold" id="statOrders">-</p>
+            </div>
+            <div class="stat-card bg-white rounded-xl p-4 shadow-sm border-l-4 border-green-500">
+              <p class="text-xs text-gray-500">Revenue</p>
+              <p class="text-xl font-bold" id="statRevenue">-</p>
+            </div>
+            <div class="stat-card bg-white rounded-xl p-4 shadow-sm border-l-4 border-purple-500">
+              <p class="text-xs text-gray-500">Active Vendors</p>
+              <p class="text-xl font-bold" id="statVendors">-</p>
+            </div>
+            <div class="stat-card bg-white rounded-xl p-4 shadow-sm border-l-4 border-amber-500">
+              <p class="text-xs text-gray-500">Active Users</p>
+              <p class="text-xl font-bold" id="statUsers">-</p>
+            </div>
+            <div class="stat-card bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-4 shadow-sm text-white">
+              <p class="text-xs text-white/80">AI Alerts</p>
+              <p class="text-xl font-bold" id="statAIAlerts">0</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-purple-600">lightbulb</span>
+                <h3 class="font-bold">AI Smart Insights</h3>
+              </div>
+              <div id="aiInsights" class="space-y-3"></div>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-green-600">trending_up</span>
+                <h3 class="font-bold">Trending Now</h3>
+              </div>
+              <div id="trendingProducts" class="space-y-2"></div>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-blue-600">rule</span>
+                <h3 class="font-bold">AI Recommendations</h3>
+              </div>
+              <div id="aiRecommendations" class="space-y-2"></div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+              <h3 class="font-bold mb-4">Revenue Trend</h3>
+              <canvas id="revenueChart" height="200"></canvas>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+              <h3 class="font-bold mb-4">Orders by Status</h3>
+              <canvas id="orderStatusChart" height="200"></canvas>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-4 border-b flex justify-between items-center">
+              <h3 class="font-bold">Recent Orders</h3>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span class="text-xs text-green-600">Live</span>
+              </div>
+            </div>
+            <table class="w-full">
+              <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                <tr>
+                  <th class="px-4 py-3 text-left">Order ID</th>
+                  <th class="px-4 py-3 text-left">Customer</th>
+                  <th class="px-4 py-3 text-left">Vendor</th>
+                  <th class="px-4 py-3 text-left">Amount</th>
+                  <th class="px-4 py-3 text-left">Status</th>
+                  <th class="px-4 py-3 text-left">AI Score</th>
+                </tr>
+              </thead>
+              <tbody id="recentOrdersTable" class="divide-y">
+                <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="section-ai-moderation" class="section-content hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-6 text-white">
+              <h3 class="font-bold mb-2">Platform Health</h3>
+              <p class="text-4xl font-bold" id="platformHealthScore">95%</p>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm border-l-4 border-red-500">
+              <h3 class="font-bold mb-2">Flagged Products</h3>
+              <p class="text-2xl font-bold" id="flaggedProducts">3</p>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm border-l-4 border-amber-500">
+              <h3 class="font-bold mb-2">Suspicious Orders</h3>
+              <p class="text-2xl font-bold" id="suspiciousOrders">2</p>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm">
+            <div class="p-4 border-b bg-purple-50">
+              <h3 class="font-bold">AI Detection Rules Active</h3>
+            </div>
+            <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <span class="material-symbols-outlined text-green-600">check_circle</span>
+                <div><p class="font-medium text-sm">Fake Product Detection</p></div>
+              </div>
+              <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <span class="material-symbols-outlined text-green-600">check_circle</span>
+                <div><p class="font-medium text-sm">Price Anomaly Detection</p></div>
+              </div>
+              <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <span class="material-symbols-outlined text-green-600">check_circle</span>
+                <div><p class="font-medium text-sm">Scam Listing Detection</p></div>
+              </div>
+              <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <span class="material-symbols-outlined text-green-600">check_circle</span>
+                <div><p class="font-medium text-sm">Review Manipulation</p></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm mt-6">
+            <div class="p-4 border-b">
+              <h3 class="font-bold">AI Flagged Items</h3>
+            </div>
+            <table class="w-full">
+              <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                <tr>
+                  <th class="px-4 py-3 text-left">Type</th>
+                  <th class="px-4 py-3 text-left">Item</th>
+                  <th class="px-4 py-3 text-left">Issue</th>
+                  <th class="px-4 py-3 text-left">Confidence</th>
+                  <th class="px-4 py-3 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="flaggedItemsTable" class="divide-y">
+                <tr class="alert-warning">
+                  <td class="px-4 py-3"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs">Product</span></td>
+                  <td class="px-4 py-3 font-medium">iPhone 15 Pro - $50</td>
+                  <td class="px-4 py-3">Price too low - scam indicator</td>
+                  <td class="px-4 py-3"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs">92%</span></td>
+                  <td class="px-4 py-3">
+                    <button class="text-red-600 hover:underline text-sm mr-2">Remove</button>
+                    <button class="text-gray-600 hover:underline text-sm">Review</button>
+                  </td>
+                </tr>
+                <tr class="alert-warning">
+                  <td class="px-4 py-3"><span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs">Order</span></td>
+                  <td class="px-4 py-3 font-medium">ORD-8923</td>
+                  <td class="px-4 py-3">Multiple orders same address</td>
+                  <td class="px-4 py-3"><span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs">78%</span></td>
+                  <td class="px-4 py-3">
+                    <button class="text-amber-600 hover:underline text-sm mr-2">Hold</button>
+                    <button class="text-gray-600 hover:underline text-sm">Investigate</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="section-server" class="section-content hidden">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-green-500">
+              <p class="text-xs text-gray-500">Status</p>
+              <p class="text-xl font-bold text-green-600" id="serverStatus">Online</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-blue-500">
+              <p class="text-xs text-gray-500">Uptime</p>
+              <p class="text-xl font-bold" id="serverUptime">-</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-purple-500">
+              <p class="text-xs text-gray-500">Memory Used</p>
+              <p class="text-xl font-bold" id="serverMemory">-</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-amber-500">
+              <p class="text-xs text-gray-500">CPU Usage</p>
+              <p class="text-xl font-bold" id="serverCPU">-</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+              <h3 class="font-bold mb-4">System Details</h3>
+              <div id="systemDetails" class="space-y-2 text-sm">
+                <div class="flex justify-between py-2 border-b"><span>Environment</span><span class="font-mono" id="sysEnv">-</span></div>
+                <div class="flex justify-between py-2 border-b"><span>Node Version</span><span class="font-mono" id="sysVersion">-</span></div>
+                <div class="flex justify-between py-2 border-b"><span>Firebase</span><span class="font-mono text-green-600" id="sysFirebase">-</span></div>
+                <div class="flex justify-between py-2 border-b"><span>Supabase</span><span class="font-mono text-green-600" id="sysSupabase">-</span></div>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+              <h3 class="font-bold mb-4">Memory Breakdown</h3>
+              <canvas id="memoryChart" height="180"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div id="section-logs" class="section-content hidden">
+          <div class="bg-white rounded-xl shadow-sm">
+            <div class="p-4 border-b flex justify-between items-center">
+              <h3 class="font-bold">Server Logs</h3>
+              <div class="flex gap-2">
+                <select id="logTypeFilter" class="p-2 border rounded text-sm" onchange="loadLogs()">
+                  <option value="all">All Types</option>
+                  <option value="error">Errors</option>
+                  <option value="warn">Warnings</option>
+                  <option value="info">Info</option>
+                </select>
+                <button onclick="loadLogs()" class="px-3 py-1 bg-[#012d1d] text-white rounded text-sm">Refresh</button>
+              </div>
+            </div>
+            <div class="max-h-96 overflow-y-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50 text-xs uppercase text-gray-500 sticky top-0">
+                  <tr>
+                    <th class="px-4 py-3 text-left">Time</th>
+                    <th class="px-4 py-3 text-left">Type</th>
+                    <th class="px-4 py-3 text-left">Message</th>
+                  </tr>
+                </thead>
+                <tbody id="logsTable" class="divide-y font-mono text-sm"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="section-reports" class="section-content hidden">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-blue-500">
+              <p class="text-xs text-gray-500">Period</p>
+              <select id="reportPeriod" class="w-full p-2 border rounded mt-1" onchange="loadReports()">
+                <option value="24h">Last 24 Hours</option>
+                <option value="7d" selected>Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+              </select>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+              <p class="text-xs text-gray-500">Total Orders</p>
+              <p class="text-2xl font-bold" id="reportOrders">-</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+              <p class="text-xs text-gray-500">Total Revenue</p>
+              <p class="text-2xl font-bold text-green-600" id="reportRevenue">-</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+              <p class="text-xs text-gray-500">Active Users</p>
+              <p class="text-2xl font-bold" id="reportUsers">-</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+              <h3 class="font-bold mb-4">Orders by Status</h3>
+              <canvas id="reportOrdersChart" height="200"></canvas>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+              <h3 class="font-bold mb-4">Revenue by Category</h3>
+              <canvas id="reportRevenueChart" height="200"></canvas>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold mb-4">Export Reports</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <button onclick="exportReport('orders')" class="p-4 border rounded-xl hover:bg-gray-50 text-left">
+                <span class="material-symbols-outlined text-2xl">receipt_long</span>
+                <p class="font-medium mt-2">Orders Report</p>
+                <p class="text-xs text-gray-500">Download CSV</p>
+              </button>
+              <button onclick="exportReport('users')" class="p-4 border rounded-xl hover:bg-gray-50 text-left">
+                <span class="material-symbols-outlined text-2xl">people</span>
+                <p class="font-medium mt-2">Users Report</p>
+                <p class="text-xs text-gray-500">Download CSV</p>
+              </button>
+              <button onclick="exportReport('financial')" class="p-4 border rounded-xl hover:bg-gray-50 text-left">
+                <span class="material-symbols-outlined text-2xl">payments</span>
+                <p class="font-medium mt-2">Financial Report</p>
+                <p class="text-xs text-gray-500">Download CSV</p>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="section-users" class="section-content hidden">
+          <div class="bg-white rounded-xl shadow-sm">
+            <table class="w-full">
+              <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                <tr>
+                  <th class="px-4 py-3 text-left">User</th>
+                  <th class="px-4 py-3 text-left">Contact</th>
+                  <th class="px-4 py-3 text-left">Role</th>
+                  <th class="px-4 py-3 text-left">Status</th>
+                  <th class="px-4 py-3 text-left">AI Risk</th>
+                </tr>
+              </thead>
+              <tbody id="usersTable" class="divide-y"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="section-orders" class="section-content hidden">
+          <div class="bg-white rounded-xl shadow-sm">
+            <div class="p-4 border-b flex justify-between items-center flex-wrap gap-4">
+              <h3 class="font-bold">All Orders</h3>
+              <div class="flex gap-3">
+                <select id="orderStatusFilter" onchange="loadOrders()" class="p-2 border rounded text-sm">
+                  <option value="">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="preparing">Preparing</option>
+                  <option value="dispatched">Dispatched</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                <input type="text" id="orderSearch" placeholder="Search orders..." class="p-2 border rounded text-sm" onkeyup="searchOrders()">
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                  <tr>
+                    <th class="px-4 py-3 text-left">Order ID</th>
+                    <th class="px-4 py-3 text-left">Customer</th>
+                    <th class="px-4 py-3 text-left">Vendor</th>
+                    <th class="px-4 py-3 text-left">Driver</th>
+                    <th class="px-4 py-3 text-left">Total</th>
+                    <th class="px-4 py-3 text-left">Status</th>
+                    <th class="px-4 py-3 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="ordersTable" class="divide-y"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="section-sellers" class="section-content hidden">
+          <div class="bg-white rounded-xl shadow-sm">
+            <div class="p-4 border-b flex justify-between items-center">
+              <h3 class="font-bold">All Sellers</h3>
+              <input type="text" id="sellerSearch" placeholder="Search sellers..." class="p-2 border rounded" onkeyup="searchSellers()">
+            </div>
+            <table class="w-full">
+              <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                <tr>
+                  <th class="px-4 py-3 text-left">Seller</th>
+                  <th class="px-4 py-3 text-left">Category</th>
+                  <th class="px-4 py-3 text-left">Status</th>
+                  <th class="px-4 py-3 text-left">Orders</th>
+                  <th class="px-4 py-3 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="sellersTable" class="divide-y"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="section-drivers" class="section-content hidden">
+          <div class="bg-white rounded-xl shadow-sm">
+            <div class="p-4 border-b flex justify-between items-center">
+              <h3 class="font-bold">All Drivers</h3>
+              <input type="text" id="driverSearch" placeholder="Search drivers..." class="p-2 border rounded" onkeyup="searchDrivers()">
+            </div>
+            <table class="w-full">
+              <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                <tr>
+                  <th class="px-4 py-3 text-left">Driver</th>
+                  <th class="px-4 py-3 text-left">Phone</th>
+                  <th class="px-4 py-3 text-left">Status</th>
+                  <th class="px-4 py-3 text-left">Ratings</th>
+                  <th class="px-4 py-3 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="driversTable" class="divide-y"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="section-analytics" class="section-content hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+              <h3 class="font-bold mb-4">Sales Trend</h3>
+              <canvas id="salesTrendChart" height="200"></canvas>
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-sm">
+              <h3 class="font-bold mb-4">Revenue by Category</h3>
+              <canvas id="categoryChart" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let currentAdmin = null;
+    let charts = {};
+    let dataService = null;
+    let liveMode = false;
+    let orderSubscription = null;
+
+    document.getElementById('loginBtn').onclick = adminLogin;
+
+    async function initDataService() {
+      dataService = new AdminDataService();
+      const connected = await dataService.init();
+      liveMode = connected;
+      console.log('Data service initialized, live mode:', liveMode);
+    }
+
+    function checkAuth() {
+      const saved = localStorage.getItem('smartsoko_admin');
+      if (saved) {
+        currentAdmin = JSON.parse(saved);
+        showDashboard();
+      }
+    }
+
+    async function adminLogin() {
+      var email = document.getElementById('adminEmail').value;
+      var password = document.getElementById('adminPassword').value;
+      var errorDiv = document.getElementById('loginError');
+
+      if (typeof window.auth !== 'undefined') {
+        try {
+          const cred = await window.auth.signInWithEmailAndPassword(window.auth, email, password);
+          currentAdmin = { email: cred.user.email, name: cred.user.displayName || 'Admin', role: 'admin' };
+          localStorage.setItem('smartsoko_admin', JSON.stringify(currentAdmin));
+          await initDataService();
+          showDashboard();
+        } catch (e) {
+          errorDiv.textContent = 'Invalid credentials';
+          errorDiv.classList.remove('hidden');
+        }
+      } else {
+        errorDiv.textContent = 'Invalid credentials';
+        errorDiv.classList.remove('hidden');
+      }
+    }
+
+    function adminLogout() {
+      if (dataService) dataService.disconnect();
+      localStorage.removeItem('smartsoko_admin');
+      currentAdmin = null;
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('adminLayout').classList.add('hidden');
+    }
+
+    function showDashboard() {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('adminLayout').classList.remove('hidden');
+      document.getElementById('adminName').textContent = currentAdmin.name;
+      updateConnectionStatus();
+      loadDashboardData();
+    }
+
+    function updateConnectionStatus() {
+      const statusEl = document.getElementById('connectionStatus');
+      if (liveMode) {
+        statusEl.textContent = 'Live';
+        statusEl.parentElement.className = 'flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full';
+      } else {
+        statusEl.textContent = 'Demo Mode';
+        statusEl.parentElement.className = 'flex items-center gap-2 px-3 py-1.5 bg-amber-50 rounded-full';
+        statusEl.className = 'text-xs font-medium text-amber-700';
+      }
+    }
+
+    function showSection(section) {
+      document.querySelectorAll('.section-content').forEach(function(el) { el.classList.add('hidden'); });
+      document.getElementById('section-' + section).classList.remove('hidden');
+      document.querySelectorAll('.sidebar-link').forEach(function(el) { el.classList.remove('active'); });
+      document.querySelector('[data-section="' + section + '"]').classList.add('active');
+
+      var titles = {
+        dashboard: ['Dashboard', 'Real-time overview'],
+        server: ['Server Status', 'System monitoring'],
+        logs: ['Server Logs', 'Debug & diagnostics'],
+        reports: ['Reports', 'Business reports'],
+        'ai-moderation': ['AI Moderation', 'Fraud detection'],
+        users: ['Users', 'User management'],
+        sellers: ['Sellers', 'Seller management'],
+        drivers: ['Drivers', 'Driver management'],
+        orders: ['Orders', 'Order management'],
+        analytics: ['Analytics', 'Business insights']
+      };
+      document.getElementById('pageTitle').textContent = titles[section][0];
+      document.getElementById('pageSubtitle').textContent = titles[section][1];
+
+      if (section === 'dashboard') loadDashboardData();
+      else if (section === 'server') loadServerStatus();
+      else if (section === 'logs') loadLogs();
+      else if (section === 'reports') loadReports();
+      else if (section === 'ai-moderation') loadAIModeration();
+      else if (section === 'users') loadUsers();
+      else if (section === 'sellers') loadSellers();
+      else if (section === 'drivers') loadDrivers();
+      else if (section === 'orders') loadOrders();
+      else if (section === 'analytics') loadAnalytics();
+    }
+
+    function esc(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    async function loadDashboardData() {
+      try {
+        var stats = await dataService.getDashboardStats();
+        document.getElementById('statOrders').textContent = stats.totalOrders.toLocaleString();
+        document.getElementById('statRevenue').textContent = 'TZS ' + (stats.totalRevenue / 1000000).toFixed(1) + 'M';
+        document.getElementById('statVendors').textContent = stats.activeVendors.toLocaleString();
+        document.getElementById('statUsers').textContent = stats.totalUsers.toLocaleString();
+
+        var flagged = await dataService.getFlaggedItems();
+        var alertCount = flagged.products.length + flagged.orders.length;
+        document.getElementById('statAIAlerts').textContent = alertCount;
+
+        document.getElementById('aiInsights').innerHTML = generateInsights(stats, flagged);
+
+        var topProducts = await dataService.getTopProducts();
+        document.getElementById('trendingProducts').innerHTML = topProducts.map(function(p) {
+          return '<div class="flex justify-between p-2 bg-green-50 rounded"><span class="text-sm font-medium">' + p.rank + '. ' + esc(p.name) + '</span><span class="text-sm text-green-600">' + p.count + ' sold</span></div>';
+        }).join('') || '<p class="text-sm text-gray-500">No product data available</p>';
+
+        document.getElementById('aiRecommendations').innerHTML = generateRecommendations(stats);
+
+        var orders = await dataService.getRecentOrders(10);
+        var statusColors = { pending: 'bg-yellow-100 text-yellow-800', preparing: 'bg-purple-100 text-purple-800', dispatched: 'bg-indigo-100 text-indigo-800', delivered: 'bg-green-100 text-green-800', completed: 'bg-green-100 text-green-800', cancelled: 'bg-red-100 text-red-800' };
+
+        document.getElementById('recentOrdersTable').innerHTML = orders.length ? orders.map(function(o) {
+          var rowClass = o.aiScore > 70 ? 'alert-warning' : 'hover:bg-gray-50';
+          return '<tr class="' + rowClass + '">' +
+            '<td class="px-4 py-3 font-mono text-sm">' + esc(o.id) + '</td>' +
+            '<td class="px-4 py-3">' + esc(o.customer) + '</td>' +
+            '<td class="px-4 py-3">' + esc(o.vendor) + '</td>' +
+            '<td class="px-4 py-3 font-medium">TZS ' + o.amount.toLocaleString() + '</td>' +
+            '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ' + (statusColors[o.status] || 'bg-gray-100 text-gray-800') + '">' + esc(o.status) + '</span></td>' +
+            '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ' + (o.aiScore > 70 ? 'bg-red-100 text-red-800' : o.aiScore > 40 ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800') + '">' + o.aiScore + '%</span></td>' +
+          '</tr>';
+        }).join('') : '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No orders yet</td></tr>';
+
+        setupRealtimeOrders();
+      } catch (e) {
+        console.error('Dashboard load error:', e);
+        loadDashboardFallback();
+      }
+
+      initCharts();
+    }
+
+    function loadDashboardFallback() {
+      document.getElementById('statOrders').textContent = '0';
+      document.getElementById('statRevenue').textContent = 'TZS 0';
+      document.getElementById('statVendors').textContent = '0';
+      document.getElementById('statUsers').textContent = '0';
+      document.getElementById('statAIAlerts').textContent = '0';
+      document.getElementById('aiInsights').innerHTML = '<p class="text-sm text-gray-500">Connect to database to see insights</p>';
+      document.getElementById('trendingProducts').innerHTML = '<p class="text-sm text-gray-500">No product data</p>';
+      document.getElementById('aiRecommendations').innerHTML = '<p class="text-sm text-gray-500">No recommendations</p>';
+      document.getElementById('recentOrdersTable').innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No orders found</td></tr>';
+    }
+
+    function generateInsights(stats, flagged) {
+      var insights = [];
+      if (stats.totalOrders > 0) {
+        insights.push('<div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-500"><p class="text-sm">' + stats.totalOrders + ' orders processed on platform</p></div>');
+      }
+      if (flagged.products.length > 0) {
+        insights.push('<div class="p-3 bg-red-50 rounded-lg border-l-4 border-red-500"><p class="text-sm">' + flagged.products.length + ' products flagged for price review</p></div>');
+      }
+      if (flagged.orders.length > 0) {
+        insights.push('<div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500"><p class="text-sm">' + flagged.orders.length + ' orders flagged for manual review</p></div>');
+      }
+      if (insights.length === 0) {
+        insights.push('<div class="p-3 bg-gray-50 rounded-lg"><p class="text-sm text-gray-500">No insights yet - add data to get started</p></div>');
+      }
+      return insights.join('');
+    }
+
+    function generateRecommendations(stats) {
+      var recs = [];
+      if (stats.totalUsers > 10) {
+        recs.push('<div class="p-3 bg-blue-50 rounded-lg"><span class="text-sm">Consider enabling vendor verification for ' + stats.activeVendors + ' active vendors</span></div>');
+      }
+      if (stats.totalRevenue > 0) {
+        recs.push('<div class="p-3 bg-blue-50 rounded-lg"><span class="text-sm">Set up automated payout schedules for vendors</span></div>');
+      }
+      recs.push('<div class="p-3 bg-blue-50 rounded-lg"><span class="text-sm">Enable AI fraud detection rules for all new listings</span></div>');
+      return recs.join('');
+    }
+
+    function setupRealtimeOrders() {
+      if (orderSubscription) return;
+      orderSubscription = dataService.subscribeToOrders(function(payload) {
+        console.log('Real-time order update:', payload);
+        loadDashboardData();
+      });
+    }
+
+    async function loadAIModeration() {
+      try {
+        var flagged = await dataService.getFlaggedItems();
+        var healthScore = flagged.products.length + flagged.orders.length === 0 ? 100 : Math.max(70, 100 - (flagged.products.length + flagged.orders.length) * 5);
+        document.getElementById('platformHealthScore').textContent = healthScore + '%';
+        document.getElementById('flaggedProducts').textContent = flagged.products.length;
+        document.getElementById('suspiciousOrders').textContent = flagged.orders.length;
+
+        var allItems = flagged.products.concat(flagged.orders);
+        if (allItems.length > 0) {
+          document.getElementById('flaggedItemsTable').innerHTML = allItems.map(function(item) {
+            var rowClass = item.confidence > 80 ? 'alert-critical' : item.confidence > 60 ? 'alert-warning' : '';
+            var typeColor = item.type === 'Product' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700';
+            var actionBtn = item.type === 'Product'
+              ? '<button class="text-red-600 hover:underline text-sm mr-2">Remove</button><button class="text-gray-600 hover:underline text-sm">Review</button>'
+              : '<button class="text-amber-600 hover:underline text-sm mr-2">Hold</button><button class="text-gray-600 hover:underline text-sm">Investigate</button>';
+            return '<tr class="' + rowClass + '">' +
+              '<td class="px-4 py-3"><span class="px-2 py-1 ' + typeColor + ' rounded text-xs">' + esc(item.type) + '</span></td>' +
+              '<td class="px-4 py-3 font-medium">' + esc(item.item) + '</td>' +
+              '<td class="px-4 py-3">' + esc(item.issue) + '</td>' +
+              '<td class="px-4 py-3"><span class="px-2 py-1 ' + (item.confidence > 80 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700') + ' rounded text-xs">' + item.confidence + '%</span></td>' +
+              '<td class="px-4 py-3">' + actionBtn + '</td>' +
+            '</tr>';
+          }).join('');
+        } else {
+          document.getElementById('flaggedItemsTable').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No flagged items - platform is clean</td></tr>';
+        }
+      } catch (e) {
+        document.getElementById('platformHealthScore').textContent = 'N/A';
+        document.getElementById('flaggedProducts').textContent = '-';
+        document.getElementById('suspiciousOrders').textContent = '-';
+        document.getElementById('flaggedItemsTable').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">Unable to load data</td></tr>';
+      }
+    }
+
+    async function loadServerStatus() {
+      try {
+        var response = await fetch('/api/admin/system/status', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        var result = await response.json();
+        if (result.success) {
+          var s = result.data;
+          document.getElementById('serverStatus').textContent = s.firebase === 'connected' ? 'Online' : 'Offline';
+          document.getElementById('serverUptime').textContent = Math.floor(s.uptime / 60) + ' min';
+          document.getElementById('serverMemory').textContent = s.memoryPercent.heapUsed + '%';
+          document.getElementById('serverCPU').textContent = '-';
+          document.getElementById('sysEnv').textContent = s.environment;
+          document.getElementById('sysVersion').textContent = s.version;
+          document.getElementById('sysFirebase').textContent = s.firebase;
+          document.getElementById('sysSupabase').textContent = 'N/A';
+        }
+      } catch (e) {
+        console.error('Server status error:', e);
+      }
+    }
+
+    async function loadLogs() {
+      try {
+        var typeFilter = document.getElementById('logTypeFilter').value;
+        var response = await fetch('/api/admin/system/logs?type=' + typeFilter + '&limit=100', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        var result = await response.json();
+        if (result.success) {
+          document.getElementById('logsTable').innerHTML = result.data.map(function(l) {
+            var typeClass = l.type === 'error' ? 'text-red-600' : l.type === 'warn' ? 'text-amber-600' : 'text-gray-600';
+            return '<tr class="hover:bg-gray-50">' +
+              '<td class="px-4 py-2 text-gray-500">' + new Date(l.timestamp).toLocaleTimeString() + '</td>' +
+              '<td class="px-4 py-2"><span class="px-2 py-0.5 rounded text-xs font-medium ' + typeClass + '">' + l.type + '</span></td>' +
+              '<td class="px-4 py-2">' + esc(l.message) + '</td>' +
+            '</tr>';
+          }).join('') || '<tr><td colspan="3" class="px-4 py-8 text-center text-gray-500">No logs</td></tr>';
+        }
+      } catch (e) {
+        document.getElementById('logsTable').innerHTML = '<tr><td colspan="3" class="px-4 py-8 text-center text-red-500">Unable to load logs</td></tr>';
+      }
+    }
+
+    async function loadReports() {
+      try {
+        var period = document.getElementById('reportPeriod').value;
+        var response = await fetch('/api/admin/reports?period=' + period, { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        var result = await response.json();
+        if (result.success) {
+          var r = result.data;
+          document.getElementById('reportOrders').textContent = r.orders?.total || 0;
+          document.getElementById('reportRevenue').textContent = 'TZS ' + ((r.orders?.totalRevenue || 0) / 1000000).toFixed(1) + 'M';
+          document.getElementById('reportUsers').textContent = r.users?.total || 0;
+        }
+      } catch (e) {
+        console.error('Reports error:', e);
+      }
+    }
+
+    function exportReport(type) {
+      alert('Export feature for ' + type + ' - Coming soon');
+    }
+
+    async function loadSellers() {
+      try {
+        var response = await fetch('/api/admin/sellers', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        var result = await response.json();
+        if (result.success) {
+          document.getElementById('sellersTable').innerHTML = result.data.map(function(s) {
+            return '<tr>' +
+              '<td class="px-4 py-3 font-medium">' + esc(s.name) + '</td>' +
+              '<td class="px-4 py-3 text-sm">' + esc(s.category) + '</td>' +
+              '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ' + (s.isOpen ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') + '">' + (s.isOpen ? 'Open' : 'Closed') + '</span></td>' +
+              '<td class="px-4 py-3 text-sm">' + (s.totalOrders || 0) + '</td>' +
+              '<td class="px-4 py-3">' +
+                '<button onclick="updateSeller(\'' + s.id + '\', \'toggle\')" class="text-[#012d1d] hover:underline text-sm mr-2">' + (s.isOpen ? 'Close' : 'Open') + '</button>' +
+                '<button onclick="deleteSeller(\'' + s.id + '\', \'' + esc(s.name) + '\')" class="text-red-600 hover:underline text-sm">Delete</button>' +
+              '</td>' +
+            '</tr>';
+          }).join('') || '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No sellers</td></tr>';
+        }
+      } catch (e) {
+        document.getElementById('sellersTable').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-red-500">Unable to load sellers</td></tr>';
+      }
+    }
+
+    async function loadDrivers() {
+      try {
+        var response = await fetch('/api/admin/drivers', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        var result = await response.json();
+        if (result.success) {
+          document.getElementById('driversTable').innerHTML = result.data.map(function(d) {
+            return '<tr>' +
+              '<td class="px-4 py-3 font-medium">' + esc(d.name) + '</td>' +
+              '<td class="px-4 py-3 text-sm">' + esc(d.phone) + '</td>' +
+              '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ' + (d.available ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800') + '">' + (d.available ? 'Available' : 'Busy') + '</span></td>' +
+              '<td class="px-4 py-3 text-sm">' + (d.rating || '-') + '</td>' +
+              '<td class="px-4 py-3">' +
+                '<button class="text-[#012d1d] hover:underline text-sm">View</button>' +
+              '</td>' +
+            '</tr>';
+          }).join('') || '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No drivers</td></tr>';
+        }
+      } catch (e) {
+        document.getElementById('driversTable').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-red-500">Unable to load drivers</td></tr>';
+      }
+    }
+
+    async function loadUsers() {
+      try {
+        var users = await dataService.getUsers();
+        var roleColors = { super_admin: 'bg-red-100 text-red-800', admin: 'bg-red-100 text-red-800', vendor: 'bg-purple-100 text-purple-800', driver: 'bg-blue-100 text-blue-800', customer: 'bg-gray-100 text-gray-800' };
+
+        document.getElementById('usersTable').innerHTML = users.length ? users.map(function(u) {
+          var rowClass = u.aiRisk > 70 ? 'alert-warning' : 'hover:bg-gray-50';
+          return '<tr class="' + rowClass + '">' +
+            '<td class="px-4 py-3 font-medium">' + esc(u.name) + '</td>' +
+            '<td class="px-4 py-3 text-sm">' + esc(u.email) + '</td>' +
+            '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ' + (roleColors[u.role] || 'bg-gray-100') + '">' + esc(u.role) + '</span></td>' +
+            '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ' + (u.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') + '">' + esc(u.status) + '</span></td>' +
+            '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ' + (u.aiRisk > 70 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800') + '">' + u.aiRisk + '%</span></td>' +
+          '</tr>';
+        }).join('') : '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No users found</td></tr>';
+      } catch (e) {
+        document.getElementById('usersTable').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">Unable to load users</td></tr>';
+      }
+    }
+
+    var allOrders = [];
+
+    async function loadOrders() {
+      try {
+        var orders = await dataService.getOrders();
+        allOrders = orders || [];
+        
+        // Apply status filter
+        var statusFilter = document.getElementById('orderStatusFilter')?.value;
+        if (statusFilter) {
+          orders = orders.filter(o => o.status === statusFilter);
+        }
+        
+        renderOrders(orders);
+      } catch (e) {
+        console.error('Error loading orders:', e);
+        document.getElementById('ordersTable').innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">Unable to load orders</td></tr>';
+      }
+    }
+
+    function searchOrders() {
+      var searchTerm = document.getElementById('orderSearch')?.value.toLowerCase() || '';
+      var filtered = allOrders.filter(o => 
+        (o.id && o.id.toLowerCase().includes(searchTerm)) ||
+        (o.customer && o.customer.toLowerCase().includes(searchTerm)) ||
+        (o.vendor && o.vendor.toLowerCase().includes(searchTerm))
+      );
+      renderOrders(filtered);
+    }
+
+    function renderOrders(orders) {
+      var statusColors = { pending: 'bg-yellow-100 text-yellow-800', preparing: 'bg-purple-100 text-purple-800', dispatched: 'bg-indigo-100 text-indigo-800', delivered: 'bg-green-100 text-green-800', completed: 'bg-green-100 text-green-800', cancelled: 'bg-red-100 text-red-800' };
+
+      document.getElementById('ordersTable').innerHTML = orders.length ? orders.map(function(o) {
+        var canAssignDriver = ['pending', 'preparing'].includes(o.status);
+        var canCancel = ['pending', 'preparing'].includes(o.status);
+        var canUpdateStatus = !['delivered', 'cancelled'].includes(o.status);
+        
+        return '<tr class="hover:bg-gray-50">' +
+          '<td class="px-4 py-3 font-mono text-sm">' + esc(o.id?.substring(0, 8)) + '...</td>' +
+          '<td class="px-4 py-3">' + esc(o.customer) + '</td>' +
+          '<td class="px-4 py-3">' + esc(o.vendor) + '</td>' +
+          '<td class="px-4 py-3">' + (o.driver ? esc(o.driver) : '<span class="text-gray-400">Not assigned</span>') + '</td>' +
+          '<td class="px-4 py-3 font-medium">TZS ' + (o.amount || 0).toLocaleString() + '</td>' +
+          '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ' + (statusColors[o.status] || 'bg-gray-100 text-gray-800') + '">' + esc(o.status) + '</span></td>' +
+          '<td class="px-4 py-3">' +
+            (canAssignDriver ? '<button onclick="showAssignDriverModal(\'' + o.id + '\')" class="text-blue-600 hover:underline text-sm mr-2">Assign Driver</button>' : '') +
+            (canUpdateStatus ? '<button onclick="updateOrderStatus(\'' + o.id + '\')" class="text-[#012d1d] hover:underline text-sm mr-2">Update</button>' : '') +
+            (canCancel ? '<button onclick="cancelOrder(\'' + o.id + '\')" class="text-red-600 hover:underline text-sm">Cancel</button>' : '') +
+          '</td>' +
+        '</tr>';
+      }).join('') : '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">No orders found</td></tr>';
+    }
+
+    async function showAssignDriverModal(orderId) {
+      try {
+        var drivers = await dataService.getDrivers ? await dataService.getDrivers() : [];
+        
+        if (!drivers || drivers.length === 0) {
+          // Fallback: try to fetch from Firestore
+          const db = window.db;
+          if (db) {
+            const { collection, getDocs, query, where } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+            const driversSnap = await getDocs(query(collection(db, 'drivers'), where('available', '==', true)));
+            drivers = driversSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          }
+        }
+        
+        if (drivers.length === 0) {
+          alert('No available drivers found');
+          return;
+        }
+        
+        var driverOptions = drivers.map(d => 
+          '<option value="' + d.id + '">' + esc(d.name) + ' (' + (d.phone || 'No phone') + ')</option>'
+        ).join('');
+        
+        var driverId = prompt('Select driver to assign:\n\nAvailable Drivers:\n' + 
+          drivers.map((d, i) => (i + 1) + '. ' + d.name + ' - ' + (d.phone || 'No phone')).join('\n') +
+          '\n\nEnter driver number (1-' + drivers.length + '):');
+        
+        if (driverId) {
+          var selectedIndex = parseInt(driverId) - 1;
+          if (selectedIndex >= 0 && selectedIndex < drivers.length) {
+            await assignDriver(orderId, drivers[selectedIndex].id, drivers[selectedIndex].name);
+          } else {
+            alert('Invalid driver selection');
+          }
+        }
+      } catch (e) {
+        console.error('Error loading drivers:', e);
+        alert('Error loading drivers: ' + e.message);
+      }
+    }
+
+    async function assignDriver(orderId, driverId, driverName) {
+      try {
+        const db = window.db;
+        if (!db) {
+          alert('Database not available');
+          return;
+        }
+        
+        const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        
+        await updateDoc(doc(db, 'orders', orderId), {
+          driverId: driverId,
+          driverName: driverName,
+          status: 'dispatched',
+          dispatchedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        
+        // Update driver status
+        await updateDoc(doc(db, 'drivers', driverId), {
+          available: false,
+          currentOrderId: orderId
+        });
+        
+        alert('Driver ' + driverName + ' assigned successfully');
+        loadOrders();
+      } catch (e) {
+        console.error('Error assigning driver:', e);
+        alert('Error assigning driver: ' + e.message);
+      }
+    }
+
+    async function cancelOrder(orderId) {
+      if (!confirm('Are you sure you want to cancel this order?\n\nThis action cannot be undone.')) {
+        return;
+      }
+      
+      try {
+        const db = window.db;
+        if (!db) {
+          alert('Database not available');
+          return;
+        }
+        
+        const { doc, updateDoc, serverTimestamp, getDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        
+        // Get current order to check if driver was assigned
+        const orderSnap = await getDoc(doc(db, 'orders', orderId));
+        const orderData = orderSnap.data();
+        
+        await updateDoc(doc(db, 'orders', orderId), {
+          status: 'cancelled',
+          cancelledAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        
+        // Free up driver if assigned
+        if (orderData?.driverId) {
+          await updateDoc(doc(db, 'drivers', orderData.driverId), {
+            available: true,
+            currentOrderId: null
+          });
+        }
+        
+        alert('Order cancelled successfully');
+        loadOrders();
+      } catch (e) {
+        console.error('Error cancelling order:', e);
+        alert('Error cancelling order: ' + e.message);
+      }
+    }
+
+    async function updateOrderStatus(orderId) {
+      var statuses = ['pending', 'preparing', 'dispatched', 'delivered'];
+      var newStatus = prompt('Enter new status:\n\n1. pending\n2. preparing\n3. dispatched\n4. delivered\n\nEnter number (1-4):');
+      
+      if (!newStatus) return;
+      
+      var index = parseInt(newStatus) - 1;
+      if (index < 0 || index >= statuses.length) {
+        alert('Invalid selection');
+        return;
+      }
+      
+      try {
+        const db = window.db;
+        if (!db) {
+          alert('Database not available');
+          return;
+        }
+        
+        const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        
+        await updateDoc(doc(db, 'orders', orderId), {
+          status: statuses[index],
+          updatedAt: serverTimestamp()
+        });
+        
+        alert('Order status updated to ' + statuses[index]);
+        loadOrders();
+      } catch (e) {
+        console.error('Error updating order:', e);
+        alert('Error updating order: ' + e.message);
+      }
+    }
+
+    async function loadAnalytics() {
+      try {
+        var revenueData = await dataService.getRevenueData(7);
+        var statusBreakdown = await dataService.getOrderStatusBreakdown();
+
+        var salesCtx = document.getElementById('salesTrendChart');
+        if (salesCtx && typeof Chart !== 'undefined') {
+          if (charts.salesTrend) charts.salesTrend.destroy();
+          charts.salesTrend = new Chart(salesCtx, {
+            type: 'bar',
+            data: {
+              labels: revenueData.labels,
+              datasets: [{ label: 'Orders', data: revenueData.orderCount, backgroundColor: '#012d1d', borderRadius: 6 }]
+            },
+            options: { responsive: true }
+          });
+        }
+
+        var categoryCtx = document.getElementById('categoryChart');
+        if (categoryCtx && typeof Chart !== 'undefined') {
+          if (charts.category) charts.category.destroy();
+          var statusLabels = Object.keys(statusBreakdown);
+          var statusValues = Object.values(statusBreakdown);
+          if (statusLabels.length > 0) {
+            charts.category = new Chart(categoryCtx, {
+              type: 'doughnut',
+              data: {
+                labels: statusLabels.map(s => s.charAt(0).toUpperCase() + s.slice(1)),
+                datasets: [{ data: statusValues, backgroundColor: ['#f59e0b', '#8b5cf6', '#22c55e', '#6366f1', '#dc2626', '#6b7280'] }]
+              },
+              options: { responsive: true }
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Analytics load error:', e);
+      }
+    }
+
+    function initCharts() {
+      dataService.getRevenueData(7).then(function(revenueData) {
+        var revenueCtx = document.getElementById('revenueChart');
+        if (revenueCtx && typeof Chart !== 'undefined') {
+          if (charts.revenue) charts.revenue.destroy();
+          charts.revenue = new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+              labels: revenueData.labels,
+              datasets: [{ label: 'Revenue (TZS)', data: revenueData.revenue, borderColor: '#012d1d', backgroundColor: 'rgba(1,45,29,0.1)', fill: true, tension: 0.4 }]
+            },
+            options: { responsive: true }
+          });
+        }
+      });
+
+      dataService.getOrderStatusBreakdown().then(function(statusBreakdown) {
+        var statusCtx = document.getElementById('orderStatusChart');
+        if (statusCtx && typeof Chart !== 'undefined') {
+          if (charts.orderStatus) charts.orderStatus.destroy();
+          var statusLabels = Object.keys(statusBreakdown);
+          var statusValues = Object.values(statusBreakdown);
+          if (statusLabels.length > 0) {
+            charts.orderStatus = new Chart(statusCtx, {
+              type: 'doughnut',
+              data: {
+                labels: statusLabels.map(s => s.charAt(0).toUpperCase() + s.slice(1)),
+                datasets: [{ data: statusValues, backgroundColor: ['#f59e0b', '#8b5cf6', '#22c55e', '#6366f1', '#dc2626', '#6b7280'] }]
+              },
+              options: { responsive: true }
+            });
+          }
+        }
+      });
+    }
+
+    async function updateSeller(sellerId, action) {
+      try {
+        var response = await fetch('/api/admin/sellers/' + sellerId, {
+          method: 'POST',
+          headers: { 
+            'Authorization': 'Bearer ' + (window.currentAdminToken || ''),
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ action: action })
+        });
+        var result = await response.json();
+        if (result.success) {
+          loadSellers();
+        } else {
+          alert('Failed to update seller: ' + (result.message || 'Unknown error'));
+        }
+      } catch (e) {
+        console.error('Error updating seller:', e);
+        alert('Error updating seller. Please try again.');
+      }
+    }
+
+    async function deleteSeller(sellerId, sellerName) {
+      if (!confirm('Are you sure you want to delete seller "' + sellerName + '"?\n\nThis action cannot be undone. All associated data will be permanently removed.')) {
+        return;
+      }
+      
+      try {
+        // Try API first
+        var response = await fetch('/api/admin/sellers/' + sellerId, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') }
+        });
+        
+        if (response.ok) {
+          loadSellers();
+          alert('Seller deleted successfully');
+          return;
+        }
+        
+        // Fallback to Firestore
+        const db = window.db;
+        if (!db) {
+          alert('Database not available');
+          return;
+        }
+        
+        const { doc, deleteDoc, collection, getDocs, query, where, writeBatch } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        
+        // Delete seller from restaurants collection
+        await deleteDoc(doc(db, 'restaurants', sellerId));
+        
+        // Delete associated products
+        const productsQuery = query(collection(db, 'products'), where('restaurantId', '==', sellerId));
+        const productsSnap = await getDocs(productsQuery);
+        
+        const batch = writeBatch(db);
+        productsSnap.forEach((productDoc) => {
+          batch.delete(productDoc.ref);
+        });
+        await batch.commit();
+        
+        loadSellers();
+        alert('Seller "' + sellerName + '" and all associated products have been deleted');
+        
+      } catch (e) {
+        console.error('Error deleting seller:', e);
+        alert('Error deleting seller: ' + e.message);
+      }
+    }
+
+    window.escapeHtml = esc;
+    window.showSection = showSection;
+    window.adminLogout = adminLogout;
+    window.updateSeller = updateSeller;
+    window.deleteSeller = deleteSeller;
+    window.searchOrders = searchOrders;
+    window.showAssignDriverModal = showAssignDriverModal;
+    window.assignDriver = assignDriver;
+    window.cancelOrder = cancelOrder;
+    window.updateOrderStatus = updateOrderStatus;
+
+    checkAuth();
+  </script>
+</body>
+</html>

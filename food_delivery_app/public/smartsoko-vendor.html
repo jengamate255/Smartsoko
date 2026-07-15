@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Performance: Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kilimanjaro Fresh - SMARTSOKO</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <!-- Design System -->
+  <link rel="stylesheet" href="smartsoko-design-system.css">
+  
+  <style> .vendor-hero {background: linear-gradient(135deg,var(--color-terra) 0%,var(--color-gold) 100%);padding: var(--spacing-xl) 0;color: var(--color-white)} .vendor-header {display: flex;align-items: center;gap: var(--spacing-lg);margin-bottom: var(--spacing-lg)} .vendor-logo {width: 120px;height: 120px;border-radius: var(--radius-lg);background-color: var(--color-white);display: flex;align-items: center;justify-content: center;font-size: 48px;color: var(--color-terra);box-shadow: var(--shadow-lg)} .vendor-info h1 {font-size: clamp(28px,4vw,48px);color: var(--color-white);margin-bottom: var(--spacing-xs)} .vendor-badge {display: inline-block;background-color: rgba(255,255,255,0.2);padding: 4px 12px;border-radius: var(--radius-full);font-size: var(--text-small);font-weight: 600;margin-bottom: var(--spacing-sm)} .vendor-stats {display: flex;gap: var(--spacing-lg);margin-top: var(--spacing-md)} .vendor-stat {text-align: center} .vendor-stat-number {font-family: var(--font-display);font-size: 24px;font-weight: 700;color: var(--color-white)} .vendor-stat-label {font-size: var(--text-small);opacity: 0.9} .vendor-actions {display: flex;gap: var(--spacing-sm);margin-top: var(--spacing-lg)} .tabs {display: flex;border-bottom: 2px solid var(--color-taupe);margin-bottom: var(--spacing-lg);overflow-x: auto} .tab {padding: var(--spacing-sm) var(--spacing-md);font-family: var(--font-accent);font-weight: 600;color: var(--color-gray);border-bottom: 3px solid transparent;cursor: pointer;transition: all var(--transition-fast);white-space: nowrap} .tab.active {color: var(--color-gold);border-bottom-color: var(--color-gold)} .tab:hover {color: var(--color-charcoal)} .tab-content {display: none} .tab-content.active {display: block} .products-section {margin-bottom: var(--spacing-xl)} .section-title {font-size: var(--text-h3);margin-bottom: var(--spacing-md);display: flex;align-items: center;justify-content: space-between} .view-all {color: var(--color-gold);font-size: var(--text-small);text-decoration: none;font-weight: 600} .view-all:hover {text-decoration: underline} .info-grid {display: grid;grid-template-columns: repeat(auto-fit,minmax(250px,1fr));gap: var(--spacing-md);margin-bottom: var(--spacing-lg)} .info-card {background-color: var(--color-white);padding: var(--spacing-md);border-radius: var(--radius-lg);box-shadow: var(--shadow-sm)} .info-card h3 {font-size: var(--text-body);margin-bottom: var(--spacing-sm);display: flex;align-items: center;gap: var(--spacing-xs)} .info-card p {color: var(--color-gray);font-size: var(--text-small);line-height: 1.5} .reviews-section {margin-bottom: var(--spacing-xl)} .review-card {background-color: var(--color-white);padding: var(--spacing-md);border-radius: var(--radius-lg);box-shadow: var(--shadow-sm);margin-bottom: var(--spacing-md)} .review-header {display: flex;align-items: center;gap: var(--spacing-sm);margin-bottom: var(--spacing-sm)} .reviewer-avatar {width: 40px;height: 40px;border-radius: var(--radius-full);background-color: var(--color-taupe);display: flex;align-items: center;justify-content: center;color: var(--color-white);font-weight: 600} .reviewer-info {flex: 1} .reviewer-name {font-weight: 600;font-size: var(--text-small)} .review-date {font-size: var(--text-caption);color: var(--color-gray)} .review-rating {color: var(--color-gold);font-size: 14px} .review-text {color: var(--color-charcoal);line-height: 1.6;font-size: var(--text-small)} .floating-cart {position: fixed;bottom: 80px;right: var(--spacing-md);z-index: var(--z-dropdown)} @media (max-width: 768px) {.vendor-header {flex-direction: column;text-align: center} .vendor-stats {justify-content: center} .vendor-actions {justify-content: center;flex-wrap: wrap} .tabs {justify-content: center} } </style>
+</head>
+<body>
+  <!-- Top Navigation -->
+  <nav class="nav-top">
+    <a href="smartsoko-home.html" class="nav-logo">SMARTSOKO</a>
+    
+    <div class="nav-search">
+      <div class="search-bar">
+        <span class="material-icons search-icon">search</span>
+        <input type="text" class="search-input" placeholder="Search products...">
+      </div>
+    </div>
+    
+    <div class="nav-links">
+      <a href="smartsoko-products.html" class="nav-link">Browse</a>
+      <a href="smartsoko-vendor.html" class="nav-link">Vendors</a>
+      <a href="main.html" class="nav-link">About</a>
+      <a href="profile.html" class="nav-link">Contact</a>
+    </div>
+    
+    <div class="nav-actions">
+      <button onclick="window.location.href='profile.html'" class="btn btn-ghost">
+        <span class="material-icons">favorite_border</span>
+      </button>
+      <button onclick="window.location.href='smartsoko-cart.html'" class="btn btn-primary">
+        <span class="material-icons">shopping_cart</span>
+        Cart (3)
+      </button>
+    </div>
+  </nav>
+
+  <!-- Vendor Hero -->
+  <section class="vendor-hero">
+    <div class="container">
+      <div class="vendor-header">
+        <div class="vendor-logo">
+          <span class="material-icons" style="font-size: 64px;">eco</span>
+        </div>
+        <div class="vendor-info">
+          <span class="vendor-badge">✓ VERIFIED VENDOR</span>
+          <h1>Kilimanjaro Fresh</h1>
+          <p style="font-size: var(--text-body); opacity: 0.9; max-width: 600px;">
+            Farm-fresh vegetables and fruits grown on the slopes of Mount Kilimanjaro. 
+            Certified organic, delivered daily to your doorstep.
+          </p>
+          <div class="vendor-stats">
+            <div class="vendor-stat">
+              <div class="vendor-stat-number">4.8</div>
+              <div class="vendor-stat-label">Rating</div>
+            </div>
+            <div class="vendor-stat">
+              <div class="vendor-stat-number">1.2k</div>
+              <div class="vendor-stat-label">Reviews</div>
+            </div>
+            <div class="vendor-stat">
+              <div class="vendor-stat-number">5-8</div>
+              <div class="vendor-stat-label">Years</div>
+            </div>
+            <div class="vendor-stat">
+              <div class="vendor-stat-number">30min</div>
+              <div class="vendor-stat-label">Delivery</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="vendor-actions">
+        <button class="btn btn-white">
+          <span class="material-icons">chat</span>
+          Contact Vendor
+        </button>
+        <button class="btn btn-secondary" style="border-color: var(--color-white); color: var(--color-white);">
+          <span class="material-icons">favorite</span>
+          Follow
+        </button>
+        <button class="btn btn-ghost" style="border-color: var(--color-white); color: var(--color-white);">
+          <span class="material-icons">share</span>
+          Share
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="section">
+    <div class="container">
+      <!-- Tabs -->
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('products')">Products</div>
+        <div class="tab" onclick="switchTab('about')">About</div>
+        <div class="tab" onclick="switchTab('reviews')">Reviews</div>
+        <div class="tab" onclick="switchTab('info')">Delivery Info</div>
+      </div>
+
+      <!-- Products Tab -->
+      <div id="products-tab" class="tab-content active">
+        <!-- Featured Products -->
+        <div class="products-section">
+          <div class="section-title">
+            <h2>Featured Products</h2>
+            <a href="#" class="view-all">View All →</a>
+          </div>
+          
+          <div class="grid grid-cols-4">
+            <div class="product-card">
+              <div style="position: relative; overflow: hidden;">
+                <img src="https://picsum.photos/seed/tomatoes-kili/280/160" alt="Organic Tomatoes" class="product-image" loading="lazy">
+                <span class="product-badge">BESTSELLER</span>
+              </div>
+              <div class="product-content">
+                <div class="product-vendor">Kilimanjaro Fresh</div>
+                <h3 class="product-name">Organic Vine Tomatoes</h3>
+                <div class="product-price">TZS 8,500/kg</div>
+                <div class="product-action">
+                  <div class="quantity-selector">
+                    <button class="quantity-btn">−</button>
+                    <span class="quantity-value">1</span>
+                    <button class="quantity-btn">+</button>
+                  </div>
+                  <button class="btn btn-primary" style="flex: 1;">
+                    <span class="material-icons" style="font-size: 18px;">add_shopping_cart</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="product-card">
+              <div style="position: relative; overflow: hidden;">
+                <img src="https://picsum.photos/seed/spinach-kili/280/160" alt="Fresh Spinach" class="product-image" loading="lazy">
+                <span class="product-badge">ORGANIC</span>
+              </div>
+              <div class="product-content">
+                <div class="product-vendor">Kilimanjaro Fresh</div>
+                <h3 class="product-name">Mountain Spinach</h3>
+                <div class="product-price">TZS 3,200/bunch</div>
+                <div class="product-action">
+                  <div class="quantity-selector">
+                    <button class="quantity-btn">−</button>
+                    <span class="quantity-value">1</span>
+                    <button class="quantity-btn">+</button>
+                  </div>
+                  <button class="btn btn-primary" style="flex: 1;">
+                    <span class="material-icons" style="font-size: 18px;">add_shopping_cart</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="product-card">
+              <div style="position: relative; overflow: hidden;">
+                <img src="https://picsum.photos/seed/carrots-kili/280/160" alt="Rainbow Carrots" class="product-image" loading="lazy">
+              </div>
+              <div class="product-content">
+                <div class="product-vendor">Kilimanjaro Fresh</div>
+                <h3 class="product-name">Rainbow Carrots</h3>
+                <div class="product-price">TZS 4,800/kg</div>
+                <div class="product-action">
+                  <div class="quantity-selector">
+                    <button class="quantity-btn">−</button>
+                    <span class="quantity-value">1</span>
+                    <button class="quantity-btn">+</button>
+                  </div>
+                  <button class="btn btn-primary" style="flex: 1;">
+                    <span class="material-icons" style="font-size: 18px;">add_shopping_cart</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="product-card">
+              <div style="position: relative; overflow: hidden;">
+                <img src="https://picsum.photos/seed/kale-kili/280/160" alt="Fresh Kale" class="product-image" loading="lazy">
+              </div>
+              <div class="product-content">
+                <div class="product-vendor">Kilimanjaro Fresh</div>
+                <h3 class="product-name">Fresh Kale</h3>
+                <div class="product-price">TZS 2,800/bunch</div>
+                <div class="product-action">
+                  <div class="quantity-selector">
+                    <button class="quantity-btn">−</button>
+                    <span class="quantity-value">1</span>
+                    <button class="quantity-btn">+</button>
+                  </div>
+                  <button class="btn btn-primary" style="flex: 1;">
+                    <span class="material-icons" style="font-size: 18px;">add_shopping_cart</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- All Products -->
+        <div class="products-section">
+          <div class="section-title">
+            <h2>All Products</h2>
+            <select class="sort-select">
+              <option>Sort by: Featured</option>
+              <option>Price: Low to High</option>
+              <option>Price: High to Low</option>
+              <option>Newest First</option>
+            </select>
+          </div>
+          
+          <div class="grid grid-cols-4">
+            <!-- Additional products would go here -->
+            <div class="product-card">
+              <div style="position: relative; overflow: hidden;">
+                <img src="https://picsum.photos/seed/peppers-kili/280/160" alt="Bell Peppers" class="product-image" loading="lazy">
+              </div>
+              <div class="product-content">
+                <div class="product-vendor">Kilimanjaro Fresh</div>
+                <h3 class="product-name">Mixed Bell Peppers</h3>
+                <div class="product-price">TZS 6,500/kg</div>
+                <div class="product-action">
+                  <div class="quantity-selector">
+                    <button class="quantity-btn">−</button>
+                    <span class="quantity-value">1</span>
+                    <button class="quantity-btn">+</button>
+                  </div>
+                  <button class="btn btn-primary" style="flex: 1;">
+                    <span class="material-icons" style="font-size: 18px;">add_shopping_cart</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Tab -->
+      <div id="about-tab" class="tab-content">
+        <div style="max-width: 800px; margin: 0 auto;">
+          <h2 style="font-size: var(--text-h2); margin-bottom: var(--spacing-md);">Our Story</h2>
+          <p style="font-size: var(--text-body); line-height: 1.8; color: var(--color-charcoal); margin-bottom: var(--spacing-lg);">
+            Founded in 2016, Kilimanjaro Fresh started as a small family farm on the fertile slopes of Mount Kilimanjaro. 
+            Today, we work with over 50 local farmers to bring the freshest organic produce to your table.
+          </p>
+          
+          <h3 style="font-size: var(--text-h3); margin-bottom: var(--spacing-sm);">Our Mission</h3>
+          <p style="font-size: var(--text-body); line-height: 1.8; color: var(--color-charcoal); margin-bottom: var(--spacing-lg);">
+            To provide fresh, organic, and sustainably grown produce while supporting local farming communities 
+            and promoting healthy eating habits across Tanzania.
+          </p>
+
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>
+                <span class="material-icons" style="color: var(--color-gold);">eco</span>
+                100% Organic
+              </h3>
+              <p>All our produce is certified organic and grown without harmful pesticides or chemicals.</p>
+            </div>
+            
+            <div class="info-card">
+              <h3>
+                <span class="material-icons" style="color: var(--color-gold);">local_shipping</span>
+                Daily Delivery
+              </h3>
+              <p>Fresh produce harvested and delivered to your doorstep the same day.</p>
+            </div>
+            
+            <div class="info-card">
+              <h3>
+                <span class="material-icons" style="color: var(--color-gold);">people</span>
+                Community Support
+              </h3>
+              <p>We support over 50 local farming families and provide fair trade prices.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews Tab -->
+      <div id="reviews-tab" class="tab-content">
+        <div class="reviews-section">
+          <div class="section-title">
+            <h2>Customer Reviews</h2>
+            <div style="display: flex; align-items: center; gap: var(--spacing-xs);">
+              <span style="color: var(--color-gold); font-size: 24px;">★★★★★</span>
+              <span style="font-weight: 600;">4.8</span>
+              <span style="color: var(--color-gray);">(1,234 reviews)</span>
+            </div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-header">
+              <div class="reviewer-avatar">AJ</div>
+              <div class="reviewer-info">
+                <div class="reviewer-name">Aisha Juma</div>
+                <div class="review-date">2 days ago</div>
+              </div>
+              <div class="review-rating">★★★★★</div>
+            </div>
+            <p class="review-text">
+              Absolutely fresh vegetables! The tomatoes are so flavorful and the spinach lasts for days. 
+              Delivery is always on time and the packaging is excellent. Highly recommend!
+            </p>
+          </div>
+
+          <div class="review-card">
+            <div class="review-header">
+              <div class="reviewer-avatar">MK</div>
+              <div class="reviewer-info">
+                <div class="reviewer-name">Michael Kimani</div>
+                <div class="review-date">1 week ago</div>
+              </div>
+              <div class="review-rating">★★★★★</div>
+            </div>
+            <p class="review-text">
+              Been buying from Kilimanjaro Fresh for 6 months now. The quality is consistently excellent 
+              and their customer service is outstanding. Love supporting local farmers too!
+            </p>
+          </div>
+
+          <div class="review-card">
+            <div class="review-header">
+              <div class="reviewer-avatar">SN</div>
+              <div class="reviewer-info">
+                <div class="reviewer-name">Sarah Nyerere</div>
+                <div class="review-date">2 weeks ago</div>
+              </div>
+              <div class="review-rating">★★★★☆</div>
+            </div>
+            <p class="review-text">
+              Great quality produce and very convenient delivery. The only reason for 4 stars is that 
+              sometimes they run out of popular items. But overall, excellent service!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delivery Info Tab -->
+      <div id="info-tab" class="tab-content">
+        <div class="info-grid">
+          <div class="info-card">
+            <h3>
+              <span class="material-icons" style="color: var(--color-gold);">schedule</span>
+              Delivery Hours
+            </h3>
+            <p>
+              <strong>Monday - Saturday:</strong> 7:00 AM - 8:00 PM<br>
+              <strong>Sunday:</strong> 8:00 AM - 6:00 PM<br>
+              <strong>Same-day delivery:</strong> Order before 2 PM
+            </p>
+          </div>
+          
+          <div class="info-card">
+            <h3>
+              <span class="material-icons" style="color: var(--color-gold);">location_on</span>
+              Delivery Areas
+            </h3>
+            <p>
+              Dar es Salaam (all districts)<br>
+              Dodoma, Arusha, Mwanza<br>
+              Minimum order: TZS 5,000
+            </p>
+          </div>
+          
+          <div class="info-card">
+            <h3>
+              <span class="material-icons" style="color: var(--color-gold);">payments</span>
+              Payment Methods
+            </h3>
+            <p>
+              M-Pesa, Tigo Pesa<br>
+              Bank Transfer, Cash on Delivery<br>
+              All transactions are secure
+            </p>
+          </div>
+          
+          <div class="info-card">
+            <h3>
+              <span class="material-icons" style="color: var(--color-gold);">local_shipping</span>
+              Delivery Fees
+            </h3>
+            <p>
+              Dar es Salaam: TZS 2,000<br>
+              Other cities: TZS 5,000<br>
+              Free delivery on orders over TZS 20,000
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Floating Cart Button -->
+  <div class="floating-cart">
+    <button class="btn btn-primary" style="border-radius: var(--radius-full); box-shadow: var(--shadow-lg);">
+      <span class="material-icons">shopping_cart</span>
+      Cart (3)
+    </button>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="nav-bottom">
+    <a href="smartsoko-home.html" class="nav-item">
+      <span class="material-icons nav-icon">home</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="smartsoko-products.html" class="nav-item">
+      <span class="material-icons nav-icon">grid_view</span>
+      <span class="nav-label">Browse</span>
+    </a>
+    <a href="smartsoko-cart.html" class="nav-item">
+      <span class="material-icons nav-icon">shopping_cart</span>
+      <span class="nav-label">Cart</span>
+    </a>
+    <a href="customer.html" class="nav-item">
+      <span class="material-icons nav-icon">receipt_long</span>
+      <span class="nav-label">Orders</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <span class="material-icons nav-icon">person</span>
+      <span class="nav-label">Account</span>
+    </a>
+  </nav>
+
+  <!-- Toast Container -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // Initialize vendor page
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeVendorPage();
+    });
+
+    function initializeVendorPage() {
+      // Quantity selectors
+      setupQuantitySelectors();
+      
+      // Add to cart buttons
+      setupAddToCartButtons();
+    }
+
+    function setupQuantitySelectors() {
+      const quantitySelectors = document.querySelectorAll('.quantity-selector');
+      quantitySelectors.forEach(selector => {
+        const minusBtn = selector.querySelector('.quantity-btn:first-child');
+        const plusBtn = selector.querySelector('.quantity-btn:last-child');
+        const valueSpan = selector.querySelector('.quantity-value');
+
+        minusBtn.addEventListener('click', () => {
+          let value = parseInt(valueSpan.textContent);
+          if (value > 1) {
+            valueSpan.textContent = value - 1;
+          }
+        });
+
+        plusBtn.addEventListener('click', () => {
+          let value = parseInt(valueSpan.textContent);
+          valueSpan.textContent = value + 1;
+        });
+      });
+    }
+
+    function setupAddToCartButtons() {
+      const addToCartButtons = document.querySelectorAll('.btn-primary');
+      addToCartButtons.forEach(button => {
+        if (button.textContent.includes('add_shopping_cart')) {
+          button.addEventListener('click', handleAddToCart);
+        }
+      });
+    }
+
+    function switchTab(tabName) {
+      // Hide all tabs
+      const allTabs = document.querySelectorAll('.tab');
+      const allContents = document.querySelectorAll('.tab-content');
+      
+      allTabs.forEach(tab => tab.classList.remove('active'));
+      allContents.forEach(content => content.classList.remove('active'));
+      
+      // Show selected tab
+      event.target.classList.add('active');
+      document.getElementById(`${tabName}-tab`).classList.add('active');
+    }
+
+    function handleAddToCart(event) {
+      const button = event.currentTarget;
+      const productCard = button.closest('.product-card');
+      const productName = productCard.querySelector('.product-name').textContent;
+      const quantity = productCard.querySelector('.quantity-value').textContent;
+      
+      // Simulate adding to cart
+      button.disabled = true;
+      button.innerHTML = '<span class="material-icons">check</span> Added';
+      
+      showToast(`Added ${quantity} × ${productName} to cart`, 'success');
+      
+      // Update cart count
+      setTimeout(() => {
+        button.disabled = false;
+        button.innerHTML = '<span class="material-icons" style="font-size: 18px;">add_shopping_cart</span>';
+        
+        // Update cart count in navigation
+        const cartButtons = document.querySelectorAll('.nav-actions .btn-primary, .floating-cart .btn-primary');
+        cartButtons.forEach(cartButton => {
+          const currentCount = parseInt(cartButton.textContent.match(/\d+/)[0]);
+          cartButton.innerHTML = `<span class="material-icons">shopping_cart</span> Cart (${currentCount + 1})`;
+        });
+      }, 1000);
+    }
+
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type}`;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

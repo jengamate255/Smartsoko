@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Performance: Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMARTSOKO - Your Local. Your Fresh. Your Market.</title>
+  <meta name="description" content="A beautiful, intuitive marketplace celebrating African entrepreneurship. Designed for simplicity, built for community.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <!-- Design System -->
+  <link rel="stylesheet" href="smartsoko-design-system.css">
+  
+  <style> /* Additional styles for this page */ .hero {background: linear-gradient(135deg,var(--color-cream) 0%,var(--color-taupe) 100%);padding: var(--spacing-2xl) 0;text-align: center;position: relative;overflow: hidden} .hero::before {content: '';position: absolute;top: 0;left: 0;right: 0;bottom: 0;background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D4A574' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");opacity: 0.3} .hero-content {position: relative;z-index: 1} .hero h1 {font-size: clamp(36px,6vw,64px);margin-bottom: var(--spacing-md);background: linear-gradient(135deg,var(--color-gold),var(--color-terra));-webkit-background-clip: text;-webkit-text-fill-color: transparent;background-clip: text} .hero p {font-size: clamp(16px,2.5vw,20px);color: var(--color-gray);max-width: 600px;margin: 0 auto var(--spacing-xl)} .category-grid {display: grid;grid-template-columns: repeat(auto-fit,minmax(120px,1fr));gap: var(--spacing-md);margin-bottom: var(--spacing-xl)} .category-card {background-color: var(--color-white);border-radius: var(--radius-lg);padding: var(--spacing-md);text-align: center;cursor: pointer;transition: all var(--transition-normal);border: 2px solid transparent} .category-card:hover {transform: translateY(-4px);box-shadow: var(--shadow-md);border-color: var(--color-gold)} .category-icon {width: 48px;height: 48px;margin: 0 auto var(--spacing-sm);border-radius: var(--radius-full);display: flex;align-items: center;justify-content: center;font-size: 24px;color: var(--color-white)} .category-name {font-weight: 600;font-size: var(--text-small);color: var(--color-charcoal);margin-bottom: 4px} .category-count {font-size: var(--text-caption);color: var(--color-gray)} .vendor-section {background-color: var(--color-white);padding: var(--spacing-xl) 0} .section-header {text-align: center;margin-bottom: var(--spacing-xl)} .section-header h2 {font-size: var(--text-h2);margin-bottom: var(--spacing-sm)} .section-header p {color: var(--color-gray);max-width: 500px;margin: 0 auto} .stats-bar {background-color: var(--color-charcoal);color: var(--color-white);padding: var(--spacing-lg) 0;text-align: center} .stats-grid {display: grid;grid-template-columns: repeat(auto-fit,minmax(150px,1fr));gap: var(--spacing-md);max-width: 800px;margin: 0 auto} .stat-item {text-align: center} .stat-number {font-family: var(--font-display);font-size: clamp(24px,4vw,36px);font-weight: 700;color: var(--color-gold);margin-bottom: 4px} .stat-label {font-size: var(--text-small);color: var(--color-taupe)} .cta-section {background: linear-gradient(135deg,var(--color-gold),var(--color-terra));color: var(--color-charcoal);padding: var(--spacing-2xl) 0;text-align: center} .cta-section h2 {color: var(--color-charcoal);margin-bottom: var(--spacing-md)} .cta-section p {color: var(--color-charcoal);opacity: 0.9;margin-bottom: var(--spacing-xl)} .btn-white {background-color: var(--color-white);color: var(--color-charcoal)} .btn-white:hover {background-color: var(--color-cream)} @media (max-width: 768px) {.hero {padding: var(--spacing-xl) var(--spacing-md)} .category-grid {grid-template-columns: repeat(3,1fr);gap: var(--spacing-sm)} .stats-grid {grid-template-columns: repeat(2,1fr)} } </style>
+</head>
+<body>
+  <!-- Top Navigation -->
+  <nav class="nav-top">
+    <a href="smartsoko-home.html" class="nav-logo">SMARTSOKO</a>
+    
+    <div class="nav-search">
+      <div class="search-bar">
+        <span class="material-icons search-icon">search</span>
+        <input type="text" class="search-input" placeholder="Search vendors, products...">
+      </div>
+    </div>
+    
+    <div class="nav-links">
+      <a href="smartsoko-products.html" class="nav-link">Browse</a>
+      <a href="smartsoko-vendor.html" class="nav-link">Vendors</a>
+      <a href="main.html" class="nav-link">About</a>
+      <a href="profile.html" class="nav-link">Contact</a>
+    </div>
+    
+    <div class="nav-actions">
+      <button onclick="window.location.href='profile.html'" class="btn btn-ghost">
+        <span class="material-icons">person</span>
+        Account
+      </button>
+      <button onclick="window.location.href='smartsoko-cart.html'" class="btn btn-primary">
+        <span class="material-icons">shopping_cart</span>
+        Cart
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main style="padding-bottom: 80px;">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <h1>Your Local. Your Fresh. Your Market.</h1>
+          <p>A beautiful marketplace celebrating African entrepreneurship. Shop from 100+ verified local vendors in your community.</p>
+          <div style="display: flex; gap: var(--spacing-sm); justify-content: center; flex-wrap: wrap;">
+            <button onclick="window.location.href='smartsoko-products.html'" class="btn btn-primary">
+              <span class="material-icons">shopping_bag</span>
+              Shop Now
+            </button>
+            <button onclick="window.location.href='restaurant.html'" class="btn btn-secondary">
+              <span class="material-icons">store</span>
+              Become a Vendor
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Shop by Category</h2>
+          <p>Fresh products from trusted local vendors</p>
+        </div>
+        
+        <div class="category-grid">
+          <div class="category-card" data-category="fishing">
+            <div class="category-icon" style="background-color: var(--color-fishing);">
+              <span class="material-icons">set_meal</span>
+            </div>
+            <div class="category-name">Fishing</div>
+            <div class="category-count">12 vendors</div>
+          </div>
+          
+          <div class="category-card" data-category="fruits">
+            <div class="category-icon" style="background-color: var(--color-fruits);">
+              <span class="material-icons">nutrition</span>
+            </div>
+            <div class="category-name">Fruits</div>
+            <div class="category-count">28 vendors</div>
+          </div>
+          
+          <div class="category-card" data-category="dairy">
+            <div class="category-icon" style="background-color: var(--color-dairy);">
+              <span class="material-icons">local_cafe</span>
+            </div>
+            <div class="category-name">Dairy</div>
+            <div class="category-count">15 vendors</div>
+          </div>
+          
+          <div class="category-card" data-category="vegetables">
+            <div class="category-icon" style="background-color: var(--color-vegetables);">
+              <span class="material-icons">eco</span>
+            </div>
+            <div class="category-name">Vegetables</div>
+            <div class="category-count">22 vendors</div>
+          </div>
+          
+          <div class="category-card" data-category="bakery">
+            <div class="category-icon" style="background-color: var(--color-bakery);">
+              <span class="material-icons">bakery_dining</span>
+            </div>
+            <div class="category-name">Bakery</div>
+            <div class="category-count">18 vendors</div>
+          </div>
+          
+          <div class="category-card" data-category="honey">
+            <div class="category-icon" style="background-color: var(--color-honey);">
+              <span class="material-icons">opacity</span>
+            </div>
+            <div class="category-name">Honey & Spices</div>
+            <div class="category-count">8 vendors</div>
+          </div>
+          
+          <div class="category-card" data-category="artisan">
+            <div class="category-icon" style="background-color: var(--color-artisan);">
+              <span class="material-icons">handyman</span>
+            </div>
+            <div class="category-name">Artisan</div>
+            <div class="category-count">14 vendors</div>
+          </div>
+          
+          <div class="category-card" data-category="more">
+            <div class="category-icon" style="background-color: var(--color-gray);">
+              <span class="material-icons">more_horiz</span>
+            </div>
+            <div class="category-name">More</div>
+            <div class="category-count">25+ vendors</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Vendors Section -->
+    <section class="vendor-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Featured Vendors</h2>
+          <p>Meet the amazing entrepreneurs in your community</p>
+        </div>
+        
+        <div class="grid grid-cols-4">
+          <div class="vendor-card">
+            <div class="vendor-avatar" style="background-color: var(--color-terra);">
+              <span class="material-icons">store</span>
+            </div>
+            <div class="vendor-name">Kilimanjaro Fresh</div>
+            <div class="vendor-category">Vegetables</div>
+            <div class="vendor-rating">
+              <span class="material-icons" style="color: var(--color-gold); font-size: 16px;">star</span>
+              4.8 (124 reviews)
+            </div>
+            <div class="vendor-delivery">
+              <span class="material-icons" style="font-size: 16px;">schedule</span>
+              30-45 min delivery
+            </div>
+            <a href="#" class="vendor-link">View Vendor →</a>
+          </div>
+          
+          <div class="vendor-card">
+            <div class="vendor-avatar" style="background-color: var(--color-fruits);">
+              <span class="material-icons">nutrition</span>
+            </div>
+            <div class="vendor-name">Serengeti Fruits</div>
+            <div class="vendor-category">Fruits</div>
+            <div class="vendor-rating">
+              <span class="material-icons" style="color: var(--color-gold); font-size: 16px;">star</span>
+              4.9 (89 reviews)
+            </div>
+            <div class="vendor-delivery">
+              <span class="material-icons" style="font-size: 16px;">schedule</span>
+              25-40 min delivery
+            </div>
+            <a href="#" class="vendor-link">View Vendor →</a>
+          </div>
+          
+          <div class="vendor-card">
+            <div class="vendor-avatar" style="background-color: var(--color-dairy);">
+              <span class="material-icons">local_cafe</span>
+            </div>
+            <div class="vendor-name">Zanzibar Dairy</div>
+            <div class="vendor-category">Dairy</div>
+            <div class="vendor-rating">
+              <span class="material-icons" style="color: var(--color-gold); font-size: 16px;">star</span>
+              4.7 (156 reviews)
+            </div>
+            <div class="vendor-delivery">
+              <span class="material-icons" style="font-size: 16px;">schedule</span>
+              20-35 min delivery
+            </div>
+            <a href="#" class="vendor-link">View Vendor →</a>
+          </div>
+          
+          <div class="vendor-card">
+            <div class="vendor-avatar" style="background-color: var(--color-bakery);">
+              <span class="material-icons">bakery_dining</span>
+            </div>
+            <div class="vendor-name">Dar Bakery</div>
+            <div class="vendor-category">Bakery</div>
+            <div class="vendor-rating">
+              <span class="material-icons" style="color: var(--color-gold); font-size: 16px;">star</span>
+              4.6 (203 reviews)
+            </div>
+            <div class="vendor-delivery">
+              <span class="material-icons" style="font-size: 16px;">schedule</span>
+              15-30 min delivery
+            </div>
+            <a href="#" class="vendor-link">View Vendor →</a>
+          </div>
+        </div>
+        
+        <div class="text-center mt-xl">
+          <button class="btn btn-secondary">
+            View All Vendors
+            <span class="material-icons">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-bar">
+      <div class="container">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-number">150+</div>
+            <div class="stat-label">Local Vendors</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">5,000+</div>
+            <div class="stat-label">Happy Customers</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">25,000+</div>
+            <div class="stat-label">Orders Delivered</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">4.8★</div>
+            <div class="stat-label">Average Rating</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <div class="container">
+        <h2>Ready to Support Local Business?</h2>
+        <p>Join thousands of customers shopping fresh from their community.</p>
+        <div style="display: flex; gap: var(--spacing-sm); justify-content: center; flex-wrap: wrap;">
+          <button onclick="window.location.href='smartsoko-products.html'" class="btn btn-white">
+            <span class="material-icons">shopping_bag</span>
+            Start Shopping
+          </button>
+          <button onclick="window.location.href='restaurant.html'" class="btn btn-ghost" style="border-color: var(--color-white); color: var(--color-white);">
+            <span class="material-icons">store</span>
+            Register Your Business
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="nav-bottom">
+    <a href="smartsoko-home.html" class="nav-item active">
+      <span class="material-icons nav-icon">home</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="smartsoko-products.html" class="nav-item">
+      <span class="material-icons nav-icon">grid_view</span>
+      <span class="nav-label">Browse</span>
+    </a>
+    <a href="smartsoko-cart.html" class="nav-item">
+      <span class="material-icons nav-icon">shopping_cart</span>
+      <span class="nav-label">Cart</span>
+    </a>
+    <a href="customer.html" class="nav-item">
+      <span class="material-icons nav-icon">receipt_long</span>
+      <span class="nav-label">Orders</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <span class="material-icons nav-icon">person</span>
+      <span class="nav-label">Account</span>
+    </a>
+  </nav>
+
+  <!-- Toast Container -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // Initialize app
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeApp();
+    });
+
+    function initializeApp() {
+      // Search functionality
+      const searchInput = document.querySelector('.search-input');
+      searchInput.addEventListener('input', handleSearch);
+
+      // Category cards
+      const categoryCards = document.querySelectorAll('.category-card');
+      categoryCards.forEach(card => {
+        card.addEventListener('click', handleCategoryClick);
+      });
+
+      // Vendor cards
+      const vendorCards = document.querySelectorAll('.vendor-card');
+      vendorCards.forEach(card => {
+        card.addEventListener('click', handleVendorClick);
+      });
+
+      // Navigation
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => {
+        item.addEventListener('click', handleNavigation);
+      });
+
+      // Smooth scrolling
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', handleSmoothScroll);
+      });
+    }
+
+    function handleSearch(event) {
+      const query = event.target.value.toLowerCase();
+      console.log('Searching for:', query);
+      
+      // Implement search logic here
+      if (query.length > 2) {
+        // Show search results
+        showToast('Searching for vendors...', 'info');
+      }
+    }
+
+    function handleCategoryClick(event) {
+      const category = event.currentTarget.dataset.category;
+      console.log('Category selected:', category);
+      showToast(`Browsing ${category} vendors...`, 'success');
+      
+      // Navigate to category page
+      setTimeout(() => {
+        // window.location.href = `/category/${category}`;
+      }, 500);
+    }
+
+    function handleVendorClick(event) {
+      const vendorCard = event.currentTarget;
+      const vendorName = vendorCard.querySelector('.vendor-name').textContent;
+      console.log('Vendor selected:', vendorName);
+      showToast(`Opening ${vendorName}...`, 'success');
+      
+      // Navigate to vendor page
+      setTimeout(() => {
+        // window.location.href = `/vendor/${vendorName.toLowerCase().replace(/\s+/g, '-')}`;
+      }, 500);
+    }
+
+    function handleNavigation(event) {
+      event.preventDefault();
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => item.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      
+      const label = event.currentTarget.querySelector('.nav-label').textContent;
+      console.log('Navigating to:', label);
+    }
+
+    function handleSmoothScroll(event) {
+      event.preventDefault();
+      const target = document.querySelector(event.target.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type}`;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Add some interactive animations
+    function addScrollAnimations() {
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, observerOptions);
+
+      // Observe elements for animation
+      document.querySelectorAll('.vendor-card, .category-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+      });
+    }
+
+    // Initialize scroll animations
+    addScrollAnimations();
+
+    // Add parallax effect to hero
+    window.addEventListener('scroll', () => {
+      const scrolled = window.pageYOffset;
+      const hero = document.querySelector('.hero');
+      if (hero) {
+        hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+      }
+    });
+  </script>
+</body>
+</html>

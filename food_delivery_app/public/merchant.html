@@ -1,0 +1,2327 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <!-- Performance: Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartSoko - Seller Dashboard</title>
+  <meta name="description" content="Manage your SmartSoko business. Track orders, manage your menu, and analyze sales performance all in one place.">
+
+  <meta name="theme-color" content="#064E3B">
+  <link rel="stylesheet" href="design-system.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preload" href="dist/tailwind.css" as="style">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <!-- Firebase Modular SDK -->
+  <script type="module" src="config/firebase-config.js?v=3"></script>
+  <script src="auth-check.js?v=4" defer></script>
+  <script src="js/merchant-enhancements.js?v=2"></script>
+  <script src="nav-component.js" defer></script>
+  
+  <style> 
+    .material-symbols-outlined {font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24} 
+    body {min-height: max(884px,100dvh)} 
+    
+    /* Premium UI Animations & Effects */
+    .mesh-bg {
+      background-color: #f0fdf4;
+      background-image: 
+        radial-gradient(at 40% 20%, hsla(140,100%,88%,0.4) 0px, transparent 50%),
+        radial-gradient(at 80% 0%, hsla(160,100%,85%,0.4) 0px, transparent 50%),
+        radial-gradient(at 0% 50%, hsla(130,100%,90%,0.4) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+    
+    .dark .mesh-bg {
+      background-color: #064e3b;
+      background-image: 
+        radial-gradient(at 40% 20%, hsla(150,100%,15%,0.5) 0px, transparent 50%),
+        radial-gradient(at 80% 0%, hsla(160,100%,12%,0.5) 0px, transparent 50%),
+        radial-gradient(at 0% 50%, hsla(140,100%,10%,0.5) 0px, transparent 50%);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .dark .glass-card {
+      background: rgba(17, 24, 39, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .hover-lift {
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    }
+    .hover-lift:hover {
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    /* Custom Scrollbar for better aesthetics */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .dark ::-webkit-scrollbar-thumb { background: #475569; }
+  </style>
+</head>
+<body class="bg-background mesh-bg font-body text-on-surface transition-colors duration-500">
+  <!-- Navigation handled by SmartNav -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      SmartNav.init({ activePage: 'orders', role: 'merchant' });
+    });
+  </script>
+
+  <!-- Main Content -->
+  <main class="container mx-auto p-4 pt-6 pb-28">
+    <!-- Enhanced Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-5 mb-8">
+      <div class="hover-lift glass-card bg-gradient-to-br from-green-50/80 to-green-100/80 dark:from-green-900/40 dark:to-green-800/40 p-5 rounded-2xl shadow-sm border border-green-200/50 dark:border-green-800/50 relative overflow-hidden">
+        <div class="absolute -right-4 -top-4 w-16 h-16 bg-green-500/10 rounded-full blur-xl"></div>
+        <div class="flex items-center justify-between relative z-10">
+          <div>
+            <p class="text-green-600 dark:text-green-400 text-xs font-bold tracking-wider uppercase mb-1">Today's Sales</p>
+            <p class="text-2xl font-extrabold text-green-800 dark:text-green-100" id="todaySales">TSh 0</p>
+            <p class="text-xs font-medium text-green-500 mt-1" id="salesTrend">+0% vs yesterday</p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-tr from-green-600 to-green-400 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/30">
+            <span class="material-symbols-outlined text-white">payments</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hover-lift glass-card bg-gradient-to-br from-blue-50/80 to-blue-100/80 dark:from-blue-900/40 dark:to-blue-800/40 p-5 rounded-2xl shadow-sm border border-blue-200/50 dark:border-blue-800/50 relative overflow-hidden">
+        <div class="absolute -right-4 -top-4 w-16 h-16 bg-blue-500/10 rounded-full blur-xl"></div>
+        <div class="flex items-center justify-between relative z-10">
+          <div>
+            <p class="text-blue-600 dark:text-blue-400 text-xs font-bold tracking-wider uppercase mb-1">Orders</p>
+            <p class="text-2xl font-extrabold text-blue-800 dark:text-blue-100" id="orderCount">0</p>
+            <p class="text-xs font-medium text-blue-500 mt-1" id="pendingOrders">0 pending</p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+            <span class="material-symbols-outlined text-white">shopping_bag</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hover-lift glass-card bg-gradient-to-br from-yellow-50/80 to-yellow-100/80 dark:from-yellow-900/40 dark:to-yellow-800/40 p-5 rounded-2xl shadow-sm border border-yellow-200/50 dark:border-yellow-800/50 relative overflow-hidden">
+        <div class="absolute -right-4 -top-4 w-16 h-16 bg-yellow-500/10 rounded-full blur-xl"></div>
+        <div class="flex items-center justify-between relative z-10">
+          <div>
+            <p class="text-yellow-600 dark:text-yellow-400 text-xs font-bold tracking-wider uppercase mb-1">Rating</p>
+            <p class="text-2xl font-extrabold text-yellow-800 dark:text-yellow-100" id="restaurantRating">4.5</p>
+            <p class="text-xs font-medium text-yellow-500 mt-1" id="totalReviews">0 reviews</p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-tr from-yellow-500 to-amber-400 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/30">
+            <span class="material-symbols-outlined text-white">star</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hover-lift glass-card bg-gradient-to-br from-purple-50/80 to-purple-100/80 dark:from-purple-900/40 dark:to-purple-800/40 p-5 rounded-2xl shadow-sm border border-purple-200/50 dark:border-purple-800/50 relative overflow-hidden">
+        <div class="absolute -right-4 -top-4 w-16 h-16 bg-purple-500/10 rounded-full blur-xl"></div>
+        <div class="flex items-center justify-between relative z-10">
+          <div>
+            <p class="text-purple-600 dark:text-purple-400 text-xs font-bold tracking-wider uppercase mb-1">Menu</p>
+            <p class="text-2xl font-extrabold text-purple-800 dark:text-purple-100" id="menuItemCount">0</p>
+            <p class="text-xs font-medium text-purple-500 mt-1" id="availableItems">0 available</p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-tr from-purple-600 to-fuchsia-400 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
+            <span class="material-symbols-outlined text-white">restaurant_menu</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hover-lift glass-card bg-gradient-to-br from-orange-50/80 to-orange-100/80 dark:from-orange-900/40 dark:to-orange-800/40 p-5 rounded-2xl shadow-sm border border-orange-200/50 dark:border-orange-800/50 relative overflow-hidden lg:col-span-2 xl:col-span-1">
+        <div class="absolute -right-4 -top-4 w-16 h-16 bg-orange-500/10 rounded-full blur-xl"></div>
+        <div class="flex items-center justify-between relative z-10">
+          <div>
+            <p class="text-orange-600 dark:text-orange-400 text-xs font-bold tracking-wider uppercase mb-1">This Week</p>
+            <p class="text-2xl font-extrabold text-orange-800 dark:text-orange-100" id="weeklySales">TSh 0</p>
+            <p class="text-xs font-medium text-orange-500 mt-1" id="weeklyOrders">0 orders</p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-tr from-orange-500 to-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/30">
+            <span class="material-symbols-outlined text-white">calendar_view_week</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hover-lift glass-card bg-gradient-to-br from-teal-50/80 to-teal-100/80 dark:from-teal-900/40 dark:to-teal-800/40 p-5 rounded-2xl shadow-sm border border-teal-200/50 dark:border-teal-800/50 relative overflow-hidden lg:col-span-2 xl:col-span-1">
+        <div class="absolute -right-4 -top-4 w-16 h-16 bg-teal-500/10 rounded-full blur-xl"></div>
+        <div class="flex items-center justify-between relative z-10">
+          <div>
+            <p class="text-teal-600 dark:text-teal-400 text-xs font-bold tracking-wider uppercase mb-1">Avg Order</p>
+            <p class="text-2xl font-extrabold text-teal-800 dark:text-teal-100" id="avgOrderValue">TSh 0</p>
+            <p class="text-xs font-medium text-teal-500 mt-1">per order</p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-tr from-teal-500 to-emerald-400 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/30">
+            <span class="material-symbols-outlined text-white">trending_up</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Pills Tabs -->
+    <div class="glass-card rounded-2xl shadow-lg mb-8 overflow-hidden">
+      <div class="p-2 border-b border-gray-100/50 dark:border-gray-800/50 bg-white/40 dark:bg-gray-900/40">
+        <div class="flex space-x-1 overflow-x-auto pb-1 scrollbar-hide">
+          <button onclick="switchTab('orders', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl bg-primary text-white font-bold shadow-md transition-all duration-300 flex items-center">
+            <span class="material-symbols-outlined mr-2 text-[20px]">shopping_cart</span>Orders
+          </button>
+          <button onclick="switchTab('menu', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
+            <span class="material-symbols-outlined mr-2 text-[20px]">restaurant</span>Menu
+          </button>
+          <button onclick="switchTab('analytics', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
+            <span class="material-symbols-outlined mr-2 text-[20px]">monitoring</span>Analytics
+          </button>
+          <button onclick="switchTab('finance', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
+            <span class="material-symbols-outlined mr-2 text-[20px]">account_balance_wallet</span>Finance
+          </button>
+          <button onclick="switchTab('promotions', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
+            <span class="material-symbols-outlined mr-2 text-[20px]">sell</span>Promos
+          </button>
+          <button onclick="switchTab('reviews', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
+            <span class="material-symbols-outlined mr-2 text-[20px]">star</span>Reviews
+          </button>
+          <button onclick="switchTab('profile', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
+            <span class="material-symbols-outlined mr-2 text-[20px]">settings</span>Settings
+          </button>
+        </div>
+      </div>
+
+      <!-- Orders Tab -->
+      <div id="ordersTab" class="p-6 md:p-8 bg-white/60 dark:bg-gray-900/60">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+          <div>
+            <h2 class="text-xl font-bold">Recent Orders</h2>
+            <p class="text-sm text-gray-500">Manage and track customer orders</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <div class="flex bg-gray-100 rounded-lg p-1">
+              <button onclick="filterOrdersByStatus('all')" class="status-filter-btn px-3 py-1.5 rounded-md text-sm font-medium bg-white shadow-sm text-gray-700" data-status="all">All</button>
+              <button onclick="filterOrdersByStatus('pending')" class="status-filter-btn px-3 py-1.5 rounded-md text-sm font-medium text-gray-600 hover:bg-white/50" data-status="pending">Pending</button>
+              <button onclick="filterOrdersByStatus('preparing')" class="status-filter-btn px-3 py-1.5 rounded-md text-sm font-medium text-gray-600 hover:bg-white/50" data-status="preparing">Preparing</button>
+              <button onclick="filterOrdersByStatus('ready')" class="status-filter-btn px-3 py-1.5 rounded-md text-sm font-medium text-gray-600 hover:bg-white/50" data-status="ready">Ready</button>
+              <button onclick="filterOrdersByStatus('delivered')" class="status-filter-btn px-3 py-1.5 rounded-md text-sm font-medium text-gray-600 hover:bg-white/50" data-status="delivered">Delivered</button>
+            </div>
+            <div class="flex bg-gray-100 rounded-lg p-1 items-center px-2">
+              <span class="text-xs text-gray-500 mr-2">Date:</span>
+              <input type="date" id="orderDateFilter" onchange="filterOrdersByDate(this.value)" class="text-sm bg-transparent border-none outline-none text-gray-700 h-full">
+            </div>
+            <button onclick="refreshOrders()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2">
+              <span class="material-symbols-outlined text-sm">refresh</span>
+              Refresh
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Orders List -->
+          <div class="lg:col-span-2">
+            <div id="ordersList" class="space-y-3 max-h-[600px] overflow-y-auto">
+              <!-- Orders will be loaded here -->
+            </div>
+          </div>
+          <!-- Order Details Panel -->
+          <div class="bg-gray-50 rounded-xl p-4">
+            <h3 class="font-semibold mb-3 flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">info</span>
+              Order Details
+            </h3>
+            <div id="orderDetailsPanel">
+              <p class="text-gray-500 text-sm text-center py-8">Select an order to view details</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Menu Tab -->
+      <div id="menuTab" class="p-6 hidden">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+          <div>
+            <h2 class="text-xl font-bold">Menu Management</h2>
+            <p class="text-sm text-gray-500">Manage your products and inventory</p>
+          </div>
+          <div class="flex gap-2">
+            <div id="bulkActionsMenu" class="hidden items-center gap-2 mr-2 bg-gray-50 px-3 py-1 rounded-lg border border-gray-200">
+              <span class="text-sm font-medium text-gray-600"><span id="selectedCount">0</span> selected</span>
+              <button onclick="bulkDelete()" class="text-red-600 hover:bg-red-50 p-1.5 rounded" title="Delete Selected"><span class="material-symbols-outlined text-sm">delete</span></button>
+              <button onclick="bulkToggleAvailability()" class="text-yellow-600 hover:bg-yellow-50 p-1.5 rounded" title="Toggle Availability"><span class="material-symbols-outlined text-sm">power_settings_new</span></button>
+            </div>
+            <select id="menuFilter" onchange="filterMenuItems(this.value)" class="border border-gray-300 rounded-lg px-3 py-2 bg-white">
+              <option value="all">All Categories</option>
+              <option value="food">Food</option>
+              <option value="drinks">Drinks</option>
+              <option value="dessert">Dessert</option>
+              <option value="available">Available Only</option>
+            </select>
+            <button onclick="openAddMenuItem()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 shadow-sm transition-all hover:shadow-md">
+              <span class="material-symbols-outlined text-sm">add</span>
+              Add Item
+            </button>
+          </div>
+        </div>
+        <!-- Menu Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <div class="bg-white p-3 rounded-lg border border-gray-200">
+            <p class="text-xs text-gray-500">Total Items</p>
+            <p class="text-lg font-bold" id="totalMenuItems">0</p>
+          </div>
+          <div class="bg-white p-3 rounded-lg border border-gray-200">
+            <p class="text-xs text-gray-500">Available</p>
+            <p class="text-lg font-bold text-green-600" id="availableMenuItems">0</p>
+          </div>
+          <div class="bg-white p-3 rounded-lg border border-gray-200">
+            <p class="text-xs text-gray-500">Out of Stock</p>
+            <p class="text-lg font-bold text-red-600" id="outOfStockItems">0</p>
+          </div>
+          <div class="bg-white p-3 rounded-lg border border-gray-200">
+            <p class="text-xs text-gray-500">Top Category</p>
+            <p class="text-lg font-bold text-blue-600" id="topCategory">-</p>
+          </div>
+        </div>
+        <div id="menuItemsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Menu items will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Analytics Tab -->
+      <div id="analyticsTab" class="p-6 hidden">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-xl font-bold">Sales Analytics</h2>
+            <p class="text-sm text-gray-500">Track your business performance</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="exportAnalyticsCSV()" class="bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm font-medium transition-colors">
+              <span class="material-symbols-outlined text-sm">download</span>
+              Export CSV
+            </button>
+            <select id="analyticsPeriod" onchange="loadAnalytics()" class="border border-gray-300 rounded-lg px-3 py-2 bg-white">
+              <option value="7">Last 7 Days</option>
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 3 Months</option>
+            </select>
+          </div>
+        </div>
+        <!-- Revenue Chart -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
+          <h3 class="font-semibold mb-3">Revenue Overview</h3>
+          <div id="revenueChart" class="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+            <canvas id="revenueCanvas"></canvas>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+            <h3 class="font-semibold mb-3 flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">trending_up</span>
+              Popular Items
+            </h3>
+            <div id="popularItems" class="space-y-3">
+              <!-- Popular items will be loaded here -->
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+            <h3 class="font-semibold mb-3 flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">schedule</span>
+              Peak Hours
+            </h3>
+            <div id="peakHours" class="space-y-2">
+              <!-- Peak hours will be loaded here -->
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+            <h3 class="font-semibold mb-3 flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">category</span>
+              Sales by Category
+            </h3>
+            <div id="categorySales" class="space-y-2">
+              <!-- Category sales will be loaded here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews Tab -->
+      <div id="reviewsTab" class="p-6 hidden">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-xl font-bold">Customer Reviews</h2>
+            <p class="text-sm text-gray-500">Manage customer feedback and ratings</p>
+          </div>
+          <div class="flex gap-2">
+            <select id="reviewFilter" onchange="filterReviews(this.value)" class="border border-gray-300 rounded-lg px-3 py-2 bg-white">
+              <option value="all">All Reviews</option>
+              <option value="5">5 Stars</option>
+              <option value="4">4 Stars</option>
+              <option value="3">3 Stars</option>
+              <option value="2">2 Stars</option>
+              <option value="1">1 Star</option>
+            </select>
+          </div>
+        </div>
+        <!-- Rating Summary -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-4">
+          <div class="flex flex-col md:flex-row items-center gap-6">
+            <div class="text-center">
+              <p class="text-4xl font-bold text-yellow-600" id="averageRating">4.5</p>
+              <div class="flex gap-1 my-2" id="ratingStars">
+                <!-- Stars will be inserted here -->
+              </div>
+              <p class="text-sm text-gray-500"><span id="totalReviewCount">0</span> reviews</p>
+            </div>
+            <div class="flex-1 w-full">
+              <div class="space-y-2" id="ratingBreakdown">
+                <!-- Rating breakdown bars -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="reviewsList" class="space-y-3">
+          <!-- Reviews will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Finance Tab -->
+      <div id="financeTab" class="p-6 hidden">
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <h2 class="text-xl font-bold">Earnings & Payouts</h2>
+            <p class="text-sm text-gray-500">Manage your money and request withdrawals</p>
+          </div>
+          <button onclick="requestPayout()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark font-medium flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">account_balance_wallet</span>
+            Request Payout
+          </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div class="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-xl shadow-sm text-white">
+            <p class="text-green-100 text-sm font-medium uppercase mb-1">Available Balance</p>
+            <p class="text-3xl font-bold" id="availableBalance">TSh 145,000</p>
+            <p class="text-xs text-green-200 mt-2">Ready for withdrawal</p>
+          </div>
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <p class="text-gray-500 text-sm font-medium uppercase mb-1">Pending Clearance</p>
+            <p class="text-2xl font-bold text-gray-800" id="pendingBalance">TSh 32,500</p>
+            <p class="text-xs text-gray-400 mt-2">From recent orders</p>
+          </div>
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <p class="text-gray-500 text-sm font-medium uppercase mb-1">Total Lifetime Earnings</p>
+            <p class="text-2xl font-bold text-gray-800" id="lifetimeEarnings">TSh 2,450,000</p>
+            <p class="text-xs text-gray-400 mt-2">After SmartSoko fees</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Promotions Tab -->
+      <div id="promotionsTab" class="p-6 hidden">
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <h2 class="text-xl font-bold">Promotions & Discounts</h2>
+            <p class="text-sm text-gray-500">Create special offers to attract more customers</p>
+          </div>
+          <button onclick="openPromoModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">add_circle</span>
+            Create Promo Code
+          </button>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <h3 class="font-semibold mb-4 text-gray-700">Active Promotions</h3>
+          <div id="activePromosList" class="space-y-3">
+            <p class="text-sm text-gray-500">You currently have no active promotions.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Tab -->
+      <div id="profileTab" class="p-6 hidden">
+        <h2 class="text-xl font-bold mb-4">Restaurant Settings</h2>
+        <div class="mb-4 bg-surface-container-high p-4 rounded-xl flex items-center justify-between border border-outline-variant">
+          <div>
+            <h3 class="font-semibold text-on-surface">Dark Mode</h3>
+            <p class="text-sm text-on-surface-variant">Switch to a sleek dark theme for night viewing</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="darkModeToggle" class="sr-only peer" onchange="toggleDarkMode(this.checked)">
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+          </label>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Store Info -->
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 class="font-semibold mb-4 flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">store</span>
+              Store Information
+            </h3>
+            <form id="storeInfoForm" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
+                <input type="text" id="storeName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Company Logo URL (optional)</label>
+                <input type="text" id="storeLogo" placeholder="images/default-logo.png" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea id="storeDescription" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"></textarea>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select id="storeCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                  <option value="food">Food & Restaurant</option>
+                  <option value="grocery">Grocery</option>
+                  <option value="bakery">Bakery</option>
+                  <option value="dairy">Dairy</option>
+                  <option value="fruits">Fruits & Vegetables</option>
+                </select>
+              </div>
+              <button type="submit" class="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition-colors">
+                Save Changes
+              </button>
+            </form>
+          </div>
+          <!-- Business Hours -->
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 class="font-semibold mb-4 flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">schedule</span>
+              Business Hours
+            </h3>
+            <form id="businessHoursForm" class="space-y-3">
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium">Monday - Friday</span>
+                <div class="flex gap-2">
+                  <input type="time" value="08:00" class="px-2 py-1 border rounded">
+                  <span class="text-gray-500">to</span>
+                  <input type="time" value="22:00" class="px-2 py-1 border rounded">
+                </div>
+              </div>
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium">Saturday - Sunday</span>
+                <div class="flex gap-2">
+                  <input type="time" value="09:00" class="px-2 py-1 border rounded">
+                  <span class="text-gray-500">to</span>
+                  <input type="time" value="23:00" class="px-2 py-1 border rounded">
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="isOpen" class="rounded text-primary">
+                <label for="isOpen" class="text-sm">Store is currently open</label>
+              </div>
+              <button type="submit" class="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition-colors">
+                Update Hours
+              </button>
+            </form>
+          </div>
+        </div>
+        
+        <!-- Account Actions -->
+        <div class="mt-6 bg-white p-6 rounded-xl shadow-sm border border-red-100">
+          <h3 class="font-semibold mb-4 flex items-center gap-2 text-red-600">
+            <span class="material-symbols-outlined">logout</span>
+            Account
+          </h3>
+          <button onclick="logout()" class="w-full bg-red-50 text-red-600 border border-red-200 py-3 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2 font-medium">
+            <span class="material-symbols-outlined">logout</span>
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Add/Edit Menu Item Modal -->
+    <div id="addMenuModal" class="hidden fixed inset-0 z-[100] bg-on-surface/50 backdrop-blur-sm items-center justify-center p-4">
+      <div class="bg-surface rounded-2xl shadow-xl w-full max-w-md overflow-hidden max-h-[90vh] overflow-y-auto">
+        <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center sticky top-0 bg-surface z-10">
+          <h3 id="menuModalTitle" class="font-headline font-bold text-lg text-primary">Add Menu Item</h3>
+          <button onclick="closeAddMenuItem()" class="text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <form onsubmit="submitAddMenuItem(event)" class="p-6 space-y-4">
+          <input type="hidden" id="menuItemId">
+          <div>
+            <label for="menuItemName" class="block text-sm font-medium text-on-surface mb-1">Item Name *</label>
+            <input type="text" id="menuItemName" required class="w-full px-4 py-2 bg-surface-container border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+          </div>
+          <div>
+            <label for="menuItemPrice" class="block text-sm font-medium text-on-surface mb-1">Price (TSh) *</label>
+            <input type="number" id="menuItemPrice" required min="1" class="w-full px-4 py-2 bg-surface-container border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+          </div>
+          <div>
+            <label for="menuItemDesc" class="block text-sm font-medium text-on-surface mb-1">Description</label>
+            <textarea id="menuItemDesc" rows="2" class="w-full px-4 py-2 bg-surface-container border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"></textarea>
+          </div>
+          <div>
+            <label for="menuItemImage" class="block text-sm font-medium text-on-surface mb-1">Image</label>
+            <!-- File Upload Option -->
+            <div class="flex gap-2 mb-2">
+              <input type="file" id="menuItemImageFile" accept="image/*" onchange="handleImageFileSelect(this)" class="hidden">
+              <button type="button" onclick="document.getElementById('menuItemImageFile').click()" class="flex-1 px-4 py-2 bg-secondary-container border border-secondary/30 rounded-lg text-on-secondary-container font-medium hover:bg-secondary/20 transition-all flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-sm">upload</span>
+                Choose File
+              </button>
+              <button type="button" onclick="openImageGallery()" class="px-4 py-2 bg-surface-container border border-outline-variant rounded-lg text-on-surface hover:bg-surface-container-high transition-all" title="Select from gallery">
+                <span class="material-symbols-outlined text-sm">photo_library</span>
+              </button>
+            </div>
+            <!-- Manual Path Input -->
+            <input type="text" id="menuItemImage" placeholder="images/default-product.png" oninput="updateImagePreview(this.value)" class="w-full px-4 py-2 bg-surface-container border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm">
+            <p class="text-xs text-gray-500 mt-1">Upload an image or enter path like 'images/product.png'</p>
+            <!-- Image Preview -->
+            <div id="imagePreviewContainer" class="mt-3 hidden">
+              <p class="text-xs text-gray-500 mb-1">Preview:</p>
+              <img id="imagePreview" src="" alt="Preview" class="w-full h-32 object-cover rounded-lg border border-outline-variant">
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <label for="menuItemStock" class="block text-sm font-medium text-on-surface mb-1">Stock Quantity</label>
+              <input type="number" id="menuItemStock" value="-1" min="-1" class="w-full px-4 py-2 bg-surface-container border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+              <p class="text-xs text-gray-500 mt-1">Set to -1 for unlimited</p>
+            </div>
+            <div class="flex-1">
+              <label for="menuItemCategory" class="block text-sm font-medium text-on-surface mb-1">Category</label>
+              <input type="text" id="menuItemCategory" list="categoryOptions" placeholder="e.g. Breakfast, Drinks" class="w-full px-4 py-2 bg-surface-container border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+              <datalist id="categoryOptions">
+                <option value="Food">
+                <option value="Drinks">
+                <option value="Dessert">
+                <option value="Specials">
+              </datalist>
+            </div>
+          </div>
+          
+          <div class="border-t border-gray-200 pt-3">
+            <p class="text-sm font-medium text-on-surface mb-2">Advanced Options</p>
+            
+            <div class="mb-3">
+              <label class="block text-xs text-gray-500 mb-1">Dietary Tags</label>
+              <div class="flex flex-wrap gap-2">
+                <label class="flex items-center gap-1 text-sm bg-gray-50 px-2 py-1 rounded border"><input type="checkbox" name="dietaryTags" value="Vegan"> Vegan</label>
+                <label class="flex items-center gap-1 text-sm bg-gray-50 px-2 py-1 rounded border"><input type="checkbox" name="dietaryTags" value="Vegetarian"> Vegetarian</label>
+                <label class="flex items-center gap-1 text-sm bg-gray-50 px-2 py-1 rounded border"><input type="checkbox" name="dietaryTags" value="Gluten-Free"> Gluten-Free</label>
+                <label class="flex items-center gap-1 text-sm bg-gray-50 px-2 py-1 rounded border"><input type="checkbox" name="dietaryTags" value="Halal"> Halal</label>
+                <label class="flex items-center gap-1 text-sm bg-gray-50 px-2 py-1 rounded border"><input type="checkbox" name="dietaryTags" value="Spicy"> Spicy 🌶️</label>
+              </div>
+            </div>
+
+            <div class="flex gap-4 mb-3">
+              <div class="flex-1">
+                <label for="availableFrom" class="block text-xs text-gray-500 mb-1">Available From</label>
+                <input type="time" id="availableFrom" class="w-full px-3 py-1.5 bg-surface-container border border-outline-variant rounded text-sm">
+              </div>
+              <div class="flex-1">
+                <label for="availableTo" class="block text-xs text-gray-500 mb-1">Available To</label>
+                <input type="time" id="availableTo" class="w-full px-3 py-1.5 bg-surface-container border border-outline-variant rounded text-sm">
+              </div>
+            </div>
+
+            <div>
+              <label for="menuItemVariations" class="block text-xs text-gray-500 mb-1">Variations & Add-ons (Format: Size Small=+0, Size Large=+1500)</label>
+              <textarea id="menuItemVariations" rows="2" placeholder="Extra Cheese=+500, Regular=+0, Large=+1500" class="w-full px-4 py-2 bg-surface-container border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all text-sm"></textarea>
+            </div>
+          </div>
+          <div class="pt-4 flex gap-3">
+            <button type="button" onclick="closeAddMenuItem()" class="flex-1 py-3 px-4 rounded-xl border border-outline-variant text-on-surface hover:bg-surface-container-high transition-all font-medium">Cancel</button>
+            <button type="submit" id="menuModalSubmitBtn" class="flex-1 py-3 px-4 rounded-xl bg-primary text-on-primary hover:opacity-90 transition-all font-bold">Add Item</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Promo Builder Modal -->
+    <div id="promoModal" class="hidden fixed inset-0 z-[100] bg-on-surface/50 backdrop-blur-sm items-center justify-center p-4">
+      <div class="bg-surface rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface">
+          <h3 class="font-headline font-bold text-lg text-primary">Create Promo Code</h3>
+          <button onclick="closePromoModal()" class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Code</label>
+            <input type="text" id="promoCodeInput" placeholder="e.g. KARIBU10" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Discount (%)</label>
+            <input type="number" id="promoDiscountInput" min="1" max="100" placeholder="10" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none">
+          </div>
+          <button onclick="savePromoCode()" class="w-full py-3 rounded-xl bg-primary text-white hover:opacity-90 transition-all font-bold">Save Promo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div id="chatModal" class="hidden fixed inset-0 z-[100] bg-on-surface/50 backdrop-blur-sm items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="bg-surface rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-md h-[80vh] sm:h-[60vh] flex flex-col overflow-hidden">
+        <div class="px-4 py-3 bg-primary text-white flex justify-between items-center shadow-md z-10">
+          <div>
+            <h3 class="font-bold text-lg" id="chatCustomerName">Customer</h3>
+            <p class="text-xs text-green-200">Online</p>
+          </div>
+          <button onclick="closeChatModal()" class="text-white hover:text-green-100 transition-colors"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div id="chatMessages" class="flex-1 p-4 bg-gray-50 overflow-y-auto flex flex-col gap-3">
+          <div class="text-center text-xs text-gray-400 my-2">Chat started</div>
+        </div>
+        <div class="p-3 bg-white border-t border-gray-200 flex gap-2">
+          <input type="text" id="chatInput" placeholder="Type a message..." class="flex-1 px-4 py-2 bg-gray-100 border-none rounded-full focus:ring-2 focus:ring-primary outline-none" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+          <button onclick="sendChatMessage()" class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors shadow-md">
+            <span class="material-symbols-outlined text-sm">send</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Driver Tracking Modal -->
+    <div id="driverModal" class="hidden fixed inset-0 z-[100] bg-on-surface/50 backdrop-blur-sm items-center justify-center p-4">
+      <div class="bg-surface rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface">
+          <h3 class="font-headline font-bold text-lg text-indigo-700 flex items-center gap-2"><span class="material-symbols-outlined">my_location</span> Live Tracking</h3>
+          <button onclick="closeDriverModal()" class="text-on-surface-variant hover:text-indigo-700 transition-colors"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="relative w-full h-64 bg-gray-200">
+          <!-- Fake Map Background -->
+          <img src="images/default-map.png" class="w-full h-full object-cover opacity-60" onerror="this.style.display='none'; this.nextElementSibling.style.background='linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)'">
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="bg-indigo-600 text-white p-3 rounded-full shadow-lg animate-bounce">
+              <span class="material-symbols-outlined">two_wheeler</span>
+            </div>
+          </div>
+        </div>
+        <div class="p-6 bg-white">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
+              <span class="material-symbols-outlined text-2xl">person</span>
+            </div>
+            <div>
+              <p class="font-bold text-lg" id="trackingDriverName">Driver Name</p>
+              <p class="text-sm text-gray-500" id="trackingStatus">Status</p>
+            </div>
+            <div class="ml-auto flex gap-2">
+              <button onclick="alert('Calling driver...')" class="bg-green-100 text-green-700 p-2 rounded-full hover:bg-green-200"><span class="material-symbols-outlined">call</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modular Merchant App -->
+  <script src="js/merchant-app.js?v=2"></script>
+  
+  <!-- Legacy inline script for backward compatibility (will be removed) -->
+  <script>
+    // Global state
+    var currentSeller = null;
+    
+    // Resolve Firestore reference reliably
+    var db = window.db;
+    if (!db) {
+      console.warn('Firestore not initialized');
+    }
+
+    // Keep escapeHtml for any inline usage
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      SmartNav.init({ activePage: 'orders', role: 'merchant', breadcrumbs: ['Merchant', 'Dashboard'] });
+
+      // ── Demo / mock-login mode ──────────────────────────────────────────────
+      // When the user logged in with a test account (no real Firebase user),
+      // onAuthStateChanged fires with null and would loop back to login.html.
+      // Detect this early and skip the Firebase listener entirely.
+      const authMode = localStorage.getItem('smartsoko_auth_mode');
+      if (authMode === 'demo') {
+        const demoUser = JSON.parse(localStorage.getItem('smartsoko_demo_user') || '{}');
+        if (demoUser.uid && (demoUser.role === 'merchant' || demoUser.role === 'seller')) {
+          // Use a synthetic UID so Firestore queries still work (they'll return empty for mock IDs)
+          (async () => {
+            await loadSellerData(demoUser.uid);
+            if (currentSeller) {
+              setupRealtimeListeners();
+            }
+          })();
+          return; // do NOT attach Firebase listener
+        } else if (demoUser.uid) {
+          // Logged-in demo user but wrong role — send to login
+          window.location.href = 'login.html?reason=unauthorized';
+          return;
+        }
+      }
+
+      // ── Real Firebase auth ──────────────────────────────────────────────────
+      const auth = window.auth;
+      if (!auth) {
+        window.location.href = 'login.html?reason=auth_required';
+        return;
+      }
+
+      auth.onAuthStateChanged(async user => {
+        if (user) {
+          await loadSellerData(user.uid);
+          if (currentSeller) {
+            setupRealtimeListeners();
+          }
+        } else {
+          window.location.href = 'login.html';
+        }
+      });
+    });
+
+    async function loadSellerData(uid) {
+      try {
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { collection, query, where, getDocs, doc, setDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const q = query(collection(db, 'sellers'), where('ownerId', '==', uid));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          currentSeller = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+        } else {
+          // Fallback for demo users or new merchants without a profile
+          const fallbackId = (uid === 'merchant@smartsoko.com' || uid === 'demo-merchant') ? 'demo-seller' : uid;
+          currentSeller = { id: fallbackId, ownerId: uid, name: 'Demo Restaurant', category: 'food', isOpen: true, rating: '4.5' };
+          // Optionally, persist this demo seller so it appears on the customer app
+          try {
+            await setDoc(doc(db, 'sellers', fallbackId), currentSeller, { merge: true });
+          } catch (e) {
+            console.log('Skipped persisting demo seller', e);
+          }
+        }
+
+        document.getElementById('restaurantRating').textContent = currentSeller.rating || '4.5';
+        
+        // Load comprehensive stats
+        await loadComprehensiveStats();
+        
+        loadOrders();
+        loadProducts();
+        loadReviews();
+        
+        // Populate settings form
+        document.getElementById('storeName').value = currentSeller.name || '';
+        document.getElementById('storeLogo').value = currentSeller.logoUrl || '';
+        document.getElementById('storeDescription').value = currentSeller.description || '';
+        document.getElementById('storeCategory').value = currentSeller.category || 'food';
+        document.getElementById('isOpen').checked = currentSeller.isOpen || false;
+      } catch (error) {
+        console.error('Error loading seller data:', error);
+      }
+    }
+
+    async function loadComprehensiveStats() {
+      if (!currentSeller) return;
+      
+      try {
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const weekAgo = new Date(today);
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        const q = query(collection(db, 'orders'), where('sellerId', '==', currentSeller.id));
+        const ordersSnap = await getDocs(q);
+        
+        let todaySales = 0;
+        let yesterdaySales = 0;
+        let weeklySales = 0;
+        let weeklyOrders = 0;
+        let orderCount = 0;
+        let pendingCount = 0;
+        let totalRevenue = 0;
+        
+        ordersSnap.forEach(doc => {
+          const order = doc.data();
+          orderCount++;
+          totalRevenue += order.total || 0;
+          
+          const orderDate = order.createdAt ? (order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt)) : null;
+          
+          if (orderDate) {
+            if (orderDate >= today) {
+              todaySales += order.total || 0;
+            }
+            if (orderDate >= yesterday && orderDate < today) {
+              yesterdaySales += order.total || 0;
+            }
+            if (orderDate >= weekAgo) {
+              weeklySales += order.total || 0;
+              weeklyOrders++;
+            }
+          }
+          
+          if (order.status === 'pending') pendingCount++;
+        });
+        
+        // Update stats
+        document.getElementById('todaySales').textContent = `TSh ${todaySales.toLocaleString()}`;
+        document.getElementById('orderCount').textContent = orderCount;
+        document.getElementById('pendingOrders').textContent = `${pendingCount} pending`;
+        document.getElementById('weeklySales').textContent = `TSh ${weeklySales.toLocaleString()}`;
+        document.getElementById('weeklyOrders').textContent = `${weeklyOrders} orders`;
+        
+        // Calculate trends
+        const salesTrend = yesterdaySales > 0 ? ((todaySales - yesterdaySales) / yesterdaySales * 100).toFixed(1) : 0;
+        const trendElem = document.getElementById('salesTrend');
+        trendElem.textContent = `${salesTrend >= 0 ? '+' : ''}${salesTrend}% vs yesterday`;
+        trendElem.className = `text-xs mt-1 ${salesTrend >= 0 ? 'text-green-600' : 'text-red-600'}`;
+        
+        // Average order value
+        const avgOrder = orderCount > 0 ? Math.round(totalRevenue / orderCount) : 0;
+        document.getElementById('avgOrderValue').textContent = `TSh ${avgOrder.toLocaleString()}`;
+        
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    // Real-time listener flag
+    let initialLoadComplete = false;
+
+    async function setupRealtimeListeners() {
+      if (!currentSeller || !currentSeller.id) {
+        console.warn('setupRealtimeListeners called but currentSeller is null or missing id');
+        return;
+      }
+      const db = window.db;
+      if (!db) throw new Error('Firestore not initialized');
+      const { collection, query, where, onSnapshot } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+      const q = query(collection(db, 'orders'), where('sellerId', '==', currentSeller?.id));
+      onSnapshot(q, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === 'added') {
+            if (initialLoadComplete) {
+              const order = change.doc.data();
+              // Only notify if it's a recent order
+              const orderDate = order.createdAt ? (order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt)) : new Date();
+              if (new Date() - orderDate < 60000) { // Within last minute
+                showNotification(`New Order received from ${order.customerName || 'Customer'}!`, 'success');
+                // Optional: Play a sound
+                try {
+                  const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                  audio.play().catch(e => console.log('Audio autoplay blocked'));
+                } catch(e) {}
+              }
+            }
+          }
+          
+          if (change.type === 'modified' || change.type === 'added') {
+            loadOrders(currentOrderFilter, document.getElementById('orderDateFilter').value);
+            loadComprehensiveStats(); // Update stats in real-time
+          }
+        });
+        initialLoadComplete = true;
+      });
+    }
+
+    async function loadOrders(statusFilter = 'all', dateFilter = '') {
+      try {
+        if (!currentSeller) return;
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const q = query(collection(db, 'orders'), where('sellerId', '==', currentSeller.id));
+        const snapshot = await getDocs(q);
+
+        let orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Client-side sorting by createdAt
+        orders.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt.toDate ? a.createdAt.toDate() : a.createdAt) : new Date(0);
+          const dateB = b.createdAt ? new Date(b.createdAt.toDate ? b.createdAt.toDate() : b.createdAt) : new Date(0);
+          return dateB - dateA; // Descending order
+        });
+
+        if (statusFilter !== 'all') {
+          orders = orders.filter(o => o.status === statusFilter);
+        }
+        
+        if (dateFilter) {
+          orders = orders.filter(o => {
+            const orderDate = o.createdAt ? (o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt)) : null;
+            if (!orderDate) return false;
+            // Compare local date strings (YYYY-MM-DD)
+            const localDateStr = new Date(orderDate.getTime() - (orderDate.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+            return localDateStr === dateFilter;
+          });
+        }
+        
+        allOrders = orders;
+        displayOrders(orders);
+      } catch (error) {
+        console.error('Error loading orders:', error);
+      }
+    }
+
+    function displayOrders(orders) {
+      const container = document.getElementById('ordersList');
+      
+      if (orders.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-500 py-8">No orders found</p>';
+        return;
+      }
+      
+      container.innerHTML = orders.map(order => {
+        const safeId = escapeHtml(order.id);
+        const safeCustomerName = escapeHtml(order.customerName) || 'Customer';
+        const safeStatus = escapeHtml(order.status) || 'pending';
+        const orderIdShort = order.id ? order.id.slice(-8) : 'N/A';
+        return `
+        <div onclick="selectOrder('${safeId}')" class="hover-lift border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl p-5 cursor-pointer ${selectedOrderId === order.id ? 'ring-2 ring-primary border-primary shadow-md' : ''}">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <div class="flex flex-wrap items-center gap-2 mb-3">
+                <h4 class="font-bold text-gray-900 dark:text-gray-100 text-lg">#${orderIdShort}</h4>
+                <span class="px-3 py-1 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-bold text-xs rounded-full">
+                  TSh ${(order.total || 0).toLocaleString()}
+                </span>
+                <span class="px-3 py-1 ${getStatusColor(order.status)} text-xs rounded-full font-bold uppercase tracking-wide shadow-sm border border-black/5">
+                  ${safeStatus}
+                </span>
+              </div>
+              <div class="text-sm text-gray-600 mb-1">
+                <span class="material-symbols-outlined text-sm align-middle">person</span> ${safeCustomerName}
+              </div>
+              <div class="text-sm text-gray-500">
+                <span class="material-symbols-outlined text-sm align-middle">schedule</span> ${order.createdAt ? (order.createdAt.toDate ? order.createdAt.toDate().toLocaleString() : new Date(order.createdAt).toLocaleString()) : 'N/A'}
+              </div>
+            </div>
+            <div class="flex flex-col space-y-2 ml-4">
+              ${getOrderActions(order)}
+            </div>
+          </div>
+        </div>
+      `}).join('');
+    }
+
+    // Menu filtering
+    function filterMenuItems(filter) {
+      const items = filter === 'all' ? products : 
+                    filter === 'available' ? products.filter(p => p.isAvailable) :
+                    products.filter(p => p.category === filter);
+      displayProducts(items);
+    }
+
+    // Reviews functionality
+    let allReviews = [];
+
+    async function loadReviews() {
+      if (!currentSeller) return;
+      try {
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { collection, query, where, orderBy, limit, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        
+        // Try compound query first (requires index)
+        let reviewsSnap;
+        try {
+          const q = query(collection(db, 'reviews'), where('sellerId', '==', currentSeller.id), orderBy('createdAt', 'desc'), limit(50));
+          reviewsSnap = await getDocs(q);
+        } catch (indexError) {
+          // Fallback: simple query without ordering if index doesn't exist
+          const errorMsg = indexError.message || indexError.toString() || '';
+          if (errorMsg.includes('index') || errorMsg.includes('orderBy')) {
+            console.warn('Reviews index not created, using fallback query. Error:', errorMsg);
+            const q = query(collection(db, 'reviews'), where('sellerId', '==', currentSeller.id), limit(50));
+            reviewsSnap = await getDocs(q);
+            // Sort client-side
+            reviewsSnap = {
+              docs: reviewsSnap.docs.sort((a, b) => {
+                const dateA = a.data().createdAt?.toDate?.() || new Date(a.data().createdAt || 0);
+                const dateB = b.data().createdAt?.toDate?.() || new Date(b.data().createdAt || 0);
+                return dateB - dateA;
+              })
+            };
+          } else {
+            throw indexError;
+          }
+        }
+        
+        allReviews = reviewsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        displayReviews(allReviews);
+        updateRatingSummary(allReviews);
+      } catch (error) {
+        console.error('Error loading reviews:', error);
+        const errorMsg = error.message || error.toString() || '';
+        if (errorMsg.includes('offline') || errorMsg.includes('unavailable') || errorMsg.includes('network')) {
+          document.getElementById('reviewsList').innerHTML = '<p class="text-center text-gray-500 py-8">Reviews unavailable (offline mode)</p>';
+        } else {
+          document.getElementById('reviewsList').innerHTML = '<p class="text-center text-gray-500 py-8">No reviews yet</p>';
+        }
+      }
+    }
+
+    function displayReviews(reviews) {
+      const container = document.getElementById('reviewsList');
+      
+      if (reviews.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-500 py-8">No reviews yet</p>';
+        return;
+      }
+      
+      container.innerHTML = reviews.map(review => {
+        const safeCustomerName = escapeHtml(review.customerName) || 'Anonymous';
+        const safeComment = escapeHtml(review.comment) || 'No comment';
+        const orderIdShort = review.orderId ? review.orderId.slice(-8) : '';
+        return `
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex items-center gap-2">
+              <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-gray-500">person</span>
+              </div>
+              <div>
+                <p class="font-medium">${safeCustomerName}</p>
+                <div class="flex gap-0.5">
+                  ${Array(5).fill(0).map((_, i) => `
+                    <span class="material-symbols-outlined text-sm ${i < (review.rating || 0) ? 'text-yellow-500' : 'text-gray-300'}">star</span>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+            <span class="text-sm text-gray-500">${review.createdAt ? (review.createdAt.toDate ? review.createdAt.toDate().toLocaleDateString() : new Date(review.createdAt).toLocaleDateString()) : ''}</span>
+          </div>
+          <p class="text-gray-700">${safeComment}</p>
+          ${orderIdShort ? `<p class="text-xs text-gray-400 mt-2">Order #${orderIdShort}</p>` : ''}
+        </div>
+      `}).join('');
+    }
+
+    function filterReviews(rating) {
+      const filtered = rating === 'all' ? allReviews : allReviews.filter(r => r.rating === parseInt(rating));
+      displayReviews(filtered);
+    }
+
+    function updateRatingSummary(reviews) {
+      if (reviews.length === 0) {
+        document.getElementById('averageRating').textContent = '0.0';
+        document.getElementById('totalReviewCount').textContent = '0';
+        document.getElementById('ratingStars').innerHTML = '';
+        document.getElementById('ratingBreakdown').innerHTML = '';
+        return;
+      }
+      
+      const totalRating = reviews.reduce((sum, r) => sum + (r.rating || 0), 0);
+      const avgRating = (totalRating / reviews.length).toFixed(1);
+      
+      document.getElementById('averageRating').textContent = avgRating;
+      document.getElementById('totalReviewCount').textContent = reviews.length;
+      document.getElementById('totalReviews').textContent = `${reviews.length} reviews`;
+      
+      // Update stars
+      document.getElementById('ratingStars').innerHTML = Array(5).fill(0).map((_, i) => `
+        <span class="material-symbols-outlined text-lg ${i < Math.round(avgRating) ? 'text-yellow-500' : 'text-gray-300'}">star</span>
+      `).join('');
+      
+      // Rating breakdown
+      const counts = [5, 4, 3, 2, 1].map(star => ({
+        star,
+        count: reviews.filter(r => r.rating === star).length
+      }));
+      
+      document.getElementById('ratingBreakdown').innerHTML = counts.map(({ star, count }) => {
+        const percentage = (count / reviews.length * 100).toFixed(0);
+        return `
+          <div class="flex items-center gap-2">
+            <span class="text-sm w-8">${star} ★</span>
+            <div class="flex-1 bg-gray-200 rounded-full h-2">
+              <div class="bg-yellow-500 h-2 rounded-full" style="width: ${percentage}%"></div>
+            </div>
+            <span class="text-sm text-gray-500 w-8">${count}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Settings form handlers
+    document.getElementById('storeInfoForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentSeller) return;
+      
+      try {
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        await updateDoc(doc(db, 'sellers', currentSeller.id), {
+          name: document.getElementById('storeName').value,
+          logoUrl: document.getElementById('storeLogo').value,
+          description: document.getElementById('storeDescription').value,
+          category: document.getElementById('storeCategory').value,
+          updatedAt: new Date().toISOString()
+        });
+        showNotification('Store information updated!', 'success');
+      } catch (error) {
+        showNotification('Failed to update store info', 'error');
+      }
+    });
+
+    document.getElementById('businessHoursForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentSeller) return;
+      
+      try {
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        await updateDoc(doc(db, 'sellers', currentSeller.id), {
+          isOpen: document.getElementById('isOpen').checked,
+          updatedAt: new Date().toISOString()
+        });
+        showNotification('Business hours updated!', 'success');
+      } catch (error) {
+        showNotification('Failed to update hours', 'error');
+      }
+    });
+
+    // Notification helper
+    function showNotification(message, type = 'info') {
+      const colors = {
+        success: 'bg-green-600',
+        error: 'bg-red-600',
+        info: 'bg-blue-600'
+      };
+      
+      const notification = document.createElement('div');
+      notification.className = `fixed bottom-6 right-6 ${colors[type]} text-white px-6 py-3 rounded-xl shadow-lg z-50 flex items-center gap-2`;
+      notification.innerHTML = `
+        <span class="material-symbols-outlined text-sm">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}</span>
+        <span class="font-medium">${message}</span>
+      `;
+      
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 3000);
+    }
+
+    function getStatusColor(status) {
+      const colors = {
+        'pending': 'bg-yellow-100 text-yellow-800',
+        'preparing': 'bg-blue-100 text-blue-800',
+        'ready_for_delivery': 'bg-green-100 text-green-800',
+        'delivered': 'bg-gray-100 text-gray-800',
+        'accepted': 'bg-purple-100 text-purple-800'
+      };
+      return colors[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    function getOrderActions(order) {
+      switch(order.status) {
+        case 'pending':
+          return `<button onclick="updateOrderStatus('${order.id}', 'preparing')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">Accept</button>`;
+        case 'preparing':
+          return `<button onclick="updateOrderStatus('${order.id}', 'ready_for_delivery')" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">Ready for Delivery</button>`;
+        default:
+          return '';
+      }
+    }
+
+    async function updateOrderStatus(orderId, newStatus) {
+      try {
+        // Use enhanced function if available
+        if (typeof window.updateOrderStatus === 'function' && window.updateOrderStatus !== updateOrderStatus) {
+          await window.updateOrderStatus(orderId, newStatus);
+        } else {
+          // Fallback to basic update
+          const db = window.db;
+          if (!db) throw new Error('Firestore not initialized');
+          const { doc, updateDoc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+          
+          const updateData = {
+            status: newStatus,
+            updatedAt: new Date().toISOString()
+          };
+          
+          if (newStatus === 'accepted') updateData.acceptedAt = new Date().toISOString();
+          if (newStatus === 'preparing') updateData.preparingAt = new Date().toISOString();
+          if (newStatus === 'ready_for_delivery') updateData.readyAt = new Date().toISOString();
+          if (newStatus === 'delivered') updateData.deliveredAt = new Date().toISOString();
+          
+          await updateDoc(doc(db, 'orders', orderId), updateData);
+          
+          // Send notification to customer
+          if (typeof window.sendCustomerNotification === 'function') {
+            const orderDoc = await getDoc(doc(db, 'orders', orderId));
+            if (orderDoc.exists()) {
+              const order = orderDoc.data();
+              const messages = {
+                'accepted': 'Your order has been accepted!',
+                'preparing': 'Your order is being prepared',
+                'ready_for_delivery': 'Your order is ready for delivery!',
+                'delivered': 'Your order has been delivered. Enjoy!'
+              };
+              window.sendCustomerNotification(order.customerId, messages[newStatus], orderId);
+            }
+          }
+        }
+        
+        loadOrders();
+        showNotification(`Order ${newStatus.replace('_', ' ')}!`, 'success');
+      } catch (error) {
+        console.error('Error updating order status:', error);
+        showNotification('Failed to update order status', 'error');
+      }
+    }
+
+    // Load sales analytics dashboard
+    async function loadSalesDashboard() {
+      try {
+        if (typeof window.getSalesAnalytics !== 'function') {
+          console.warn('Analytics function not available');
+          return;
+        }
+
+        // Load today's stats
+        const todayStats = await window.getSalesAnalytics('today');
+        if (todayStats) {
+          document.getElementById('todaySales').textContent = `TSh ${todayStats.totalSales.toLocaleString()}`;
+          document.getElementById('ordersCompleted').textContent = todayStats.totalOrders;
+        }
+
+        // Load week's stats
+        const weekStats = await window.getSalesAnalytics('week');
+        if (weekStats) {
+          document.getElementById('weekSales').textContent = `TSh ${weekStats.totalSales.toLocaleString()}`;
+        }
+
+        // Load month's stats
+        const monthStats = await window.getSalesAnalytics('month');
+        if (monthStats) {
+          document.getElementById('monthSales').textContent = `TSh ${monthStats.totalSales.toLocaleString()}`;
+        }
+
+        // Load top products
+        if (todayStats && todayStats.topItems) {
+          renderTopProducts(todayStats.topItems);
+        }
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+      }
+    }
+
+    // Render top products
+    function renderTopProducts(topItems) {
+      const container = document.getElementById('topProductsList');
+      if (!container) return;
+
+      if (topItems.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-500">No sales data yet</p>';
+        return;
+      }
+
+      container.innerHTML = topItems.map((item, index) => `
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-sm">
+              ${index + 1}
+            </div>
+            <span class="font-medium">${item.name}</span>
+          </div>
+          <span class="text-sm font-semibold text-primary">${item.count} sold</span>
+        </div>
+      `).join('');
+    }
+
+    async function loadProducts() {
+      try {
+        // Use enhanced function if available
+        if (typeof window.loadMerchantProducts === 'function') {
+          const products = await window.loadMerchantProducts();
+          displayProducts(products);
+          return;
+        }
+        
+        // Fallback to basic load
+        if (!currentSeller) return;
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const q = query(collection(db, 'products'), where('sellerId', '==', currentSeller.id));
+        const snapshot = await getDocs(q);
+        
+        products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        displayProducts(products);
+        document.getElementById('menuItemCount').textContent = products.length;
+      } catch (error) {
+        console.error('Error loading products:', error);
+      }
+    }
+
+    function displayProducts(items) {
+      const container = document.getElementById('menuItemsList');
+      
+      // Update menu stats
+      const totalItems = products.length;
+      const availableItems = products.filter(p => p.isAvailable).length;
+      const outOfStock = totalItems - availableItems;
+      
+      // Get top category
+      const categoryCount = {};
+      products.forEach(p => {
+        categoryCount[p.category] = (categoryCount[p.category] || 0) + 1;
+      });
+      const topCategory = Object.entries(categoryCount).sort((a, b) => b[1] - a[1])[0];
+      
+      document.getElementById('totalMenuItems').textContent = totalItems;
+      document.getElementById('availableMenuItems').textContent = availableItems;
+      document.getElementById('outOfStockItems').textContent = outOfStock;
+      document.getElementById('topCategory').textContent = topCategory ? topCategory[0].charAt(0).toUpperCase() + topCategory[0].slice(1) : '-';
+      document.getElementById('menuItemCount').textContent = totalItems;
+      document.getElementById('availableItems').textContent = `${availableItems} available`;
+      
+      if (items.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-500 py-8">No products found</p>';
+        return;
+      }
+      
+      container.innerHTML = items.map(item => {
+        const isUnlimited = item.stock === undefined || item.stock < 0;
+        const stockDisplay = isUnlimited ? 'Unlimited' : `${item.stock} left`;
+        
+        let tagsHtml = '';
+        if (item.tags && item.tags.length > 0) {
+          tagsHtml = `<div class="flex flex-wrap gap-1 mt-2">` + 
+            item.tags.map(t => `<span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">${t}</span>`).join('') +
+            `</div>`;
+        }
+
+        let timeHtml = '';
+        if (item.availableFrom || item.availableTo) {
+           timeHtml = `<div class="text-[10px] text-gray-500 mt-1"><span class="material-symbols-outlined text-[12px] align-middle">schedule</span> ${item.availableFrom || 'Open'} - ${item.availableTo || 'Close'}</div>`;
+        }
+
+        let varCount = item.variations ? item.variations.split(',').length : 0;
+        let varHtml = varCount > 0 ? `<div class="text-[10px] text-primary mt-1 font-medium"><span class="material-symbols-outlined text-[12px] align-middle">tune</span> ${varCount} variation(s)</div>` : '';
+
+        return `
+        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-white flex flex-col h-full relative group">
+          <div class="absolute top-3 left-3 z-10 bg-white rounded flex items-center justify-center shadow-sm">
+            <input type="checkbox" class="product-select-cb w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer" value="${item.id}" onchange="updateBulkActionUI()">
+          </div>
+          <div class="w-full h-32 rounded-md mb-3 overflow-hidden bg-gray-100 relative">
+            <img src="${item.imageUrl || 'images/default-product.png'}" alt="${escapeHtml(item.name)}" class="w-full h-full object-cover" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="absolute inset-0 flex items-center justify-center hidden">
+              <div class="text-center">
+                <span class="material-symbols-outlined text-4xl text-gray-400">image</span>
+                <p class="text-xs text-gray-500 mt-1">${escapeHtml(item.name)}</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-between items-start mb-1">
+            <div>
+              <h4 class="font-semibold">${escapeHtml(item.name)}</h4>
+              <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">${escapeHtml(item.category) || 'General'}</span>
+              <span class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded ml-1 font-medium shadow-sm border border-blue-100">📦 ${stockDisplay}</span>
+            </div>
+            <span class="text-lg font-bold text-green-600 whitespace-nowrap ml-2">TSh ${(item.price || 0).toLocaleString()}</span>
+          </div>
+          ${tagsHtml}
+          ${timeHtml}
+          ${varHtml}
+          <p class="text-gray-600 text-sm my-3 flex-grow">${escapeHtml(item.description) || 'No description'}</p>
+          <div class="flex justify-between items-center pt-3 border-t border-gray-100 mt-auto">
+            <span class="px-2 py-1 ${item.isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} text-xs rounded-full font-medium">
+              ${item.isAvailable ? '● Available' : '● Unavailable'}
+            </span>
+            <div class="flex space-x-1">
+              <button onclick="toggleProductAvailability('${item.id}')" class="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" title="Toggle Availability">
+                <span class="material-symbols-outlined text-sm">power_settings_new</span>
+              </button>
+              <button onclick="openEditMenuItem('${item.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit Item">
+                <span class="material-symbols-outlined text-sm">edit</span>
+              </button>
+              <button onclick="deleteProduct('${item.id}')" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete Item">
+                <span class="material-symbols-outlined text-sm">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `}).join('');
+    }
+
+    async function deleteProduct(productId) {
+      if (!confirm('Are you sure you want to delete this item?')) return;
+      
+      try {
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        await deleteDoc(doc(db, 'products', productId));
+        showNotification('Product deleted successfully!', 'success');
+        loadProducts();
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        showNotification('Failed to delete product', 'error');
+      }
+    }
+
+    async function toggleProductAvailability(productId) {
+      try {
+        const product = products.find(p => p.id === productId);
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        await updateDoc(doc(db, 'products', productId), { isAvailable: !product.isAvailable });
+        loadProducts();
+      } catch (error) {
+        console.error('Error toggling product availability:', error);
+      }
+    }
+
+    async function loadAnalytics() {
+      if (!currentSeller) return;
+      
+      try {
+        const period = parseInt(document.getElementById('analyticsPeriod')?.value || '7');
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - period);
+        
+        // Popular Items
+        const itemCounts = {};
+        const categorySales = {};
+        const hourCounts = {};
+        const dailyRevenue = {};
+        
+        allOrders.forEach(order => {
+          const orderDate = order.createdAt ? (order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt)) : null;
+          if (orderDate && orderDate >= startDate) {
+            // Daily revenue for chart
+            const dateKey = orderDate.toLocaleDateString();
+            dailyRevenue[dateKey] = (dailyRevenue[dateKey] || 0) + (order.total || 0);
+            
+            // Category sales
+            if (order.items) {
+              order.items.forEach(item => {
+                itemCounts[item.name] = (itemCounts[item.name] || 0) + (item.quantity || 1);
+                
+                // Get category from products
+                const product = products.find(p => p.name === item.name);
+                const category = product?.category || 'Other';
+                categorySales[category] = (categorySales[category] || 0) + ((item.price || 0) * (item.quantity || 1));
+              });
+            }
+            
+            // Peak hours
+            const hour = orderDate.getHours();
+            hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+          }
+        });
+        
+        // Display Popular Items
+        const sortedItems = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        document.getElementById('popularItems').innerHTML = sortedItems.map(([name, count], index) => `
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${index < 3 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}">
+              ${index + 1}
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-medium">${name}</p>
+              <p class="text-xs text-gray-500">${count} sold</p>
+            </div>
+          </div>
+        `).join('') || '<p class="text-sm text-gray-500">No data available</p>';
+        
+        // Display Peak Hours
+        const sortedHours = Object.entries(hourCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        document.getElementById('peakHours').innerHTML = sortedHours.map(([hour, count]) => {
+          const timeLabel = `${hour}:00 - ${hour}:59`;
+          const percentage = Math.round((count / allOrders.length) * 100) || 0;
+          return `
+            <div class="flex items-center gap-2">
+              <span class="text-sm w-20">${timeLabel}</span>
+              <div class="flex-1 bg-gray-200 rounded-full h-2">
+                <div class="bg-primary h-2 rounded-full" style="width: ${percentage}%"></div>
+              </div>
+              <span class="text-sm text-gray-500 w-8">${count}</span>
+            </div>
+          `;
+        }).join('') || '<p class="text-sm text-gray-500">No data available</p>';
+        
+        // Display Category Sales
+        const sortedCategories = Object.entries(categorySales).sort((a, b) => b[1] - a[1]);
+        const totalSales = sortedCategories.reduce((sum, [, sales]) => sum + sales, 0);
+        document.getElementById('categorySales').innerHTML = sortedCategories.map(([category, sales]) => {
+          const percentage = totalSales > 0 ? Math.round((sales / totalSales) * 100) : 0;
+          return `
+            <div class="flex items-center gap-2">
+              <span class="text-sm w-24 capitalize">${category}</span>
+              <div class="flex-1 bg-gray-200 rounded-full h-2">
+                <div class="bg-green-500 h-2 rounded-full" style="width: ${percentage}%"></div>
+              </div>
+              <span class="text-sm text-gray-500">TSh ${sales.toLocaleString()}</span>
+            </div>
+          `;
+        }).join('') || '<p class="text-sm text-gray-500">No data available</p>';
+        
+        // Simple revenue chart using canvas
+        drawRevenueChart(dailyRevenue, period);
+        
+      } catch (error) {
+        console.error('Error loading analytics:', error);
+      }
+    }
+
+    function drawRevenueChart(dailyRevenue, period) {
+      const canvas = document.getElementById('revenueCanvas');
+      if (!canvas) return;
+      
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width = canvas.offsetWidth || 600;
+      const height = canvas.height = canvas.offsetHeight || 250;
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, width, height);
+      
+      const dates = Object.keys(dailyRevenue).sort();
+      const values = dates.map(d => dailyRevenue[d]);
+      
+      if (values.length === 0) {
+        ctx.fillStyle = '#9CA3AF';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('No revenue data available', width / 2, height / 2);
+        return;
+      }
+      
+      const maxValue = Math.max(...values, 1);
+      const padding = 40;
+      const chartWidth = width - padding * 2;
+      const chartHeight = height - padding * 2;
+      
+      // Draw bars
+      const barWidth = chartWidth / dates.length * 0.6;
+      const gap = chartWidth / dates.length * 0.4;
+      
+      values.forEach((value, i) => {
+        const barHeight = (value / maxValue) * chartHeight;
+        const x = padding + i * (barWidth + gap) + gap / 2;
+        const y = height - padding - barHeight;
+        
+        // Draw bar
+        ctx.fillStyle = '#012d1d';
+        ctx.fillRect(x, y, barWidth, barHeight);
+        
+        // Draw value label
+        ctx.fillStyle = '#374151';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`TSh ${(value / 1000).toFixed(0)}k`, x + barWidth / 2, y - 5);
+        
+        // Draw date label
+        const date = new Date(dates[i]);
+        ctx.fillText(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), x + barWidth / 2, height - 10);
+      });
+    }
+
+    function switchTab(tabName, clickedBtn) {
+      document.querySelectorAll('[id$="Tab"]').forEach(tab => {
+        tab.classList.add('hidden');
+        tab.classList.remove('animate-fade-in');
+      });
+      
+      const targetTab = document.getElementById(tabName + 'Tab');
+      targetTab.classList.remove('hidden');
+      // Force a reflow to trigger animation
+      void targetTab.offsetWidth;
+      targetTab.classList.add('animate-fade-in');
+      
+      // Load data based on tab
+      if (tabName === 'analytics' && typeof window.getSalesAnalytics === 'function') {
+        loadSalesDashboard();
+      } else if (tabName === 'products') {
+        loadProducts();
+      } else if (tabName === 'orders') {
+        loadOrders();
+      }
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-primary', 'text-white', 'shadow-md', 'font-bold');
+        btn.classList.add('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-800');
+      });
+
+      // Use the passed button reference; fall back to the global event target if needed
+      const activeBtn = clickedBtn || (typeof event !== 'undefined' && event.target) || null;
+      if (activeBtn) {
+        // Handle if they clicked the span icon inside the button
+        const actualBtn = activeBtn.closest('button') || activeBtn;
+        actualBtn.classList.remove('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-800');
+        actualBtn.classList.add('bg-primary', 'text-white', 'shadow-md', 'font-bold');
+      }
+
+      if (tabName === 'analytics') loadAnalytics();
+    }
+
+    let currentOrderFilter = 'all';
+    let selectedOrderId = null;
+
+    function filterOrders(filter) {
+      loadOrders(filter, document.getElementById('orderDateFilter').value);
+    }
+
+    function filterOrdersByStatus(status) {
+      currentOrderFilter = status;
+      // Update button styles
+      document.querySelectorAll('.status-filter-btn').forEach(btn => {
+        if (btn.dataset.status === status) {
+          btn.classList.add('bg-white', 'shadow-sm', 'text-gray-700');
+          btn.classList.remove('text-gray-600', 'hover:bg-white/50');
+        } else {
+          btn.classList.remove('bg-white', 'shadow-sm', 'text-gray-700');
+          btn.classList.add('text-gray-600', 'hover:bg-white/50');
+        }
+      });
+      loadOrders(status, document.getElementById('orderDateFilter').value);
+    }
+
+    function filterOrdersByDate(dateStr) {
+      loadOrders(currentOrderFilter, dateStr);
+    }
+
+    function refreshOrders() {
+      loadOrders(currentOrderFilter, document.getElementById('orderDateFilter').value);
+    }
+
+    function selectOrder(orderId) {
+      selectedOrderId = orderId;
+      const order = allOrders.find(o => o.id === orderId);
+      if (order) {
+        displayOrderDetails(order);
+      }
+    }
+
+    function displayOrderDetails(order) {
+      const panel = document.getElementById('orderDetailsPanel');
+      const items = order.items || [];
+      
+      panel.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-sm text-gray-500">Order ID</p>
+              <p class="font-semibold">#${order.id.slice(-8)}</p>
+            </div>
+            <span class="px-3 py-1 ${getStatusColor(order.status)} text-xs rounded-full font-medium">
+              ${order.status.toUpperCase()}
+            </span>
+          </div>
+          
+          <div class="border-t border-gray-200 pt-3">
+            <p class="text-sm text-gray-500 mb-2">Customer</p>
+            <p class="font-medium">${order.customerName || 'Customer'}</p>
+            <p class="text-sm text-gray-600">${order.customerPhone || 'N/A'}</p>
+            <p class="text-sm text-gray-600 mt-1">${order.customerAddress || 'N/A'}</p>
+          </div>
+          
+          <div class="border-t border-gray-200 pt-3">
+            <p class="text-sm text-gray-500 mb-2">Items</p>
+            <div class="space-y-2">
+              ${items.map(item => `
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">${item.name} x${item.quantity || 1}</span>
+                  <span class="text-sm font-medium">TSh ${((item.price || 0) * (item.quantity || 1)).toLocaleString()}</span>
+                </div>
+              `).join('') || '<p class="text-sm text-gray-400">No items</p>'}
+            </div>
+          </div>
+          
+          <div class="border-t border-gray-200 pt-3">
+            <div class="flex justify-between items-center">
+              <span class="font-semibold">Total</span>
+              <span class="font-bold text-lg text-primary">TSh ${(order.total || 0).toLocaleString()}</span>
+            </div>
+          </div>
+          
+          <div class="border-t border-gray-200 pt-3 flex justify-between items-center">
+            <div>
+              <p class="text-sm text-gray-500 mb-2">Customer Communications</p>
+              <button onclick="openCustomerChat('${escapeHtml(order.id)}', '${escapeHtml(order.customerName || 'Customer')}')" class="text-primary font-medium hover:underline flex items-center gap-1 text-sm">
+                <span class="material-symbols-outlined text-sm">chat</span> Message Customer
+              </button>
+            </div>
+            ${order.status === 'ready_for_delivery' || order.status === 'delivered' ? `
+            <div class="text-right">
+              <p class="text-sm text-gray-500 mb-2">Driver Tracking</p>
+              <button onclick="openDriverTracking('${escapeHtml(order.driverName || 'Driver')}', '${escapeHtml(order.status)}')" class="bg-indigo-100 text-indigo-700 font-medium px-3 py-1.5 rounded text-sm hover:bg-indigo-200 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">two_wheeler</span> Live Status
+              </button>
+            </div>
+            ` : ''}
+          </div>
+
+          <div class="border-t border-gray-200 pt-3">
+            <p class="text-sm text-gray-500 mb-2">Actions</p>
+            <div class="flex gap-2">
+              ${getOrderDetailActions(order)}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getOrderDetailActions(order) {
+      switch(order.status) {
+        case 'pending':
+          return `
+            <button onclick="updateOrderStatus('${order.id}', 'preparing')" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Accept & Prepare</button>
+            <button onclick="updateOrderStatus('${order.id}', 'cancelled')" class="flex-1 bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm hover:bg-red-200">Decline</button>
+          `;
+        case 'preparing':
+          return `<button onclick="updateOrderStatus('${order.id}', 'ready_for_delivery')" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">Mark Ready for Delivery</button>`;
+        case 'ready_for_delivery':
+          return `<button onclick="updateOrderStatus('${order.id}', 'delivered')" class="w-full bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700">Mark Delivered</button>`;
+        default:
+          return `<p class="text-sm text-gray-500">No actions available</p>`;
+      }
+    }
+
+    // Dark Mode Toggle Logic
+    function toggleDarkMode(isDark) {
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        localStorage.setItem('theme', 'light');
+      }
+    }
+    
+    // Check saved theme on load
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+      const toggle = document.getElementById('darkModeToggle');
+      if (toggle) toggle.checked = true;
+    }
+
+    function toggleProfile() {}
+    function toggleNotifications() {}
+
+    async function logout() {
+      // Clear auth data from localStorage
+      localStorage.removeItem('smartsoko_auth_mode');
+      localStorage.removeItem('smartsoko_demo_user');
+      localStorage.removeItem('smartsoko_cart');
+      
+      // Sign out from Firebase if available
+      const auth = window.auth;
+      if (auth) {
+        try {
+          await auth.signOut();
+        } catch (error) {
+          console.error('Logout error:', error);
+        }
+      }
+      window.location.href = 'login.html';
+    }
+
+    function openAddMenuItem() {
+      document.getElementById('menuModalTitle').textContent = 'Add Menu Item';
+      document.getElementById('menuModalSubmitBtn').textContent = 'Add Item';
+      document.getElementById('menuItemId').value = '';
+      document.getElementById('addMenuModal').classList.remove('hidden');
+      document.getElementById('addMenuModal').classList.add('flex');
+    }
+    
+    function openEditMenuItem(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+      
+      document.getElementById('menuModalTitle').textContent = 'Edit Menu Item';
+      document.getElementById('menuModalSubmitBtn').textContent = 'Save Changes';
+      document.getElementById('menuItemId').value = product.id;
+      document.getElementById('menuItemName').value = product.name || '';
+      document.getElementById('menuItemPrice').value = product.price || '';
+      document.getElementById('menuItemDesc').value = product.description || '';
+      const imagePath = product.imageUrl || '';
+      document.getElementById('menuItemImage').value = imagePath;
+      updateImagePreview(imagePath);
+      document.getElementById('menuItemStock').value = product.stock !== undefined ? product.stock : -1;
+      document.getElementById('menuItemCategory').value = product.category || '';
+      document.getElementById('availableFrom').value = product.availableFrom || '';
+      document.getElementById('availableTo').value = product.availableTo || '';
+      document.getElementById('menuItemVariations').value = product.variations || '';
+
+      // Set tags
+      const tagCheckboxes = document.querySelectorAll('input[name="dietaryTags"]');
+      tagCheckboxes.forEach(cb => {
+        cb.checked = product.tags && product.tags.includes(cb.value);
+      });
+      
+      document.getElementById('addMenuModal').classList.remove('hidden');
+      document.getElementById('addMenuModal').classList.add('flex');
+    }
+
+    function closeAddMenuItem() {
+      document.getElementById('addMenuModal').classList.add('hidden');
+      document.getElementById('addMenuModal').classList.remove('flex');
+      document.getElementById('menuItemId').value = '';
+      document.querySelector('#addMenuModal form').reset();
+      // Hide image preview when closing
+      document.getElementById('imagePreviewContainer').classList.add('hidden');
+      document.getElementById('imagePreview').src = '';
+    }
+
+    function updateImagePreview(path) {
+      const container = document.getElementById('imagePreviewContainer');
+      const preview = document.getElementById('imagePreview');
+      if (!path || path.trim() === '') {
+        // Show default image preview
+        preview.src = 'images/default-product.png';
+        container.classList.remove('hidden');
+      } else {
+        preview.src = path;
+        container.classList.remove('hidden');
+      }
+      // Handle image load error
+      preview.onerror = function() {
+        this.src = 'images/default-product.png';
+      };
+    }
+
+    function handleImageFileSelect(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          // Show preview
+          const preview = document.getElementById('imagePreview');
+          const container = document.getElementById('imagePreviewContainer');
+          preview.src = e.target.result;
+          container.classList.remove('hidden');
+          
+          // In a real app, you would upload to server here
+          // For now, we'll create a temporary data URL
+          // Note: To save permanently, the file needs server-side handling
+          
+          // Show notification about upload
+          showNotification(`Selected: ${file.name} (Save to apply changes)`, 'info');
+        };
+        
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function openImageGallery() {
+      // Create a simple gallery modal
+      const galleryHtml = `
+        <div id="imageGalleryModal" class="fixed inset-0 z-[200] bg-on-surface/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div class="bg-surface rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center">
+              <h3 class="font-headline font-bold text-lg text-primary">Select Image</h3>
+              <button onclick="closeImageGallery()" class="text-on-surface-variant hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div class="p-6">
+              <div id="galleryGrid" class="grid grid-cols-3 gap-3 max-h-[400px] overflow-y-auto">
+                <!-- Default images -->
+                <div onclick="selectGalleryImage('images/default-product.png')" class="cursor-pointer border-2 border-transparent hover:border-primary rounded-lg overflow-hidden transition-all">
+                  <img src="images/default-product.png" class="w-full h-24 object-cover">
+                  <p class="text-xs text-center mt-1 text-gray-500">Default Product</p>
+                </div>
+                <div onclick="selectGalleryImage('images/default-logo.png')" class="cursor-pointer border-2 border-transparent hover:border-primary rounded-lg overflow-hidden transition-all">
+                  <img src="images/default-logo.png" class="w-full h-24 object-cover">
+                  <p class="text-xs text-center mt-1 text-gray-500">Default Logo</p>
+                </div>
+                <div onclick="selectGalleryImage('images/default-map.png')" class="cursor-pointer border-2 border-transparent hover:border-primary rounded-lg overflow-hidden transition-all">
+                  <img src="images/default-map.png" class="w-full h-24 object-cover">
+                  <p class="text-xs text-center mt-1 text-gray-500">Default Map</p>
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 mt-4 text-center">Click an image to select it</p>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.insertAdjacentHTML('beforeend', galleryHtml);
+      
+      // Try to load existing images from the images folder
+      loadGalleryImages();
+    }
+
+    function loadGalleryImages() {
+      // This would ideally scan the images folder
+      // For now, we show the default images
+    }
+
+    function closeImageGallery() {
+      const modal = document.getElementById('imageGalleryModal');
+      if (modal) modal.remove();
+    }
+
+    function selectGalleryImage(imagePath) {
+      document.getElementById('menuItemImage').value = imagePath;
+      updateImagePreview(imagePath);
+      closeImageGallery();
+      showNotification(`Selected: ${imagePath}`, 'success');
+    }
+
+    function showNotification(message, type = 'info') {
+      const colors = {
+        info: 'bg-blue-500',
+        success: 'bg-green-500',
+        error: 'bg-red-500'
+      };
+      
+      const notification = document.createElement('div');
+      notification.className = `fixed bottom-4 right-4 ${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg z-[300] fade-up`;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+    
+    function submitAddMenuItem(e) {
+      e.preventDefault();
+      const id = document.getElementById('menuItemId').value;
+      const name = document.getElementById('menuItemName').value;
+      const priceRaw = parseFloat(document.getElementById('menuItemPrice').value);
+      const price = isNaN(priceRaw) ? 0 : priceRaw;
+      const description = document.getElementById('menuItemDesc').value;
+      const imageUrl = document.getElementById('menuItemImage').value;
+      const stockRaw = parseInt(document.getElementById('menuItemStock').value, 10);
+      const stock = isNaN(stockRaw) ? -1 : stockRaw;
+      const category = document.getElementById('menuItemCategory').value || 'General';
+      const availableFrom = document.getElementById('availableFrom').value || '';
+      const availableTo = document.getElementById('availableTo').value || '';
+      const variations = document.getElementById('menuItemVariations').value || '';
+      
+      const tags = [];
+      document.querySelectorAll('input[name="dietaryTags"]:checked').forEach(cb => {
+        tags.push(cb.value);
+      });
+      
+      const productData = { 
+        name, price, description, imageUrl, stock, category, tags, availableFrom, availableTo, variations 
+      };
+      
+      if (id) {
+        updateProduct(id, productData);
+      } else {
+        addProduct(productData);
+      }
+      
+      closeAddMenuItem();
+    }
+
+    async function addProduct(productData) {
+      try {
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const sellerId = currentSeller?.id || localStorage.getItem('sellerId') || 'demo-seller';
+        const product = {
+          ...productData,
+          sellerId: sellerId,
+          isAvailable: true,
+          createdAt: new Date().toISOString()
+        };
+
+        await addDoc(collection(db, 'products'), product);
+        showNotification('Product added successfully!', 'success');
+        loadProducts();
+      } catch (error) {
+        console.error('Error adding product:', error);
+        showNotification('Failed to add product: ' + error.message, 'error');
+      }
+    }
+    
+    async function updateProduct(id, productData) {
+      try {
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        await updateDoc(doc(db, 'products', id), {
+          ...productData,
+          updatedAt: new Date().toISOString()
+        });
+        showNotification('Product updated successfully!', 'success');
+        loadProducts();
+      } catch (error) {
+        console.error('Error updating product:', error);
+        showNotification('Failed to update product: ' + error.message, 'error');
+      }
+    }
+
+    // Bulk Actions logic
+    function updateBulkActionUI() {
+      const selected = document.querySelectorAll('.product-select-cb:checked');
+      const menu = document.getElementById('bulkActionsMenu');
+      const count = document.getElementById('selectedCount');
+      
+      if (selected.length > 0) {
+        menu.classList.remove('hidden');
+        menu.classList.add('flex');
+        count.textContent = selected.length;
+      } else {
+        menu.classList.add('hidden');
+        menu.classList.remove('flex');
+      }
+    }
+
+    async function bulkDelete() {
+      const selected = Array.from(document.querySelectorAll('.product-select-cb:checked')).map(cb => cb.value);
+      if (selected.length === 0) return;
+      
+      if (confirm(`Are you sure you want to delete ${selected.length} items? This cannot be undone.`)) {
+        try {
+          const db = window.db;
+          if (!db) throw new Error('Firestore not initialized');
+          const { writeBatch, doc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+          const batch = writeBatch(db);
+          selected.forEach(id => {
+            batch.delete(doc(db, 'products', id));
+          });
+          await batch.commit();
+          showNotification(`${selected.length} items deleted`, 'success');
+          loadProducts();
+        } catch (error) {
+          showNotification('Bulk delete failed', 'error');
+        }
+      }
+    }
+
+    async function bulkToggleAvailability() {
+      const selected = Array.from(document.querySelectorAll('.product-select-cb:checked')).map(cb => cb.value);
+      if (selected.length === 0) return;
+      
+      try {
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { writeBatch, doc, collection, query, where, documentId, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        
+        const batch = writeBatch(db);
+        
+        // Fetch current states to flip them
+        const productsQuery = query(
+          collection(db, 'products'),
+          where(documentId(), 'in', selected.slice(0, 10)) // Firestore limits 'in' to 10 items
+        );
+        const snap = await getDocs(productsQuery);
+        
+        snap.forEach(docSnap => {
+          const currentStatus = docSnap.data().isAvailable;
+          batch.update(doc(db, 'products', docSnap.id), { isAvailable: !currentStatus });
+        });
+        
+        await batch.commit();
+        showNotification(`${selected.length} items toggled`, 'success');
+        
+        // Uncheck all after toggle so the UI resets
+        document.querySelectorAll('.product-select-cb:checked').forEach(cb => cb.checked = false);
+        updateBulkActionUI();
+        
+        loadProducts();
+      } catch (error) {
+        showNotification('Bulk toggle failed', 'error');
+        console.error(error);
+      }
+    }
+
+    function exportAnalyticsCSV() {
+      if (!allOrders || allOrders.length === 0) {
+        showNotification('No data to export', 'error');
+        return;
+      }
+      
+      const headers = ['Order ID', 'Date', 'Customer', 'Status', 'Total (TSh)'];
+      const rows = allOrders.map(o => {
+        const dateStr = o.createdAt ? (o.createdAt.toDate ? o.createdAt.toDate().toLocaleString() : new Date(o.createdAt).toLocaleString()) : 'N/A';
+        return [
+          o.id,
+          `"${dateStr}"`,
+          `"${escapeHtml(o.customerName || 'Customer')}"`,
+          o.status,
+          o.total || 0
+        ].join(',');
+      });
+      
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `smartsoko_sales_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Modal Handlers
+    function requestPayout() {
+      // Simulate API call
+      showNotification('Processing payout request...', 'info');
+      setTimeout(() => {
+        showNotification('Payout request of TSh 145,000 submitted successfully! Funds will arrive in 1-2 business days.', 'success');
+        document.getElementById('availableBalance').textContent = 'TSh 0';
+      }, 1500);
+    }
+
+    function openPromoModal() {
+      document.getElementById('promoCodeInput').value = '';
+      document.getElementById('promoDiscountInput').value = '';
+      document.getElementById('promoModal').classList.remove('hidden');
+      document.getElementById('promoModal').classList.add('flex');
+    }
+
+    function closePromoModal() {
+      document.getElementById('promoModal').classList.add('hidden');
+      document.getElementById('promoModal').classList.remove('flex');
+    }
+
+    async function savePromoCode() {
+      const code = document.getElementById('promoCodeInput').value.trim().toUpperCase();
+      const discount = parseInt(document.getElementById('promoDiscountInput').value);
+      
+      if (!code || isNaN(discount)) return showNotification('Please fill all fields', 'error');
+      
+      try {
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        await addDoc(collection(db, 'promotions'), {
+          sellerId: currentSeller.id,
+          code: code,
+          discountPercent: discount,
+          isActive: true,
+          createdAt: new Date().toISOString()
+        });
+        showNotification('Promo code created!', 'success');
+        closePromoModal();
+        loadPromotions();
+      } catch (error) {
+        showNotification('Failed to create promo code', 'error');
+      }
+    }
+
+    async function loadPromotions() {
+      if (!currentSeller) return;
+      try {
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { collection, query, where, getDocs, doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        const q = query(collection(db, 'promotions'), where('sellerId', '==', currentSeller.id));
+        const snap = await getDocs(q);
+        const list = document.getElementById('activePromosList');
+        if (snap.empty) {
+          list.innerHTML = '<p class="text-sm text-gray-500">You currently have no active promotions.</p>';
+          return;
+        }
+        
+        list.innerHTML = snap.docs.map(doc => {
+          const p = doc.data();
+          return `
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <div>
+                <span class="font-bold text-gray-800">${escapeHtml(p.code)}</span>
+                <span class="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">${p.discountPercent}% OFF</span>
+              </div>
+              <button onclick="deletePromotion('${doc.id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded"><span class="material-symbols-outlined text-sm">delete</span></button>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function deletePromotion(promoId) {
+      try {
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        await deleteDoc(doc(db, 'promotions', promoId));
+        loadPromotions();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Call loadPromotions when switching to promotions tab
+    const originalSwitchTab = switchTab;
+    switchTab = function(tabName, clickedBtn) {
+      originalSwitchTab(tabName, clickedBtn);
+      if (tabName === 'promotions') loadPromotions();
+    };
+
+    function openCustomerChat(orderId, customerName) {
+      document.getElementById('chatCustomerName').textContent = customerName;
+      document.getElementById('chatMessages').innerHTML = '<div class="text-center text-xs text-gray-400 my-2">Chat started with ' + escapeHtml(customerName) + '</div>';
+      document.getElementById('chatModal').classList.remove('hidden');
+      document.getElementById('chatModal').classList.add('flex');
+    }
+
+    function closeChatModal() {
+      document.getElementById('chatModal').classList.add('hidden');
+      document.getElementById('chatModal').classList.remove('flex');
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      
+      const container = document.getElementById('chatMessages');
+      container.innerHTML += `
+        <div class="self-end bg-primary text-white px-4 py-2 rounded-2xl rounded-tr-none max-w-[80%] shadow-sm">
+          <p class="text-sm">${escapeHtml(msg)}</p>
+        </div>
+      `;
+      input.value = '';
+      container.scrollTop = container.scrollHeight;
+      
+      // Simulate reply
+      setTimeout(() => {
+        container.innerHTML += `
+          <div class="self-start bg-white text-gray-800 border border-gray-200 px-4 py-2 rounded-2xl rounded-tl-none max-w-[80%] shadow-sm mt-1">
+            <p class="text-sm">Thanks for the update!</p>
+          </div>
+        `;
+        container.scrollTop = container.scrollHeight;
+      }, 1500);
+    }
+
+    function openDriverTracking(driverName, status) {
+      document.getElementById('trackingDriverName').textContent = driverName;
+      document.getElementById('trackingStatus').textContent = status === 'delivered' ? 'Delivery Completed' : 'En Route to Customer';
+      document.getElementById('driverModal').classList.remove('hidden');
+      document.getElementById('driverModal').classList.add('flex');
+    }
+
+    function closeDriverModal() {
+      document.getElementById('driverModal').classList.add('hidden');
+      document.getElementById('driverModal').classList.remove('flex');
+    }
+  </script>
+
+  <!-- Initialize SmartNav -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      SmartNav.init({ activePage: 'orders', role: 'merchant', breadcrumbs: ['Merchant', 'Dashboard'] });
+    });
+  </script>
+</body>
+</html>
