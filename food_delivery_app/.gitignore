@@ -118,3 +118,4 @@ supabase/.temp/
 build_out.txt
 build_log.txt
 test_log.txt
+.env*
