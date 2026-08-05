@@ -4,6 +4,8 @@ import '../models/user.dart' as models;
 import '../config/app_config.dart';
 import '../utils/role_validator.dart';
 import '../utils/logger.dart';
+import 'supabase_service.dart';
+import '../utils/rate_limiter.dart';
 import 'dart:math';
 import 'supabase_service.dart';
 import '../utils/rate_limiter.dart';
@@ -182,6 +184,56 @@ class AuthService {
       normalized = '255$normalized';
     }
     return normalized;
+  }
+
+  Future<models.User?> getUserByPhone(String phone) async {
+    final normalizedPhone = normalizePhone(phone);
+    try {
+      final doc = await _firestore.collection(AppConfig.usersCollection)
+          .where('phone', isEqualTo: normalizedPhone)
+          .limit(1)
+          .get();
+      
+      if (doc.docs.isNotEmpty) {
+        return models.User.fromFirestore(doc.docs.first);
+      }
+    } catch (e) {
+      AppLogger.warning('getUserByPhone failed: $e');
+    }
+    return null;
+  }
+
+  Future<models.User> createUserWithRole(String phone, models.UserRole role) async {
+    final normalizedPhone = normalizePhone(phone);
+    
+    final newUser = models.User(
+      id: '',
+      phone: normalizedPhone,
+      role: role,
+      createdAt: DateTime.now(),
+    );
+
+    final docRef = await _firestore.collection(AppConfig.usersCollection).add(newUser.toFirestore());
+
+    final createdUser = models.User(
+      id: docRef.id,
+      phone: normalizedPhone,
+      role: role,
+      createdAt: DateTime.now(),
+    );
+
+    // Also create in Supabase for sync
+    try {
+      await _supabaseService.client.from('profiles').insert({
+        'id': createdUser.id,
+        'phone': normalizedPhone,
+        'role': role.name,
+      });
+    } catch (e) {
+      AppLogger.warning('Failed to sync new user to Supabase: $e');
+    }
+
+    return createdUser;
   }
 
   Future<void> signOut() async {

@@ -1220,7 +1220,7 @@ app.get('/api/driver/profile', verifyToken, requireRole('driver', 'admin'), asyn
 });
 
 const routes = [
-  'login', 'home', 'customer', 'merchant', 'driver', 'admin',
+  'login', 'home', 'merchant', 'driver', 'admin',
   'discovery', 'profile', 'cart', 'orders', 'product',
   'restaurant', 'chat', 'track-order', 'checkout', '404', 'wallet',
   'store',
@@ -1231,11 +1231,11 @@ const routes = [
 
 routes.forEach(route => {
   app.get(`/${route}`, (req, res) => {
-    const filePath = path.join(__dirname, 'web', `${route}.html`);
+    const filePath = path.join(__dirname, 'public', `${route}.html`);
     if (fs.existsSync(filePath)) {
       res.sendFile(filePath);
     } else {
-      res.status(404).sendFile(path.join(__dirname, 'web', '404.html'));
+      res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
     }
   });
 });
@@ -3209,6 +3209,95 @@ app.get('/api/pricing/surge', async (req, res) => {
     res.status(500).json({ success: false, error: 'Failed to calculate pricing' });
   }
 });
+
+// ===== PUSH NOTIFICATIONS =====
+// Store push subscriptions per user: { [userId]: [subscription, ...] }
+const pushSubscriptions = {};
+
+app.post('/api/notifications/subscribe', async (req, res) => {
+  try {
+    const { subscription } = req.body;
+    const idToken = getBearerTokenFromRequest(req);
+    if (!idToken || !db) return res.status(401).json({ success: false, error: 'Unauthorized' });
+
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    const uid = decoded.uid;
+
+    if (!pushSubscriptions[uid]) pushSubscriptions[uid] = [];
+    const exists = pushSubscriptions[uid].some(s => JSON.stringify(s) === JSON.stringify(subscription));
+    if (!exists) pushSubscriptions[uid].push(subscription);
+
+    await db.collection('push_subscriptions').doc(uid).set({
+      subscriptions: pushSubscriptions[uid],
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Subscribe error:', error);
+    res.status(500).json({ success: false, error: 'Failed to subscribe' });
+  }
+});
+
+app.post('/api/notifications/send', async (req, res) => {
+  try {
+    const { userId, title, body, url, orderId } = req.body;
+    if (!userId || !title) return res.status(400).json({ success: false, error: 'userId and title required' });
+
+    const subs = pushSubscriptions[userId] || [];
+    if (subs.length === 0) {
+      return res.json({ success: true, sent: 0, note: 'No subscriptions' });
+    }
+
+    const webpush = require('web-push');
+    const vapidKeys = {
+      publicKey: 'BNDx7CvSBCAWR8JUjr1pI37-vpF9kAfAER5pN_SRDSYy5sVnJvGuJgBU9Rz5bE5D8kOx1fAMmpaJ02wK8h9QjsA',
+      privateKey: process.env.VAPID_PRIVATE_KEY || 'default-private-key-do-not-use'
+    };
+    webpush.setVapidDetails('mailto:admin@smartsoko.com', vapidKeys.publicKey, vapidKeys.privateKey);
+
+    const payload = JSON.stringify({ title, body, url: url || '/', orderId: orderId || null, tag: orderId || 'general' });
+    let sent = 0;
+    for (const sub of subs) {
+      try {
+        await webpush.sendNotification(sub, payload);
+        sent++;
+      } catch (e) {
+        if (e.statusCode === 410 || e.statusCode === 404) {
+          const idx = pushSubscriptions[userId].indexOf(sub);
+          if (idx > -1) pushSubscriptions[userId].splice(idx, 1);
+        }
+      }
+    }
+
+    res.json({ success: true, sent });
+  } catch (error) {
+    console.error('Send notification error:', error);
+    res.status(500).json({ success: false, error: 'Failed to send notification' });
+  }
+});
+
+// Helper to send notification to a user by role
+async function notifyUserByRole(role, title, body, url, orderId) {
+  if (!db) return;
+  try {
+    const usersSnap = await db.collection('users').where('role', '==', role).get();
+    for (const doc of usersSnap.docs) {
+      const uid = doc.id;
+      const subs = pushSubscriptions[uid] || [];
+      if (subs.length === 0) continue;
+      try {
+        await fetch(`http://localhost:${PORT}/api/notifications/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: uid, title, body, url, orderId })
+        });
+      } catch (e) { /* skip */ }
+    }
+  } catch (e) {
+    console.error('notifyUserByRole error:', e.message);
+  }
+}
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
@@ -5408,7 +5497,7 @@ app.use('/api', (req, res) => {
 
 // HTML 404 handler.
 app.use((req, res) => {
-  res.status(404).sendFile(path.join(__dirname, 'web', '404.html'));
+  res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
 // Error handling middleware.

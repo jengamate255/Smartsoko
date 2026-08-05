@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -9,8 +8,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    
-    <!-- Location permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
@@ -24,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SmartSokoDriver"
         android:usesCleartextTraffic="true">
-        
+
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
@@ -34,8 +31,6 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            
-            <!-- Handle deep links from notifications -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -44,10 +39,14 @@
                 <data android:scheme="smartsoko" android:host="driver" />
             </intent-filter>
         </activity>
-        
-        <!-- Firebase Messaging Service -->
+
         <service
-            android:name=".notifications.DriverMessagingService"
+            android:name=".service.LocationTrackingService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+
+        <service
+            android:name=".notification.DriverMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -64,6 +63,6 @@
         <meta-data
             android:name="com.mapbox.token"
             android:value="@string/mapbox_access_token" />
-            
+
     </application>
 </manifest>

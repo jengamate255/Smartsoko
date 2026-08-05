@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <include domain="sharedpref" path="." />
+    <include domain="database" path="." />
+    <exclude domain="sharedpref" path="device_token.xml" />
+    <exclude domain="sharedpref" path="auth_token.xml" />
+    <exclude domain="database" path="smartsoko.db" />
+    <exclude domain="database" path="smartsoko.db-journal" />
+    <exclude domain="database" path="smartsoko.db-shm" />
+    <exclude domain="database" path="smartsoko.db-wal" />
+</full-backup-content>

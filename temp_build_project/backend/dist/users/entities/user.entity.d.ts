@@ -1,0 +1,30 @@
+import { RefreshToken } from '../../auth/entities/refresh-token.entity';
+import { UserLocation } from './user-location.entity';
+import { Trip } from '../../trips/entities/trip.entity';
+import { Wallet } from '../../wallets/entities/wallet.entity';
+import { PaymentMethod } from '../../payments/entities/payment-method.entity';
+import { Notification } from '../../notifications/entities/notification.entity';
+import { ChatMessage } from '../../chat/entities/chat-message.entity';
+import { DriverAvailability } from '../../locations/entities/driver-availability.entity';
+export declare class User {
+    id: string;
+    email: string;
+    phone: string;
+    full_name: string;
+    password_hash: string;
+    avatar_url: string;
+    role: string;
+    is_verified: boolean;
+    is_active: boolean;
+    created_at: Date;
+    updated_at: Date;
+    refresh_tokens: RefreshToken[];
+    locations: UserLocation[];
+    customer_trips: Trip[];
+    driver_trips: Trip[];
+    wallets: Wallet[];
+    payment_methods: PaymentMethod[];
+    notifications: Notification[];
+    chat_messages: ChatMessage[];
+    driver_availability: DriverAvailability[];
+}

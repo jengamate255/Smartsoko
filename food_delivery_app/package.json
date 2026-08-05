@@ -475,6 +475,7 @@
     "validate-npm-package-name": "^5.0.1",
     "vary": "^1.1.2",
     "wcwidth": "^1.0.1",
+    "web-push": "^3.6.7",
     "web-streams-polyfill": "^3.3.3",
     "webidl-conversions": "^3.0.1",
     "whatwg-fetch": "^3.6.20",

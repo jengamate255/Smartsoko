@@ -55,7 +55,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
           .limit(1)
           .get();
 
-      if (existingUserDoc.docs.isNotEmpty) {
+      if (existingUser != null) {
         // User exists, just authenticate them
         await authService.signInWithPhone(widget.phoneNumber);
       } else {

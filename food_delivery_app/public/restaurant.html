@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Performance: Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartSoko - Seller Registration</title>
+  <meta name="description" content="Register your business on SmartSoko. Reach more customers, manage orders easily, and get fast payments. Join the leading marketplace for local sellers.">
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preload" href="dist/tailwind.css" as="style">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="nav-component.js" defer></script>
+  <script type="module" src="config/firebase-config.js"></script>
+  <script type="module" src="config/cross-platform-service.js?v=4"></script>
+  <style> body {font-family: 'Plus Jakarta Sans',sans-serif} .gradient-bg {background: #012d1d} </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Navigation handled by SmartNav -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      SmartNav.init({ activePage: 'home', role: 'customer' });
+      SmartNav.initPageTransition();
+    });
+  </script>
+  <div class="h-16 md:h-20"></div>
+
+  <main class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- Hero -->
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-bold text-gray-800 mb-2">Join SmartSoko as a Seller</h2>
+      <p class="text-gray-600">Expand your business and reach more customers in your community</p>
+    </div>
+
+    <!-- Registration Form -->
+    <div class="bg-white rounded-2xl shadow-lg p-8">
+      <form id="sellerForm" class="space-y-6">
+        <!-- Business Info -->
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label for="businessName" class="block text-sm font-semibold text-gray-700 mb-2">Business Name *</label>
+
+            <input type="text" id="businessName" required 
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+              placeholder="e.g., Mama Ntilie's Kitchen">
+          </div>
+          <div>
+            <label for="category" class="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
+
+            <select id="category" required 
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+              <option value="">Select Business Category</option>
+              <optgroup label="Food & Agriculture">
+                <option value="food">🍔 Food & Restaurant</option>
+                <option value="dairy">🥛 Dairy Products</option>
+                <option value="fruits">🍎 Fruits & Vegetables</option>
+                <option value="groceries">🛒 Groceries & Retail</option>
+                <option value="bakery">🍞 Bakery</option>
+              </optgroup>
+              <optgroup label="Products & Goods">
+                <option value="electronics">📱 Electronics & Phones</option>
+                <option value="fashion">👗 Fashion & Clothing</option>
+                <option value="home">🏠 Home & Garden</option>
+                <option value="beauty">💄 Beauty & Personal Care</option>
+                <option value="hardware">🔧 Hardware & Construction</option>
+                <option value="sports">⚽ Sports & Outdoor</option>
+              </optgroup>
+              <optgroup label="Services">
+                <option value="services">🔧 Professional Services</option>
+                <option value="healthcare">🏥 Healthcare & Pharmacy</option>
+                <option value="education">📚 Education & Training</option>
+                <option value="transport">🚚 Transport & Logistics</option>
+                <option value="repair">🔨 Repairs & Maintenance</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <!-- Business Logo/Image -->
+        <div>
+          <label for="businessImage" class="block text-sm font-semibold text-gray-700 mb-2">Business Logo/Image</label>
+
+          <input type="file" id="businessImage" accept="image/*" 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+            onchange="previewBusinessImage(this)">
+          <div id="imagePreview" class="hidden mt-3 w-32 h-32 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+            <img id="previewImg" class="w-full h-full object-cover" loading="lazy">
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label for="description" class="block text-sm font-semibold text-gray-700 mb-2">Business Description</label>
+
+          <textarea id="description" rows="3" 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+            placeholder="Tell customers about your business..."></textarea>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
+
+            <input type="tel" id="phone" required 
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+              placeholder="+255 XXX XXX XXX">
+          </div>
+          <div>
+            <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+
+            <input type="email" id="email" 
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+              placeholder="your@email.com">
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div>
+          <label for="address" class="block text-sm font-semibold text-gray-700 mb-2">Business Address</label>
+
+          <input type="text" id="address" 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+            placeholder="Street address, Area, City">
+        </div>
+
+        <!-- Delivery Settings -->
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label for="deliveryFee" class="block text-sm font-semibold text-gray-700 mb-2">Delivery Fee (TSh)</label>
+
+            <input type="number" id="deliveryFee" 
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+              placeholder="e.g., 2000">
+          </div>
+          <div>
+            <label for="deliveryTime" class="block text-sm font-semibold text-gray-700 mb-2">Delivery Time (minutes)</label>
+
+            <input type="number" id="deliveryTime" 
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+              placeholder="e.g., 30">
+          </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex gap-4 pt-4">
+          <button type="submit" 
+            class="flex-1 gradient-bg text-white font-semibold py-4 rounded-xl hover:opacity-90 transition-all transform hover:scale-[1.02]">
+            <i class="fas fa-store mr-2"></i>Register as Seller
+          </button>
+          <a href="merchant.html" 
+            class="flex-1 bg-gray-100 text-gray-700 font-semibold py-4 rounded-xl hover:bg-gray-200 transition-all text-center">
+            <i class="fas fa-sign-in-alt mr-2"></i>Already a Seller? Login
+          </a>
+        </div>
+      </form>
+
+      <!-- Success Message -->
+      <div id="successMessage" class="hidden mt-6 p-4 bg-green-100 border border-green-400 rounded-lg">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+          <div>
+            <h3 class="font-semibold text-green-800">Registration Successful!</h3>
+            <p class="text-green-700 text-sm">Welcome to SmartSoko! You can now start selling.</p>
+          </div>
+        </div>
+        <div class="mt-4 flex gap-3">
+          <a href="merchant.html" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all">
+            Go to Dashboard
+          </a>
+          <a href="main.html" class="bg-white border border-green-600 text-green-600 px-4 py-2 rounded-lg hover:bg-green-50 transition-all">
+            Back to Home
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Benefits -->
+    <div class="mt-8 grid md:grid-cols-3 gap-6">
+      <div class="bg-white rounded-xl p-6 text-center shadow-md">
+        <div class="w-14 h-14 bg-primary-fixed rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-users text-primary text-2xl"></i>
+        </div>
+        <h3 class="font-semibold mb-2">Reach More Customers</h3>
+        <p class="text-gray-600 text-sm">Connect with thousands of local customers</p>
+      </div>
+      <div class="bg-white rounded-xl p-6 text-center shadow-md">
+        <div class="w-14 h-14 bg-primary-fixed rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-mobile-alt text-primary text-2xl"></i>
+        </div>
+        <h3 class="font-semibold mb-2">Easy Management</h3>
+        <p class="text-gray-600 text-sm">Manage orders and inventory from your phone</p>
+      </div>
+      <div class="bg-white rounded-xl p-6 text-center shadow-md">
+        <div class="w-14 h-14 bg-primary-fixed rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-money-bill-wave text-primary text-2xl"></i>
+        </div>
+        <h3 class="font-semibold mb-2">Fast Payments</h3>
+        <p class="text-gray-600 text-sm">Get paid quickly via M-Pesa</p>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { storage, db } from './config/firebase-config.js';
+    import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
+    import { collection, addDoc, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    // Form submission
+    document.getElementById('sellerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Registering...';
+      submitBtn.disabled = true;
+
+      try {
+        const imageFile = document.getElementById('businessImage').files[0];
+        let imageUrl = null;
+
+        // Upload image if selected
+        if (imageFile) {
+          try {
+            const imageRef = ref(storage, `sellers/${Date.now()}_${imageFile.name}`);
+            const snapshot = await uploadBytes(imageRef, imageFile);
+            imageUrl = await getDownloadURL(snapshot.ref);
+          } catch (error) {
+            console.error('Image upload failed:', error);
+
+            // Check if it's a CORS error
+            if (error.message && (error.message.includes('CORS') || error.code === 'cors' || error.code === 'storage/unauthorized')) {
+              console.warn('CORS policy blocking upload. Using placeholder image instead.');
+              // Use a placeholder image URL
+              imageUrl = 'https://via.placeholder.com/400x300/FF6600/FFFFFF?text=Business+Image';
+
+              // Show warning to user
+              const warningDiv = document.createElement('div');
+              warningDiv.className = 'bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded mb-4';
+              warningDiv.innerHTML = '<p class="text-sm"><strong>Image Upload Notice:</strong> Image upload is temporarily unavailable due to CORS restrictions. A placeholder image will be used. You can update your business image later.</p>';
+              document.getElementById('sellerForm').insertBefore(warningDiv, document.getElementById('sellerForm').firstChild);
+            }
+          }
+        }
+
+        const svc = window.crossPlatformService;
+        const sellerData = {
+          name: document.getElementById('businessName').value,
+          category: document.getElementById('category').value,
+          description: document.getElementById('description').value,
+          phone: document.getElementById('phone').value,
+          email: document.getElementById('email').value,
+          address: document.getElementById('address').value,
+          deliveryFee: parseInt(document.getElementById('deliveryFee').value) || 0,
+          deliveryTimeMinutes: parseInt(document.getElementById('deliveryTime').value) || 30,
+          imageUrl: imageUrl,
+          isOpen: true,
+          rating: 0,
+          createdAt: new Date().toISOString()
+        };
+
+        if (svc && svc.isReady()) {
+          const result = await svc.create('restaurants', sellerData);
+          // Also create seller reference
+          await svc.update('sellers', result.id, {
+            restaurantId: result.id,
+            role: 'merchant',
+            createdAt: sellerData.createdAt
+          });
+        } else {
+          sellerData.createdAt = serverTimestamp();
+          // Add to restaurants collection (consistent with app structure)
+          const restaurantRef = await addDoc(collection(db, 'restaurants'), {
+            ...sellerData,
+            isActive: true,
+            totalOrders: 0,
+            totalRevenue: 0
+          });
+          
+          // Also create seller reference
+          await setDoc(doc(db, 'sellers', restaurantRef.id), {
+            restaurantId: restaurantRef.id,
+            role: 'merchant',
+            createdAt: sellerData.createdAt
+          });
+        }
+        
+        document.getElementById('sellerForm').classList.add('hidden');
+        document.getElementById('successMessage').classList.remove('hidden');
+        
+      } catch (error) {
+        console.error('Registration error:', error);
+        alert('Registration failed. Please try again.');
+        submitBtn.innerHTML = '<i class="fas fa-store mr-2"></i>Register as Seller';
+        submitBtn.disabled = false;
+      }
+    });
+
+    function previewBusinessImage(input) {
+      const preview = document.getElementById('imagePreview');
+      const previewImg = document.getElementById('previewImg');
+      
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewImg.src = e.target.result;
+          preview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(input.files[0]);
+      } else {
+        preview.classList.add('hidden');
+        previewImg.src = '';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      SmartNav.init({ activePage: 'home', role: 'customer', breadcrumbs: ['Home', 'Seller Registration'] });
+      SmartNav.initPageTransition();
+    });
+  </script>
+</body>
+</html>

@@ -9,6 +9,7 @@ import '../../services/payment_service.dart';
 import '../../services/restaurant_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/analytics_service.dart';
+import '../../services/nestjs_api_service.dart';
 import '../../utils/constants.dart';
 import 'order_tracking_screen.dart';
 

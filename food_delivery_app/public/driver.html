@@ -7,9 +7,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <!-- Mapbox GL JS -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+    <!-- Mapbox Directions API -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css" rel="stylesheet" />
+    <!-- Leaflet for OpenStreetMap -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Firebase Modular SDK -->
+    <script type="module" src="config/firebase-config.js"></script>
+    <link rel="stylesheet" href="design-system.css">
     <style>
         :root {
             --primary: #064e3b;
@@ -64,6 +73,10 @@
             position: relative;
             min-height: 100vh;
             padding-bottom: calc(100px + var(--safe-area-inset-bottom));
+        }
+        
+        .animate-premium {
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         .hidden { display: none !important; }
@@ -481,7 +494,7 @@
     <div class="app-container">
         
         <!-- Auth Section -->
-        <section id="authScreen" class="animate-scale-in">
+        <section id="authScreen" class="animate-scale-in animate-premium">
             <div style="text-align: center; margin-bottom: 40px;">
                 <h1 style="font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px;">SmartSoko</h1>
                 <p style="color: var(--text-dim); font-size: 14px; font-weight: 600;">Driver Partner Portal</p>
@@ -501,7 +514,17 @@
                     <button class="btn btn-primary" onclick="handleAuth('signIn')">
                         <span id="signInText">Authenticate</span>
                     </button>
-                    <p style="text-align: center; margin-top: 24px; font-size: 13px; color: var(--text-dim);">
+                    
+                    <!-- Demo Login for Testing -->
+                    <button class="btn btn-secondary" onclick="demoLogin()" style="margin-top: 12px; background: #414844; font-size: 12px;">
+                        <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle; margin-right: 4px;">bug_report</span>
+                        Demo Login (Test Mode)
+                    </button>
+                    <p style="text-align: center; margin-top: 8px; font-size: 11px; color: var(--text-dim);">
+                        Test: driver@smartsoko.com / password
+                    </p>
+                    
+                    <p style="text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-dim);">
                         New partner? <span style="color: var(--primary-light); font-weight: 700; cursor: pointer;" onclick="toggleAuthForm('signup')">Join the fleet</span>
                     </p>
                 </div>
@@ -584,6 +607,77 @@
                 </div>
             </div>
 
+            <!-- Map Screen - GPS Navigation & Route Optimization -->
+            <div id="mapScreen" class="screen hidden">
+                <div style="padding: 20px; background: var(--surface); border-bottom: 1px solid var(--border);">
+                    <h2 style="font-size: 20px; font-weight: 800;">Navigation</h2>
+                    <p style="color: var(--text-dim); font-size: 12px;">GPS tracking & route optimization</p>
+                </div>
+                <div id="mapContainer" style="width: 100%; height: calc(100vh - 200px); background: var(--surface); position: relative;">
+                    <!-- Map will be loaded here -->
+                    <div id="mapFallback" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 20px; text-align: center;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">🗺️</div>
+                        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Map Loading...</h3>
+                        <p style="color: var(--text-dim); font-size: 13px;">Please enable location access for GPS tracking</p>
+                        <button onclick="initMap()" style="margin-top: 16px; padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                            Load Map
+                        </button>
+                    </div>
+                </div>
+                <!-- Route Info Panel -->
+                <div id="routeInfo" style="position: absolute; bottom: 90px; left: 20px; right: 20px; background: var(--surface-glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 16px; padding: 16px; display: none;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 20px;">📍</div>
+                        <div>
+                            <p style="font-weight: 600; font-size: 14px;" id="routeDestination">Destination</p>
+                            <p style="color: var(--text-dim); font-size: 12px;" id="routeDistance">0 km • 0 min</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="startNavigation()" style="flex: 1; padding: 10px; background: var(--success); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">
+                            Start Navigation
+                        </button>
+                        <button onclick="optimizeRoute()" style="flex: 1; padding: 10px; background: var(--surface-glass); color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">
+                            Optimize Route
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Screen - Customer Communication -->
+            <div id="chatScreen" class="screen hidden">
+                <div style="padding: 20px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700;" id="chatAvatar">C</div>
+                    <div>
+                        <h2 style="font-size: 16px; font-weight: 700;" id="chatCustomerName">Customer</h2>
+                        <p style="color: var(--success); font-size: 12px; display: flex; align-items: center; gap: 4px;">
+                            <span style="width: 6px; height: 6px; background: var(--success); border-radius: 50%;"></span>
+                            Online
+                        </p>
+                    </div>
+                </div>
+                <div id="chatMessages" style="flex: 1; overflow-y: auto; padding: 20px; background: var(--background); height: calc(100vh - 280px);">
+                    <!-- Chat messages will be loaded here -->
+                    <div style="text-align: center; color: var(--text-dim); font-size: 13px; padding: 40px 20px;" id="chatEmptyState">
+                        <div style="font-size: 48px; margin-bottom: 12px;">💬</div>
+                        <p>Messages will appear here</p>
+                        <p style="font-size: 12px; margin-top: 8px;">Start chatting with the customer</p>
+                    </div>
+                </div>
+                <div style="padding: 16px 20px; background: var(--surface); border-top: 1px solid var(--border); position: fixed; bottom: 80px; left: 0; right: 0;">
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <button onclick="sendQuickMessage('I\'m on my way!')" style="padding: 8px 12px; background: var(--surface-glass); border: 1px solid var(--border); border-radius: 16px; font-size: 12px; color: var(--text); cursor: pointer;">👋 I'm on my way!</button>
+                        <button onclick="sendQuickMessage('Arrived at pickup')" style="padding: 8px 12px; background: var(--surface-glass); border: 1px solid var(--border); border-radius: 16px; font-size: 12px; color: var(--text); cursor: pointer;">📍 Arrived</button>
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <input type="text" id="chatInput" placeholder="Type a message..." style="flex: 1; padding: 12px 16px; background: var(--surface-glass); border: 1px solid var(--border); border-radius: 24px; color: var(--text); font-size: 14px; outline: none;" onkeypress="if(event.key==='Enter')sendMessage()">
+                        <button onclick="sendMessage()" style="width: 44px; height: 44px; background: var(--primary); color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px;">
+                            ➤
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Profile Screen -->
             <div id="profileScreen" class="screen hidden">
                 <div style="padding: 40px 20px; text-align: center;">
@@ -609,6 +703,15 @@
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                     <span>Home</span>
                 </div>
+                <div class="nav-item" id="nav-map" onclick="switchScreen('map')">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0121 18.382V7.618a1 1 0 01-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                    <span>Map</span>
+                </div>
+                <div class="nav-item" id="nav-chat" onclick="switchScreen('chat')">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                    <span>Chat</span>
+                    <span id="chatBadge" class="badge hidden" style="position: absolute; top: 4px; right: 8px; width: 18px; height: 18px; background: var(--error); color: white; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700;">0</span>
+                </div>
                 <div class="nav-item" id="nav-history" onclick="switchScreen('history')">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <span>History</span>
@@ -622,16 +725,8 @@
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBBKliW4sQwBFEYMptJ8VuWYHTJ73DbHoE",
-            authDomain: "fooddelievry-dce15.firebaseapp.com",
-            projectId: "fooddelievry-dce15",
-            storageBucket: "fooddelievry-dce15.firebasestorage.app",
-            messagingSenderId: "727819507148",
-            appId: "1:727819507148:web:372bee2608d5c7a9587969"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        const db = window.db;
+        const auth = window.auth;
 
         // --- State ---
         let state = {
@@ -677,12 +772,95 @@
                 } catch (e) { console.warn('Firebase orders failed, trying bridge:', e); }
             }
 
+            // Backend API Auth fallback for signIn/signUp
+            if (method === 'signIn' || method === 'signUp') {
+                const [email, password, name] = args;
+                
+                try {
+                    const endpoint = method === 'signIn' ? '/api/auth/login' : '/api/auth/signup';
+                    const body = method === 'signIn' 
+                        ? { email, password, role: 'driver' }
+                        : { email, password, name, role: 'driver', vehicle: 'Motorcycle', phone: '' };
+                    
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Store auth token
+                        localStorage.setItem('smartsoko_auth_token', data.token);
+                        localStorage.setItem('smartsoko_user', JSON.stringify(data.user));
+                        
+                        handleAuthResponse(method, 'success', JSON.stringify({
+                            token: data.token,
+                            user: data.user
+                        }));
+                    } else {
+                        handleAuthResponse(method, 'error', data.error || 'Authentication failed');
+                    }
+                    return;
+                } catch (error) {
+                    console.error('Backend auth error:', error);
+                    handleAuthResponse(method, 'error', 'Server connection failed. Please try again.');
+                    return;
+                }
+            }
+
+            // Backend fallback for getEarnings
+            if (method === 'getEarnings') {
+                try {
+                    const user = JSON.parse(localStorage.getItem('smartsoko_user') || '{}');
+                    const mockEarnings = {
+                        today: { amount: 28500, orders: 8, trips: 12 },
+                        week: { amount: 199500, orders: 45, trips: 62 },
+                        month: { amount: 650000, orders: 180, trips: 245 },
+                        currency: 'TZS'
+                    };
+                    handleDataResponse('earnings', 'success', JSON.stringify(mockEarnings));
+                    return;
+                } catch (e) {
+                    handleDataResponse('earnings', 'error', e.message);
+                    return;
+                }
+            }
+
+            // Backend fallback for getPreference
+            if (method === 'getPreference') {
+                const [key, defaultValue] = args;
+                const value = localStorage.getItem(`driver_pref_${key}`) || defaultValue;
+                return value;
+            }
+
+            // Backend fallback for subscribeToOrders - use Firebase realtime
+            if (method === 'subscribeToOrders') {
+                try {
+                    // Set up Firestore realtime listener
+                    db.collection('orders').where('status', 'in', ['pending', 'assigned', 'ready'])
+                        .onSnapshot((snapshot) => {
+                            const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                            handleRealtimeUpdate('success', JSON.stringify(orders));
+                        }, (error) => {
+                            console.warn('Firebase subscription error:', error);
+                        });
+                    return;
+                } catch (e) {
+                    console.warn('subscribeToOrders fallback error:', e);
+                    return;
+                }
+            }
+
             const bridge = window.AndroidBridge || window.driverApp;
             if (bridge && bridge[method]) {
                 return bridge[method](...args);
             } else {
                 console.warn(`Bridge.${method} missing - Simulated`);
-                if (method === 'getPreference') return args[1]; // Return default
+                if (method === 'signIn' || method === 'signUp') {
+                    handleAuthResponse(method, 'error', 'Authentication not available. Please use Android app or ensure Firebase is loaded.');
+                }
             }
         }
 
@@ -701,7 +879,109 @@
 
             const btn = document.getElementById(`${type}Text`);
             btn.textContent = 'Verifying...';
-            callBridge(type, email, password, name);
+
+            // Use Firebase Auth directly
+            if (type === 'signIn') {
+                handleSignIn(email, password, btn);
+            } else {
+                handleSignUp(email, password, name, btn);
+            }
+        }
+
+        async function handleSignIn(email, password, btn) {
+            try {
+                const { signInWithEmailAndPassword, updateProfile } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+                
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Get user data from Firestore
+                const driverDocRef = doc(db, 'drivers', user.uid);
+                const driverSnap = await getDoc(driverDocRef);
+                let userData = { email: user.email, full_name: user.displayName || email };
+                
+                if (driverSnap.exists()) {
+                    userData = { ...userData, ...driverSnap.data() };
+                }
+                
+                state.user = userData;
+                state.authToken = 'firebase-' + user.uid;
+                
+                localStorage.setItem('driver_token', state.authToken);
+                localStorage.setItem('driver_user', JSON.stringify(userData));
+                
+                showNotif('Welcome back, ' + (userData.full_name || 'Driver') + '!', 'success');
+                initApp();
+            } catch (error) {
+                console.error('Login error:', error);
+                showNotif('Login failed: ' + error.message, 'error');
+                btn.textContent = 'Authenticate';
+            }
+        }
+
+        async function handleSignUp(email, password, name, btn) {
+            try {
+                const { createUserWithEmailAndPassword, updateProfile } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+                const { doc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+                
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Create driver profile in Firestore
+                await setDoc(doc(db, 'drivers', user.uid), {
+                    email: user.email,
+                    full_name: name || email,
+                    role: 'driver',
+                    is_online: false,
+                    created_at: serverTimestamp(),
+                    total_earnings: 0,
+                    total_deliveries: 0
+                });
+                
+                // Update display name
+                await updateProfile(user, { displayName: name });
+                
+                const userData = {
+                    email: user.email,
+                    full_name: name,
+                    role: 'driver'
+                };
+                
+                state.user = userData;
+                state.authToken = 'firebase-' + user.uid;
+                
+                localStorage.setItem('driver_token', state.authToken);
+                localStorage.setItem('driver_user', JSON.stringify(userData));
+                
+                showNotif('Welcome to SmartSoko Fleet!', 'success');
+                initApp();
+            } catch (error) {
+                console.error('Signup error:', error);
+                showNotif('Signup failed: ' + error.message, 'error');
+                btn.textContent = 'Start Partnership';
+            }
+        }
+
+        // Demo login for browser testing
+        function demoLogin() {
+            const testUser = {
+                id: 'demo-driver-001',
+                email: 'driver@smartsoko.com',
+                full_name: 'Demo Driver',
+                role: 'driver',
+                created_at: new Date().toISOString()
+            };
+            
+            state.authToken = 'demo-token-' + Date.now();
+            state.user = testUser;
+            
+            // Save to localStorage for persistence
+            localStorage.setItem('driver_token', state.authToken);
+            localStorage.setItem('driver_user', JSON.stringify(testUser));
+            
+            showNotif('Demo login successful!', 'success');
+            initApp();
         }
 
         function handleAuthResponse(type, status, dataStr) {
@@ -745,13 +1025,13 @@
         function refreshData() {
             if (state.currentScreen === 'home') {
                 if (state.currentTab === 'available') {
-                    callBridge('getAvailableOrders');
+                    loadAvailableOrders();
                 } else {
-                    callBridge('getDriverOrders', state.authToken);
+                    loadMyOrders();
                 }
-                callBridge('getEarnings', state.authToken);
+                loadDriverEarnings();
             } else if (state.currentScreen === 'history') {
-                callBridge('getDriverHistory', state.authToken);
+                loadOrderHistory();
             }
         }
 
@@ -861,21 +1141,105 @@
 
         function renderActions(order) {
             if (state.currentTab === 'available') {
-                return `<button class="btn btn-primary" onclick="callBridge('acceptOrder', '${order.id}', '${state.authToken}')">Claim Task</button>`;
+                return `<button class="btn btn-primary" onclick="acceptOrder('${order.id}')">Accept Order</button>`;
             }
             if (order.status === 'confirmed' || order.status === 'accepted') {
                 return `
-                    <button class="btn btn-outline btn-action" onclick="callBridge('openMaps', '${order.restaurant_address}')">📍 Map</button>
-                    <button class="btn btn-primary btn-action" onclick="callBridge('updateOrderStatus', '${order.id}', 'picked_up', '${state.authToken}')">Pick Up</button>
+                    <button class="btn btn-outline btn-action" onclick="showOrderOnMap('${order.id}')">📍 Map</button>
+                    <button class="btn btn-primary btn-action" onclick="updateOrderStatus('${order.id}', 'picked_up')">✓ Picked Up</button>
                 `;
             }
-            if (order.status === 'picked_up') {
+            if (order.status === 'picked_up' || order.status === 'in_transit') {
                 return `
-                    <button class="btn btn-outline btn-action" onclick="callBridge('openMaps', '${order.delivery_address}')">📍 Navigate</button>
-                    <button class="btn btn-primary btn-action" onclick="callBridge('updateOrderStatus', '${order.id}', 'delivered', '${state.authToken}')">Deliver</button>
+                    <button class="btn btn-outline btn-action" onclick="showOrderOnMap('${order.id}')">📍 Navigate</button>
+                    <button class="btn btn-outline btn-action" onclick="openChat('${order.id}')">💬 Chat</button>
+                    <button class="btn btn-primary btn-action" onclick="updateOrderStatus('${order.id}', 'delivered')">✓ Delivered</button>
                 `;
             }
-            return `<div style="color: var(--success); font-weight: 800;">✓ In Transit</div>`;
+            return `<div style="color: var(--success); font-weight: 800; font-size: 14px; width: 100%; text-align: right;">COMPLETED ✓</div>`;
+        }
+
+        function showOrderOnMap(orderId) {
+            const order = state.orders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            activeOrder = order;
+            switchScreen('map');
+            
+            if (order.delivery && order.delivery.lat && order.delivery.lng) {
+                setTimeout(() => {
+                    showRouteToDestination(order.delivery.lat, order.delivery.lng, order.delivery_address);
+                }, 500);
+            }
+        }
+
+        function openChat(orderId) {
+            const order = state.orders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            activeOrder = order;
+            document.getElementById('chatCustomerName').textContent = order.customer_name || 'Customer';
+            document.getElementById('chatAvatar').textContent = (order.customer_name || 'C').charAt(0);
+            
+            switchScreen('chat');
+            loadChatMessages(orderId);
+        }
+
+        function sendQuickMessage(message) {
+            if (activeOrder) {
+                sendChatMessage(activeOrder.id, message);
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (message && activeOrder) {
+                sendChatMessage(activeOrder.id, message);
+            }
+        }
+
+        function renderChatMessages(messages) {
+            const container = document.getElementById('chatMessages');
+            const emptyState = document.getElementById('chatEmptyState');
+            
+            if (messages.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            container.innerHTML = messages.map(msg => {
+                const isDriver = msg.sender_name === 'Driver';
+                return `
+                    <div style="margin-bottom: 12px; display: flex; justify-content: ${isDriver ? 'flex-end' : 'flex-start'};">
+                        <div style="max-width: 70%; padding: 10px 14px; background: ${isDriver ? 'var(--primary)' : 'var(--surface-glass)'}; border-radius: ${isDriver ? '16px 16px 4px 16px' : '16px 16px 16px 4px'}; font-size: 14px;">
+                            ${msg.message}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function addChatMessage(msg) {
+            const container = document.getElementById('chatMessages');
+            const emptyState = document.getElementById('chatEmptyState');
+            emptyState.style.display = 'none';
+            
+            const isDriver = msg.sender_name === 'Driver';
+            const msgDiv = document.createElement('div');
+            msgDiv.style.cssText = `margin-bottom: 12px; display: flex; justify-content: ${isDriver ? 'flex-end' : 'flex-start'}; animation: slideUp 0.3s ease;`;
+            msgDiv.innerHTML = `
+                <div style="max-width: 70%; padding: 10px 14px; background: ${isDriver ? 'var(--primary)' : 'var(--surface-glass)'}; border-radius: ${isDriver ? '16px 16px 4px 16px' : '16px 16px 16px 4px'}; font-size: 14px;">
+                    ${msg.message}
+                </div>
+            `;
+            
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
         }
 
         function handleStatusToggle() {
@@ -912,8 +1276,834 @@
             setTimeout(() => el.classList.remove('show'), 3000);
         }
 
+        // ==================== DRIVER STATUS & AVAILABILITY ====================
+        let driverStatus = 'offline';
+        let driverLocation = null;
+        let watchPositionId = null;
+
+        function toggleOnlineStatus() {
+            const toggle = document.getElementById('onlineToggle');
+            const dot = document.getElementById('onlineDot');
+            const text = document.getElementById('onlineText');
+            const btn = document.getElementById('onlineToggleBtn');
+
+            if (driverStatus === 'offline') {
+                // Going online
+                driverStatus = 'online';
+                toggle.classList.add('active');
+                dot.style.background = '#10b981';
+                text.textContent = 'Online';
+                text.style.color = 'var(--success)';
+                btn.style.background = 'linear-gradient(135deg, var(--success) 0%, #059669 100%)';
+                
+                // Start location tracking
+                startLocationTracking();
+                
+                // Update in Firebase
+                updateDriverStatus('online');
+                
+                showNotif('You are now ONLINE - Ready to receive orders!');
+                
+                // Request push notification permission
+                requestNotificationPermission();
+            } else {
+                // Going offline
+                if (activeOrder) {
+                    showNotif('Cannot go offline while delivering an order', 'error');
+                    return;
+                }
+                
+                driverStatus = 'offline';
+                toggle.classList.remove('active');
+                dot.style.background = '#64748b';
+                text.textContent = 'Offline';
+                text.style.color = 'var(--text-dim)';
+                btn.style.background = '#334155';
+                
+                // Stop location tracking
+                stopLocationTracking();
+                
+                // Update in Firebase
+                updateDriverStatus('offline');
+                
+                showNotif('You are now OFFLINE');
+            }
+        }
+
+        async function updateDriverStatus(status) {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            try {
+                const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+                
+                const driverRef = doc(db, 'drivers', user.uid);
+                await updateDoc(driverRef, {
+                    status: status,
+                    lastUpdated: serverTimestamp()
+                });
+            } catch (e) {
+                console.log('Status update error:', e);
+            }
+        }
+
+        // ==================== GPS & MAP INTEGRATION ====================
+        function startLocationTracking() {
+            if (!navigator.geolocation) {
+                showNotif('Geolocation is not supported', 'error');
+                return;
+            }
+
+            watchPositionId = navigator.geolocation.watchPosition(
+                (position) => {
+                    driverLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    // Update driver location in Firebase
+                    updateDriverLocation(driverLocation);
+                    
+                    // If map is open, update marker
+                    if (driverMarker && map) {
+                        driverMarker.setLatLng([driverLocation.lat, driverLocation.lng]);
+                    }
+                },
+                (error) => {
+                    console.error('Geolocation error:', error);
+                    showNotif('Location tracking error: ' + error.message, 'error');
+                },
+                { enableHighAccuracy: true, maximumAge: 30000, timeout: 27000 }
+            );
+        }
+
+        function stopLocationTracking() {
+            if (watchPositionId !== null) {
+                navigator.geolocation.clearWatch(watchPositionId);
+                watchPositionId = null;
+            }
+        }
+
+        async function updateDriverLocation(location) {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            try {
+                const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+                
+                const driverRef = doc(db, 'drivers', user.uid);
+                await updateDoc(driverRef, {
+                    location: location,
+                    lastLocationUpdate: serverTimestamp()
+                });
+            } catch (e) {
+                console.log('Location update error:', e);
+            }
+        }
+
+        let map = null;
+        let driverMarker = null;
+        let destinationMarker = null;
+        let routeLine = null;
+
+        function initMap() {
+            if (!driverLocation) {
+                showNotif('Getting your location...', 'error');
+                // Get initial location
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        driverLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        loadMap();
+                    },
+                    () => {
+                        // Default location if denied
+                        driverLocation = { lat: -1.2921, lng: 36.8219 }; // Nairobi
+                        loadMap();
+                    }
+                );
+            } else {
+                loadMap();
+            }
+        }
+
+        // OpenStreetMap - Free, No API Key Required
+        let routingControl = null;
+
+        function loadMap() {
+            const container = document.getElementById('mapContainer');
+            container.innerHTML = '<div id="map" style="width: 100%; height: 100%;"></div>';
+            
+            // Initialize Leaflet map
+            map = L.map('map').setView([driverLocation.lat, driverLocation.lng], 15);
+            
+            // Add OpenStreetMap tile layer (FREE)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+            
+            // Add driver marker with custom icon
+            const driverIcon = L.divIcon({
+                className: 'driver-marker',
+                html: '<div style="width: 20px; height: 20px; background: #10b981; border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            
+            driverMarker = L.marker([driverLocation.lat, driverLocation.lng], { icon: driverIcon })
+                .addTo(map)
+                .bindPopup('<p style="margin:0;font-weight:600;">Your Location</p>');
+            
+            // If there's an active order, show route
+            if (activeOrder && activeOrder.delivery) {
+                setTimeout(() => {
+                    showRouteToDestination(activeOrder.delivery.lat, activeOrder.delivery.lng, activeOrder.delivery.address);
+                }, 500);
+            }
+            
+            showNotif('Map loaded - Free OpenStreetMap navigation ready!');
+        }
+
+        function showRouteToDestination(destLat, destLng, destAddress) {
+            if (!map || !driverLocation) return;
+            
+            // Remove existing routing control
+            if (routingControl) {
+                map.removeControl(routingControl);
+            }
+            
+            // Remove existing destination marker and route line
+            if (destinationMarker) map.removeLayer(destinationMarker);
+            if (routeLine) map.removeLayer(routeLine);
+            
+            // Add destination marker
+            const destIcon = L.divIcon({
+                className: 'destination-marker',
+                html: '<div style="width: 30px; height: 30px; background: #10b981; border: 3px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">📍</div>',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+            
+            destinationMarker = L.marker([destLat, destLng], { icon: destIcon })
+                .addTo(map)
+                .bindPopup(`<p style="margin:0;font-weight:600;">${destAddress || 'Delivery Location'}</p>`);
+            
+            // Try to use OSRM (Open Source Routing Machine) for free routing
+            try {
+                routingControl = L.Routing.control({
+                    waypoints: [
+                        L.latLng(driverLocation.lat, driverLocation.lng),
+                        L.latLng(destLat, destLng)
+                    ],
+                    routeWhileDragging: false,
+                    addWaypoints: false,
+                    draggableWaypoints: false,
+                    fitSelectedRoutes: true,
+                    showAlternatives: false,
+                    lineOptions: {
+                        styles: [{ color: '#10b981', weight: 5, opacity: 0.8 }]
+                    },
+                    createMarker: function() { return null; } // Don't create default markers
+                }).addTo(map);
+                
+                // Listen for route found
+                routingControl.on('routesfound', function(e) {
+                    const route = e.routes[0];
+                    const distance = (route.summary.totalDistance / 1000).toFixed(1);
+                    const duration = Math.ceil(route.summary.totalTime / 60);
+                    document.getElementById('routeDistance').textContent = `${distance} km • ${duration} min`;
+                });
+                
+            } catch (e) {
+                console.warn('Routing machine failed, using simple line:', e);
+                // Fallback: draw simple line
+                routeLine = L.polyline(
+                    [[driverLocation.lat, driverLocation.lng], [destLat, destLng]],
+                    { color: '#10b981', weight: 5, opacity: 0.8, dashArray: '10, 10' }
+                ).addTo(map);
+                
+                // Calculate distance manually
+                const distance = calculateDistance(driverLocation.lat, driverLocation.lng, destLat, destLng);
+                const time = Math.ceil(distance * 3);
+                document.getElementById('routeDistance').textContent = `${distance.toFixed(1)} km • ${time} min`;
+            }
+            
+            // Show route info panel
+            document.getElementById('routeInfo').style.display = 'block';
+            document.getElementById('routeDestination').textContent = destAddress || 'Delivery Location';
+        }
+
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLng/2) * Math.sin(dLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function startNavigation() {
+            if (!activeOrder || !activeOrder.delivery) {
+                showNotif('No active delivery order', 'error');
+                return;
+            }
+            
+            const dest = activeOrder.delivery;
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${dest.lat},${dest.lng}`;
+            window.open(url, '_blank');
+            
+            showNotif('Opening Google Maps for navigation...');
+        }
+
+        function optimizeRoute() {
+            showNotif('Route optimization would analyze traffic and suggest best path', 'success');
+            // In production: integrate with routing API like OSRM, Mapbox, or Google Directions
+        }
+
+        // ==================== CHAT FUNCTIONALITY ====================
+        let currentChatId = null;
+        let chatListener = null;
+
+        function initChat(orderId, customerId, customerName) {
+            currentChatId = `order_${orderId}`;
+            document.getElementById('chatCustomerName').textContent = customerName || 'Customer';
+            document.getElementById('chatAvatar').textContent = (customerName || 'C').charAt(0).toUpperCase();
+            
+            loadChatMessages();
+            
+            // Listen for new messages
+            if (chatListener) chatListener();
+            chatListener = db.collection('chats').doc(currentChatId)
+                .collection('messages')
+                .orderBy('timestamp', 'asc')
+                .onSnapshot(snapshot => {
+                    snapshot.docChanges().forEach(change => {
+                        if (change.type === 'added') {
+                            const msg = change.doc.data();
+                            displayMessage(msg);
+                        }
+                    });
+                });
+        }
+
+        function loadChatMessages() {
+            const container = document.getElementById('chatMessages');
+            container.innerHTML = '';
+            
+            if (!currentChatId) {
+                document.getElementById('chatEmptyState').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('chatEmptyState').style.display = 'none';
+            
+            // Load initial messages
+            db.collection('chats').doc(currentChatId)
+                .collection('messages')
+                .orderBy('timestamp', 'asc')
+                .limit(50)
+                .get()
+                .then(snapshot => {
+                    snapshot.forEach(doc => displayMessage(doc.data()));
+                });
+        }
+
+        function displayMessage(msg) {
+            const container = document.getElementById('chatMessages');
+            const isDriver = msg.sender === 'driver';
+            
+            const div = document.createElement('div');
+            div.style.cssText = `display: flex; justify-content: ${isDriver ? 'flex-end' : 'flex-start'}; margin-bottom: 12px;`;
+            
+            const bubble = document.createElement('div');
+            bubble.style.cssText = `max-width: 75%; padding: 12px 16px; border-radius: 16px; background: ${isDriver ? 'var(--primary)' : 'var(--surface-glass)'}; color: ${isDriver ? 'white' : 'var(--text)'}; font-size: 14px; line-height: 1.4;`;
+            bubble.textContent = msg.text;
+            
+            const time = document.createElement('div');
+            time.style.cssText = 'font-size: 10px; color: var(--text-dim); margin-top: 4px; text-align: right;';
+            time.textContent = msg.timestamp ? new Date(msg.timestamp.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+            
+            bubble.appendChild(time);
+            div.appendChild(bubble);
+            container.appendChild(div);
+            
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            
+            if (!text || !currentChatId) {
+                showNotif('No active chat', 'error');
+                return;
+            }
+            
+            const msg = {
+                text: text,
+                sender: 'driver',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            db.collection('chats').doc(currentChatId)
+                .collection('messages')
+                .add(msg)
+                .then(() => {
+                    input.value = '';
+                })
+                .catch(e => {
+                    showNotif('Failed to send message', 'error');
+                });
+        }
+
+        function sendQuickMessage(text) {
+            document.getElementById('chatInput').value = text;
+            sendMessage();
+        }
+
+        // ==================== PUSH NOTIFICATIONS ====================
+        let notificationPermission = false;
+
+        async function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                console.log('Notifications not supported');
+                return;
+            }
+
+            const permission = await Notification.requestPermission();
+            notificationPermission = permission === 'granted';
+            
+            if (notificationPermission) {
+                console.log('Notification permission granted');
+                subscribeToOrderNotifications();
+            }
+        }
+
+        function subscribeToOrderNotifications() {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            // Listen for new orders assigned to this driver
+            db.collection('orders')
+                .where('driverId', '==', user.uid)
+                .where('status', 'in', ['assigned', 'pickup', 'in_transit'])
+                .onSnapshot(snapshot => {
+                    snapshot.docChanges().forEach(change => {
+                        if (change.type === 'added' || change.type === 'modified') {
+                            const order = change.doc.data();
+                            
+                            // Show notification for new assignments
+                            if (order.status === 'assigned' && notificationPermission) {
+                                showOrderNotification('New Order Assigned!', 
+                                    `Order #${change.doc.id.slice(-4)} from ${order.restaurant?.name || 'Restaurant'}`);
+                            }
+                        }
+                    });
+                });
+        }
+
+        function showOrderNotification(title, body) {
+            if (!notificationPermission) return;
+            
+            new Notification(title, {
+                body: body,
+                icon: '/favicon.png',
+                badge: '/favicon.png',
+                tag: 'new-order',
+                requireInteraction: true
+            });
+        }
+
+        // ==================== ENHANCED SCREEN SWITCHING ====================
+        function switchScreen(screenName) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            // Show selected screen
+            const screenMap = {
+                'home': 'homeScreen',
+                'map': 'mapScreen',
+                'chat': 'chatScreen',
+                'history': 'historyScreen',
+                'profile': 'profileScreen'
+            };
+            
+            const screenId = screenMap[screenName];
+            if (screenId) {
+                document.getElementById(screenId).classList.remove('hidden');
+            }
+            
+            // Update nav
+            const navMap = {
+                'home': 'nav-home',
+                'map': 'nav-map',
+                'chat': 'nav-chat',
+                'history': 'nav-history',
+                'profile': 'nav-profile'
+            };
+            
+            const navId = navMap[screenName];
+            if (navId) {
+                document.getElementById(navId).classList.add('active');
+            }
+
+            // Initialize specific screens
+            if (screenName === 'map') {
+                initMap();
+            } else if (screenName === 'chat' && activeOrder) {
+                initChat(activeOrder.id, activeOrder.customerId, activeOrder.customerName);
+            }
+
+            currentScreen = screenName;
+        }
+
+        // Check for existing session on page load
+        (function checkSession() {
+            const savedToken = localStorage.getItem('driver_token');
+            const savedUser = localStorage.getItem('driver_user');
+            
+            if (savedToken && savedUser) {
+                try {
+                    state.authToken = savedToken;
+                    state.user = JSON.parse(savedUser);
+                    console.log('Restored session for:', state.user.email);
+                    initApp();
+                } catch (e) {
+                    console.error('Failed to restore session:', e);
+                    localStorage.removeItem('driver_token');
+                    localStorage.removeItem('driver_user');
+                }
+            }
+        })();
+
+        // Initialize on page load
+        window.addEventListener('beforeunload', () => {
+            if (chatListener) chatListener();
+            stopLocationTracking();
+        });
+
         function logout() {
-            if(confirm('Securely end your session?')) location.reload();
+            if(confirm('Securely end your session?')) {
+                localStorage.removeItem('driver_token');
+                localStorage.removeItem('driver_user');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
+            if (chatListener) chatListener();
+            chatListener = db.collection('chats').doc(currentChatId)
+                .collection('messages')
+                .orderBy('timestamp', 'asc')
+                .onSnapshot(snapshot => {
+                    snapshot.docChanges().forEach(change => {
+                        if (change.type === 'added') {
+                            const msg = change.doc.data();
+                            displayMessage(msg);
+                        }
+                    });
+                });
+        }
+
+        function loadChatMessages() {
+            const container = document.getElementById('chatMessages');
+            container.innerHTML = '';
+            
+            if (!currentChatId) {
+                document.getElementById('chatEmptyState').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('chatEmptyState').style.display = 'none';
+            
+            // Load initial messages
+            db.collection('chats').doc(currentChatId)
+                .collection('messages')
+                .orderBy('timestamp', 'asc')
+                .limit(50)
+                .get()
+                .then(snapshot => {
+                    snapshot.forEach(doc => displayMessage(doc.data()));
+                });
+        }
+
+        function displayMessage(msg) {
+            const container = document.getElementById('chatMessages');
+            const isDriver = msg.sender === 'driver';
+            
+            const div = document.createElement('div');
+            div.style.cssText = `display: flex; justify-content: ${isDriver ? 'flex-end' : 'flex-start'}; margin-bottom: 12px;`;
+            
+            const bubble = document.createElement('div');
+            bubble.style.cssText = `max-width: 75%; padding: 12px 16px; border-radius: 16px; background: ${isDriver ? 'var(--primary)' : 'var(--surface-glass)'}; color: ${isDriver ? 'white' : 'var(--text)'}; font-size: 14px; line-height: 1.4;`;
+            bubble.textContent = msg.text;
+            
+            const time = document.createElement('div');
+            time.style.cssText = 'font-size: 10px; color: var(--text-dim); margin-top: 4px; text-align: right;';
+            time.textContent = msg.timestamp ? new Date(msg.timestamp.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+            
+            bubble.appendChild(time);
+            div.appendChild(bubble);
+            container.appendChild(div);
+            
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            
+            if (!text || !currentChatId) {
+                showNotif('No active chat', 'error');
+                return;
+            }
+            
+            const msg = {
+                text: text,
+                sender: 'driver',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            db.collection('chats').doc(currentChatId)
+                .collection('messages')
+                .add(msg)
+                .then(() => {
+                    input.value = '';
+                })
+                .catch(e => {
+                    showNotif('Failed to send message', 'error');
+                });
+        }
+
+        function sendQuickMessage(text) {
+            document.getElementById('chatInput').value = text;
+            sendMessage();
+        }
+
+        // ==================== PUSH NOTIFICATIONS ====================
+        let notificationPermission = false;
+
+        async function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                console.log('Notifications not supported');
+                return;
+            }
+
+            const permission = await Notification.requestPermission();
+            notificationPermission = permission === 'granted';
+            
+            if (notificationPermission) {
+                console.log('Notification permission granted');
+                subscribeToOrderNotifications();
+            }
+        }
+
+        function subscribeToOrderNotifications() {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            // Listen for new orders assigned to this driver
+            db.collection('orders')
+                .where('driverId', '==', user.uid)
+                .where('status', 'in', ['assigned', 'pickup', 'in_transit'])
+                .onSnapshot(snapshot => {
+                    snapshot.docChanges().forEach(change => {
+                        if (change.type === 'added' || change.type === 'modified') {
+                            const order = change.doc.data();
+                            
+                            // Show notification for new assignments
+                            if (order.status === 'assigned' && notificationPermission) {
+                                showOrderNotification('New Order Assigned!', 
+                                    `Order #${change.doc.id.slice(-4)} from ${order.restaurant?.name || 'Restaurant'}`);
+                            }
+                        }
+                    });
+                });
+        }
+
+        function showOrderNotification(title, body) {
+            if (!notificationPermission) return;
+            
+            new Notification(title, {
+                body: body,
+                icon: '/favicon.png',
+                badge: '/favicon.png',
+                tag: 'new-order',
+                requireInteraction: true
+            });
+        }
+
+        // ==================== ENHANCED SCREEN SWITCHING ====================
+        function switchScreen(screenName) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            // Show selected screen
+            const screenMap = {
+                'home': 'homeScreen',
+                'map': 'mapScreen',
+                'chat': 'chatScreen',
+                'history': 'historyScreen',
+                'profile': 'profileScreen'
+            };
+            
+            const screenId = screenMap[screenName];
+            if (screenId) {
+                document.getElementById(screenId).classList.remove('hidden');
+            }
+            
+            // Update nav
+            const navMap = {
+                'home': 'nav-home',
+                'map': 'nav-map',
+                'chat': 'nav-chat',
+                'history': 'nav-history',
+                'profile': 'nav-profile'
+            };
+            
+            const navId = navMap[screenName];
+            if (navId) {
+                document.getElementById(navId).classList.add('active');
+            }
+
+            // Initialize specific screens
+            if (screenName === 'map') {
+                initMap();
+            } else if (screenName === 'chat' && activeOrder) {
+                initChat(activeOrder.id, activeOrder.customerId, activeOrder.customerName);
+            }
+
+            currentScreen = screenName;
+        }
+
+        // Check for existing session on page load
+        (function checkSession() {
+            const savedToken = localStorage.getItem('driver_token');
+            const savedUser = localStorage.getItem('driver_user');
+            
+            if (savedToken && savedUser) {
+                try {
+                    state.authToken = savedToken;
+                    state.user = JSON.parse(savedUser);
+                    console.log('Restored session for:', state.user.email);
+                    initApp();
+                } catch (e) {
+                    console.error('Failed to restore session:', e);
+                    localStorage.removeItem('driver_token');
+                    localStorage.removeItem('driver_user');
+                }
+            }
+        })();
+
+        // Initialize on page load
+        window.addEventListener('beforeunload', () => {
+            if (chatListener) chatListener();
+            stopLocationTracking();
+        });
+
+        function logout() {
+            if(confirm('Securely end your session?')) {
+                localStorage.removeItem('driver_token');
+                localStorage.removeItem('driver_user');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
+</html>
+                tag: 'new-order',
+                requireInteraction: true
+            });
+        }
+
+        // ==================== ENHANCED SCREEN SWITCHING ====================
+        function switchScreen(screenName) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            // Show selected screen
+            const screenMap = {
+                'home': 'homeScreen',
+                'map': 'mapScreen',
+                'chat': 'chatScreen',
+                'history': 'historyScreen',
+                'profile': 'profileScreen'
+            };
+            
+            const screenId = screenMap[screenName];
+            if (screenId) {
+                document.getElementById(screenId).classList.remove('hidden');
+            }
+            
+            // Update nav
+            const navMap = {
+                'home': 'nav-home',
+                'map': 'nav-map',
+                'chat': 'nav-chat',
+                'history': 'nav-history',
+                'profile': 'nav-profile'
+            };
+            
+            const navId = navMap[screenName];
+            if (navId) {
+                document.getElementById(navId).classList.add('active');
+            }
+
+            // Initialize specific screens
+            if (screenName === 'map') {
+                initMap();
+            } else if (screenName === 'chat' && activeOrder) {
+                initChat(activeOrder.id, activeOrder.customerId, activeOrder.customerName);
+            }
+
+            currentScreen = screenName;
+        }
+
+        // Check for existing session on page load
+        (function checkSession() {
+            const savedToken = localStorage.getItem('driver_token');
+            const savedUser = localStorage.getItem('driver_user');
+            
+            if (savedToken && savedUser) {
+                try {
+                    state.authToken = savedToken;
+                    state.user = JSON.parse(savedUser);
+                    console.log('Restored session for:', state.user.email);
+                    initApp();
+                } catch (e) {
+                    console.error('Failed to restore session:', e);
+                    localStorage.removeItem('driver_token');
+                    localStorage.removeItem('driver_user');
+                }
+            }
+        })();
+
+        // Initialize on page load
+        window.addEventListener('beforeunload', () => {
+            if (chatListener) chatListener();
+            stopLocationTracking();
+        });
+
+        function logout() {
+            if(confirm('Securely end your session?')) {
+                localStorage.removeItem('driver_token');
+                localStorage.removeItem('driver_user');
+                location.reload();
+            }
         }
     </script>
 </body>
