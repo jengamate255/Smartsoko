@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SmartSoko Shared Navigation Component
  * Single source of truth for all navigation across the app.
  * Include this script on any page and call the render functions.
@@ -16,7 +16,7 @@
  */
 
 const SmartNav = (() => {
-  // ── Configuration ──────────────────────────────────────────────
+  // â”€â”€ Configuration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const NAV_ITEMS = [
     { id: 'home',      label: 'Home',      icon: 'home',           href: '/main' },
     { id: 'discover',  label: 'Discover',   icon: 'explore',        href: '/discovery' },
@@ -31,12 +31,11 @@ const SmartNav = (() => {
     { id: 'profile',   label: 'Profile',    icon: 'person',         href: '/profile' },
   ];
 
-  const MERCHANT_NAV = [
-    { id: 'home',      label: 'Home',      icon: 'home',           href: '/main' },
-    { id: 'orders',    label: 'Orders',     icon: 'receipt_long',   href: '/merchant' },
-    { id: 'products',  label: 'Products',   icon: 'inventory_2',    href: '/merchant' },
-    { id: 'profile',   label: 'Profile',    icon: 'person',         href: '/profile' },
-  ];
+const MERCHANT_NAV = [
+  { id: 'home',      label: 'Home',      icon: 'home',           href: '/main' },
+  { id: 'orders',    label: 'Orders',     icon: 'receipt_long',   href: '/merchant' },
+  { id: 'products',  label: 'Products',   icon: 'inventory_2',    href: '/merchant' },
+];
 
   const ADMIN_NAV = [
     { id: 'home',      label: 'Home',      icon: 'home',           href: '/main' },
@@ -60,13 +59,14 @@ const SmartNav = (() => {
   let config = {};
   let cartCount = 0;
 
-  // ── Init ───────────────────────────────────────────────────────
+  // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function init(opts = {}) {
     config = {
       activePage: opts.activePage || 'home',
       showMegaMenu: opts.showMegaMenu !== false,
       showCart: opts.showCart !== false,
       showSearch: opts.showSearch !== false,
+      skipTopbar: opts.skipTopbar === true,
       role: opts.role || 'customer',
       breadcrumbs: opts.breadcrumbs || null,
       title: opts.title || 'SmartSoko',
@@ -74,13 +74,29 @@ const SmartNav = (() => {
     };
 
     cartCount = getCartCount();
-    renderTopBar();
+    if (!config.skipTopbar) renderTopBar();
     renderBottomNav();
     initScrollBehavior();
     initKeyboardNav();
+    registerServiceWorker();
   }
 
-  // ── Cart helpers ───────────────────────────────────────────────
+  // â”€â”€ Service Worker Registration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      const swPath = '/pwa/sw.js';
+      // Only register if not already registered
+      navigator.serviceWorker.getRegistration(swPath).then(reg => {
+        if (!reg) {
+          navigator.serviceWorker.register(swPath, { scope: '/pwa/' }).catch(() => {
+            // Silent fail â€” SW is a progressive enhancement
+          });
+        }
+      });
+    }
+  }
+
+  // â”€â”€ Cart helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function getCartCount() {
     // Try CartService first, fallback to localStorage
     if (window.CartService && window.CartService.getItemCount) {
@@ -101,7 +117,7 @@ const SmartNav = (() => {
     });
   }
 
-  // ── Top Bar ────────────────────────────────────────────────────
+  // â”€â”€ Top Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function renderTopBar() {
     let existing = document.getElementById('smartnav-topbar');
     if (existing) existing.remove();
@@ -169,7 +185,7 @@ const SmartNav = (() => {
         .cart-badge-count {
           position: absolute; top: -4px; right: -4px;
           min-width: 18px; height: 18px; padding: 0 4px;
-          background: #dc2626; color: #fff; border-radius: 999px;
+          background: #B91C1C; color: #fff; border-radius: 999px;
           font-size: 0.65rem; font-weight: 700;
           display: flex; align-items: center; justify-content: center;
         }
@@ -251,13 +267,14 @@ const SmartNav = (() => {
         .sn-breadcrumbs .sn-bc-current { color: #1a1a1a; font-weight: 600; }
 
         /* Bottom nav */
-        .sn-bottom-nav {
-          position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
-          background: rgba(255,255,255,0.9); backdrop-filter: blur(16px);
-          border-top: 1px solid rgba(0,0,0,0.06);
-          display: flex; justify-content: center; gap: 0.25rem;
-          padding: 0.5rem 0.75rem 0.75rem;
-          pointer-events: none;
+         .sn-bottom-nav {
+           position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+           background: rgba(255,255,255,0.9); backdrop-filter: blur(16px);
+           border-top: 1px solid rgba(0,0,0,0.06);
+           display: flex; justify-content: center; gap: 0.25rem;
+           padding: 0.5rem 0.75rem 0.75rem;
+           pointer-events: none;
+           display: none;
         }
         .sn-bottom-nav > * {
           pointer-events: auto;
@@ -273,8 +290,9 @@ const SmartNav = (() => {
         .sn-bottom-item .material-symbols-outlined { font-size: 1.35rem; }
         .sn-bottom-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
 
-        @media (max-width: 768px) {
-          .sn-hamburger { display: flex; }
+         @media (max-width: 768px) {
+           .sn-bottom-nav { display: flex; }
+           .sn-hamburger { display: flex; }
           .sn-search { display: none; }
           .sn-btn span.sn-btn-label { display: none; }
           .sn-mega-dropdown { min-width: calc(100vw - 2rem); left: 1rem; transform: none; }
@@ -308,12 +326,14 @@ const SmartNav = (() => {
           <a href="/checkout" class="sn-btn sn-btn-ghost cart-icon" style="position:relative;">
             <span class="material-symbols-outlined" style="font-size:1.15rem;">shopping_cart</span>
             <span class="sn-btn-label">Cart</span>
-            <span class="cart-badge-count" style="display:${cartCount > 0 ? 'flex' : 'none'}; background-color: #ba1a1a; color: white;">${cartCount}</span>
+            <span class="cart-badge-count" style="display:${cartCount > 0 ? 'flex' : 'none'}; background-color: #B91C1C; color: white;">${cartCount}</span>
           </a>` : ''}
 
+          ${config.showProfile !== false ? `
           <a href="/profile" class="sn-avatar" aria-label="Profile">
             <span class="material-symbols-outlined" style="font-size:1rem;">person</span>
           </a>
+          ` : ''}
         </div>
       </div>
     `;
@@ -347,7 +367,7 @@ const SmartNav = (() => {
     document.getElementById('sn-drawer-overlay')?.addEventListener('click', closeDrawer);
   }
 
-  // ── Drawer ─────────────────────────────────────────────────────
+  // â”€â”€ Drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function renderDrawer() {
     let existing = document.getElementById('sn-drawer-overlay');
     if (existing) existing.remove();
@@ -421,7 +441,7 @@ const SmartNav = (() => {
     }
   }
 
-  // ── Bottom Nav ─────────────────────────────────────────────────
+  // â”€â”€ Bottom Nav â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function renderBottomNav() {
     let existing = document.getElementById('smartnav-bottom');
     if (existing) existing.remove();
@@ -440,7 +460,7 @@ const SmartNav = (() => {
     document.body.appendChild(nav);
   }
 
-  // ── Breadcrumbs ────────────────────────────────────────────────
+  // â”€â”€ Breadcrumbs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function renderBreadcrumbs() {
     let existing = document.getElementById('smartnav-breadcrumbs');
     if (existing) existing.remove();
@@ -471,7 +491,7 @@ const SmartNav = (() => {
     }
   }
 
-  // ── Scroll behavior ────────────────────────────────────────────
+  // â”€â”€ Scroll behavior â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function initScrollBehavior() {
     let lastScroll = 0;
     const topbar = document.getElementById('smartnav-topbar');
@@ -488,7 +508,7 @@ const SmartNav = (() => {
     }, { passive: true });
   }
 
-  // ── Keyboard navigation ────────────────────────────────────────
+  // â”€â”€ Keyboard navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function initKeyboardNav() {
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeDrawer();
@@ -499,8 +519,103 @@ const SmartNav = (() => {
     });
   }
 
-  // ── Public API ─────────────────────────────────────────────────
-  return { init, updateCartBadge, openDrawer, closeDrawer };
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // SHARED UI HELPERS
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+  let _toastContainer = null;
+
+  function getToastContainer() {
+    if (!_toastContainer) {
+      _toastContainer = document.getElementById('sn-toast-container');
+      if (!_toastContainer) {
+        _toastContainer = document.createElement('div');
+        _toastContainer.id = 'sn-toast-container';
+        _toastContainer.className = 'toast-container';
+        document.body.appendChild(_toastContainer);
+      }
+    }
+    return _toastContainer;
+  }
+
+  const TOAST_ICONS = {
+    success: 'check_circle',
+    error: 'error',
+    warning: 'warning',
+    info: 'info'
+  };
+
+  function showToast(message, type = 'info', duration = 4000) {
+    const container = getToastContainer();
+    const icon = TOAST_ICONS[type] || 'info';
+    const el = document.createElement('div');
+    el.className = `toast toast-${type}`;
+    el.innerHTML = `<span class="material-symbols-outlined toast-icon">${icon}</span><span>${message}</span>`;
+    container.appendChild(el);
+    setTimeout(() => {
+      el.classList.add('toast-removing');
+      setTimeout(() => el.remove(), 250);
+    }, duration);
+    return el;
+  }
+
+  function showLoading(container, options = {}) {
+    const { count = 3, type = 'card' } = options;
+    if (typeof container === 'string') container = document.querySelector(container);
+    if (!container) return;
+    container.innerHTML = '';
+    container.dataset.snLoading = 'true';
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      if (type === 'card') {
+        el.className = 'skeleton skeleton-card';
+      } else if (type === 'line') {
+        el.className = 'skeleton-line';
+        el.innerHTML = '<div class="skeleton skeleton-avatar"></div><div style="flex:1"><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text-sm"></div></div>';
+      } else if (type === 'text') {
+        el.className = 'skeleton-text';
+        el.style.width = (60 + Math.random() * 40) + '%';
+      } else if (type === 'product') {
+        el.style.cssText = 'display:flex;flex-direction:column;gap:12px;padding:16px;';
+        el.innerHTML = '<div class="skeleton" style="height:160px;border-radius:16px"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text-sm"></div><div class="skeleton" style="height:16px;width:30%"></div>';
+      }
+      container.appendChild(el);
+    }
+  }
+
+  function hideLoading(container) {
+    if (typeof container === 'string') container = document.querySelector(container);
+    if (!container) return;
+    container.querySelectorAll('.skeleton, .skeleton-line, .skeleton-card, .skeleton-text').forEach(el => el.remove());
+    delete container.dataset.snLoading;
+  }
+
+  function showEmptyState(container, options = {}) {
+    const { icon = 'inbox', title = 'Nothing here yet', message = '', actionText, actionHandler } = options;
+    if (typeof container === 'string') container = document.querySelector(container);
+    if (!container) return;
+    container.innerHTML = `
+      <div class="empty-state">
+        <span class="material-symbols-outlined empty-state-icon">${icon}</span>
+        <div class="empty-state-title">${title}</div>
+        ${message ? `<div class="empty-state-message">${message}</div>` : ''}
+        ${actionText ? `<button class="empty-state-action">${actionText}</button>` : ''}
+      </div>`;
+    if (actionText && actionHandler) {
+      const btn = container.querySelector('.empty-state-action');
+      if (btn) btn.addEventListener('click', actionHandler);
+    }
+  }
+
+  function initPageTransition() {
+    document.body.classList.add('page-enter');
+  }
+
+  // â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  return {
+    init, updateCartBadge, openDrawer, closeDrawer,
+    showToast, showLoading, hideLoading, showEmptyState, initPageTransition
+  };
 })();
 
 // Export to global scope for inline scripts

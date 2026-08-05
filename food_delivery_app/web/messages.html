@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="design-system.css">
   <link rel="stylesheet" href="css/social.css">
   <script type="module" src="config/firebase-config.js?v=3"></script>
+  <script type="module" src="config/cross-platform-service.js?v=4"></script>
   <script src="auth-check.js?v=4" defer></script>
   <script src="js/cart-service.js" defer></script>
   <script src="js/social-service.js" defer></script>
@@ -79,9 +80,9 @@
     </div>
   </div>
 
-  <script>
-    SmartNav?.init?.({ activePage: 'social', role: 'customer', showSearch: false });
-  </script>
+<script>
+      (function initNav() { if (window.SmartNav && SmartNav.init) { SmartNav.init({ activePage: 'social', role: 'customer', showSearch: false }); } else { setTimeout(initNav, 100); } })();
+    </script>
   <script src="js/messages-page.js" defer></script>
 </body>
 </html>

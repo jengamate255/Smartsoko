@@ -76,8 +76,53 @@ class MerchantApp extends StatelessWidget {
         title: 'Food Delivery - Merchant',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF064E3B),
+            brightness: Brightness.light,
+          ),
           useMaterial3: true,
+          scaffoldBackgroundColor: const Color(0xFFF7F9FF),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Color(0xFF064E3B),
+            foregroundColor: Colors.white,
+            elevation: 0,
+            centerTitle: true,
+            titleTextStyle: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          cardTheme: CardTheme(
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: Colors.grey[50],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFF064E3B), width: 2),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF064E3B),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
         ),
         home: const AuthWrapper(),
       ),
@@ -101,9 +146,9 @@ class AuthWrapper extends StatelessWidget {
           );
         }
         
-        if (snapshot.hasData) {
+        if (snapshot.hasData && snapshot.data != null) {
           // Set Crashlytics user ID and role for crash reporting
-          final user = snapshot.data;
+          final user = snapshot.data!;
           FirebaseCrashlytics.instance.setUserIdentifier(user.id);
           FirebaseCrashlytics.instance.setCustomKey('role', user.role.name);
           FirebaseCrashlytics.instance.setCustomKey('app_type', 'merchant');

@@ -1,411 +1,388 @@
 <!DOCTYPE html>
-
-<html lang="en"><head>
-  <!-- Performance: Preconnect to external domains -->
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>SmartSoko - Cart</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link rel="dns-prefetch" href="https://www.gstatic.com">
-  <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Organic Curator - Cart &amp; Checkout</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="icon" type="image/png" href="favicon.png">
-<link rel="stylesheet" href="design-system.css">
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script src="js/cart-service.js"></script>
-<script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              "on-error-container": "#93000a",
-              "surface-bright": "#fbf9f5",
-              "inverse-primary": "#a5d0b9",
-              "outline-variant": "#c1c8c2",
-              "secondary-fixed": "#ffdcc4",
-              "surface-dim": "#dbdad6",
-              "on-surface": "#1b1c1a",
-              "on-primary-container": "#86af99",
-              "secondary-fixed-dim": "#ffb781",
-              "tertiary-container": "#503700",
-              "outline": "#717973",
-              "on-secondary-fixed-variant": "#703800",
-              "primary-container": "#1b4332",
-              "error": "#ba1a1a",
-              "primary-fixed-dim": "#a5d0b9",
-              "primary": "#064E3B",
-              "on-background": "#1b1c1a",
-              "inverse-on-surface": "#f2f0ed",
-              "surface-container-low": "#f5f3ef",
-              "on-tertiary-fixed-variant": "#5e4100",
-              "primary-fixed": "#c1ecd4",
-              "inverse-surface": "#30312e",
-              "on-primary": "#ffffff",
-              "on-secondary-fixed": "#301400",
-              "error-container": "#ffdad6",
-              "secondary-container": "#fd8603",
-              "on-primary-fixed-variant": "#274e3d",
-              "secondary": "#934b00",
-              "surface-container": "#efeeea",
-              "tertiary": "#342300",
-              "on-error": "#ffffff",
-              "surface-variant": "#e4e2de",
-              "tertiary-fixed": "#ffdea9",
-              "on-primary-fixed": "#002114",
-              "background": "#fbf9f5",
-              "surface": "#fbf9f5",
-              "surface-container-lowest": "#ffffff",
-              "on-tertiary-container": "#d89b00",
-              "tertiary-fixed-dim": "#ffba27",
-              "on-tertiary-fixed": "#271900",
-              "on-secondary": "#ffffff",
-              "surface-container-high": "#eae8e4",
-              "surface-tint": "#3f6653",
-              "on-tertiary": "#ffffff",
-              "on-surface-variant": "#414844",
-              "on-secondary-container": "#5f2f00",
-              "surface-container-highest": "#e4e2de"
-            },
-            fontFamily: {
-              "headline": ["Plus Jakarta Sans"],
-              "body": ["Be Vietnam Pro"],
-              "label": ["Be Vietnam Pro"]
-            },
-            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
-          },
-        },
-      }
-    </script>
-<style> .material-symbols-outlined {font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24} body {font-family: 'Be Vietnam Pro',sans-serif} h1,h2,h3 {font-family: 'Plus Jakarta Sans',sans-serif} </style>
-<style> body {min-height: max(884px,100dvh)} </style>
-  </head>
-<body class="bg-surface text-on-surface min-h-screen pb-32" data-delivery-fee="2000" data-tax-rate="0.18" data-currency="TZS">
-<header class="fixed top-0 w-full z-50 bg-[#fbf9f5]/80 backdrop-blur-xl flex justify-between items-center px-6 py-4 w-full">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[#064E3B]">arrow_back</span>
-<h1 class="font-plus-jakarta text-lg font-bold tracking-tight text-[#064E3B]">Cart</h1>
-</div>
-<div class="flex items-center gap-4">
-<span class="material-symbols-outlined text-[#064E3B]">notifications</span>
-</div>
-</header>
-<main class="pt-20 px-6 max-w-2xl mx-auto space-y-12">
-<section class="space-y-6" id="cart-items">
-<div class="flex justify-between items-end">
-<h2 class="text-2xl font-bold tracking-tight">Your Selection</h2>
-<span id="itemCount" class="text-on-surface-variant text-sm font-medium">0 Items</span>
-</div>
-<div id="cartContainer" class="space-y-4">
-<!-- Cart items loaded dynamically -->
-<div id="emptyCartMsg" class="text-center py-12">
-<div class="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mx-auto mb-4">
-<span class="material-symbols-outlined text-4xl text-primary/30">shopping_cart</span>
-</div>
-<p class="text-on-surface-variant">Your cart is empty</p>
-<a href="/index" class="inline-block mt-4 bg-primary text-on-primary px-6 py-2 rounded-full font-medium hover:opacity-90 transition-all">
-Start Shopping
-</a>
-</div>
-</div>
-</section>
-<section class="space-y-6" id="delivery">
-<h2 class="text-2xl font-bold tracking-tight">Delivery Details</h2>
-<div class="bg-surface-container-low rounded-xl p-6 space-y-6">
-<div class="flex items-start gap-4">
-<div class="bg-primary-fixed p-3 rounded-full text-on-primary-fixed">
-<span class="material-symbols-outlined">location_on</span>
-</div>
-<div class="flex-grow">
-<div class="flex justify-between items-center">
-<span class="font-bold text-primary">Home Address</span>
-<button class="text-primary text-sm font-bold uppercase tracking-wider">Change</button>
-</div>
-<p class="text-on-surface-variant text-sm mt-1 leading-relaxed" id="deliveryAddress">
-                            <span id="addressLine1">Loading...</span><br/>
-                            <span id="addressLine2"></span>
-                        </p>
-</div>
-</div>
-<div class="space-y-3">
-<span class="text-xs font-bold text-on-surface-variant uppercase tracking-[0.1em]">Preferred Time Slot</span>
-<div class="grid grid-cols-2 gap-3">
-<div id="timeSlots" class="grid grid-cols-2 gap-3">
-                        <!-- Time slots loaded dynamically -->
-                        </div>
-</div>
-</div>
-</div>
-</section>
-<section class="bg-surface-container-highest rounded-xl p-8 space-y-4" id="summary">
-<div class="flex justify-between text-on-surface-variant">
-<span>Subtotal</span>
-<span id="subtotal" class="font-medium">TZS 0</span>
-</div>
-<div class="flex justify-between text-on-surface-variant">
-<span>Delivery Fee (<span id="deliveryDistance">2km</span>)</span>
-<span id="deliveryFee" class="font-medium">TZS 0</span>
-</div>
-<div class="flex justify-between text-on-surface-variant">
-<span>VAT (<span id="taxRate">18%</span>)</span>
-<span id="taxes" class="font-medium">TZS 0</span>
-</div>
-<div class="pt-4 mt-2 border-t border-outline-variant/30 flex justify-between items-center">
-<span class="text-lg font-bold">Grand Total</span>
-<span id="grandTotal" class="text-2xl font-extrabold text-primary">TZS 0</span>
-</div>
-</section>
-</main>
-<footer class="fixed bottom-0 left-0 w-full bg-[#fbf9f5]/80 backdrop-blur-xl px-6 pb-8 pt-4 z-50 rounded-t-[3rem] shadow-[0_-8px_24px_rgba(27,28,26,0.06)]">
-<div class="max-w-2xl mx-auto flex flex-col gap-4">
-<button class="w-full bg-secondary-container text-on-secondary-container hover:bg-secondary py-5 rounded-full font-bold text-lg shadow-lg flex items-center justify-center gap-3 transition-all active:scale-95">
-                Place Order
-                <span class="material-symbols-outlined">arrow_forward</span>
-</button>
-<div class="flex justify-around items-center px-4">
-<div class="flex flex-col items-center justify-center text-[#414844] px-5 py-2 hover:bg-[#eae8e4] rounded-full transition-all">
-<span class="material-symbols-outlined">home</span>
-<span class="font-plus-jakarta text-[10px] font-medium tracking-wide">Home</span>
-</div>
-<div class="flex flex-col items-center justify-center text-[#414844] px-5 py-2 hover:bg-[#eae8e4] rounded-full transition-all">
-<span class="material-symbols-outlined">search</span>
-<span class="font-plus-jakarta text-[10px] font-medium tracking-wide">Search</span>
-</div>
-<div class="flex flex-col items-center justify-center bg-[#c1ecd4] text-[#002114] rounded-full px-5 py-2">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
-<span class="font-plus-jakarta text-[10px] font-medium tracking-wide">Cart</span>
-</div>
-<div class="flex flex-col items-center justify-center text-[#414844] px-5 py-2 hover:bg-[#eae8e4] rounded-full transition-all">
-<span class="material-symbols-outlined">person</span>
-<span class="font-plus-jakarta text-[10px] font-medium tracking-wide">Profile</span>
-</div>
-</div>
-</div>
-</footer>
+  <link rel="preload" href="dist/tailwind.css" as="style">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script type="module" src="config/firebase-config.js?v=5"></script>
+  <script type="module" src="config/cross-platform-service.js?v=4"></script>
+  <script src="js/cart-service.js?v=5" defer></script>
+  <script src="nav-component.js?v=5" defer></script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display: inline-block; line-height: 1; vertical-align: middle; }
+    .filled-icon { font-variation-settings: 'FILL' 1; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Be Vietnam Pro','Plus Jakarta Sans',sans-serif; min-height: 100vh; }
+    h1,h2,h3,h4 { font-family: 'Plus Jakarta Sans',sans-serif; }
+    .gradient-bg { background: #064e3b; }
+    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .cart-item { transition: box-shadow 0.2s, transform 0.2s; }
+    .cart-item:hover { box-shadow: 0 8px 24px rgba(44,62,80,0.08); transform: translateY(-2px); }
+  </style>
+</head>
+<body class="bg-[#F8FAF6] text-on-background min-h-screen pb-24 md:pb-0">
 
-<script>
-// Cart State - use CartService when available
-let cart = [];
-
-// XSS sanitization helper
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-}
-
-function loadCartData() {
-  if (window.CartService) {
-    cart = CartService.getCart();
-  } else {
-    cart = JSON.parse(localStorage.getItem('smartsoko_cart')) || [];
-  }
-  return cart;
-}
-
-// Load and render cart
-function loadCart() {
-  loadCartData();
-  const container = document.getElementById('cartContainer');
-  const emptyMsg = document.getElementById('emptyCartMsg');
-  const itemCount = document.getElementById('itemCount');
-  
-  const totalItems = cart.reduce((sum, item) => sum + (item.quantity || item.qty || 1), 0);
-  itemCount.textContent = `${totalItems} Item${totalItems !== 1 ? 's' : ''}`;
-  
-  if (cart.length === 0) {
-    emptyMsg.style.display = 'block';
-    updateSummary(0);
-    return;
-  }
-  
-  emptyMsg.style.display = 'none';
-  
-  container.innerHTML = cart.map((item, index) => {
-    const safeName = escapeHtml(item.name);
-    const safeSellerName = escapeHtml(item.sellerName) || 'Local Seller';
-    const safeImageUrl = escapeHtml(item.imageUrl);
-    return `
-    <div class="bg-surface-container-lowest rounded-xl p-6 flex gap-4 relative overflow-hidden group">
-      <div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container">
-        ${item.imageUrl ? 
-          `<img src="${safeImageUrl}" class="w-full h-full object-cover" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'material-symbols-outlined text-3xl text-primary flex items-center justify-center h-full\'>restaurant</span>'">` :
-          `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-fixed to-primary-fixed-dim"><span class="material-symbols-outlined text-3xl text-primary">restaurant</span></div>`
-        }
-      </div>
-      <div class="flex-grow flex flex-col justify-between">
-        <div class="flex justify-between items-start">
-          <div>
-            <h3 class="font-bold text-lg leading-tight">${safeName}</h3>
-            <p class="text-on-surface-variant text-sm">${safeSellerName}</p>
-          </div>
-          <span class="font-bold text-secondary">TZS ${((item.price || 0) * (item.quantity || item.qty || 1)).toLocaleString()}</span>
+  <!-- Header -->
+  <header class="bg-white/80 backdrop-blur-xl fixed top-0 w-full z-50 shadow-sm flex justify-between items-center px-4 md:px-12 h-16">
+    <div class="flex items-center gap-2">
+      <a href="/home" class="flex items-center gap-2 text-white no-underline">
+        <div class="w-9 h-9 bg-green-700/15 rounded-lg flex items-center justify-center">
+          <span class="material-symbols-outlined text-green-700">shopping_basket</span>
         </div>
-        <div class="flex justify-between items-center mt-2">
-          <div class="flex items-center bg-surface-container-low rounded-full px-3 py-1 gap-4">
-            <button onclick="updateQuantity(${index}, -1)" class="w-6 h-6 flex items-center justify-center text-primary hover:bg-white rounded-full transition-colors">
-              <span class="material-symbols-outlined text-sm">remove</span>
-            </button>
-            <span class="font-bold text-sm">${item.quantity || item.qty || 1}</span>
-            <button onclick="updateQuantity(${index}, 1)" class="w-6 h-6 flex items-center justify-center text-primary hover:bg-white rounded-full transition-colors">
-              <span class="material-symbols-outlined text-sm">add</span>
-            </button>
-          </div>
-          <button onclick="removeItem(${index})" class="text-on-surface-variant hover:text-error transition-colors p-1 hover:bg-error/10 rounded-full">
-            <span class="material-symbols-outlined text-xl">delete</span>
-          </button>
-        </div>
-      </div>
+        <span class="text-lg font-bold hidden sm:block">SmartSoko</span>
+      </a>
     </div>
-  `}).join('');
-  
-  const subtotal = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || item.qty || 1)), 0);
-  updateSummary(subtotal);
-}
+    <div class="flex items-center gap-3">
+      <a href="/cart" class="relative p-2 text-green-700/80 hover:text-green-700 rounded-full">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <span id="headerCartBadge" class="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+      </a>
+    </div>
+  </header>
 
-function updateQuantity(index, delta) {
-  const item = cart[index];
-  if (item) {
-    const itemId = item.id;
-    if (window.CartService) {
-      CartService.updateQuantity(itemId, delta);
-      loadCartData();
-    } else {
-      item.quantity = (item.quantity || item.qty || 1) + delta;
-      if (item.quantity <= 0) {
-        cart.splice(index, 1);
-      }
-      localStorage.setItem('smartsoko_cart', JSON.stringify(cart));
-    }
-  }
-  loadCart();
-  if (window.SmartNav) SmartNav.updateCartBadge();
-}
+  <main class="max-w-[1280px] mx-auto px-4 md:px-12 pt-20 pb-24 md:pb-8">
+    <!-- Cart Header -->
+    <div class="flex items-end justify-between mb-6">
+      <h1 class="text-2xl font-bold text-gray-900">Cart</h1>
+      <span id="itemCount" class="text-sm text-gray-500">0 Items</span>
+    </div>
 
-function removeItem(index) {
-  const item = cart[index];
-  if (item) {
-    if (window.CartService) {
-      CartService.removeItem(item.id);
-      loadCartData();
-    } else {
-      cart.splice(index, 1);
-      localStorage.setItem('smartsoko_cart', JSON.stringify(cart));
-    }
-  }
-  loadCart();
-  if (window.SmartNav) SmartNav.updateCartBadge();
-}
+    <!-- Cart Items -->
+    <section id="cart-items" class="space-y-3 mb-6">
+      <!-- Skeletons while loading -->
+      <div class="cart-item bg-white rounded-xl p-4 flex gap-4 skeleton skeleton-thumbnail h-24"></div>
+      <div class="cart-item bg-white rounded-xl p-4 flex gap-4 skeleton skeleton-thumbnail h-24"></div>
+    </section>
 
-function saveCart() {
-  if (window.CartService) {
-    CartService.saveCart(cart);
-  } else {
-    localStorage.setItem('smartsoko_cart', JSON.stringify(cart));
-  }
-}
+    <!-- Empty State (hidden by default) -->
+    <div id="emptyCartState" class="hidden text-center py-16">
+      <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <span class="material-symbols-outlined text-4xl text-green-700/30">shopping_cart</span>
+      </div>
+      <p class="text-gray-500 mb-4">Your cart is empty</p>
+      <a href="/discovery" class="inline-block gradient-bg text-white px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all">
+        Start Shopping
+      </a>
+    </div>
 
-// Configuration from data attributes
-function getConfig() {
-  const body = document.body;
-  return {
-    deliveryFee: parseInt(body.dataset.deliveryFee) || 2000,
-    taxRate: parseFloat(body.dataset.taxRate) || 0.18,
-    currency: body.dataset.currency || 'TZS'
-  };
-}
+    <!-- Delivery Details -->
+    <section class="mb-6" id="delivery-section">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Delivery Details</h2>
+      <div class="bg-white rounded-xl shadow-[0px_2px_8px_rgba(44,62,80,0.05)] border border-transparent hover:border-green-100 transition-all p-5 space-y-5">
+        <div class="flex items-start gap-4">
+          <div class="p-2 bg-green-50 rounded-full text-green-700 flex-shrink-0">
+            <span class="material-symbols-outlined">location_on</span>
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between items-center">
+              <span class="font-semibold text-green-800">Delivery Address</span>
+              <button onclick="window.location.href='/profile?tab=addresses'" class="text-green-700 text-sm font-semibold hover:underline">Change</button>
+            </div>
+            <p id="deliveryAddress" class="text-gray-500 text-sm mt-1 leading-relaxed">Set delivery address</p>
+          </div>
+        </div>
+        <div class="pt-2 border-t border-gray-100">
+          <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Preferred Time Slot</span>
+          <div id="timeSlots" class="grid grid-cols-2 gap-3 mt-3"></div>
+        </div>
+      </div>
+    </section>
 
-function updateSummary(subtotal) {
-  const config = getConfig();
-  const taxes = Math.round(subtotal * config.taxRate);
-  const total = subtotal + config.deliveryFee + taxes;
-  
-  document.getElementById('subtotal').textContent = `${config.currency} ${subtotal.toLocaleString()}`;
-  document.getElementById('deliveryFee').textContent = `${config.currency} ${config.deliveryFee.toLocaleString()}`;
-  document.getElementById('taxes').textContent = `${config.currency} ${taxes.toLocaleString()}`;
-  document.getElementById('grandTotal').textContent = `${config.currency} ${total.toLocaleString()}`;
-  document.getElementById('taxRate').textContent = `${(config.taxRate * 100).toFixed(0)}%`;
-}
+    <!-- Order Summary -->
+    <section class="mb-6" id="summary-section">
+      <div class="bg-white rounded-xl shadow-[0px_2px_8px_rgba(44,62,80,0.05)] border border-transparent hover:border-green-100 transition-all p-5 space-y-3">
+        <div class="flex justify-between text-gray-500">
+          <span>Subtotal</span>
+          <span id="subtotal" class="font-medium">TSh 0</span>
+        </div>
+        <div class="flex justify-between text-gray-500">
+          <span>Delivery Fee (<span id="deliveryDistance">2km</span>)</span>
+          <span id="deliveryFee" class="font-medium">TSh 0</span>
+        </div>
+        <div class="flex justify-between text-gray-500">
+          <span>VAT (<span id="taxRate">18%</span>)</span>
+          <span id="taxes" class="font-medium">TSh 0</span>
+        </div>
+        <div class="pt-3 mt-2 border-t border-gray-100 flex justify-between items-center">
+          <span class="text-lg font-bold text-gray-900">Grand Total</span>
+          <span id="grandTotal" class="text-2xl font-extrabold text-green-800">TSh 0</span>
+        </div>
+        <button onclick="checkout()" class="hidden md:flex w-full gradient-bg text-white py-4 rounded-full font-bold text-lg shadow-lg items-center justify-center gap-3 transition-all active:scale-95 mt-4">
+          Place Order
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+      </div>
+    </section>
+  </main>
 
-// Load delivery address from localStorage or geolocation
-function loadAddress() {
-  const savedAddress = JSON.parse(localStorage.getItem('smartsoko_delivery_address'));
-  
-  if (savedAddress) {
-    document.getElementById('addressLine1').textContent = savedAddress.line1 || 'Home';
-    document.getElementById('addressLine2').textContent = savedAddress.line2 || 'Dar es Salaam, Tanzania';
-  } else {
-    // Default to generic loading state that prompts user
-    document.getElementById('addressLine1').textContent = 'Set delivery address';
-    document.getElementById('addressLine2').textContent = 'Tap "Change" to add your location';
-  }
-}
-
-// Generate dynamic time slots
-function loadTimeSlots() {
-  const slotsContainer = document.getElementById('timeSlots');
-  const now = new Date();
-  const currentHour = now.getHours();
-  
-  const slots = [];
-  
-  // Today slots (if before 20:00)
-  if (currentHour < 20) {
-    slots.push({
-      label: 'Today',
-      time: '18:00 - 20:00',
-      value: 'today_evening',
-      available: currentHour < 18
-    });
-  }
-  
-  // Tomorrow slots
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const dayName = tomorrow.toLocaleDateString('en-US', { weekday: 'short' });
-  
-  slots.push(
-    { label: `${dayName}`, time: '09:00 - 12:00', value: 'tomorrow_morning', available: true },
-    { label: `${dayName}`, time: '14:00 - 17:00', value: 'tomorrow_afternoon', available: true }
-  );
-  
-  slotsContainer.innerHTML = slots.map((slot, index) => `
-    <button onclick="selectTimeSlot('${slot.value}')" 
-            class="time-slot-btn ${index === 0 ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface hover:bg-surface-container-highest'} 
-                   rounded-full py-3 px-4 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${!slot.available ? 'opacity-50 cursor-not-allowed' : ''}"
-            ${!slot.available ? 'disabled' : ''}
-            data-slot="${slot.value}">
-      <span class="material-symbols-outlined text-lg">schedule</span>
-      <span>${slot.label}, ${slot.time}</span>
+  <!-- Bottom Bar (Mobile) -->
+  <footer class="fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-xl px-4 md:px-6 pt-3 pb-6 z-50 rounded-t-[3rem] shadow-[0_-8px_24px_rgba(27,28,26,0.06)] md:hidden">
+    <button onclick="checkout()" class="w-full gradient-bg text-white py-4 rounded-full font-bold text-lg shadow-lg flex items-center justify-center gap-3 transition-all active:scale-95">
+      Place Order
+      <span class="material-symbols-outlined">arrow_forward</span>
     </button>
-  `).join('');
-}
+    <div class="flex justify-around items-center px-4 mt-4">
+      <a href="/home" class="flex flex-col items-center justify-center text-gray-500 px-5 py-2 hover:bg-gray-100 rounded-full transition-all">
+        <span class="material-symbols-outlined">home</span>
+        <span class="text-[10px] font-semibold tracking-wide">Home</span>
+      </a>
+      <a href="/discovery" class="flex flex-col items-center justify-center text-gray-500 px-5 py-2 hover:bg-gray-100 rounded-full transition-all">
+        <span class="material-symbols-outlined">search</span>
+        <span class="text-[10px] font-semibold tracking-wide">Search</span>
+      </a>
+      <a href="/cart" class="flex flex-col items-center justify-center bg-green-100 text-green-700 rounded-full px-5 py-2">
+        <span class="material-symbols-outlined filled-icon">shopping_cart</span>
+        <span class="text-[10px] font-semibold tracking-wide">Cart</span>
+      </a>
+      <a href="/profile" class="flex flex-col items-center justify-center text-gray-500 px-5 py-2 hover:bg-gray-100 rounded-full transition-all">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-[10px] font-semibold tracking-wide">Profile</span>
+      </a>
+    </div>
+  </footer>
 
-function selectTimeSlot(slotValue) {
-  localStorage.setItem('smartsoko_delivery_slot', slotValue);
-  document.querySelectorAll('.time-slot-btn').forEach(btn => {
-    if (btn.dataset.slot === slotValue) {
-      btn.classList.remove('bg-surface-container-high', 'text-on-surface');
-      btn.classList.add('bg-primary', 'text-on-primary');
-    } else {
-      btn.classList.remove('bg-primary', 'text-on-primary');
-      btn.classList.add('bg-surface-container-high', 'text-on-surface');
+  <script>
+    let cart = [];
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"').replace(/'/g, '&#039;');
     }
-  });
-}
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-  loadCart();
-  loadAddress();
-  loadTimeSlots();
-  
-  // Restore selected time slot
-  const savedSlot = localStorage.getItem('smartsoko_delivery_slot');
-  if (savedSlot) selectTimeSlot(savedSlot);
-});
-</script>
-</body></html>
+    function loadCartData() {
+      if (window.CartService) {
+        cart = CartService.getCart();
+      } else {
+        cart = JSON.parse(localStorage.getItem('smartsoko_cart')) || [];
+      }
+      return cart;
+    }
+
+    function renderCart() {
+      loadCartData();
+      const container = document.getElementById('cart-items');
+      const emptyState = document.getElementById('emptyCartState');
+      const countEl = document.getElementById('itemCount');
+      const deliverySection = document.getElementById('delivery-section');
+      const summarySection = document.getElementById('summary-section');
+
+      const totalItems = cart.reduce((sum, item) => sum + (item.quantity || item.qty || 1), 0);
+      countEl.textContent = `${totalItems} Item${totalItems !== 1 ? 's' : ''}`;
+
+      const headerBadge = document.getElementById('headerCartBadge');
+      if (headerBadge) {
+        headerBadge.textContent = totalItems;
+        headerBadge.classList.toggle('hidden', totalItems === 0);
+      }
+
+      if (cart.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        deliverySection.classList.add('hidden');
+        summarySection.classList.add('hidden');
+        updateSummary(0);
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      deliverySection.classList.remove('hidden');
+      summarySection.classList.remove('hidden');
+
+      container.innerHTML = cart.map((item, index) => {
+        const qty = item.quantity || item.qty || 1;
+        const effectivePrice = (item.price || 0) + (item.variationDelta || 0);
+        const lineTotal = effectivePrice * qty;
+        const imageUrl = item.imageUrl || 'images/default-product.png';
+        const variationHtml = item.variation ? `<p class="text-xs text-gray-500">${escapeHtml(item.variation)}</p>` : '';
+        return `
+        <div class="cart-item bg-white rounded-xl p-4 flex gap-4 relative overflow-hidden group border border-gray-50" data-id="${escapeHtml(item.id)}">
+          <div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gray-50">
+            <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(item.name)}"
+              class="w-full h-full object-cover" loading="lazy"
+              onerror="this.onerror=null; this.src='images/default-product.png';">
+          </div>
+          <div class="flex-1 flex flex-col justify-between min-w-0">
+            <div class="flex justify-between items-start">
+              <div class="min-w-0">
+                <h3 class="font-semibold text-gray-900 truncate">${escapeHtml(item.name)}</h3>
+                <p class="text-gray-500 text-sm">${escapeHtml(item.sellerName || item.seller || 'SmartSoko')}</p>
+                ${variationHtml}
+              </div>
+              <span class="font-semibold text-green-800">TSh ${lineTotal.toLocaleString()}</span>
+            </div>
+            <div class="flex justify-between items-center mt-2">
+              <div class="flex items-center bg-gray-50 rounded-full px-3 py-1 gap-3">
+                <button onclick="updateQuantity('${escapeHtml(item.id)}', -1)" class="w-6 h-6 flex items-center justify-center text-green-700 hover:bg-white rounded-full transition-colors active:scale-95">
+                  <span class="material-symbols-outlined text-sm">remove</span>
+                </button>
+                <span class="font-semibold text-sm">${qty}</span>
+                <button onclick="updateQuantity('${escapeHtml(item.id)}', 1)" class="w-6 h-6 flex items-center justify-center text-green-700 hover:bg-white rounded-full transition-colors active:scale-95">
+                  <span class="material-symbols-outlined text-sm">add</span>
+                </button>
+              </div>
+              <button onclick="removeItem('${escapeHtml(item.id)}')" class="text-gray-400 hover:text-red-500 transition-colors p-1 hover:bg-red-50 rounded-full" aria-label="Remove item">
+                <span class="material-symbols-outlined text-lg">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+
+      const subtotal = cart.reduce((sum, item) => sum + (((item.price || 0) + (item.variationDelta || 0)) * (item.quantity || item.qty || 1)), 0);
+      updateSummary(subtotal);
+    }
+
+    function updateQuantity(productId, delta) {
+      if (window.CartService) {
+        CartService.updateQuantity(productId, delta);
+        loadCartData();
+      } else {
+        const item = cart.find(i => i.id === productId);
+        if (item) {
+          item.quantity = (item.quantity || item.qty || 1) + delta;
+          if (item.quantity <= 0) {
+            cart = cart.filter(i => i.id !== productId);
+          }
+          localStorage.setItem('smartsoko_cart', JSON.stringify(cart));
+        }
+      }
+      renderCart();
+      if (typeof SmartNav !== 'undefined' && SmartNav.updateCartBadge) SmartNav.updateCartBadge();
+    }
+
+    function removeItem(productId) {
+      if (window.CartService) {
+        CartService.removeItem(productId);
+        loadCartData();
+      } else {
+        cart = cart.filter(i => i.id !== productId);
+        localStorage.setItem('smartsoko_cart', JSON.stringify(cart));
+      }
+      renderCart();
+      if (typeof SmartNav !== 'undefined' && SmartNav.updateCartBadge) SmartNav.updateCartBadge();
+    }
+
+    function getConfig() {
+      const body = document.body;
+      return {
+        deliveryFee: parseInt(body.dataset.deliveryFee) || 2000,
+        taxRate: parseFloat(body.dataset.taxRate) || 0.18,
+        currency: body.dataset.currency || 'TSh'
+      };
+    }
+
+    async function applyServerConfig() {
+      try {
+        const res = await fetch('/api/config', { cache: 'no-store' });
+        if (!res.ok) return;
+        const cfg = await res.json();
+        const pricing = cfg && cfg.pricing;
+        if (!pricing) return;
+        if (pricing.deliveryFee != null) document.body.dataset.deliveryFee = pricing.deliveryFee;
+        if (pricing.taxRate != null) document.body.dataset.taxRate = pricing.taxRate;
+        if (pricing.currency != null) document.body.dataset.currency = pricing.currency;
+      } catch (e) {
+        /* fall back to defaults in getConfig() */
+      }
+    }
+
+    function updateSummary(subtotal) {
+      const config = getConfig();
+      const taxes = Math.round(subtotal * config.taxRate);
+      const total = subtotal + config.deliveryFee + taxes;
+
+      document.getElementById('subtotal').textContent = `${config.currency} ${subtotal.toLocaleString()}`;
+      document.getElementById('deliveryFee').textContent = `${config.currency} ${config.deliveryFee.toLocaleString()}`;
+      document.getElementById('taxes').textContent = `${config.currency} ${taxes.toLocaleString()}`;
+      document.getElementById('grandTotal').textContent = `${config.currency} ${total.toLocaleString()}`;
+      document.getElementById('taxRate').textContent = `${(config.taxRate * 100).toFixed(0)}%`;
+    }
+
+    function loadAddress() {
+      const savedAddress = JSON.parse(localStorage.getItem('smartsoko_delivery_address'));
+      const addrEl = document.getElementById('deliveryAddress');
+      if (savedAddress) {
+        addrEl.textContent = `${savedAddress.line1 || 'Home'}, ${savedAddress.line2 || 'Dar es Salaam, Tanzania'}`;
+      } else {
+        addrEl.textContent = 'Tap "Change" to add your location';
+      }
+    }
+
+    function loadTimeSlots() {
+      const slotsContainer = document.getElementById('timeSlots');
+      const now = new Date();
+      const currentHour = now.getHours();
+      const slots = [];
+
+      if (currentHour < 20) {
+        slots.push({ label: 'Today', time: '18:00 - 20:00', value: 'today_evening', available: currentHour < 18 });
+      }
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const dayName = tomorrow.toLocaleDateString('en-US', { weekday: 'short' });
+      slots.push(
+        { label: dayName, time: '09:00 - 12:00', value: 'tomorrow_morning', available: true },
+        { label: dayName, time: '14:00 - 17:00', value: 'tomorrow_afternoon', available: true }
+      );
+
+      slotsContainer.innerHTML = slots.map((slot, index) => `
+        <button onclick="selectTimeSlot('${slot.value}')"
+          class="time-slot-btn ${index === 0 ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
+                 rounded-full py-3 px-4 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${!slot.available ? 'opacity-50 cursor-not-allowed' : ''}"
+          ${!slot.available ? 'disabled' : ''}
+          data-slot="${slot.value}">
+          <span class="material-symbols-outlined text-lg">schedule</span>
+          <span>${slot.label}, ${slot.time}</span>
+        </button>
+      `).join('');
+
+      const savedSlot = localStorage.getItem('smartsoko_delivery_slot');
+      if (savedSlot) selectTimeSlot(savedSlot);
+    }
+
+    function selectTimeSlot(slotValue) {
+      localStorage.setItem('smartsoko_delivery_slot', slotValue);
+      document.querySelectorAll('.time-slot-btn').forEach(btn => {
+        if (btn.dataset.slot === slotValue) {
+          btn.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+          btn.classList.add('bg-green-700', 'text-white');
+        } else {
+          btn.classList.remove('bg-green-700', 'text-white');
+          btn.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+        }
+      });
+    }
+
+    function checkout() {
+      if (cart.length === 0) {
+        if (typeof SmartNav !== 'undefined' && SmartNav.showToast) SmartNav.showToast('Your cart is empty', 'error');
+        else alert('Your cart is empty');
+        return;
+      }
+      window.location.href = 'checkout.html';
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async () => {
+      await applyServerConfig();
+      if (typeof SmartNav !== 'undefined' && typeof SmartNav.initPageTransition === 'function') SmartNav.initPageTransition();
+      renderCart();
+      loadAddress();
+      loadTimeSlots();
+
+      if (typeof SmartNav !== 'undefined' && SmartNav.updateCartBadge) SmartNav.updateCartBadge();
+    });
+  </script>
+</body>
+</html>

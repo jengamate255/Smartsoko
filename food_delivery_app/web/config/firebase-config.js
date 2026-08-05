@@ -1,10 +1,11 @@
 // Unified Firebase Configuration for Food Delivery System
 // Using Firebase Modular SDK v9+
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-import { getFirestore, connectFirestoreEmulator, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+import { getFirestore, connectFirestoreEmulator, collection, onSnapshot, doc, getDoc, setDoc, updateDoc, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 import { getAuth, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
+
+let getAnalytics = null;
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -25,13 +26,16 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
 
-// Initialize Analytics (only in browser environment)
+// Lazy-load Analytics (fail gracefully if blocked)
 let analytics = null;
-try {
-  analytics = getAnalytics(app);
-} catch (e) {
-  console.log('Analytics not initialized:', e.message);
-}
+import("https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js").then(m => {
+  try {
+    getAnalytics = m.getAnalytics;
+    analytics = getAnalytics(app);
+  } catch (e) {
+    console.log('Analytics not initialized:', e.message);
+  }
+}).catch(e => console.log('Analytics module not available:', e.message));
 
 // Make available globally for legacy code compatibility
 window.app = app;
@@ -40,16 +44,31 @@ window.auth = auth;
 window.storage = storage;
 window.analytics = analytics;
 
-// Dispatch event to notify that Firebase is initialized
+// Also expose commonly-used Firestore functions so inline scripts
+// can use them without a separate dynamic import (which creates a
+// new SDK instance with a different auth context).
+window.doc = doc;
+window.getDoc = getDoc;
+window.setDoc = setDoc;
+window.updateDoc = updateDoc;
+window.collection = collection;
+window.query = query;
+window.where = where;
+window.orderBy = orderBy;
+window.limit = limit;
+window.onSnapshot = onSnapshot;
+window.getDocs = (...args) => import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js').then(m => m.getDocs(...args));
+
+// Dispatch events to notify that Firebase is initialized
 document.dispatchEvent(new CustomEvent('firebase-initialized', { detail: { app, db, auth } }));
+document.dispatchEvent(new CustomEvent('data-service-ready', { detail: { service: 'firebase', db, auth } }));
 console.log('Firebase initialized and globals set (window.db, window.auth)');
 
-export { app, db, auth, storage, analytics, firebaseConfig };
+export { app, db, auth, storage, analytics, firebaseConfig, doc, getDoc, setDoc, updateDoc, query, where, orderBy, limit };
 
 // Auto-detect Local Emulator - only connect if emulators are actually running
 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
   console.log('🌐 Running locally — using production Firebase (live Firestore).');
-  console.log('💡 Tip: Click "Demo Login" button to bypass authentication for testing');
   
   // Only connect to emulators if explicitly requested via URL param: ?emulator=true
   var useEmulator = new URLSearchParams(window.location.search).get('emulator') === 'true';

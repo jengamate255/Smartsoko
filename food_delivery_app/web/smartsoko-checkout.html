@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <!-- Performance: Preconnect to external domains -->
@@ -60,7 +60,7 @@
       <div style="margin-bottom: var(--spacing-md); font-size: var(--text-small);">
         <a href="smartsoko-home.html" style="color: var(--color-gray);">Home</a>
         <span style="margin: 0 var(--spacing-xs); color: var(--color-gray);">/</span>
-        <a href="smartsoko-cart.html" style="color: var(--color-gray);">Cart</a>
+        <a href="smartsoko-cart.html" style="color: var(--color-gray); padding: 8px; display: inline-block;">Cart</a>
         <span style="margin: 0 var(--spacing-xs); color: var(--color-gray);">/</span>
         <span style="color: var(--color-charcoal);">Checkout</span>
       </div>
@@ -68,7 +68,7 @@
       <!-- Checkout Steps -->
       <div class="checkout-steps">
         <div class="step completed">
-          <div class="step-number">✓</div>
+          <div class="step-number">âœ“</div>
           <div class="step-label">Cart</div>
         </div>
         <div class="step active">
@@ -149,7 +149,7 @@
                 <input type="radio" name="delivery" value="standard" checked>
                 <div class="delivery-info">
                   <div class="delivery-name">Standard Delivery</div>
-                  <div class="delivery-description">30-45 minutes • Same day</div>
+                  <div class="delivery-description">30-45 minutes â€¢ Same day</div>
                 </div>
                 <div class="delivery-price">TZS 2,000</div>
               </div>
@@ -158,7 +158,7 @@
                 <input type="radio" name="delivery" value="express">
                 <div class="delivery-info">
                   <div class="delivery-name">Express Delivery</div>
-                  <div class="delivery-description">15-20 minutes • Priority</div>
+                  <div class="delivery-description">15-20 minutes â€¢ Priority</div>
                 </div>
                 <div class="delivery-price">TZS 5,000</div>
               </div>
@@ -167,7 +167,7 @@
                 <input type="radio" name="delivery" value="scheduled">
                 <div class="delivery-info">
                   <div class="delivery-name">Scheduled Delivery</div>
-                  <div class="delivery-description">Choose your time • Tomorrow</div>
+                  <div class="delivery-description">Choose your time â€¢ Tomorrow</div>
                 </div>
                 <div class="delivery-price">TZS 1,500</div>
               </div>
@@ -212,20 +212,20 @@
         <!-- Order Summary -->
         <div class="order-summary">
           <div class="summary-card">
-            <h2 class="summary-title">Order Summary</h2>
+            <h1 class="summary-title">Order Summary</h1>
             
             <div class="summary-item">
-              <span>Organic Vine Tomatoes × 2</span>
+              <span>Organic Vine Tomatoes Ã— 2</span>
               <span>TZS 17,000</span>
             </div>
             
             <div class="summary-item">
-              <span>Mountain Spinach × 1</span>
+              <span>Mountain Spinach Ã— 1</span>
               <span>TZS 3,200</span>
             </div>
             
             <div class="summary-item">
-              <span>Rainbow Carrots × 1</span>
+              <span>Rainbow Carrots Ã— 1</span>
               <span>TZS 4,800</span>
             </div>
             
@@ -430,7 +430,7 @@
       
       // Simulate order processing
       setTimeout(() => {
-        showToast('Order placed successfully! 🎉', 'success');
+        showToast('Order placed successfully! ðŸŽ‰', 'success');
         
         // Redirect to order confirmation
         setTimeout(() => {

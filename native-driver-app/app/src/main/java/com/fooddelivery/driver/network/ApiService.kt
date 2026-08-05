@@ -1,5 +1,7 @@
 package com.fooddelivery.driver.network
 
+import com.fooddelivery.driver.data.model.OrderEntity
+import com.google.gson.annotations.SerializedName
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -62,12 +64,12 @@ data class DriverProfileResponse(
 data class DriverData(
     val id: String,
     val email: String,
-    val fullName: String,
+    @SerializedName("full_name") val fullName: String,
     val phone: String?,
     val vehicle: String?,
     val plate: String?,
     val rating: Double,
-    val totalDeliveries: Int,
+    @SerializedName("total_deliveries") val totalDeliveries: Int,
     val status: String
 )
 
@@ -80,13 +82,13 @@ data class Order(
     val id: String,
     val restaurantName: String,
     val restaurantAddress: String,
-    val restaurantLat: Double,
-    val restaurantLng: Double,
+    val restaurantLat: Double? = null,
+    val restaurantLng: Double? = null,
     val customerName: String?,
     val customerAddress: String,
     val customerLat: Double,
     val customerLng: Double,
-    val items: String, // JSON string of List<OrderItem>
+    val items: List<OrderItem>,
     val totalAmount: Double,
     val status: String,
     val createdAt: String,
@@ -98,7 +100,7 @@ data class OrderItem(
     val name: String,
     val quantity: Int,
     val price: Double,
-    val specialInstructions: String?
+    val notes: String? = null
 )
 
 data class OrderStatusUpdate(

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <!-- Performance: Preconnect to external domains -->
@@ -21,7 +21,7 @@
   <!-- Design System -->
   <link rel="stylesheet" href="smartsoko-design-system.css">
   
-  <style> .checkout-container {display: grid;grid-template-columns: 1fr 380px;gap: var(--spacing-xl);max-width: 1200px;margin: 0 auto} .cart-items {background-color: var(--color-white);border-radius: var(--radius-lg);padding: var(--spacing-lg);box-shadow: var(--shadow-sm)} .cart-item {display: flex;gap: var(--spacing-md);padding: var(--spacing-md) 0;border-bottom: 1px solid var(--color-taupe)} .cart-item:last-child {border-bottom: none} .cart-item-image {width: 80px;height: 80px;border-radius: var(--radius-md);object-fit: cover;flex-shrink: 0} .cart-item-details {flex: 1;display: flex;flex-direction: column;justify-content: space-between} .cart-item-header {display: flex;justify-content: space-between;align-items: flex-start} .cart-item-name {font-weight: 600;font-size: var(--text-body);color: var(--color-charcoal);margin-bottom: 4px} .cart-item-vendor {font-size: var(--text-small);color: var(--color-gray);margin-bottom: var(--spacing-xs)} .cart-item-price {font-weight: 600;color: var(--color-gold);font-size: var(--text-body)} .cart-item-actions {display: flex;align-items: center;gap: var(--spacing-sm)} .quantity-selector {display: flex;align-items: center;gap: var(--spacing-xs);border: 1px solid var(--color-taupe);border-radius: var(--radius-md);padding: 2px} .quantity-btn {width: 28px;height: 28px;border: none;background-color: transparent;border-radius: var(--radius-sm);display: flex;align-items: center;justify-content: center;cursor: pointer;transition: background-color var(--transition-fast)} .quantity-btn:hover {background-color: var(--color-cream)} .quantity-value {min-width: 32px;text-align: center;font-weight: 600;font-size: var(--text-small)} .remove-btn {color: var(--color-error);background: none;border: none;padding: 4px;cursor: pointer;border-radius: var(--radius-sm);transition: background-color var(--transition-fast)} .remove-btn:hover {background-color: rgba(193,65,14,0.1)} .order-summary {position: sticky;top: 80px;height: fit-content} .summary-card {background-color: var(--color-white);border-radius: var(--radius-lg);padding: var(--spacing-lg);box-shadow: var(--shadow-sm);margin-bottom: var(--spacing-md)} .summary-title {font-size: var(--text-h3);margin-bottom: var(--spacing-md);padding-bottom: var(--spacing-sm);border-bottom: 1px solid var(--color-taupe)} .summary-row {display: flex;justify-content: space-between;align-items: center;padding: var(--spacing-xs) 0;font-size: var(--text-small)} .summary-row.total {font-size: var(--text-body);font-weight: 600;color: var(--color-charcoal);padding-top: var(--spacing-sm);border-top: 1px solid var(--color-taupe);margin-top: var(--spacing-sm)} .promo-code {background-color: var(--color-cream);border-radius: var(--radius-lg);padding: var(--spacing-md);margin-bottom: var(--spacing-md)} .promo-input-group {display: flex;gap: var(--spacing-xs)} .promo-input {flex: 1;padding: 12px;border: 1px solid var(--color-taupe);border-radius: var(--radius-md);font-size: var(--text-small);background-color: var(--color-white)} .promo-btn {padding: 12px 20px;background-color: var(--color-gold);color: var(--color-charcoal);border: none;border-radius: var(--radius-md);font-weight: 600;font-size: var(--text-small);cursor: pointer;transition: background-color var(--transition-fast)} .promo-btn:hover {background-color: var(--color-gold-dark)} .empty-cart {text-align: center;padding: var(--spacing-2xl);color: var(--color-gray)} .empty-cart-icon {font-size: 64px;color: var(--color-taupe);margin-bottom: var(--spacing-md)} .continue-shopping {margin-top: var(--spacing-lg)} @media (max-width: 1024px) {.checkout-container {grid-template-columns: 1fr} .order-summary {position: static} } @media (max-width: 768px) {.cart-item {flex-direction: column;gap: var(--spacing-sm)} .cart-item-image {width: 100%;height: 200px} .cart-item-actions {justify-content: space-between} } </style>
+  <style> .checkout-container {display: grid;grid-template-columns: 1fr 380px;gap: var(--spacing-xl);max-width: 1200px;margin: 0 auto} .cart-items {background-color: var(--color-white);border-radius: var(--radius-lg);padding: var(--spacing-lg);box-shadow: var(--shadow-sm)} .cart-item {display: flex;gap: var(--spacing-md);padding: var(--spacing-md) 0;border-bottom: 1px solid var(--color-taupe)} .cart-item:last-child {border-bottom: none} .cart-item-image {width: 80px;height: 80px;border-radius: var(--radius-md);object-fit: cover;flex-shrink: 0} .cart-item-details {flex: 1;display: flex;flex-direction: column;justify-content: space-between} .cart-item-header {display: flex;justify-content: space-between;align-items: flex-start} .cart-item-name {font-weight: 600;font-size: var(--text-body);color: var(--color-charcoal);margin-bottom: 4px} .cart-item-vendor {font-size: var(--text-small);color: var(--color-gray);margin-bottom: var(--spacing-xs)} .cart-item-price {font-weight: 600;color: var(--color-gold);font-size: var(--text-body)} .cart-item-actions {display: flex;align-items: center;gap: var(--spacing-sm)} .quantity-selector {display: flex;align-items: center;gap: var(--spacing-xs);border: 1px solid var(--color-taupe);border-radius: var(--radius-md);padding: 2px} .quantity-btn {width: 36px;height: 36px;border: none;background-color: transparent;border-radius: var(--radius-sm);display: flex;align-items: center;justify-content: center;cursor: pointer;transition: background-color var(--transition-fast)} .quantity-btn:hover {background-color: var(--color-cream)} .quantity-value {min-width: 32px;text-align: center;font-weight: 600;font-size: var(--text-small)} .remove-btn {color: var(--color-error);background: none;border: none;padding: 4px;cursor: pointer;border-radius: var(--radius-sm);transition: background-color var(--transition-fast)} .remove-btn:hover {background-color: rgba(193,65,14,0.1)} .order-summary {position: sticky;top: 80px;height: fit-content} .summary-card {background-color: var(--color-white);border-radius: var(--radius-lg);padding: var(--spacing-lg);box-shadow: var(--shadow-sm);margin-bottom: var(--spacing-md)} .summary-title {font-size: var(--text-h3);margin-bottom: var(--spacing-md);padding-bottom: var(--spacing-sm);border-bottom: 1px solid var(--color-taupe)} .summary-row {display: flex;justify-content: space-between;align-items: center;padding: var(--spacing-xs) 0;font-size: var(--text-small)} .summary-row.total {font-size: var(--text-body);font-weight: 600;color: var(--color-charcoal);padding-top: var(--spacing-sm);border-top: 1px solid var(--color-taupe);margin-top: var(--spacing-sm)} .promo-code {background-color: var(--color-cream);border-radius: var(--radius-lg);padding: var(--spacing-md);margin-bottom: var(--spacing-md)} .promo-input-group {display: flex;gap: var(--spacing-xs)} .promo-input {flex: 1;padding: 12px;border: 1px solid var(--color-taupe);border-radius: var(--radius-md);font-size: var(--text-small);background-color: var(--color-white)} .promo-btn {padding: 12px 20px;background-color: var(--color-gold);color: var(--color-charcoal);border: none;border-radius: var(--radius-md);font-weight: 600;font-size: var(--text-small);cursor: pointer;transition: background-color var(--transition-fast)} .promo-btn:hover {background-color: var(--color-gold-dark)} .empty-cart {text-align: center;padding: var(--spacing-2xl);color: var(--color-gray)} .empty-cart-icon {font-size: 64px;color: var(--color-taupe);margin-bottom: var(--spacing-md)} .continue-shopping {margin-top: var(--spacing-lg)} @media (max-width: 1024px) {.checkout-container {grid-template-columns: 1fr} .order-summary {position: static} } @media (max-width: 768px) {.cart-item {flex-direction: column;gap: var(--spacing-sm)} .cart-item-image {width: 100%;height: 200px} .cart-item-actions {justify-content: space-between} } </style>
 </head>
 <body>
   <!-- Top Navigation -->
@@ -31,7 +31,7 @@
     <div class="nav-search">
       <div class="search-bar">
         <span class="material-icons search-icon">search</span>
-        <input type="text" class="search-input" placeholder="Search products...">
+        <input type="text" class="search-input" aria-label="Search products" placeholder="Search products...">
       </div>
     </div>
     
@@ -83,7 +83,7 @@
               </div>
               <div class="cart-item-actions">
                 <div class="quantity-selector">
-                  <button class="quantity-btn" onclick="updateQuantity(this, -1)">−</button>
+                  <button class="quantity-btn" onclick="updateQuantity(this, -1)">âˆ’</button>
                   <span class="quantity-value">2</span>
                   <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
                 </div>
@@ -107,7 +107,7 @@
               </div>
               <div class="cart-item-actions">
                 <div class="quantity-selector">
-                  <button class="quantity-btn" onclick="updateQuantity(this, -1)">−</button>
+                  <button class="quantity-btn" onclick="updateQuantity(this, -1)">âˆ’</button>
                   <span class="quantity-value">1</span>
                   <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
                 </div>
@@ -131,7 +131,7 @@
               </div>
               <div class="cart-item-actions">
                 <div class="quantity-selector">
-                  <button class="quantity-btn" onclick="updateQuantity(this, -1)">−</button>
+                  <button class="quantity-btn" onclick="updateQuantity(this, -1)">âˆ’</button>
                   <span class="quantity-value">1</span>
                   <button class="quantity-btn" onclick="updateQuantity(this, 1)">+</button>
                 </div>
@@ -173,7 +173,7 @@
               Promo Code
             </div>
             <div class="promo-input-group">
-              <input type="text" class="promo-input" placeholder="Enter code" id="promoCode">
+              <input type="text" class="promo-input" placeholder="Enter code" id="promoCode" aria-label="Promo code">
               <button class="promo-btn" onclick="applyPromo()">Apply</button>
             </div>
           </div>

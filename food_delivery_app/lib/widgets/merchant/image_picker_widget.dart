@@ -40,7 +40,7 @@ class ImagePickerWidget extends StatelessWidget {
                 width: errorText != null ? 2 : 1,
               ),
             ),
-            child: _buildContent(),
+            child: _buildContent(context),
           ),
         ),
         if (errorText != null) ...[
@@ -57,7 +57,7 @@ class ImagePickerWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
     if (imageUrl != null && imageUrl!.isNotEmpty) {
       return Stack(
         fit: StackFit.expand,
@@ -90,7 +90,7 @@ class ImagePickerWidget extends StatelessWidget {
               ),
               child: IconButton(
                 icon: const Icon(Icons.edit, color: Colors.white),
-                onPressed: _showImageSourceDialog,
+                onPressed: () => _showImageSourceDialog(context),
                 tooltip: 'Change image',
               ),
             ),

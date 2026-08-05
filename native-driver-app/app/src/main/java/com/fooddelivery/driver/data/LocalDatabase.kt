@@ -1,14 +1,18 @@
 package com.fooddelivery.driver.data
 
 import androidx.room.Database
+import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = [OrderEntity::class, DriverPrefsEntity::class], version = 1, exportSchema = false)
+@Database(
+    entities = [com.fooddelivery.driver.data.model.OrderEntity::class],
+    version = 2,
+    exportSchema = false
+)
 @TypeConverters(OrderEntityConverters::class)
 abstract class LocalDatabase : RoomDatabase() {
     abstract fun orderDao(): OrderDao
-    abstract fun prefsDao(): PrefsDao
 
     companion object {
         @Volatile

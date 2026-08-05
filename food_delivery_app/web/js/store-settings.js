@@ -1,5 +1,20 @@
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 
+async function getSellerByOwner(uid) {
+  const q = window.query(window.collection(window.db, 'sellers'), window.where('ownerId', '==', uid), window.limit(1));
+  const snap = await window.getDocs(q);
+  const d = snap.docs[0];
+  return d ? { id: d.id, ...d.data() } : null;
+}
+
+async function updateSeller(id, updates) {
+  await window.updateDoc(window.doc(window.db, 'sellers', id), updates);
+}
+
+async function deleteSeller(id) {
+  await window.deleteDoc(window.doc(window.db, 'sellers', id));
+}
+
 let currentSeller = null;
 let sellerId = null;
 let holidays = [];
@@ -142,7 +157,7 @@ async function loadSettings() {
   onAuthStateChanged(auth, async user => {
     if (!user) { window.location.href = '/login'; return; }
     try {
-      const seller = await window.DataService.getSellerByOwner(user.uid);
+      const seller = await getSellerByOwner(user.uid);
       if (!seller) {
         document.getElementById('loadingState').classList.add('hidden');
         document.getElementById('settingsContent').classList.remove('hidden');
@@ -171,7 +186,7 @@ window.saveBasicInfo = async function() {
       description: document.getElementById('editStoreDescription').value.trim()
     };
     if (!updates.name) { showToast('Store name is required', 'error'); return; }
-    await window.DataService.updateSeller(sellerId, updates);
+    await updateSeller(sellerId, updates);
     showToast('Basic info saved!', 'success');
     currentSeller = { ...currentSeller, ...updates };
   } catch (error) {
@@ -193,9 +208,9 @@ window.saveContact = async function() {
       email: document.getElementById('editEmail').value.trim()
     };
     if (!isNaN(lat) && !isNaN(lng)) {
-      updates.location = new firebase.firestore.GeoPoint(lat, lng);
+      updates.location = { latitude: lat, longitude: lng };
     }
-    await window.DataService.updateSeller(sellerId, updates);
+    await updateSeller(sellerId, updates);
     showToast('Contact info saved!', 'success');
     currentSeller = { ...currentSeller, ...updates };
   } catch (error) {
@@ -207,7 +222,7 @@ window.saveHours = async function() {
   if (!sellerId) return;
   try {
     const updates = { openingHours: collectHours() };
-    await window.DataService.updateSeller(sellerId, updates);
+    await updateSeller(sellerId, updates);
     showToast('Store hours saved!', 'success');
     currentSeller = { ...currentSeller, ...updates };
   } catch (error) {
@@ -224,7 +239,7 @@ window.saveDelivery = async function() {
       deliveryTimeMinutes: parseInt(document.getElementById('editDeliveryTime').value) || 30,
       isOpen: document.getElementById('editIsOpen').checked
     };
-    await window.DataService.updateSeller(sellerId, updates);
+    await updateSeller(sellerId, updates);
     showToast('Delivery settings saved!', 'success');
     currentSeller = { ...currentSeller, ...updates };
     const statusBadge = document.getElementById('storeStatusBadge');
@@ -248,7 +263,7 @@ window.saveBranding = async function() {
         secondary: document.getElementById('editSecondaryColor').value
       }
     };
-    await window.DataService.updateSeller(sellerId, updates);
+    await updateSeller(sellerId, updates);
     showToast('Branding saved!', 'success');
     currentSeller = { ...currentSeller, ...updates };
   } catch (error) {
@@ -260,7 +275,7 @@ window.saveSeo = async function() {
   if (!sellerId) return;
   try {
     const updates = { seoDescription: document.getElementById('editSeoDescription').value.trim() };
-    await window.DataService.updateSeller(sellerId, updates);
+    await updateSeller(sellerId, updates);
     showToast('SEO description saved!', 'success');
     currentSeller = { ...currentSeller, ...updates };
   } catch (error) {
@@ -273,7 +288,7 @@ window.deleteStore = async function() {
   if (!confirm('Permanently delete your store? This cannot be undone.')) return;
   if (!confirm('Really delete? All products and data will be lost.')) return;
   try {
-    await window.DataService.deleteSeller(sellerId);
+    await deleteSeller(sellerId);
     showToast('Store deleted', 'success');
     setTimeout(() => { window.location.href = '/merchant'; }, 1500);
   } catch (error) {

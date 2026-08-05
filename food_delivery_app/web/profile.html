@@ -1,63 +1,83 @@
 <!DOCTYPE html>
 <html class="light" lang="en">
 <head>
-  <!-- Performance: Preconnect to external domains -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-  <link rel="dns-prefetch" href="https://www.gstatic.com">
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <title>SmartSoko - My Account</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" href="dist/tailwind.css" as="style">
   <link rel="stylesheet" href="dist/tailwind.css">
   <link rel="stylesheet" href="design-system.css">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
-  <!-- Firebase Modular SDK -->
-  <script type="module" src="config/firebase-config.js?v=3"></script>
-  <script src="auth-check.js?v=4" defer></script>
-  
-  <style> .material-symbols-outlined {font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24} body {min-height: max(884px,100dvh)} </style>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script type="module" src="config/firebase-config.js?v=5"></script>
+  <script type="module" src="config/cross-platform-service.js?v=4"></script>
+  <script src="auth-check.js?v=5" defer></script>
+  <script src="nav-component.js?v=5" defer></script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display: inline-block; line-height: 1; vertical-align: middle; }
+    .filled-icon { font-variation-settings: 'FILL' 1; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter','Montserrat',sans-serif; min-height: 100vh; background: #F8FAF6; }
+    h1,h2,h3,h4,h5,h6 { font-family: 'Montserrat',sans-serif; }
+    .gradient-bg { background: #064e3b; }
+    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    .profile-card { background: white; border-radius: 14px; box-shadow: 0 2px 8px rgba(44,62,80,0.05); border: 1px solid #f0f0f0; }
+  </style>
 </head>
-<body class="bg-background font-body text-on-surface">
+<body class="bg-[#F8FAF6] text-gray-900 min-h-screen pb-24 md:pb-0">
 
-<!-- Navigation handled by SmartNav -->
-<div class="h-16 md:h-20"></div>
+  <!-- Top Header -->
+  <header class="bg-white/80 backdrop-blur-xl fixed top-0 w-full z-50 shadow-sm flex justify-between items-center px-4 md:px-12 h-16">
+    <div class="flex items-center gap-2">
+      <a href="/home" class="flex items-center gap-2 text-white no-underline">
+        <div class="w-9 h-9 bg-green-700/15 rounded-lg flex items-center justify-center">
+          <span class="material-symbols-outlined text-green-700">shopping_basket</span>
+        </div>
+        <span class="text-lg font-bold hidden sm:block">SmartSoko</span>
+      </a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="/profile" class="relative p-2 text-green-700/80 hover:text-green-700 rounded-full">
+        <span class="material-symbols-outlined">person</span>
+      </a>
+    </div>
+  </header>
 
-<main class="pb-32 px-6 max-w-lg mx-auto animate-premium">
-
+  <main class="max-w-[1280px] mx-auto px-4 md:px-12 pt-20 pb-24 md:pb-8">
     <!-- Avatar + Name -->
-    <div class="flex flex-col items-center text-center mb-10">
-      <div id="avatarContainer" class="w-24 h-24 rounded-full bg-primary-container flex items-center justify-center mb-4 shadow-lg ring-4 ring-primary-fixed">
-        <span class="material-symbols-outlined text-5xl text-on-primary" style="font-variation-settings:'FILL' 1;">person</span>
+    <div class="flex flex-col items-center text-center mb-8">
+      <div id="avatarContainer" class="w-24 h-24 rounded-full bg-green-700/15 flex items-center justify-center mb-4 shadow-lg ring-4 ring-green-100">
+        <span class="material-symbols-outlined text-5xl text-green-700 filled-icon">person</span>
       </div>
-      <h2 id="displayName" class="font-headline text-2xl font-extrabold text-primary">Loading…</h2>
-      <p id="userEmail" class="text-on-surface-variant text-sm mt-1"></p>
-      <span id="roleChip" class="mt-3 px-4 py-1 rounded-full bg-primary-fixed text-on-primary-fixed text-xs font-bold uppercase tracking-wider">Customer</span>
+      <h2 id="displayName" class="font-headline-md text-headline-md font-extrabold text-green-800"><span class="skeleton skeleton-heading" style="height:28px;width:150px"></span></h2>
+      <p id="userEmail" class="text-gray-500 text-sm mt-1"></p>
+      <span id="roleChip" class="mt-3 px-4 py-1 rounded-full bg-green-100 text-green-800 text-xs font-bold uppercase tracking-wider">Customer</span>
     </div>
 
     <!-- Info Card -->
-    <div class="bg-surface-container-low rounded-xl mb-6 overflow-hidden divide-y divide-outline-variant/30">
+    <div class="profile-card mb-6 overflow-hidden divide-y divide-gray-100">
       <div class="flex items-center gap-4 px-5 py-4">
-        <span class="material-symbols-outlined text-on-surface-variant">mail</span>
+        <span class="material-symbols-outlined text-gray-400">mail</span>
         <div>
-          <p class="text-xs text-on-surface-variant">Email</p>
-          <p id="infoEmail" class="font-semibold text-on-surface text-sm">—</p>
+          <p class="text-xs text-gray-500">Email</p>
+          <p id="infoEmail" class="font-semibold text-gray-900 text-sm">—</p>
         </div>
       </div>
       <div class="flex items-center gap-4 px-5 py-4">
-        <span class="material-symbols-outlined text-on-surface-variant">badge</span>
+        <span class="material-symbols-outlined text-gray-400">badge</span>
         <div>
-          <p class="text-xs text-on-surface-variant">Role</p>
-          <p id="infoRole" class="font-semibold text-on-surface text-sm capitalize">—</p>
+          <p class="text-xs text-gray-500">Role</p>
+          <p id="infoRole" class="font-semibold text-gray-900 text-sm capitalize">—</p>
         </div>
       </div>
       <div class="flex items-center gap-4 px-5 py-4">
-        <span class="material-symbols-outlined text-on-surface-variant">calendar_today</span>
+        <span class="material-symbols-outlined text-gray-400">calendar_today</span>
         <div>
-          <p class="text-xs text-on-surface-variant">Member since</p>
-          <p id="infoJoined" class="font-semibold text-on-surface text-sm">—</p>
+          <p class="text-xs text-gray-500">Member since</p>
+          <p id="infoJoined" class="font-semibold text-gray-900 text-sm">—</p>
         </div>
       </div>
     </div>
@@ -66,45 +86,48 @@
     <div id="roleLinks" class="mb-6 space-y-3"></div>
 
     <!-- Quick Actions -->
-    <div class="bg-surface-container-low rounded-xl mb-6 overflow-hidden divide-y divide-outline-variant/30">
-      <a href="/orders" class="flex items-center gap-4 px-5 py-4 hover:bg-surface-container transition-colors">
-        <span class="material-symbols-outlined text-primary">receipt_long</span>
-        <span class="font-semibold text-on-surface text-sm flex-1">My Orders</span>
-        <span class="material-symbols-outlined text-on-surface-variant text-sm">chevron_right</span>
+    <div class="profile-card mb-6 overflow-hidden divide-y divide-gray-100">
+      <a href="/orders" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors no-underline">
+        <span class="material-symbols-outlined text-green-700">receipt_long</span>
+        <span class="font-semibold text-gray-900 text-sm flex-1">My Orders</span>
+        <span class="material-symbols-outlined text-gray-400 text-sm">chevron_right</span>
       </a>
-      <a href="/customer" class="flex items-center gap-4 px-5 py-4 hover:bg-surface-container transition-colors">
-        <span class="material-symbols-outlined text-primary">storefront</span>
-        <span class="font-semibold text-on-surface text-sm flex-1">Browse Sellers</span>
-        <span class="material-symbols-outlined text-on-surface-variant text-sm">chevron_right</span>
+      <a href="/discovery" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors no-underline">
+        <span class="material-symbols-outlined text-green-700">storefront</span>
+        <span class="font-semibold text-gray-900 text-sm flex-1">Browse Sellers</span>
+        <span class="material-symbols-outlined text-gray-400 text-sm">chevron_right</span>
+      </a>
+      <a href="/referral" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors no-underline">
+        <span class="material-symbols-outlined text-green-700">redeem</span>
+        <span class="font-semibold text-gray-900 text-sm flex-1">Refer & Earn</span>
+        <span class="material-symbols-outlined text-gray-400 text-sm">chevron_right</span>
       </a>
     </div>
 
     <!-- Sign Out -->
     <button id="signOutBtn" onclick="signOut()"
-      class="w-full py-4 rounded-full border-2 border-error/40 text-error font-headline font-bold text-sm hover:bg-error/5 active:scale-95 transition-all flex items-center justify-center gap-2">
+      class="w-full py-4 rounded-full border-2 border-red-300 text-red-600 font-bold text-sm hover:bg-red-50 active:scale-95 transition-all flex items-center justify-center gap-2">
       <span class="material-symbols-outlined">logout</span>
       Sign Out
     </button>
 
-    <!-- Not signed in state (hidden by default) -->
+    <!-- Not signed in state -->
     <div id="notSignedIn" class="hidden text-center py-12">
-      <span class="material-symbols-outlined text-5xl text-on-surface-variant mb-4">no_accounts</span>
-      <p class="text-on-surface-variant mb-6">You're not signed in.</p>
-      <a href="/login" class="bg-primary text-on-primary px-8 py-3 rounded-full font-headline font-bold text-sm hover:opacity-90 transition-all inline-block">Sign In</a>
+      <span class="material-symbols-outlined text-5xl text-gray-400 mb-4">no_accounts</span>
+      <p class="text-gray-500 mb-6">You're not signed in.</p>
+      <a href="/login" class="inline-block gradient-bg text-white px-8 py-3 rounded-full font-semibold text-sm hover:opacity-90 transition-all">Sign In</a>
     </div>
   </main>
 
-<!-- Navigation handled by SmartNav -->
-<script src="nav-component.js" defer></script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    SmartNav.init({ activePage: 'profile', role: 'customer' });
-  });
-</script>
+  <!-- Bottom Nav (Mobile) -->
+  <nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe border-t border-gray-200 bg-white md:hidden z-50">
+    <a href="/home" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1"><span class="material-symbols-outlined">home</span><span class="text-[10px] font-semibold">Home</span></a>
+    <a href="/discovery" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1"><span class="material-symbols-outlined">search</span><span class="text-[10px] font-semibold">Browse</span></a>
+    <a href="/cart" class="flex flex-col items-center justify-center bg-green-100 text-green-700 rounded-full px-3 py-1"><span class="material-symbols-outlined filled-icon">shopping_cart</span><span class="text-[10px] font-semibold">Cart</span></a>
+    <a href="/profile" class="flex flex-col items-center justify-center bg-green-100 text-green-700 rounded-full px-3 py-1"><span class="material-symbols-outlined filled-icon">person</span><span class="text-[10px] font-semibold">Profile</span></a>
+  </nav>
 
   <script type="module">
-    const auth = window.auth;
-    const db = window.db;
     const ROLE_ICONS = { admin: 'admin_panel_settings', merchant: 'store', driver: 'electric_bike', customer: 'person' };
     const ROLE_LINKS = {
       admin:    [{ href: '/admin',    icon: 'admin_panel_settings', label: 'Admin Panel' }],
@@ -113,76 +136,102 @@
       customer: [],
     };
 
-    const { onAuthStateChanged, signOut: firebaseSignOut } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
-    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+    function initProfile() {
+      const auth = window.auth;
+      const db = window.db;
 
-    // Expose signOut globally for the onclick handler
-    window.signOut = async () => {
-      try {
-        await firebaseSignOut(auth);
-        window.location.href = '/login';
-      } catch (error) {
-        console.error('Sign out error:', error);
-      }
-    };
-
-    if (!auth) {
-      console.error('Firebase Auth not initialized');
-      document.getElementById('displayName').textContent = 'Not signed in';
-      document.getElementById('signOutBtn').classList.add('hidden');
-      document.getElementById('notSignedIn').classList.remove('hidden');
-    } else {
-
-    onAuthStateChanged(auth, async user => {
-      if (!user) {
+      if (!auth) {
+        console.warn('Firebase Auth not initialized');
         document.getElementById('displayName').textContent = 'Not signed in';
-        document.getElementById('avatarContainer').innerHTML = '<span class="material-symbols-outlined text-5xl text-on-primary-fixed" style="font-variation-settings:\'FILL\' 1;">person_off</span>';
+        document.getElementById('avatarContainer').innerHTML = '<span class="material-symbols-outlined text-5xl text-green-700/30 filled-icon">person_off</span>';
         document.getElementById('signOutBtn').classList.add('hidden');
         document.getElementById('notSignedIn').classList.remove('hidden');
         return;
       }
 
-      // Fill basic auth info
-      const name = user.displayName || user.email.split('@')[0];
-      document.getElementById('displayName').textContent = name;
-      document.getElementById('userEmail').textContent = user.email;
-      document.getElementById('infoEmail').textContent = user.email;
+      Promise.all([
+        import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js'),
+        import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js')
+      ]).then(([authMod, fsMod]) => {
+        const { onAuthStateChanged, signOut: firebaseSignOut } = authMod;
+        const { doc, getDoc } = fsMod;
 
-      // Load Firestore user doc
-      try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        const data = userDoc.exists() ? userDoc.data() : {};
-        const role = data.role || 'customer';
+        window.signOut = async () => {
+          try {
+            await firebaseSignOut(auth);
+            window.location.href = '/login';
+          } catch (error) { console.error('Sign out error:', error); }
+        };
 
-        document.getElementById('roleChip').textContent = role;
-        document.getElementById('infoRole').textContent = role;
+        onAuthStateChanged(auth, async user => {
+          if (!user) {
+            document.getElementById('displayName').textContent = 'Not signed in';
+            document.getElementById('avatarContainer').innerHTML = '<span class="material-symbols-outlined text-5xl text-green-700/30 filled-icon">person_off</span>';
+            document.getElementById('signOutBtn').classList.add('hidden');
+            document.getElementById('notSignedIn').classList.remove('hidden');
+            return;
+          }
 
-        const joined = data.createdAt
-          ? new Date(data.createdAt.seconds * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-          : 'Unknown';
-        document.getElementById('infoJoined').textContent = joined;
+          const name = user.displayName || user.email.split('@')[0];
+          document.getElementById('displayName').textContent = name;
+          document.getElementById('userEmail').textContent = user.email;
+          document.getElementById('infoEmail').textContent = user.email;
 
-        // Avatar icon by role
-        const icon = ROLE_ICONS[role] || 'person';
-        document.getElementById('avatarContainer').innerHTML =
-          `<span class="material-symbols-outlined text-5xl text-on-primary" style="font-variation-settings:'FILL' 1;">${icon}</span>`;
+          let userData = null;
+          try {
+            const svc = window.crossPlatformService;
+            if (svc && svc.isReady()) {
+              try { userData = await svc.get('users', user.uid); } catch (e) { /* silent */ }
+            }
+            if (!userData && db) {
+              try {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (userDoc.exists()) userData = userDoc.data();
+              } catch (e) { /* Firestore permission denied, use defaults */ }
+            }
+            if (!userData) {
+              try {
+                const token = await user.getIdToken();
+                const res = await fetch('/api/auth/verify', { headers: { 'Authorization': 'Bearer ' + token } });
+                if (res.ok) {
+                  const d = await res.json();
+                  if (d.success) userData = { role: d.user.role };
+                }
+              } catch (e) { /* API fallback failed */ }
+            }
+          } catch (e) { /* all data sources failed */ }
+          const data = userData || {};
+          const role = data.role || 'customer';
 
-        // Role-specific links
-        const links = ROLE_LINKS[role] || [];
-        document.getElementById('roleLinks').innerHTML = links.map(l => `
-          <a href="${l.href}"
-            class="flex items-center gap-4 px-5 py-4 bg-primary text-on-primary rounded-xl hover:opacity-90 active:scale-95 transition-all">
-            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">${l.icon}</span>
-            <span class="font-headline font-bold text-sm flex-1">${l.label}</span>
-            <span class="material-symbols-outlined text-sm">arrow_forward</span>
-          </a>
-        `).join('');
-      } catch (e) {
-        console.error('Error loading user data:', e);
-      }
-    });
+          document.getElementById('roleChip').textContent = role;
+          document.getElementById('infoRole').textContent = role;
 
-    } // Close the else block from line 136
+          const joined = data.createdAt
+            ? new Date(data.createdAt.seconds * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+            : 'Unknown';
+          document.getElementById('infoJoined').textContent = joined;
+
+          const icon = ROLE_ICONS[role] || 'person';
+          document.getElementById('avatarContainer').innerHTML = `<span class="material-symbols-outlined text-5xl text-green-700 filled-icon">${icon}</span>`;
+
+          const links = ROLE_LINKS[role] || [];
+          document.getElementById('roleLinks').innerHTML = links.map(l => `
+            <a href="${l.href}" class="flex items-center gap-4 px-5 py-4 gradient-bg text-white rounded-xl hover:opacity-90 active:scale-95 transition-all no-underline">
+              <span class="material-symbols-outlined filled-icon">${l.icon}</span>
+              <span class="font-headline font-bold text-sm flex-1">${l.label}</span>
+              <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </a>
+          `).join('');
+        });
+      });
+    }
+
+    if (window.auth) {
+      initProfile();
+    } else {
+      document.addEventListener('firebase-initialized', initProfile);
+      setTimeout(initProfile, 3000);
+    }
   </script>
 </body>
 </html>

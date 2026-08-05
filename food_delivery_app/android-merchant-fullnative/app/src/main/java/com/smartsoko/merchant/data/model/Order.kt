@@ -1,4 +1,4 @@
-package com.smartsoko.merchant.data.model
+﻿package com.smartsoko.merchant.data.model
 
 import java.util.Date
 
@@ -32,7 +32,7 @@ data class Order(
     val review: String = ""
 ) {
     val formattedTotal: String
-        get() = "KSh %.2f".format(totalAmount)
+        get() = "tsh %.2f".format(totalAmount)
 
     val formattedItems: String
         get() = items.joinToString(", ") { "${it.quantity}x ${it.name}" }

@@ -3,14 +3,17 @@ package com.fooddelivery.driver.repository
 import com.fooddelivery.driver.data.LocalDatabase
 import com.fooddelivery.driver.data.model.OrderEntity
 import com.fooddelivery.driver.data.OrderEntityConverters
-import com.fooddelivery.driver.data.PrefsDao
 import com.fooddelivery.driver.data.OrderDao
 import com.fooddelivery.driver.data.model.Order
+import com.fooddelivery.driver.network.ApiService
 import com.fooddelivery.driver.realtime.SocketManager
+import com.fooddelivery.driver.network.OrderActionResponse
 import com.fooddelivery.driver.util.Resource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -22,7 +25,7 @@ import org.json.JSONObject
 class OrderRepository(
     private val localDatabase: LocalDatabase,
     private val socketManager: SocketManager,
-    private val prefsDao: PrefsDao
+    private val apiService: ApiService
 ) {
 
     private val orderDao = localDatabase.orderDao()
@@ -63,7 +66,7 @@ class OrderRepository(
                 delay(30000) // 30 seconds
 
                 // Get unsynced orders from the local database
-                val unsyncedOrders = orderDao.getUnsyncedOrders()
+                val unsyncedOrders = orderDao.getUnsyncedOrders().first()
 
                 // For each unsynced order, try to send it to the server
                 unsyncedOrders.forEach { orderEntity ->
@@ -94,22 +97,24 @@ class OrderRepository(
      */
     private fun socketUpdateToEntity(update: SocketManager.OrderUpdate): OrderEntity {
         val data = update.data
+        val restaurantLocation = data.optJSONObject("restaurantLocation")
+        val customerLocation = data.optJSONObject("customerLocation")
         return OrderEntity(
             id = update.orderId,
-            restaurantName = data.getString("restaurantName") ?: "",
-            restaurantAddress = data.getString("restaurantAddress") ?: "",
-            restaurantLat = data.getJSONObject("restaurantLocation")?.getDouble("lat") ?: 0.0,
-            restaurantLng = data.getJSONObject("restaurantLocation")?.getDouble("lng") ?: 0.0,
-            customerName = data.getString("customerName"),
-            customerAddress = data.getString("customerAddress") ?: "",
-            customerLat = data.getJSONObject("customerLocation")?.getDouble("lat") ?: 0.0,
-            customerLng = data.getJSONObject("customerLocation")?.getDouble("lng") ?: 0.0,
-            items = data.getJSONArray("items").toString(), // We are storing the JSONArray as a string for simplicity
-            totalAmount = data.getDouble("totalAmount"),
+            restaurantName = data.optString("restaurantName") ?: "",
+            restaurantAddress = data.optString("restaurantAddress") ?: "",
+            restaurantLat = restaurantLocation?.optDouble("lat", 0.0) ?: data.optDouble("restaurantLat", 0.0),
+            restaurantLng = restaurantLocation?.optDouble("lng", 0.0) ?: data.optDouble("restaurantLng", 0.0),
+            customerName = data.optString("customerName") ?: "",
+            customerAddress = data.optString("customerAddress") ?: "",
+            customerLat = customerLocation?.optDouble("lat", 0.0) ?: data.optDouble("customerLat", 0.0),
+            customerLng = customerLocation?.optDouble("lng", 0.0) ?: data.optDouble("customerLng", 0.0),
+            items = data.optJSONArray("items")?.toString() ?: "[]",
+            totalAmount = data.optDouble("totalAmount", 0.0),
             status = update.status,
-            createdAt = data.getString("createdAt") ?: "",
-            updatedAt = data.getString("updatedAt") ?: "",
-            deliveryInstructions = data.getString("deliveryInstructions"),
+            createdAt = data.optString("createdAt") ?: "",
+            updatedAt = data.optString("updatedAt") ?: "",
+            deliveryInstructions = data.optString("deliveryInstructions"),
             isSynced = true // Since this update came from the server, we consider it synced
         )
     }
@@ -118,14 +123,28 @@ class OrderRepository(
      * Gets all orders from the local database (for offline viewing).
      */
     suspend fun getAllOrders(): List<OrderEntity> = withContext(Dispatchers.IO) {
-        orderDao.getAllOrders()
+        orderDao.getAllOrders().first()
+    }
+
+    /**
+     * Gets past orders from the local database (completed/delivered/cancelled).
+     */
+    suspend fun getPastOrders(): List<OrderEntity> = withContext(Dispatchers.IO) {
+        orderDao.getPastOrders().first()
+    }
+
+    /**
+     * Gets earnings from the local database.
+     */
+    suspend fun getEarnings(): Double = withContext(Dispatchers.IO) {
+        orderDao.getTotalEarnings().first()
     }
 
     /**
      * Gets the current unsynced orders (for debugging or manual sync).
      */
     suspend fun getUnsyncedOrders(): List<OrderEntity> = withContext(Dispatchers.IO) {
-        orderDao.getUnsyncedOrders()
+        orderDao.getUnsyncedOrders().first()
     }
 
     /**
@@ -134,37 +153,80 @@ class OrderRepository(
     suspend fun acceptOrder(authToken: String, orderId: String): Resource<OrderActionResponse> {
         return withContext(Dispatchers.IO) {
             try {
-                // In a real implementation, we would use Retrofit to call the API
-                // For now, we'll simulate the API call
-                // val response = apiService.acceptOrder(authToken, orderId)
-                // return response
-                
-                // Simulate API delay
-                delay(500)
-                
-                // Simulate successful response
-                Resource.success(OrderActionResponse(
-                    success = true,
-                    message = "Order accepted successfully",
-                    order = Order(
-                        id = orderId,
-                        restaurantName = "Restaurant",
-                        restaurantAddress = "123 Restaurant St",
-                        restaurantLat = 0.0,
-                        restaurantLng = 0.0,
-                        customerName = "Customer",
-                        customerAddress = "456 Customer Ave",
-                        customerLat = 0.0,
-                        customerLng = 0.0,
-                        items = "[]", // Empty JSON array
-                        totalAmount = 0.0,
-                        status = "accepted",
-                        createdAt = "",
-                        updatedAt = ""
-                    )
-                ))
+                val response = apiService.acceptOrder("Bearer $authToken", orderId)
+                if (response.isSuccessful && response.body() != null) {
+                    Resource.success(response.body()!!)
+                } else {
+                    Resource.error("Failed to accept order: HTTP ${response.code()}")
+                }
             } catch (e: Exception) {
                 Resource.error("Failed to accept order: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Update an order's status via the API.
+     */
+    suspend fun updateOrderStatus(authToken: String, orderId: String, status: String): Resource<OrderActionResponse> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.updateOrderStatus(
+                    "Bearer $authToken",
+                    orderId,
+                    com.fooddelivery.driver.network.OrderStatusUpdate(status)
+                )
+                if (response.isSuccessful && response.body() != null) {
+                    Resource.success(response.body()!!)
+                } else {
+                    Resource.error("Failed to update status: HTTP ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Resource.error("Failed to update status: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Persists an order to the local database (history / offline viewing).
+     */
+    suspend fun saveOrderLocally(order: com.fooddelivery.driver.data.model.Order) {
+        withContext(Dispatchers.IO) {
+            orderDao.insertOrder(com.fooddelivery.driver.data.model.OrderEntity.from(order))
+        }
+    }
+
+    /**
+     * Fetches a single order by ID (for deep links / order detail).
+     */
+    suspend fun getOrderById(authToken: String, orderId: String): Resource<com.fooddelivery.driver.network.Order> {        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getOrderDetails("Bearer $authToken", orderId)
+                if (response.isSuccessful && response.body() != null && response.body()!!.success) {
+                    Resource.success(response.body()!!.order)
+                } else {
+                    Resource.error("Failed to fetch order: HTTP ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Resource.error("Failed to fetch order: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Fetches the list of orders currently available for the driver to accept.
+     */
+    suspend fun getAvailableOrders(authToken: String): Resource<List<com.fooddelivery.driver.network.Order>> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getAvailableOrders("Bearer $authToken")
+                if (response.isSuccessful && response.body() != null) {
+                    Resource.success(response.body()!!.orders)
+                } else {
+                    Resource.error("Failed to fetch orders: HTTP ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Resource.error("Failed to fetch orders: ${e.message}")
             }
         }
     }

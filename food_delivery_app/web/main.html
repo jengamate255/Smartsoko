@@ -25,12 +25,13 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   
   <!-- Defer non-critical fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet" >
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" >
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" >
   
   <!-- Firebase Modular SDK -->
   <script type="module" src="config/firebase-config.js?v=3"></script>
+  <script type="module" src="config/cross-platform-service.js?v=4"></script>
   <script src="nav-component.js?v=3" defer></script>
   <style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}.hide-scrollbar::-webkit-scrollbar{display:none}.hide-scrollbar{-ms-overflow-style:none;scrollbar-width:none}.hero-gradient{background:#012d1d;position:relative;overflow:hidden}.hero-gradient::before{content:'';position:absolute;inset:0;background:url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.05"><circle cx="30" cy="30" r="4"/></g></g></svg>')}.card-hover{transition:all .3s cubic-bezier(0.4,0,0.2,1)}.card-hover:hover{transform:translateY(-12px) scale(1.02);box-shadow:0 25px 50px rgba(1,45,29,0.15)}.feature-icon{transition:all .3s cubic-bezier(0.4,0,0.2,1)}.feature-icon:hover{transform:scale(1.15) rotate(5deg)}.floating{animation:float 6s ease-in-out infinite}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}.slide-in{animation:slideIn .8s cubic-bezier(0.4,0,0.2,1)}@keyframes slideIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}.pulse-dot{animation:pulse 2s infinite}@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.1)}}body{min-height:max(884px,100dvh)}</style>
 </head>
@@ -38,6 +39,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       SmartNav.init({ activePage: 'home', role: 'customer' });
+      SmartNav.initPageTransition();
     });
   </script>
 
@@ -46,7 +48,7 @@
 <section class="mb-10 slide-in">
 <div class="relative flex items-center group">
 <span class="absolute left-6 material-symbols-outlined text-on-surface-variant">search</span>
-<input class="w-full pl-14 pr-6 py-5 bg-surface border-none rounded-full font-body text-on-surface placeholder:text-on-surface-variant/60 focus:ring-2 focus:ring-primary transition-all" placeholder="Search restaurants or dishes..." type="text"/>
+<input aria-label="Search" class="w-full pl-14 pr-6 py-5 bg-surface border-none rounded-full font-body text-on-surface placeholder:text-on-surface-variant/60 focus:ring-2 focus:ring-primary transition-all" placeholder="Search restaurants or dishes..." type="text"/>
 </div>
 </section>
 
@@ -85,7 +87,7 @@ Soko la kienyeji linalounga mkono wa jamii yako
 <div class="flex items-center justify-between mb-6">
 <h2 class="font-headline text-2xl font-bold tracking-tight text-primary" data-sw="Vikundi vya Haraka" data-en="Quick Categories">Quick Categories</h2>
 <span class="text-sm font-semibold text-secondary cursor-pointer hover:opacity-80 transition">
-<span data-sw="Zote" data-en="See all">Zote</span> →
+<span data-sw="Zote" data-en="See all">Zote</span> â†’
 </span>
 </div>
 <div class="flex gap-6 overflow-x-auto hide-scrollbar -mx-6 px-6">
@@ -94,35 +96,35 @@ Soko la kienyeji linalounga mkono wa jamii yako
 <div class="w-20 h-20 rounded-2xl bg-surface flex items-center justify-center hover:bg-primary/10 transition-all group">
 <span class="material-symbols-outlined text-3xl text-primary group-hover:scale-110 transition-transform">lunch_dining</span>
 </div>
-<span class="font-label text-sm font-medium text-on-surface-variant" data-sw="Chakula" data-en="Food">🍔 Food</span>
+<span class="font-label text-sm font-medium text-on-surface-variant" data-sw="Chakula" data-en="Food">ðŸ” Food</span>
 </div>
 <!-- Dairy -->
 <div class="flex flex-col items-center gap-3 min-w-[80px] card-hover cursor-pointer">
 <div class="w-20 h-20 rounded-2xl bg-surface flex items-center justify-center hover:bg-primary/10 transition-all group">
 <span class="material-symbols-outlined text-3xl text-primary group-hover:scale-110 transition-transform">local_drink</span>
 </div>
-<span class="font-label text-sm font-medium text-on-surface-variant" data-sw="Maziwa" data-en="Dairy">🥛 Dairy</span>
+<span class="font-label text-sm font-medium text-on-surface-variant" data-sw="Maziwa" data-en="Dairy">ðŸ¥› Dairy</span>
 </div>
 <!-- Fruits -->
 <div class="flex flex-col items-center gap-3 min-w-[80px] card-hover cursor-pointer">
 <div class="w-20 h-20 rounded-2xl bg-surface flex items-center justify-center hover:bg-primary/10 transition-all group">
 <span class="material-symbols-outlined text-3xl text-primary group-hover:scale-110 transition-transform">nutrition</span>
 </div>
-<span class="font-label text-sm font-medium text-on-surface-variant" data-sw="Matunda" data-en="Fruits">🍎 Fruits</span>
+<span class="font-label text-sm font-medium text-on-surface-variant" data-sw="Matunda" data-en="Fruits">ðŸŽ Fruits</span>
 </div>
 <!-- Groceries -->
 <div class="flex flex-col items-center gap-3 min-w-[80px] card-hover cursor-pointer">
 <div class="w-20 h-20 rounded-2xl bg-surface flex items-center justify-center hover:bg-primary/10 transition-all group">
 <span class="material-symbols-outlined text-3xl text-primary group-hover:scale-110 transition-transform">shopping_basket</span>
 </div>
-<span class="font-label text-sm font-medium text-on-surface-variant" data-sw="Mahitaji ya kila siku" data-en="Groceries">🛒 Groceries</span>
+<span class="font-label text-sm font-medium text-on-surface-variant" data-sw="Mahitaji ya kila siku" data-en="Groceries">ðŸ›’ Groceries</span>
 </div>
 <!-- Bakery -->
 <div class="flex flex-col items-center gap-3 min-w-[80px] card-hover cursor-pointer">
 <div class="w-20 h-20 rounded-2xl bg-surface flex items-center justify-center hover:bg-primary/10 transition-all group">
 <span class="material-symbols-outlined text-3xl text-primary group-hover:scale-110 transition-transform">bakery_dining</span>
 </div>
-<span class="font-label text-sm font-medium text-on-surface-variant" data-sw="Mkate na vitamu" data-en="Bakery">🍞 Bakery</span>
+<span class="font-label text-sm font-medium text-on-surface-variant" data-sw="Mkate na vitamu" data-en="Bakery">ðŸž Bakery</span>
 </div>
 </div>
 </section>
@@ -147,7 +149,7 @@ Soko la kienyeji linalounga mkono wa jamii yako
 <div class="p-6">
 <p class="text-on-surface-variant text-sm mb-4" data-sw="Pokea bidhaa kutoka mikakati yote" data-en="Get goods from all categories">Get goods from all categories</p>
 <div class="flex items-center justify-between">
-<span class="text-xs text-on-surface-variant">4.8 ⭐ • 1K+ users</span>
+<span class="text-xs text-on-surface-variant">4.8 â­ â€¢ 1K+ users</span>
 <a href="/customer" class="bg-primary text-white px-4 py-2 rounded-full text-sm hover:opacity-90 transition-all transform hover:scale-105 active:scale-95">
 <span data-sw="Fungua" data-en="Open">Open</span>
 </a>
@@ -165,7 +167,7 @@ Soko la kienyeji linalounga mkono wa jamii yako
 <div class="p-6">
 <p class="text-on-surface-variant text-sm mb-4" data-sw="Uuzeshe biashara yako ya soko" data-en="Manage your marketplace business">Manage your marketplace business</p>
 <div class="flex items-center justify-between">
-<span class="text-xs text-on-surface-variant">4.9 ⭐ • 10 sellers</span>
+<span class="text-xs text-on-surface-variant">4.9 â­ â€¢ 10 sellers</span>
 <a href="/merchant" class="bg-green-600 text-white px-4 py-2 rounded-full text-sm hover:bg-green-700 transition-all transform hover:scale-105 active:scale-95">
 <span data-sw="Fungua" data-en="Open">Open</span>
 </a>
@@ -183,7 +185,7 @@ Soko la kienyeji linalounga mkono wa jamii yako
 <div class="p-6">
 <p class="text-on-surface-variant text-sm mb-4" data-sw="Pokea agizo la uwasilishaji" data-en="Receive delivery orders">Receive delivery orders</p>
 <div class="flex items-center justify-between">
-<span class="text-xs text-on-surface-variant">4.7 ⭐ • 4 drivers</span>
+<span class="text-xs text-on-surface-variant">4.7 â­ â€¢ 4 drivers</span>
 <a href="/driver" class="bg-primary text-white px-4 py-2 rounded-full text-sm hover:opacity-90 transition-all transform hover:scale-105 active:scale-95">
 <span data-sw="Fungua" data-en="Open">Open</span>
 </a>
@@ -361,17 +363,22 @@ Soko la kienyeji linalounga mkono wa jamii yako
         }
 
         try {
-          // Check user role in Firestore
-          const userDoc = await getDoc(doc(window.db, 'users', user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
+          const svc = window.crossPlatformService;
+          let userData = null;
+          if (svc && svc.isReady()) {
+            try { userData = await svc.get('users', user.uid); } catch (e) { /* silent */ }
+          }
+          if (!userData) {
+            const userDoc = await getDoc(doc(window.db, 'users', user.uid));
+            if (userDoc.exists()) userData = userDoc.data();
+          }
+          if (userData) {
             if (userData.role === 'admin' || userData.role === 'super_admin') {
               adminCard.classList.remove('hidden');
             } else {
               adminCard.classList.add('hidden');
             }
           } else {
-            // No user doc - hide admin card
             adminCard.classList.add('hidden');
           }
         } catch (error) {

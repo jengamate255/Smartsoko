@@ -170,6 +170,10 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
           category: updates['category'] as String,
           isOpen: _isOpen,
           imageUrl: '',
+          lat: 0.0,
+          lng: 0.0,
+          rating: 0.0,
+          createdAt: DateTime.now(),
         );
         final created = await _restaurantService.createRestaurant(newRestaurant);
         restaurantId = created.id;

@@ -1,0 +1,35 @@
+◇ injected env (4) from .env // tip: ⌘ override existing { override: true }
+[2026-07-14 02:45:09] INFO: Firebase Admin initialized - Using REAL data from Firestore
+[2026-07-14 02:45:10] INFO: Starting Firestore real-time listeners...
+[2026-07-14 02:45:13] INFO: 
+╔════════════════════════════════════════════════════════╗
+║         SmartSoko - Production Server Ready            ║
+╠════════════════════════════════════════════════════════╣
+║  Environment: development                           ║
+║  Port: 3001                                           ║
+╠════════════════════════════════════════════════════════╣
+║  URLs:                                                 ║
+║  - Login:     http://localhost:3001/login             ║
+║  - Home:      http://localhost:3001/home             ║
+║  - Customer: http://localhost:3001/customer           ║
+║  - Merchant: http://localhost:3001/merchant           ║
+║  - Driver:   http://localhost:3001/driver             ║
+║  - Admin:    http://localhost:3001/admin              ║
+║  - Fleet:    http://localhost:3001/fleet-manager.html ║
+╠════════════════════════════════════════════════════════╣
+║  API Endpoints:                                        ║
+║  - Health:   http://localhost:3001/health             ║
+║  - Config:   http://localhost:3001/api/config         ║
+║  - Riders:   http://localhost:3001/api/riders         ║
+║  - WebSocket: ws://localhost:3001/ws                  ║
+╚════════════════════════════════════════════════════════╝
+
+[2026-07-14 02:45:13] INFO: ✓ WebSocket server active - Real-time rider tracking enabled
+
+Broadcasted 2 rider update(s) to clients
+[2026-07-14 02:45:38] INFO: GET /health {"status":200,"duration":"14ms","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.22000.2538"}
+[2026-07-14 02:45:38] INFO: GET /login {"status":200,"duration":"22ms","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.22000.2538"}
+[2026-07-14 02:49:58] INFO: GET /api/deals {"status":200,"duration":"1572ms","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.22000.2538"}
+[2026-07-14 02:49:58] INFO: GET /api/categories {"status":200,"duration":"1426ms","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.22000.2538"}
+[2026-07-14 02:49:58] INFO: GET /api/sellers {"status":200,"duration":"1495ms","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.22000.2538"}
+[2026-07-14 02:50:07] INFO: GET /api/stores/kunduchi-fresh-store {"status":200,"duration":"476ms","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.22000.2538"}

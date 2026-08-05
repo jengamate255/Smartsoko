@@ -1,0 +1,49 @@
+<resources>
+    <!-- Primary colors -->
+    <color name="primary">#FF6B35</color>
+    <color name="primary_variant">#E85D2D</color>
+    <color name="primary_dark">#D44E24</color>
+    <color name="primary_light">#FF8A5B</color>
+    <color name="on_primary">#FFFFFF</color>
+    
+    <!-- Secondary colors -->
+    <color name="secondary">#2E7D32</color>
+    <color name="secondary_variant">#1B5E20</color>
+    <color name="on_secondary">#FFFFFF</color>
+    
+    <!-- Surface colors -->
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_variant">#F5F5F5</color>
+    <color name="on_surface">#1A1A1A</color>
+    <color name="on_surface_variant">#666666</color>
+    
+    <!-- Background -->
+    <color name="background">#FAFAFA</color>
+    <color name="on_background">#1A1A1A</color>
+    
+    <!-- Error -->
+    <color name="error">#D32F2F</color>
+    <color name="on_error">#FFFFFF</color>
+    
+    <!-- Success -->
+    <color name="success">#2E7D32</color>
+    <color name="on_success">#FFFFFF</color>
+    
+    <!-- Warning -->
+    <color name="warning">#F57C00</color>
+    <color name="on_warning">#FFFFFF</color>
+    
+    <!-- Outline -->
+    <color name="outline">#E0E0E0</color>
+    <color name="outline_variant">#F0F0F0</color>
+    
+    <!-- Status bar / Navigation bar -->
+    <color name="status_bar_color">#FF6B35</color>
+    <color name="navigation_bar_color">#FFFFFF</color>
+    
+    <!-- Dividers -->
+    <color name="divider">#E0E0E0</color>
+    
+    <!-- Shadow -->
+    <color name="shadow">#000000</color>
+</resources>

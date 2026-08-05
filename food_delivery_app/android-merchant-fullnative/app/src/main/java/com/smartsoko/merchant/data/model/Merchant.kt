@@ -1,4 +1,4 @@
-package com.smartsoko.merchant.data.model
+﻿package com.smartsoko.merchant.data.model
 
 data class Merchant(
     val id: String = "",

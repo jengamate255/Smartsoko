@@ -1,44 +1,60 @@
 package com.fooddelivery.driver.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsStateWithLifecycle
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.fooddelivery.driver.R
 import com.fooddelivery.driver.data.model.Order
 import com.fooddelivery.driver.ui.state.AppViewModel
 import com.fooddelivery.driver.ui.theme.SmartSokoDriverTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
+import java.util.Locale
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: AppViewModel = viewModel()
+    viewModel: AppViewModel = viewModel(),
+    navController: NavHostController
 ) {
     SmartSokoDriverTheme {
         // Collect state from ViewModel with lifecycle awareness
-        val orders by viewModel.orders.collectAsStateWithLifecycle()
-        val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-        val user by viewModel.user.collectAsStateWithLifecycle()
-        val error by viewModel.error.collectAsStateWithLifecycle()
-        val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+        val orders by viewModel.orders.observeAsState(emptyList())
+        val isLoading by viewModel.isLoading.observeAsState(false)
+        val user by viewModel.user.observeAsState()
+        val error by viewModel.error.observeAsState()
+        val isOnline by viewModel.isOnline.observeAsState(false)
+
+        // Fetch available orders from the backend when the screen appears
+        LaunchedEffect(user) {
+            if (user != null) {
+                viewModel.loadAvailableOrders()
+            }
+        }
 
         Column(modifier = Modifier.fillMaxSize()) {
             // App Bar
             TopAppBar(
                 title = { 
                     Text(
-                        text = if (user != null) "Welcome, ${user?.fullName?.split(' ').first() ?: "Driver"}" else "Driver App",
+                        text = if (user != null) "Welcome, ${user?.fullName?.split(' ')?.firstOrNull() ?: "Driver"}" else "Driver App",
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
-                backgroundColor = MaterialTheme.colorScheme.primary,
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary),
                 actions = {
                     IconButton(
                         onClick = { /* TODO: Open notifications */ }
@@ -61,8 +77,8 @@ fun HomeScreen(
                             Text("Dismiss")
                         }
                     },
-                    label = { Text(text = errorMessage) },
-                    backgroundColor = MaterialTheme.colorScheme.error,
+                    content = { Text(text = errorMessage) },
+                    containerColor = MaterialTheme.colorScheme.error,
                     contentColor = MaterialTheme.colorScheme.onError
                 )
             }
@@ -84,7 +100,8 @@ fun HomeScreen(
                 }
                 user == null -> {
                     // Show login screen
-                    LoginScreen(
+                    AuthScreen(
+                        viewModel = viewModel,
                         onLoginSuccess = { email, password ->
                             viewModel.signIn(email, password)
                         }
@@ -101,11 +118,19 @@ fun HomeScreen(
                             modifier = Modifier.align(Alignment.Center),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.ic_empty_orders),
-                                contentDescription = "No orders",
-                                modifier = Modifier.size(80.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(80.dp)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Inbox,
+                                    contentDescription = "No orders",
+                                    modifier = Modifier.size(40.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = "No orders available",
@@ -121,8 +146,7 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.height(24.dp))
                             Button(
                                 onClick = { 
-                                    // TODO: Toggle online status
-                                    // viewModel.toggleOnlineStatus(!isOnline)
+                                    viewModel.toggleOnlineStatus(!isOnline)
                                 },
                                 modifier = Modifier.width(200.dp),
                                 colors = ButtonDefaults.buttonColors(
@@ -140,7 +164,9 @@ fun HomeScreen(
                 }
                 else -> {
                     // Show list of orders
-                    Column {
+                    Column(
+                        modifier = Modifier.weight(1f, fill = false)
+                    ) {
                         // Orders count and filter
                         Row(
                             modifier = Modifier
@@ -148,8 +174,9 @@ fun HomeScreen(
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            val orderText = "${orders.size} ${if (orders.size == 1) "order" else "orders"} available"
                             Text(
-                                text = "${orders.size} ${if (orders.size == 1) \"order\" else \"orders\"} available",
+                                text = orderText,
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Spacer(modifier = Modifier.weight(1f))
@@ -171,7 +198,7 @@ fun HomeScreen(
                                         viewModel.acceptOrder(order.id)
                                     },
                                     onOrderClicked = { 
-                                        // TODO: Navigate to order details or map
+                                        navController.navigate("order-detail/${order.id}")
                                     }
                                 )
                                 Divider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
@@ -197,7 +224,7 @@ fun HomeScreen(
                     Icon(
                         imageVector = if (isOnline) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
                         contentDescription = if (isOnline) "Online" else "Offline",
-                        tint = if (isOnline) MaterialTheme.colorScheme.success else MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = if (isOnline) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = if (isOnline) "Online and ready to receive orders" else "Offline - you won't receive new orders",
@@ -207,8 +234,7 @@ fun HomeScreen(
                 }
                 Button(
                     onClick = { 
-                        // TODO: Toggle online status
-                        // viewModel.toggleOnlineStatus(!isOnline)
+                        viewModel.toggleOnlineStatus(!isOnline)
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isOnline) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
@@ -226,103 +252,6 @@ fun HomeScreen(
 }
 
 @Composable
-fun LoginScreen(
-    onLoginSuccess: (String, String) -> Unit
-) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var loading by remember { mutableStateOf(false) }
-
-    SmartSokoDriverTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp)
-        ) {
-            Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_logo),
-                    contentDescription = "SmartSoko Driver",
-                    modifier = Modifier.size(80.dp)
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = "Welcome to SmartSoko Driver",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                TextField(
-                    label = { Text("Email") },
-                    value = email,
-                    onValueChange = { email = it },
-                    isError = email.isEmpty(),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Email,
-                            contentDescription = "Email",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                OutlinedTextField(
-                    label = { Text("Password") },
-                    value = password,
-                    onValueChange = { password = it },
-                    isError = password.isEmpty(),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = "Password",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    },
-                    isPassword = true
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(
-                    onClick = {
-                        if (email.isNotEmpty() && password.isNotEmpty()) {
-                            loading = true
-                            onLoginSuccess(email, password)
-                            loading = false
-                        }
-                    },
-                    enabled = !loading,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    if (loading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Text(
-                            text = "Sign In",
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Don't have an account? Contact support to create one.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun OrderCard(
     order: Order,
     onAcceptClicked: () -> Unit,
@@ -333,7 +262,7 @@ private fun OrderCard(
             .fillMaxWidth()
             .padding(8.dp)
             .clickable { onOrderClicked() },
-        elevation = 2.dp,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = MaterialTheme.shapes.medium
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -384,10 +313,10 @@ private fun OrderCard(
                     text = order.status.uppercase(Locale.getDefault()),
                     style = MaterialTheme.typography.bodyLarge,
                     color = when (order.status) {
-                        "assigned" -> MaterialTheme.colorScheme.warning
+                        "assigned" -> MaterialTheme.colorScheme.tertiary
                         "accepted" -> MaterialTheme.colorScheme.primary
-                        "picked_up" -> MaterialTheme.colorScheme.success
-                        "in_transit" -> MaterialTheme.colorScheme.info
+                        "picked_up" -> MaterialTheme.colorScheme.primary
+                        "in_transit" -> MaterialTheme.colorScheme.secondary
                         else -> MaterialTheme.colorScheme.onSurfaceVariant
                     }
                 )

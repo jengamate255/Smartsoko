@@ -1,5 +1,10 @@
 package com.fooddelivery.driver.realtime
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -12,8 +17,9 @@ import java.util.concurrent.TimeUnit
  * Compatible with the server's ws:// protocol (not Socket.IO).
  */
 class SocketManager(
+    private val context: Context,
     private val serverUrl: String,
-    private val authToken: String
+    private var authToken: String = ""
 ) {
 
     companion object {
@@ -27,6 +33,7 @@ class SocketManager(
     private val client = OkHttpClient.Builder()
         .readTimeout(0, TimeUnit.MILLISECONDS)
         .pingInterval(30, TimeUnit.SECONDS)
+        .connectTimeout(10, TimeUnit.SECONDS)
         .build()
 
     private var isConnected = false
@@ -34,16 +41,57 @@ class SocketManager(
     private var reconnectAttempts = 0
     private val maxReconnectAttempts = 5
     private val reconnectDelayMs = 3000L
+    private var shouldConnect = false
+
+    /**
+     * Invoked when the server rejects the connection as unauthorized (expired/invalid token).
+     * The owner should refresh the Firebase ID token and call [updateAuthToken].
+     */
+    var onUnauthorized: (() -> Unit)? = null
 
     val orderUpdatesLiveData: LiveData<OrderUpdate> = orderUpdates
     val locationUpdatesLiveData: LiveData<LocationUpdate> = locationUpdates
     val chatMessagesLiveData: LiveData<ChatMessage> = chatMessages
 
     init {
-        connect()
+        registerNetworkCallback()
+        if (authToken.isNotBlank()) {
+            shouldConnect = true
+            connect()
+        }
+    }
+
+    /**
+     * Re-connects whenever connectivity comes back (Wi-Fi -> mobile switch, etc.)
+     * even after the reconnect budget has been exhausted.
+     */
+    private fun registerNetworkCallback() {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val request = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .build()
+        try {
+            connectivityManager.registerNetworkCallback(request, object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    Log.d(TAG, "Network available - checking socket state")
+                    if (shouldConnect && !isConnected && reconnectAttempts >= maxReconnectAttempts) {
+                        reconnectAttempts = 0
+                        connect()
+                    }
+                }
+            })
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to register network callback", e)
+        }
     }
 
     private fun connect() {
+        if (!shouldConnect || authToken.isBlank()) {
+            Log.d(TAG, "Not connecting - shouldConnect=$shouldConnect, token empty=${authToken.isBlank()}")
+            return
+        }
+
         try {
             val requestBuilder = Request.Builder()
                 .url("$serverUrl/ws?token=$authToken")
@@ -120,6 +168,17 @@ class SocketManager(
                                 Log.d(TAG, "Received initial data from server")
                             }
 
+                            "error" -> {
+                                val errorMsg = data.optString("error", "Unknown error")
+                                Log.e(TAG, "Server error: $errorMsg")
+                                if (errorMsg.contains("Unauthorized", ignoreCase = true) || errorMsg.contains("Forbidden", ignoreCase = true)) {
+                                    // Token invalid - stop auto-reconnecting and let the owner refresh the token
+                                    shouldConnect = false
+                                    reconnectAttempts = maxReconnectAttempts
+                                    onUnauthorized?.invoke()
+                                }
+                            }
+
                             else -> {
                                 Log.d(TAG, "Received unknown message type: $type")
                             }
@@ -184,6 +243,8 @@ class SocketManager(
                     val sent = webSocket?.send(message.toString()) ?: false
                     if (!sent) {
                         messageQueue.add(message)
+                    } else {
+                        // sent successfully
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to send message", e)
@@ -239,6 +300,7 @@ class SocketManager(
     }
 
     fun disconnect() {
+        shouldConnect = false
         reconnectAttempts = maxReconnectAttempts // Prevent reconnection
         webSocket?.close(1000, "Driver going offline")
         webSocket = null
@@ -247,6 +309,26 @@ class SocketManager(
             messageQueue.clear()
         }
         Log.d(TAG, "WebSocket disconnected")
+    }
+
+    fun updateAuthToken(newToken: String) {
+        this.authToken = newToken
+        if (newToken.isNotBlank()) {
+            shouldConnect = true
+            reconnectAttempts = 0
+            if (!isConnected) {
+                connect()
+            } else {
+                // If already connected, reconnect with new token
+                webSocket?.close(1000, "Token updated")
+                webSocket = null
+                isConnected = false
+                connect()
+            }
+        } else {
+            // Token cleared (logout) - disconnect
+            disconnect()
+        }
     }
 
     fun isConnected(): Boolean = isConnected

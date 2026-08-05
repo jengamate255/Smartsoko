@@ -66,7 +66,6 @@ class MenuItemRow extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           '\$${menuItem.price.toStringAsFixed(2)}',
@@ -76,6 +75,27 @@ class MenuItemRow extends StatelessWidget {
                             color: Colors.green,
                           ),
                         ),
+                        if (menuItem.variants.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green[100],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              '${menuItem.variants.length} variants',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.green[800],
+                              ),
+                            ),
+                          ),
+                        ],
+                        const Spacer(),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,

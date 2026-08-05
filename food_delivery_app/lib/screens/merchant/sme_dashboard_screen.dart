@@ -70,9 +70,9 @@ class _SMEDashboardScreenState extends State<SMEDashboardScreen> {
         slivers: [
           // Header
           SliverAppBar(
-            expandedHeight: 120,
-            floating: true,
-            backgroundColor: Colors.orange,
+            expandedHeight: 140,
+            pinned: true,
+            backgroundColor: const Color(0xFF064E3B),
             flexibleSpace: FlexibleSpaceBar(
               title: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -87,19 +87,45 @@ class _SMEDashboardScreenState extends State<SMEDashboardScreen> {
                   ),
                   Text(
                     widget.shop.category,
-                    style: const TextStyle(fontSize: 12),
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w400),
                   ),
                 ],
+              ),
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF064E3B), Color(0xFF10B981)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${_analytics['totalOrders'] ?? 0} orders',
+                        style: const TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.download),
+                icon: const Icon(Icons.download, color: Colors.white),
                 onPressed: _exportSalesReport,
                 tooltip: 'Export Sales Report',
               ),
               IconButton(
-                icon: const Icon(Icons.refresh),
+                icon: const Icon(Icons.refresh, color: Colors.white),
                 onPressed: _loadAnalytics,
               ),
             ],
@@ -108,7 +134,7 @@ class _SMEDashboardScreenState extends State<SMEDashboardScreen> {
           // Content
           if (_isLoading)
             const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: CircularProgressIndicator(color: Color(0xFF064E3B))),
             )
           else
             SliverPadding(
@@ -117,35 +143,41 @@ class _SMEDashboardScreenState extends State<SMEDashboardScreen> {
                 delegate: SliverChildListDelegate([
                   // Period selector
                   _buildPeriodSelector(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
 
                   // Today's stats
-                  _buildSectionTitle('Today'),
+                  _buildSectionTitle('Today\'s Performance'),
+                  const SizedBox(height: 10),
                   _buildTodayStats(),
                   const SizedBox(height: 24),
 
                   // Overview stats
                   _buildSectionTitle('Overview (${_selectedPeriod} days)'),
+                  const SizedBox(height: 10),
                   _buildOverviewStats(),
                   const SizedBox(height: 24),
 
                   // Quick actions grid
                   _buildSectionTitle('Quick Actions'),
+                  const SizedBox(height: 10),
                   _buildQuickActions(),
                   const SizedBox(height: 24),
 
                   // Top products
                   _buildSectionTitle('Top Products'),
+                  const SizedBox(height: 10),
                   _buildTopProducts(),
                   const SizedBox(height: 24),
 
                   // Low stock alerts
                   _buildSectionTitle('Low Stock Alerts'),
+                  const SizedBox(height: 10),
                   _buildLowStockAlerts(),
                   const SizedBox(height: 24),
 
                   // Revenue chart
                   _buildSectionTitle('Revenue Trend'),
+                  const SizedBox(height: 10),
                   _buildRevenueChart(),
                   const SizedBox(height: 16),
                 ]),
@@ -157,44 +189,65 @@ class _SMEDashboardScreenState extends State<SMEDashboardScreen> {
   }
 
   Widget _buildPeriodSelector() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          const Text('Period:', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(width: 8),
-          ...[
-            {'label': '7D', 'days': 7},
-            {'label': '30D', 'days': 30},
-            {'label': '90D', 'days': 90},
-          ].map((period) {
-            final isSelected = _selectedPeriod == period['days'];
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: ChoiceChip(
-                label: Text(period['label'] as String),
-                selected: isSelected,
-                onSelected: (_) {
-                  setState(() => _selectedPeriod = period['days'] as int);
-                  _loadAnalytics();
-                },
-                selectedColor: Colors.orange[200],
+    return Row(
+      children: [
+        Text(
+          'Period:',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[700],
+            fontSize: 13,
+          ),
+        ),
+        const SizedBox(width: 10),
+        ...[
+          {'label': '7 Days', 'days': 7},
+          {'label': '30 Days', 'days': 30},
+          {'label': '90 Days', 'days': 90},
+        ].map((period) {
+          final isSelected = _selectedPeriod == period['days'];
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () {
+                setState(() => _selectedPeriod = period['days'] as int);
+                _loadAnalytics();
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFF064E3B) : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected ? const Color(0xFF064E3B) : Colors.grey[300]!,
+                  ),
+                ),
+                child: Text(
+                  period['label'] as String,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected ? Colors.white : const Color(0xFF4B5563),
+                  ),
+                ),
               ),
-            );
-          }).toList(),
-        ],
-      ),
+            ),
+          );
+        }).toList(),
+      ],
     );
   }
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 4),
       child: Text(
         title,
         style: const TextStyle(
-          fontSize: 18,
+          fontSize: 16,
           fontWeight: FontWeight.bold,
+          color: Color(0xFF1F2937),
         ),
       ),
     );
@@ -278,16 +331,30 @@ class _SMEDashboardScreenState extends State<SMEDashboardScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: color.withOpacity(0.15)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 10),
           Text(
             value,
             style: TextStyle(
@@ -298,11 +365,13 @@ class _SMEDashboardScreenState extends State<SMEDashboardScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
+          const SizedBox(height: 2),
           Text(
             label,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               color: color.withOpacity(0.8),
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -312,12 +381,12 @@ class _SMEDashboardScreenState extends State<SMEDashboardScreen> {
 
   Widget _buildQuickActions() {
     final actions = [
-      {'icon': Icons.inventory_2, 'label': 'Inventory', 'color': Colors.blue, 'screen': 'inventory'},
-      {'icon': Icons.people, 'label': 'Staff', 'color': Colors.purple, 'screen': 'staff'},
-      {'icon': Icons.local_offer, 'label': 'Promotions', 'color': Colors.orange, 'screen': 'promotions'},
-      {'icon': Icons.receipt, 'label': 'Invoices', 'color': Colors.green, 'screen': 'invoices'},
-      {'icon': Icons.account_balance, 'label': 'Branches', 'color': Colors.teal, 'screen': 'branches'},
-      {'icon': Icons.group, 'label': 'Customers', 'color': Colors.indigo, 'screen': 'customers'},
+      {'icon': Icons.inventory_2, 'label': 'Inventory', 'color': const Color(0xFF3B82F6), 'screen': 'inventory'},
+      {'icon': Icons.people, 'label': 'Staff', 'color': const Color(0xFF8B5CF6), 'screen': 'staff'},
+      {'icon': Icons.local_offer, 'label': 'Promotions', 'color': const Color(0xFFF59E0B), 'screen': 'promotions'},
+      {'icon': Icons.receipt, 'label': 'Invoices', 'color': const Color(0xFF10B981), 'screen': 'invoices'},
+      {'icon': Icons.account_balance, 'label': 'Branches', 'color': const Color(0xFF06B6D4), 'screen': 'branches'},
+      {'icon': Icons.group, 'label': 'Customers', 'color': const Color(0xFF6366F1), 'screen': 'customers'},
     ];
 
     return GridView.count(
@@ -328,29 +397,44 @@ class _SMEDashboardScreenState extends State<SMEDashboardScreen> {
       crossAxisSpacing: 12,
       childAspectRatio: 1,
       children: actions.map((action) {
+        final color = action['color'] as Color;
         return GestureDetector(
           onTap: () => _navigateToScreen(action['screen'] as String),
           child: Container(
             decoration: BoxDecoration(
-              color: (action['color'] as Color).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: (action['color'] as Color).withOpacity(0.3)),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.06),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+              border: Border.all(color: color.withOpacity(0.12)),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  action['icon'] as IconData,
-                  size: 32,
-                  color: action['color'] as Color,
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    action['icon'] as IconData,
+                    size: 24,
+                    color: color,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   action['label'] as String,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: action['color'] as Color,
+                    color: color,
                   ),
                 ),
               ],
@@ -436,42 +520,57 @@ class _SMEDashboardScreenState extends State<SMEDashboardScreen> {
   Widget _buildLowStockAlerts() {
     final lowStockProducts = (_analytics['lowStockProducts'] as List?) ?? [];
     if (lowStockProducts.isEmpty) {
-      return _buildEmptyState(Icons.check_circle, 'All products well stocked');
+      return _buildEmptyState(Icons.check_circle_outline, 'All products well stocked');
     }
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.red[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red[200]!),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.red.withOpacity(0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+        border: Border.all(color: Colors.red[100]!),
       ),
       child: Column(
         children: lowStockProducts.map<Widget>((p) {
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(
               children: [
-                Icon(Icons.warning, color: Colors.red[700], size: 20),
-                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.red[50],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(Icons.warning_amber, color: Colors.red[600], size: 18),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     p.name,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: Colors.red[200],
-                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.red[50],
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.red[200]!),
                   ),
                   child: Text(
                     '${p.stockQuantity} left',
                     style: TextStyle(
-                      color: Colors.red[800],
+                      color: Colors.red[700],
                       fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      fontSize: 11,
                     ),
                   ),
                 ),
@@ -486,7 +585,7 @@ class _SMEDashboardScreenState extends State<SMEDashboardScreen> {
   Widget _buildRevenueChart() {
     final dailyRevenue = (_analytics['dailyRevenue'] as List?) ?? [];
     if (dailyRevenue.isEmpty) {
-      return _buildEmptyState(Icons.show_chart, 'No revenue data');
+      return _buildEmptyState(Icons.show_chart, 'No revenue data yet');
     }
 
     final maxRevenue = dailyRevenue.fold<double>(
@@ -495,29 +594,48 @@ class _SMEDashboardScreenState extends State<SMEDashboardScreen> {
     );
 
     return Container(
-      height: 150,
-      padding: const EdgeInsets.all(12),
+      height: 160,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF064E3B).withOpacity(0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+        border: Border.all(color: const Color(0xFF064E3B).withOpacity(0.1)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: dailyRevenue.map((day) {
           final revenue = day['revenue'] as double;
-          final height = maxRevenue > 0 ? (revenue / maxRevenue) * 100 : 0.0;
+          final height = maxRevenue > 0 ? (revenue / maxRevenue) * 120 : 0.0;
           return Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 2),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  if (height > 0)
+                    Text(
+                      '${(revenue / 1000).toStringAsFixed(0)}k',
+                      style: const TextStyle(fontSize: 8, color: Color(0xFF6B7280)),
+                    ),
+                  const SizedBox(height: 2),
                   Container(
-                    height: height,
+                    height: height.clamp(4.0, 120.0),
                     decoration: BoxDecoration(
-                      color: revenue > 0 ? Colors.orange : Colors.grey[300],
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(2)),
+                      gradient: LinearGradient(
+                        colors: revenue > 0
+                            ? [const Color(0xFF064E3B), const Color(0xFF10B981)]
+                            : [Colors.grey[200]!, Colors.grey[200]!],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
                     ),
                   ),
                 ],
@@ -531,18 +649,27 @@ class _SMEDashboardScreenState extends State<SMEDashboardScreen> {
 
   Widget _buildEmptyState(IconData icon, String message) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
         color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey[200]!),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 48, color: Colors.grey[400]),
-          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 36, color: Colors.grey[400]),
+          ),
+          const SizedBox(height: 12),
           Text(
             message,
-            style: TextStyle(color: Colors.grey[600]),
+            style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w500),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

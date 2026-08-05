@@ -2,36 +2,36 @@
 
 /* CSS Variables - Design Tokens */
 :root {
-  /* Colors - Afrocentric Palette */
-  --color-gold: #D4A574;
-  --color-gold-dark: #C1945F;
-  --color-gold-hover: #C1945F;
-  --color-terra: #A0522D;
-  --color-amber: #F39C12;
-  --color-orange: #E67E22;
-  --color-burgundy: #8B3A3A;
-  --color-sage: #5D8B5A;
-  --color-indigo: #1A237E;
-  --color-charcoal: #2C2C2C;
-  --color-cream: #F5F1E8;
-  --color-taupe: #D4C5B9;
-  --color-gray: #8B8680;
+  /* Colors - SmartSoko Green Palette */
+  --color-gold: #064E3B;
+  --color-gold-dark: #043020;
+  --color-gold-hover: #043020;
+  --color-terra: #059669;
+  --color-amber: #F59E0B;
+  --color-orange: #059669;
+  --color-burgundy: #B91C1C;
+  --color-sage: #16A34A;
+  --color-indigo: #0EA5E9;
+  --color-charcoal: #022D1D;
+  --color-cream: #F8FAF6;
+  --color-taupe: #E2E8F0;
+  --color-gray: #64748B;
   --color-white: #FFFFFF;
 
   /* Semantic Colors */
-  --color-success: #5D8B5A;
-  --color-warning: #E67E22;
-  --color-error: #C1440E;
-  --color-info: #1A237E;
+  --color-success: #059669;
+  --color-warning: #F59E0B;
+  --color-error: #B91C1C;
+  --color-info: #0EA5E9;
 
   /* Category Colors */
-  --color-fishing: #A0522D;
-  --color-fruits: #E67E22;
-  --color-dairy: #D4A574;
-  --color-vegetables: #5D8B5A;
-  --color-bakery: #8B6F47;
-  --color-honey: #D4A574;
-  --color-artisan: #8B3A3A;
+  --color-fishing: #059669;
+  --color-fruits: #0EA5E9;
+  --color-dairy: #F59E0B;
+  --color-vegetables: #16A34A;
+  --color-bakery: #B45309;
+  --color-honey: #D97706;
+  --color-artisan: #B91C1C;
 
   /* Typography */
   --font-display: 'Playfair Display', serif;
@@ -161,7 +161,7 @@ a:hover {
 /* Primary Button */
 .btn-primary {
   background-color: var(--color-gold);
-  color: var(--color-charcoal);
+  color: var(--color-white);
   padding: 12px 32px;
   min-height: 48px;
   letter-spacing: 0.5px;
@@ -188,7 +188,7 @@ a:hover {
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: rgba(212, 165, 116, 0.1);
+  background-color: rgba(6, 78, 59, 0.1);
   border-color: var(--color-gold-dark);
 }
 
@@ -201,7 +201,7 @@ a:hover {
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background-color: rgba(44, 44, 44, 0.05);
+  background-color: rgba(2, 45, 29, 0.05);
   text-decoration: underline;
 }
 
@@ -237,7 +237,7 @@ a:hover {
 .input:focus {
   outline: none;
   border-color: var(--color-gold);
-  box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
+  box-shadow: 0 0 0 3px rgba(6, 78, 59, 0.1);
 }
 
 .input::placeholder {
@@ -268,7 +268,7 @@ a:hover {
 .search-input:focus {
   outline: none;
   border-color: var(--color-gold);
-  box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
+  box-shadow: 0 0 0 3px rgba(6, 78, 59, 0.1);
 }
 
 .search-icon {
@@ -321,7 +321,7 @@ a:hover {
   display: inline-block;
   padding: 4px 12px;
   background-color: var(--color-gold);
-  color: var(--color-charcoal);
+  color: var(--color-white);
   border-radius: var(--radius-full);
   font-size: var(--text-caption);
   font-weight: 600;
@@ -438,7 +438,7 @@ a:hover {
 .quantity-btn:hover {
   background-color: var(--color-gold);
   border-color: var(--color-gold);
-  color: var(--color-charcoal);
+  color: var(--color-white);
 }
 
 .quantity-value {
@@ -538,7 +538,7 @@ a:hover {
 
 .nav-label {
   font-family: var(--font-accent);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
 }
 

@@ -33,7 +33,7 @@ export const PostProductScreen = () => {
     try {
       // Get file extension
       const fileExt = fileUri.split('.').pop();
-      const fileName = ${Math.random().toString(36).substring(2, 15)}.;
+      const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
       
       // Get file as blob
       const response = await fetch(fileUri);
@@ -44,7 +44,7 @@ export const PostProductScreen = () => {
         .storage
         .from('product-images')
         .upload(fileName, blob, {
-          contentType: image/,
+          contentType: 'image/' + fileExt,
           upsert: false
         });
 

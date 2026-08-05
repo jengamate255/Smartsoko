@@ -48,11 +48,24 @@ export const useChatStore = create<ChatState>((set) => ({
       const { data, error } = await supabase
         .from('chats_view') // You would create this view or adjust based on your schema
         .select('*')
-        .or(user1_id.eq.,user2_id.eq.)
+        .or('user1_id.eq.' + userId + ',user2_id.eq.' + userId)
         .order('last_message_time', { ascending: false });
 
       if (error) throw error;
-      set({ chats: data as Chat[], loading: false });
+      const chats: Chat[] = (data as any[]).map((row) => {
+        if (row.lastMessage !== undefined || row.user_id !== undefined) {
+          return row as Chat;
+        }
+        return {
+          id: row.id,
+          title: row.title || (row.user1_name && row.user2_name ? row.user1_name + ' - ' + row.user2_name : 'Chat'),
+          lastMessage: row.last_message || '',
+          lastMessageTime: row.last_message_time || '',
+          user_id: row.user1_id === userId ? row.user2_id : row.user1_id,
+          avatar_url: row.user1_id === userId ? row.user2_avatar : row.user1_avatar,
+        };
+      });
+      set({ chats, loading: false });
     } catch (err: any) {
       set({ error: err.message, loading: false });
     }
@@ -92,13 +105,15 @@ export const useChatStore = create<ChatState>((set) => ({
       if (error) throw error;
 
       // Also update the chat's last message
-      await supabase
+      const { error: chatError } = await supabase
         .from('chats')
         .update({
           last_message: text,
           last_message_time: new Date().toISOString(),
         })
         .eq('id', chatId);
+
+      if (chatError) throw chatError;
 
       set((state) => ({
         messages: [...state.messages, data as Message],
@@ -112,8 +127,8 @@ export const useChatStore = create<ChatState>((set) => ({
   subscribeToMessages: (chatId: string, callback: (messages: Message[]) => void) => {
     // Set up real-time subscription for messages
     const subscription = supabase
-      .channel(messages-)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: chat_id=eq. }, (payload) => {
+      .channel('messages-' + chatId)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: 'chat_id=eq.' + chatId }, (payload) => {
         set((state) => {
           const newMessage = payload.new as Message;
           callback([...state.messages, newMessage]);

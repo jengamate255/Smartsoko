@@ -1,40 +1,70 @@
 package com.fooddelivery.driver.data
 
 import com.fooddelivery.driver.data.model.User
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 
-/**
- * Repository for handling authentication data sources.
- */
-class AuthRepository(
-    private val supabaseClient: SupabaseClient
-) {
+class AuthRepository {
+    private val auth: FirebaseAuth = Firebase.auth
+
+    val currentUser: FirebaseUser? get() = auth.currentUser
+
+    val isSignedIn: Boolean get() = auth.currentUser != null
+
+    val authStateChanges: Flow<FirebaseUser?> = callbackFlow {
+        val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            trySend(firebaseAuth.currentUser)
+        }
+        auth.addAuthStateListener(listener)
+        awaitClose { auth.removeAuthStateListener(listener) }
+    }
 
     suspend fun signIn(email: String, password: String): Result<User> {
         return try {
-            val response = supabaseClient.signIn(email, password)
-            when (response) {
-                is Resource.Success -> {
-                    val data = response.data
-                    // Extract user data from Supabase response
-                    val user = User(
-                        id = data.getString("id") ?? "",
-                        email = data.getString("email") ?? "",
-                        fullName = data.getString("user_metadata")?.let { JSONObject(it).optString("full_name", data.getString("email")?.split("@")[0] ?: "User") } ?: data.getString("email")?.split("@")[0] ?: "User",
-                        role = data.getString("role") ?: "driver", // Assuming we are signing in as driver
-                        phone = data.getString("phone")
-                    )
-                    Result.success(user)
-                }
-                is Resource.Error -> Result.exception(Exception(response.message))
-                is Resource.Loading -> Result.exception(Exception("Loading"))
-            }
+            val result = auth.signInWithEmailAndPassword(email, password).await()
+            val fbUser = result.user ?: throw Exception("Sign in failed")
+            Result.success(fbUser.toAppUser())
         } catch (e: Exception) {
-            Result.exception(e)
+            Result.failure(e)
         }
     }
 
-    // In a real app, we would also have signUp, signOut, refreshToken, etc.
-    // For now, we focus on signIn as per the requirement to use Supabase for auth.
+    suspend fun signUp(email: String, password: String, name: String): Result<User> {
+        return try {
+            val result = auth.createUserWithEmailAndPassword(email, password).await()
+            val fbUser = result.user ?: throw Exception("Sign up failed")
+            fbUser.updateProfile(com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                .setDisplayName(name)
+                .build()
+            ).await()
+            Result.success(fbUser.toAppUser())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getFirebaseToken(): String {
+        return auth.currentUser?.getIdToken(true)?.await()?.token
+            ?: throw Exception("Not authenticated")
+    }
+
+    suspend fun signOut() {
+        auth.signOut()
+    }
+
+    private fun FirebaseUser.toAppUser(): User {
+        return User(
+            id = uid,
+            email = email ?: "",
+            fullName = displayName ?: email?.split("@")?.firstOrNull() ?: "User",
+            role = "driver",
+            phone = phoneNumber ?: ""
+        )
+    }
 }

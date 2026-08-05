@@ -1,6 +1,6 @@
 [build]
   publish = "web"
-  command = "echo 'Static build complete'"
+  command = "echo Static build complete"
 
 [build.environment]
   NODE_VERSION = "18"
@@ -14,14 +14,48 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
 
 [[headers]]
-  for = "*.@(js|css|png|jpg|jpeg|gif|ico|svg)"
+  for = "/*.html"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "no-cache"
 
-# Direct file routes
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
 [[redirects]]
-  from = "/customer"
-  to = "/customer.html"
+  from = "/"
+  to = "/home.html"
+  status = 200
+
+[[redirects]]
+  from = "/register"
+  to = "/signup.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard"
+  to = "/merchant.html"
+  status = 200
+
+[[redirects]]
+  from = "/forgot-password"
+  to = "/check-user.html"
+  status = 200
+
+[[redirects]]
+  from = "/login"
+  to = "/login.html"
+  status = 200
+
+[[redirects]]
+  from = "/signup"
+  to = "/signup.html"
   status = 200
 
 [[redirects]]
@@ -30,13 +64,18 @@
   status = 200
 
 [[redirects]]
-  from = "/discovery"
-  to = "/discovery.html"
+  from = "/merchant"
+  to = "/merchant.html"
   status = 200
 
 [[redirects]]
-  from = "/product"
-  to = "/product.html"
+  from = "/driver"
+  to = "/driver.html"
+  status = 200
+
+[[redirects]]
+  from = "/customer"
+  to = "/customer.html"
   status = 200
 
 [[redirects]]
@@ -46,17 +85,22 @@
 
 [[redirects]]
   from = "/checkout"
-  to = "/smartsoko-checkout.html"
+  to = "/checkout.html"
   status = 200
 
 [[redirects]]
-  from = "/tracking"
-  to = "/index.html"
+  from = "/product"
+  to = "/product.html"
   status = 200
 
 [[redirects]]
-  from = "/chat"
-  to = "/chat.html"
+  from = "/discovery"
+  to = "/discovery.html"
+  status = 200
+
+[[redirects]]
+  from = "/track-order"
+  to = "/track-order.html"
   status = 200
 
 [[redirects]]
@@ -65,13 +109,43 @@
   status = 200
 
 [[redirects]]
-  from = "/driver"
-  to = "/driver.html"
+  from = "/orders"
+  to = "/orders.html"
   status = 200
 
 [[redirects]]
-  from = "/merchant"
-  to = "/merchant.html"
+  from = "/chat"
+  to = "/chat.html"
+  status = 200
+
+[[redirects]]
+  from = "/messages"
+  to = "/messages.html"
+  status = 200
+
+[[redirects]]
+  from = "/wallet"
+  to = "/wallet.html"
+  status = 200
+
+[[redirects]]
+  from = "/referral"
+  to = "/referral.html"
+  status = 200
+
+[[redirects]]
+  from = "/social"
+  to = "/social.html"
+  status = 200
+
+[[redirects]]
+  from = "/social-profile"
+  to = "/social-profile.html"
+  status = 200
+
+[[redirects]]
+  from = "/wishlists"
+  to = "/wishlists.html"
   status = 200
 
 [[redirects]]
@@ -85,68 +159,41 @@
   status = 200
 
 [[redirects]]
+  from = "/store"
+  to = "/store.html"
+  status = 200
+
+[[redirects]]
+  from = "/onboarding"
+  to = "/onboarding.html"
+  status = 200
+
+[[redirects]]
+  from = "/create-store"
+  to = "/create-store.html"
+  status = 200
+
+[[redirects]]
+  from = "/store-settings"
+  to = "/store-settings.html"
+  status = 200
+
+[[redirects]]
   from = "/admin"
-  to = "/supabase.html"
-  status = 200
-
-[[redirects]]
-  from = "/smartsoko"
-  to = "/smartsoko-home.html"
-  status = 200
-
-[[redirects]]
-  from = "/smartsoko/products"
-  to = "/smartsoko-products.html"
-  status = 200
-
-[[redirects]]
-  from = "/smartsoko/vendor"
-  to = "/smartsoko-vendor.html"
-  status = 200
-
-[[redirects]]
-  from = "/smartsoko/cart"
-  to = "/smartsoko-cart.html"
-  status = 200
-
-[[redirects]]
-  from = "/smartsoko/checkout"
-  to = "/smartsoko-checkout.html"
-  status = 200
-
-[[redirects]]
-  from = "/supabase"
-  to = "/supabase.html"
-  status = 200
-
-[[redirects]]
-  from = "/test-supabase"
-  to = "/test-supabase.html"
-  status = 200
-
-[[redirects]]
-  from = "/test/api"
-  to = "/test-api-integration.html"
-  status = 200
-
-[[redirects]]
-  from = "/404"
-  to = "/404.html"
-  status = 200
-
-# SPA fallback - all unknown routes go to main landing
-[[redirects]]
-  from = "/*"
-  to = "/main.html"
-  status = 200
-
-# Admin routes
-[[redirects]]
-  from = "/admin-dashboard"
   to = "/admin.html"
   status = 200
 
 [[redirects]]
-  from = "/orders"
-  to = "/orders.html"
+  from = "/admin-panel"
+  to = "/admin-panel.html"
+  status = 200
+
+[[redirects]]
+  from = "/fleet-manager"
+  to = "/fleet-manager.html"
+  status = 200
+
+[[redirects]]
+  from = "/main"
+  to = "/main.html"
   status = 200

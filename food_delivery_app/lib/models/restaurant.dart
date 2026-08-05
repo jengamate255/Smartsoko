@@ -101,6 +101,52 @@ class Restaurant {
   }
 }
 
+class MenuItemVariant {
+  final String id;
+  final String name;
+  final String type;
+  final double priceModifier;
+  final int stock;
+  final String? sku;
+  final bool isAvailable;
+
+  MenuItemVariant({
+    required this.id,
+    required this.name,
+    required this.type,
+    this.priceModifier = 0,
+    this.stock = 0,
+    this.sku,
+    this.isAvailable = true,
+  });
+
+  double getEffectivePrice(double basePrice) => basePrice + priceModifier;
+
+  factory MenuItemVariant.fromMap(Map<String, dynamic> data) {
+    return MenuItemVariant(
+      id: data['id'] ?? '',
+      name: data['name'] ?? '',
+      type: data['type'] ?? 'size',
+      priceModifier: (data['priceModifier'] ?? 0).toDouble(),
+      stock: data['stock'] ?? 0,
+      sku: data['sku'],
+      isAvailable: data['isAvailable'] ?? true,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'type': type,
+      'priceModifier': priceModifier,
+      'stock': stock,
+      'sku': sku,
+      'isAvailable': isAvailable,
+    };
+  }
+}
+
 class MenuItem {
   final String id;
   final String restaurantId;
@@ -110,6 +156,7 @@ class MenuItem {
   final String imageUrl;
   final String category;
   final bool isAvailable;
+  final List<MenuItemVariant> variants;
 
   MenuItem({
     required this.id,
@@ -120,10 +167,15 @@ class MenuItem {
     required this.imageUrl,
     required this.category,
     required this.isAvailable,
+    this.variants = const [],
   });
 
   factory MenuItem.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    final variantsList = (data['variants'] as List<dynamic>?)
+            ?.map((v) => MenuItemVariant.fromMap(v as Map<String, dynamic>))
+            .toList() ??
+        [];
     return MenuItem(
       id: doc.id,
       restaurantId: data['restaurantId'] ?? '',
@@ -133,10 +185,15 @@ class MenuItem {
       imageUrl: data['imageUrl'] ?? '',
       category: data['category'] ?? '',
       isAvailable: data['isAvailable'] ?? true,
+      variants: variantsList,
     );
   }
 
   factory MenuItem.fromMap(Map<String, dynamic> data) {
+    final variantsList = (data['variants'] as List<dynamic>?)
+            ?.map((v) => MenuItemVariant.fromMap(v as Map<String, dynamic>))
+            .toList() ??
+        [];
     return MenuItem(
       id: data['id']?.toString() ?? '',
       restaurantId: data['restaurant_id']?.toString() ?? data['restaurantId'] ?? '',
@@ -146,6 +203,7 @@ class MenuItem {
       imageUrl: data['image_url'] ?? data['imageUrl'] ?? '',
       category: data['category'] ?? '',
       isAvailable: data['is_available'] ?? data['isAvailable'] ?? true,
+      variants: variantsList,
     );
   }
 
@@ -158,6 +216,7 @@ class MenuItem {
       'imageUrl': imageUrl,
       'category': category,
       'isAvailable': isAvailable,
+      'variants': variants.map((v) => v.toMap()).toList(),
     };
   }
 }

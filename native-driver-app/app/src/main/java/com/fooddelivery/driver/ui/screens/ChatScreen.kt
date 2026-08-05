@@ -1,25 +1,41 @@
 package com.fooddelivery.driver.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsStateWithLifecycle
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.fooddelivery.driver.R
-import com.fooddelivery.driver.data.model.ChatMessage
+import androidx.compose.foundation.clickable
+import com.fooddelivery.driver.realtime.SocketManager
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import com.fooddelivery.driver.ui.state.AppViewModel
 import com.fooddelivery.driver.ui.theme.SmartSokoDriverTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
+import androidx.compose.ui.draw.clip
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
     viewModel: AppViewModel = viewModel(),
@@ -27,17 +43,18 @@ fun ChatScreen(
 ) {
     SmartSokoDriverTheme {
         // Collect state from ViewModel
-        val messages by viewModel.messages.collectAsStateWithLifecycle(emptyList())
-        val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-        val error by viewModel.error.collectAsStateWithLifecycle()
-        val user by viewModel.user.collectAsStateWithLifecycle()
-        val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
-        val activeOrder by viewModel.activeOrder.collectAsStateWithLifecycle()
+        val messages by viewModel.messages.observeAsState(emptyList())
+        val isLoading by viewModel.isLoading.observeAsState(false)
+        val error by viewModel.error.observeAsState()
+        val user by viewModel.user.observeAsState()
+        val isOnline by viewModel.isOnline.observeAsState(false)
+        val activeOrder by viewModel.activeOrder.observeAsState()
 
         // Text field state for message input
         var messageText by remember { mutableStateOf("") }
         // Scroll state for chat list
         val listState = rememberLazyListState()
+        val coroutineScope = rememberCoroutineScope()
 
         Column(modifier = Modifier.fillMaxSize()) {
             // App Bar
@@ -66,7 +83,7 @@ fun ChatScreen(
                         }
                     }
                 },
-                backgroundColor = MaterialTheme.colorScheme.primary
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
             )
 
             // Show error if any
@@ -74,13 +91,11 @@ fun ChatScreen(
                 Snackbar(
                     modifier = Modifier.fillMaxWidth(),
                     action = {
-                        TextButton(onClick = { /* TODO: Dismiss snackbar */ }) {
+                        TextButton(onClick = { }) {
                             Text("Dismiss")
                         }
                     },
-                    label = { Text(text = errorMessage) },
-                    backgroundColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError
+                    content = { Text(text = errorMessage) }
                 )
             }
 
@@ -101,7 +116,8 @@ fun ChatScreen(
                 }
                 user == null -> {
                     // Show login screen
-                    LoginScreen(
+                    AuthScreen(
+                        viewModel = viewModel,
                         onLoginSuccess = { email, password ->
                             viewModel.signIn(email, password)
                         }
@@ -154,7 +170,9 @@ fun ChatScreen(
                                                 viewModel.sendChatMessage(orderId, messageText)
                                                 messageText = ""
                                                 // Scroll to bottom
-                                                listState.scrollToItem(messages.size - 1)
+                                                coroutineScope.launch {
+                                                    listState.animateScrollToItem(messages.size - 1)
+                                                }
                                             }
                                         },
                                         enabled = messageText.isNotEmpty()
@@ -174,7 +192,9 @@ fun ChatScreen(
                                         if (messageText.isNotEmpty()) {
                                             viewModel.sendChatMessage(orderId, messageText)
                                             messageText = ""
-                                            listState.scrollToItem(messages.size - 1)
+                                            coroutineScope.launch {
+                                                listState.animateScrollToItem(messages.size - 1)
+                                            }
                                         }
                                     }
                                 ),
@@ -192,7 +212,7 @@ fun ChatScreen(
 
 @Composable
 private fun ChatMessageBubble(
-    message: ChatMessage,
+    message: SocketManager.ChatMessage,
     isOwnMessage: Boolean
 ) {
     Row(
@@ -240,7 +260,7 @@ private fun ChatMessageBubble(
                         text = formatTimestamp(message.timestamp),
                         style = MaterialTheme.typography.bodySmall,
                         color = if (isOwnMessage) {
-                            MaterialTheme.colorScheme.onPrimaryVariant
+                            MaterialTheme.colorScheme.onPrimary
                         } else {
                             MaterialTheme.colorScheme.onSurfaceVariant
                         },
@@ -252,9 +272,10 @@ private fun ChatMessageBubble(
             // Avatar (only for other user's messages)
             if (!isOwnMessage) {
                 Spacer(modifier = Modifier.width(8.dp))
-                Circle(
+                Box(
                     modifier = Modifier
                         .size(24.dp)
+                        .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
@@ -264,103 +285,6 @@ private fun ChatMessageBubble(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun LoginScreen(
-    onLoginSuccess: (String, String) -> Unit
-) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var loading by remember { mutableStateOf(false) }
-
-    SmartSokoDriverTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp)
-        ) {
-            Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_logo),
-                    contentDescription = "SmartSoko Driver",
-                    modifier = Modifier.size(80.dp)
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = "Welcome to SmartSoko Driver",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                TextField(
-                    label = { Text("Email") },
-                    value = email,
-                    onValueChange = { email = it },
-                    isError = email.isEmpty(),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Email,
-                            contentDescription = "Email",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                OutlinedTextField(
-                    label = { Text("Password") },
-                    value = password,
-                    onValueChange = { password = it },
-                    isError = password.isEmpty(),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = "Password",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    },
-                    isPassword = true
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(
-                    onClick = {
-                        if (email.isNotEmpty() && password.isNotEmpty()) {
-                            loading = true
-                            onLoginSuccess(email, password)
-                            loading = false
-                        }
-                    },
-                    enabled = !loading,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    if (loading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Text(
-                            text = "Sign In",
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Don't have an account? Contact support to create one.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
     }

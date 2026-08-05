@@ -12,16 +12,19 @@
       "host": "127.0.0.1"
     },
     "functions": {
-      "port": 5002
+      "port": 5001
     },
     "ui": {
       "enabled": true,
       "port": 4000
     }
   },
+  "storage": {
+    "rules": "storage.rules"
+  },
   "functions": {
     "source": "functions",
-    "runtime": "nodejs16"
+    "runtime": "nodejs18"
   },
   "firestore": {
     "rules": "firestore.rules",
@@ -30,28 +33,50 @@
   "hosting": {
     "site": "fooddelievry-dce15",
     "public": "web",
+    "cleanUrls": true,
+    "trailingSlash": false,
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "server.js",
+      "package.json",
+      "package-lock.json",
+      "**/*.md",
+      "**/*.backup",
+      "test-*.html"
     ],
     "rewrites": [
-      {
-        "source": "/api/**",
-        "function": "api"
-      },
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
+      { "source": "/", "destination": "/home.html" },
+      { "source": "/register", "destination": "/signup.html" },
+      { "source": "/dashboard", "destination": "/merchant.html" },
+      { "source": "/forgot-password", "destination": "/check-user.html" }
     ],
     "headers": [
       {
-        "source": "**/*.@(js|css|png|jpg|jpeg|gif|ico|svg)",
+        "source": "**/*.@(js|css)",
         "headers": [
           {
             "key": "Cache-Control",
-            "value": "public, max-age=31536000, immutable"
+            "value": "public, max-age=3600"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(png|jpg|jpeg|gif|ico|svg|webp|woff2)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=604800"
+          }
+        ]
+      },
+      {
+        "source": "**/*.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
           }
         ]
       }

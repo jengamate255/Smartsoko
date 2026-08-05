@@ -1572,6 +1572,492 @@ app.post('/api/upload', async (req, res) => {
   }
 });
 
+// ─── Admin Notifications API ───
+app.get('/api/admin/notifications', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { status, limit = 50 } = req.query;
+    if (!db) {
+      return res.json({ success: true, data: [], count: 0 });
+    }
+    let q = db.collection('admin_notifications').orderBy('createdAt', 'desc');
+    if (status) q = q.where('status', '==', status);
+    const snap = await q.limit(parseInt(String(limit)) || 50).get();
+    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    res.json({ success: true, data, count: data.length });
+  } catch (e) {
+    console.error('Error fetching notifications:', e);
+    res.status(500).json({ success: false, error: 'Failed to fetch notifications' });
+  }
+});
+
+app.post('/api/admin/notifications', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { title, message, type, priority, targetRole, targetUserIds } = req.body;
+    if (!title || !message) {
+      return res.status(400).json({ success: false, error: 'Title and message required' });
+    }
+    const notification = {
+      title,
+      message,
+      type: type || 'info',
+      priority: priority || 'normal',
+      targetRole: targetRole || 'all',
+      targetUserIds: targetUserIds || [],
+      status: 'active',
+      sentBy: req.user.uid,
+      sentAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      readCount: 0,
+      deliveryCount: 0
+    };
+    if (db) {
+      const ref = await db.collection('admin_notifications').add(notification);
+      res.json({ success: true, id: ref.id, message: 'Notification sent' });
+    } else {
+      res.json({ success: true, id: 'sim_' + Date.now(), message: 'Notification sent (simulated)' });
+    }
+  } catch (e) {
+    console.error('Error sending notification:', e);
+    res.status(500).json({ success: false, error: 'Failed to send notification' });
+  }
+});
+
+app.delete('/api/admin/notifications/:id', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    if (db) {
+      await db.collection('admin_notifications').doc(req.params.id).delete();
+    }
+    res.json({ success: true, message: 'Notification deleted' });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to delete notification' });
+  }
+});
+
+// ─── Admin RBAC API ───
+app.get('/api/admin/rbac/roles', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    const roles = [
+      { id: 'super_admin', name: 'Super Admin', permissions: ['*'], description: 'Full system access' },
+      { id: 'admin', name: 'Admin', permissions: ['read', 'write', 'manage_users', 'manage_orders', 'manage_sellers', 'manage_drivers', 'view_analytics'], description: 'Standard admin access' },
+      { id: 'moderator', name: 'Moderator', permissions: ['read', 'manage_orders', 'manage_sellers', 'view_analytics'], description: 'Content moderation access' },
+      { id: 'support', name: 'Support Agent', permissions: ['read', 'manage_tickets', 'view_users'], description: 'Customer support access' },
+      { id: 'finance', name: 'Finance', permissions: ['read', 'view_reports', 'manage_payouts'], description: 'Financial operations access' },
+      { id: 'analyst', name: 'Analyst', permissions: ['read', 'view_analytics', 'view_reports'], description: 'Read-only analytics access' }
+    ];
+    if (db) {
+      const snap = await db.collection('admin_roles').get();
+      if (!snap.empty) {
+        const customRoles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        res.json({ success: true, data: [...roles, ...customRoles] });
+        return;
+      }
+    }
+    res.json({ success: true, data: roles });
+  } catch (e) {
+    console.error('Error fetching roles:', e);
+    res.status(500).json({ success: false, error: 'Failed to fetch roles' });
+  }
+});
+
+app.post('/api/admin/rbac/roles', verifyFirebaseToken, requireRole('super_admin'), async (req, res) => {
+  try {
+    const { id, name, permissions, description } = req.body;
+    if (!id || !name || !permissions) {
+      return res.status(400).json({ success: false, error: 'id, name, and permissions required' });
+    }
+    if (db) {
+      await db.collection('admin_roles').doc(id).set({ name, permissions, description, createdAt: admin.firestore.FieldValue.serverTimestamp() });
+    }
+    res.json({ success: true, message: `Role "${name}" created` });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to create role' });
+  }
+});
+
+app.get('/api/admin/rbac/user-roles', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    if (!db) return res.json({ success: true, data: [] });
+    const snap = await db.collection('admin_user_roles').get();
+    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    res.json({ success: true, data });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to fetch user roles' });
+  }
+});
+
+app.post('/api/admin/rbac/user-roles', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { userId, roleId, email } = req.body;
+    if (!userId || !roleId) {
+      return res.status(400).json({ success: false, error: 'userId and roleId required' });
+    }
+    if (db) {
+      const existing = await db.collection('admin_user_roles').where('userId', '==', userId).get();
+      if (!existing.empty) {
+        await db.collection('admin_user_roles').doc(existing.docs[0].id).update({ roleId, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      } else {
+        await db.collection('admin_user_roles').add({
+          userId, roleId, email: email || '',
+          assignedBy: req.user.uid,
+          assignedAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    }
+    res.json({ success: true, message: 'Role assigned' });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to assign role' });
+  }
+});
+
+app.delete('/api/admin/rbac/user-roles/:id', verifyFirebaseToken, requireRole('super_admin'), async (req, res) => {
+  try {
+    if (db) {
+      await db.collection('admin_user_roles').doc(req.params.id).delete();
+    }
+    res.json({ success: true, message: 'Role assignment revoked' });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to revoke role' });
+  }
+});
+
+// ─── Admin Webhooks API ───
+app.get('/api/admin/webhooks', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    if (!db) return res.json({ success: true, data: [] });
+    const snap = await db.collection('admin_webhooks').orderBy('createdAt', 'desc').get();
+    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    res.json({ success: true, data, count: data.length });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to fetch webhooks' });
+  }
+});
+
+app.post('/api/admin/webhooks', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { name, url, events, secret } = req.body;
+    if (!name || !url || !events || !events.length) {
+      return res.status(400).json({ success: false, error: 'name, url, and events required' });
+    }
+    const webhook = {
+      name, url, events,
+      secret: secret || '',
+      isActive: true,
+      createdBy: req.user.uid,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      lastTriggeredAt: null,
+      failureCount: 0
+    };
+    if (db) {
+      const ref = await db.collection('admin_webhooks').add(webhook);
+      res.json({ success: true, id: ref.id, message: 'Webhook created' });
+    } else {
+      res.json({ success: true, id: 'sim_' + Date.now(), message: 'Webhook created (simulated)' });
+    }
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to create webhook' });
+  }
+});
+
+app.put('/api/admin/webhooks/:id', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { name, url, events, isActive, secret } = req.body;
+    if (!db) return res.json({ success: true, message: 'Webhook updated (simulated)' });
+    const updates = {};
+    if (name !== undefined) updates.name = name;
+    if (url !== undefined) updates.url = url;
+    if (events !== undefined) updates.events = events;
+    if (isActive !== undefined) updates.isActive = isActive;
+    if (secret !== undefined) updates.secret = secret;
+    updates.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+    await db.collection('admin_webhooks').doc(req.params.id).update(updates);
+    res.json({ success: true, message: 'Webhook updated' });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to update webhook' });
+  }
+});
+
+app.delete('/api/admin/webhooks/:id', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    if (db) {
+      await db.collection('admin_webhooks').doc(req.params.id).delete();
+    }
+    res.json({ success: true, message: 'Webhook deleted' });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to delete webhook' });
+  }
+});
+
+// ─── Admin API Keys ───
+app.get('/api/admin/api-keys', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    if (!db) return res.json({ success: true, data: [] });
+    const snap = await db.collection('admin_api_keys').orderBy('createdAt', 'desc').get();
+    const data = snap.docs.map(d => ({ id: d.id, ...d.data(), key: 'sk-****' + (d.data().key || '').slice(-4) }));
+    res.json({ success: true, data, count: data.length });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to fetch API keys' });
+  }
+});
+
+app.post('/api/admin/api-keys', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { name, permissions, rateLimit } = req.body;
+    if (!name) return res.status(400).json({ success: false, error: 'name required' });
+    const key = 'sk_' + require('crypto').randomBytes(32).toString('hex');
+    const apiKey = {
+      name, key,
+      permissions: permissions || ['read'],
+      rateLimit: rateLimit || 100,
+      isActive: true,
+      createdBy: req.user.uid,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      lastUsedAt: null,
+      useCount: 0
+    };
+    if (db) {
+      const ref = await db.collection('admin_api_keys').add(apiKey);
+      res.json({ success: true, id: ref.id, key, message: 'API key created. Save this key - it will not be shown again.' });
+    } else {
+      res.json({ success: true, id: 'sim_' + Date.now(), key, message: 'API key created (simulated). Save this key.' });
+    }
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to create API key' });
+  }
+});
+
+app.put('/api/admin/api-keys/:id', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { name, isActive, permissions, rateLimit } = req.body;
+    if (!db) return res.json({ success: true, message: 'API key updated (simulated)' });
+    const updates = {};
+    if (name !== undefined) updates.name = name;
+    if (isActive !== undefined) updates.isActive = isActive;
+    if (permissions !== undefined) updates.permissions = permissions;
+    if (rateLimit !== undefined) updates.rateLimit = rateLimit;
+    updates.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+    await db.collection('admin_api_keys').doc(req.params.id).update(updates);
+    res.json({ success: true, message: 'API key updated' });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to update API key' });
+  }
+});
+
+app.delete('/api/admin/api-keys/:id', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    if (db) {
+      await db.collection('admin_api_keys').doc(req.params.id).delete();
+    }
+    res.json({ success: true, message: 'API key revoked' });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to revoke API key' });
+  }
+});
+
+// ─── Admin Payouts API ───
+app.get('/api/admin/payouts', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { status, limit = 50 } = req.query;
+    if (!db) return res.json({ success: true, data: [] });
+    let q = db.collection('payout_batches').orderBy('createdAt', 'desc');
+    if (status) q = q.where('status', '==', status);
+    const snap = await q.limit(parseInt(String(limit)) || 50).get();
+    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    res.json({ success: true, data, count: data.length });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to fetch payouts' });
+  }
+});
+
+app.post('/api/admin/payouts', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { batchName, totalAmount, recipientCount, recipients } = req.body;
+    if (!batchName || !totalAmount) {
+      return res.status(400).json({ success: false, error: 'batchName and totalAmount required' });
+    }
+    const batch = {
+      batchName,
+      totalAmount: parseInt(totalAmount),
+      recipientCount: recipientCount || (recipients ? recipients.length : 0),
+      status: 'pending',
+      processedCount: 0,
+      failedCount: 0,
+      createdBy: req.user.uid,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      processedAt: null,
+      recipients: recipients || []
+    };
+    if (db) {
+      const ref = await db.collection('payout_batches').add(batch);
+      if (recipients && recipients.length) {
+        const batchRef = db.collection('payout_batches').doc(ref.id);
+        for (const r of recipients) {
+          await batchRef.collection('items').add({
+            recipientId: r.id,
+            recipientName: r.name,
+            amount: parseInt(r.amount),
+            accountNumber: r.account || '',
+            status: 'pending',
+            processedAt: null
+          });
+        }
+      }
+      res.json({ success: true, id: ref.id, message: `Payout batch "${batchName}" created` });
+    } else {
+      res.json({ success: true, id: 'sim_' + Date.now(), message: 'Payout batch created (simulated)' });
+    }
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to create payout batch' });
+  }
+});
+
+app.post('/api/admin/payouts/:id/process', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    if (!db) return res.json({ success: true, message: 'Payout processed (simulated)' });
+    await db.collection('payout_batches').doc(req.params.id).update({
+      status: 'processing',
+      processedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+    // Simulate processing delay, then mark completed
+    setTimeout(async () => {
+      try {
+        await db.collection('payout_batches').doc(req.params.id).update({
+          status: 'completed',
+          processedCount: admin.firestore.FieldValue.increment(1)
+        });
+      } catch (_) {}
+    }, 2000);
+    res.json({ success: true, message: 'Payout batch processing started' });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to process payout' });
+  }
+});
+
+// ─── Admin Risk Scoring API ───
+app.get('/api/admin/risk-score', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { entity, id } = req.query;
+    if (!db) {
+      return res.json({ success: true, data: { riskScore: 0, flags: [], recommendations: [] } });
+    }
+    const result = { riskScore: 0, flags: [], recommendations: [] };
+    if (entity === 'user' && id) {
+      const userDoc = await db.collection('users').doc(id).get();
+      if (userDoc.exists) {
+        const data = userDoc.data();
+        const ordersSnap = await db.collection('orders').where('userId', '==', id).get();
+        const cancelRate = ordersSnap.size ? ordersSnap.docs.filter(d => d.data().status === 'cancelled').length / ordersSnap.size : 0;
+        result.riskScore = Math.round(cancelRate * 100);
+        if (cancelRate > 0.3) result.flags.push('High cancellation rate');
+        if (data.suspended) result.flags.push('Previously suspended');
+        result.recommendations = result.riskScore > 50 ? ['Review account activity', 'Consider verification'] : [];
+      }
+    } else if (entity === 'order' && id) {
+      const orderDoc = await db.collection('orders').doc(id).get();
+      if (orderDoc.exists) {
+        const data = orderDoc.data();
+        const amount = data.total || data.amount || 0;
+        if (amount > 1000000) { result.riskScore += 30; result.flags.push('High value order'); }
+        if (data.status === 'pending' && !data.paymentMethod) { result.riskScore += 20; result.flags.push('No payment method'); }
+        result.riskScore = Math.min(result.riskScore, 100);
+        result.recommendations = result.riskScore > 40 ? ['Manual review recommended', 'Verify payment'] : [];
+      }
+    } else if (entity === 'seller' && id) {
+      const sellerDoc = await db.collection('sellers').doc(id).get();
+      if (sellerDoc.exists) {
+        const data = sellerDoc.data();
+        const productsSnap = await db.collection('products').where('sellerId', '==', id).get();
+        const flaggedProducts = productsSnap.docs.filter(d => d.data().flagged).length;
+        result.riskScore = Math.min(flaggedProducts * 20, 100);
+        if (flaggedProducts > 0) result.flags.push(`${flaggedProducts} flagged products`);
+        result.recommendations = result.riskScore > 40 ? ['Audit seller listings', 'Verify business documents'] : [];
+      }
+    }
+    res.json({ success: true, data: result });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Risk assessment failed' });
+  }
+});
+
+// ─── Admin Flagged Items API ───
+app.get('/api/admin/flagged-items', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    if (!db) {
+      return res.json({ success: true, data: [
+        { id: '1', type: 'Product', item: 'iPhone 15 Pro - $50', issue: 'Price too low - scam indicator', confidence: 92, status: 'pending', flaggedAt: new Date().toISOString() },
+        { id: '2', type: 'Order', item: 'ORD-8923', issue: 'Multiple orders same address', confidence: 78, status: 'pending', flaggedAt: new Date().toISOString() }
+      ]});
+    }
+    const [productsSnap, ordersSnap] = await Promise.all([
+      db.collection('products').where('flagged', '==', true).get(),
+      db.collection('orders').where('flagged', '==', true).get()
+    ]);
+    const products = productsSnap.docs.map(d => ({ id: d.id, type: 'Product', item: d.data().name, issue: d.data().flagReason || 'AI flagged', confidence: d.data().confidence || 75, status: d.data().flagStatus || 'pending', flaggedAt: d.data().flaggedAt?.toDate?.()?.toISOString() || d.data().createdAt }));
+    const orders = ordersSnap.docs.map(d => ({ id: d.id, type: 'Order', item: d.id, issue: d.data().flagReason || 'Suspicious activity', confidence: d.data().confidence || 60, status: d.data().flagStatus || 'pending', flaggedAt: d.data().flaggedAt?.toDate?.()?.toISOString() || d.data().createdAt }));
+    res.json({ success: true, data: [...products, ...orders] });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to fetch flagged items' });
+  }
+});
+
+app.put('/api/admin/flagged-items/:id', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { action, type } = req.body;
+    if (!db) return res.json({ success: true, message: 'Flagged item resolved (simulated)' });
+    const collection = type === 'Order' ? 'orders' : 'products';
+    const updates = { flagStatus: action === 'dismiss' ? 'dismissed' : 'resolved', resolvedBy: req.user.uid, resolvedAt: admin.firestore.FieldValue.serverTimestamp() };
+    await db.collection(collection).doc(req.params.id).update(updates);
+    res.json({ success: true, message: `Flagged item ${action === 'dismiss' ? 'dismissed' : 'resolved'}` });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to update flagged item' });
+  }
+});
+
+// ─── Admin System Settings API ───
+app.get('/api/admin/settings', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    if (!db) {
+      return res.json({ success: true, data: { platformName: 'SmartSoko', maintenanceMode: false, version: '1.0.0', currency: 'TZS', timezone: 'Africa/Dar_es_Salaam' } });
+    }
+    const snap = await db.collection('admin_system_settings').get();
+    const data = {};
+    snap.docs.forEach(d => { data[d.id] = d.data().value; });
+    res.json({ success: true, data });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to fetch settings' });
+  }
+});
+
+app.put('/api/admin/settings/:key', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { value } = req.body;
+    if (db) {
+      await db.collection('admin_system_settings').doc(req.params.key).set({
+        value,
+        updatedBy: req.user.uid,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    }
+    res.json({ success: true, message: 'Setting updated' });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to update setting' });
+  }
+});
+
+// ─── Admin Audit Logs API ───
+app.get('/api/admin/audit-logs', verifyFirebaseToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { limit = 100 } = req.query;
+    if (!db) return res.json({ success: true, data: [] });
+    const snap = await db.collection('admin_audit_logs').orderBy('timestamp', 'desc').limit(parseInt(String(limit)) || 100).get();
+    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    res.json({ success: true, data, count: data.length });
+  } catch (e) {
+    res.status(500).json({ success: false, error: 'Failed to fetch audit logs' });
+  }
+});
+
 // API 404 handler must stay after all API routes.
 app.use('/api', (req, res) => {
   res.status(404).json({

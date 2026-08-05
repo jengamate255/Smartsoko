@@ -1,0 +1,13 @@
+{
+  "name": "merchant-portal-server",
+  "version": "1.0.0",
+  "description": "Backend server for merchant portal API endpoints",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.22.2"
+  }
+}

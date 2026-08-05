@@ -1,0 +1,210 @@
+version: '3.8'
+
+services:
+  # SmartSoko Application (for local testing)
+  smartsoko-app:
+    build:
+      context: ../food_delivery_app
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - FIREBASE_SERVICE_ACCOUNT_BASE64=${FIREBASE_SERVICE_ACCOUNT_BASE64}
+      - FIREBASE_API_KEY=${FIREBASE_API_KEY}
+      - FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN}
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_STORAGE_BUCKET=${FIREBASE_STORAGE_BUCKET}
+      - FIREBASE_MESSAGING_SENDER_ID=${FIREBASE_MESSAGING_SENDER_ID}
+      - FIREBASE_APP_ID=${FIREBASE_APP_ID}
+      - PESAPAL_CONSUMER_KEY=${PESAPAL_CONSUMER_KEY}
+      - PESAPAL_CONSUMER_SECRET=${PESAPAL_CONSUMER_SECRET}
+      - PESAPAL_ENV=${PESAPAL_ENV}
+      - PESAPAL_CALLBACK_BASE=http://localhost:3000
+      - MAPBOX_ACCESS_TOKEN=${MAPBOX_ACCESS_TOKEN}
+      - DELIVERY_FEE=2000
+      - TAX_RATE=0.18
+      - CURRENCY=TSh
+    networks:
+      - perf-network
+    depends_on:
+      - redis
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    networks:
+      - perf-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    networks:
+      - perf-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:10.1.0
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    networks:
+      - perf-network
+    depends_on:
+      - prometheus
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # k6 Load Testing Engine
+  k6:
+    image: grafana/k6:0.48.0
+    volumes:
+      - ./k6:/scripts
+      - ./scripts:/scripts/shared
+      - ./reports:/reports
+    environment:
+      - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+      - BASE_URL=http://smartsoko-app:3000
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - perf-network
+    depends_on:
+      - smartsoko-app
+      - prometheus
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    # Default command runs all tests - override with specific test
+    command: run /scripts/smoke-test.js
+
+  # k6 WebSocket test runner (for real-time features)
+  k6-ws:
+    image: grafana/k6:0.48.0
+    volumes:
+      - ./k6:/scripts
+      - ./scripts:/scripts/shared
+      - ./reports:/reports
+    environment:
+      - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+      - BASE_URL=http://smartsoko-app:3000
+    networks:
+      - perf-network
+    depends_on:
+      - smartsoko-app
+    command: run /scripts/websocket-test.js
+
+  # Data Generator for test data
+  datagen:
+    build:
+      context: .
+      dockerfile: Dockerfile.datagen
+    volumes:
+      - ./datagen:/datagen
+      - ./data:/data
+    environment:
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_SERVICE_ACCOUNT_BASE64=${FIREBASE_SERVICE_ACCOUNT_BASE64}
+      - TARGET_USERS=1000000
+      - TARGET_PRODUCTS=500000
+      - TARGET_ORDERS=5000000
+    networks:
+      - perf-network
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+
+  # InfluxDB for k6 metrics (alternative to Prometheus)
+  influxdb:
+    image: influxdb:2.7
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+      - influxdb-config:/etc/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=adminadmin
+      - DOCKER_INFLUXDB_INIT_ORG=smartsoko
+      - DOCKER_INFLUXDB_INIT_BUCKET=k6
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-super-secret-admin-token
+    networks:
+      - perf-network
+
+  # Telegraf for system metrics
+  telegraf:
+    image: telegraf:1.28
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc:/host/etc:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - HOST_PROC=/host/proc
+      - HOST_SYS=/host/sys
+    networks:
+      - perf-network
+    depends_on:
+      - influxdb
+      - prometheus
+
+volumes:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+  influxdb-data:
+  influxdb-config:
+
+networks:
+  perf-network:
+    driver: bridge

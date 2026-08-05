@@ -14,7 +14,7 @@ class OfflineIndicator extends StatelessWidget {
     final connectivityService = context.watch<ConnectivityService>();
 
     return StreamBuilder<bool>(
-      stream: connectivityService.isConnectedStream,
+      stream: connectivityService.connectivityStream,
       initialData: true,
       builder: (context, snapshot) {
         final isConnected = snapshot.data ?? true;
@@ -60,7 +60,7 @@ class AnimatedOfflineIndicator extends StatelessWidget {
     final connectivityService = context.watch<ConnectivityService>();
 
     return StreamBuilder<bool>(
-      stream: connectivityService.isConnectedStream,
+      stream: connectivityService.connectivityStream,
       initialData: true,
       builder: (context, snapshot) {
         final isConnected = snapshot.data ?? true;

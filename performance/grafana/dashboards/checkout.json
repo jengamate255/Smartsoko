@@ -1,0 +1,19 @@
+{
+  "dashboard": {
+    "title": "SmartSoko - Checkout Flow",
+    "uid": "smartsoko-checkout",
+    "tags": ["smartsoko", "checkout"],
+    "timezone": "browser",
+    "refresh": "10s",
+    "time": {"from": "now-1h", "to": "now"},
+    "panels": [
+      {"id": 1, "title": "Checkout Latency (p95)", "type": "graph", "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(checkout_latency_seconds_bucket[1m]))", "legendFormat": "checkout p95"}]},
+      {"id": 2, "title": "Order Creation Rate", "type": "graph", "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8}, "targets": [{"expr": "rate(order_creation_total[1m])", "legendFormat": "orders/min"}, {"expr": "rate(order_creation_failed_total[1m])", "legendFormat": "failed/min"}]},
+      {"id": 3, "title": "Stock Reduction Rate", "type": "graph", "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8}, "targets": [{"expr": "rate(stock_reduction_total[1m])", "legendFormat": "reductions/min"}, {"expr": "rate(stock_reduction_failed_total[1m])", "legendFormat": "failed/min"}]},
+      {"id": 4, "title": "Payment Init Rate", "type": "graph", "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8}, "targets": [{"expr": "rate(payment_init_total[1m])", "legendFormat": "init/min"}, {"expr": "rate(payment_init_failed_total[1m])", "legendFormat": "failed/min"}]},
+      {"id": 5, "title": "Duplicate Order Rate", "type": "singlestat", "gridPos": {"x": 0, "y": 16, "w": 6, "h": 4}, "targets": [{"expr": "rate(duplicate_order_total[5m]) * 100", "legendFormat": "%"}]},
+      {"id": 6, "title": "Order Confirmation Latency", "type": "graph", "gridPos": {"x": 6, "y": 16, "w": 18, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(order_confirm_latency_seconds_bucket[1m]))", "legendFormat": "confirm p95"}]}
+    ]
+  },
+  "overwrite": true
+}

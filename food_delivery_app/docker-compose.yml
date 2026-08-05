@@ -14,9 +14,9 @@ services:
       - FIREBASE_PROJECT_ID=fooddelievry-dce15
       - FIREBASE_PRIVATE_KEY=
       - FIREBASE_CLIENT_EMAIL=
-      # Supabase credentials
+      # Supabase credentials (set in .env or your environment — never commit service keys)
       - SUPABASE_URL=https://vonkqyiczeqhuqhahsxm.supabase.co
-      - SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvbmtxeWljemVxaHVxaGFoc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjIzNDksImV4cCI6MjA5MDM5ODM0OX0.UKAT3re6P_oAB3E1svwCFdqTQWZL6yulJ1ZX4nAgJJ8
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY:?set SUPABASE_SERVICE_KEY in .env}
       # Other optional environment variables
       - FIREBASE_SERVICE_ACCOUNT=serviceAccountKey.json
     volumes:

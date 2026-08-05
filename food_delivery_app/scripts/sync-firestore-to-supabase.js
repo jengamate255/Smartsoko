@@ -2,8 +2,13 @@ const admin = require('firebase-admin');
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
 
-const SUPABASE_URL = 'https://vonkqyiczeqhuqhahsxm.supabase.co';
-const SRK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvbmtxeWljemVxaHVxaGFoc3htIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDgyMjM0OSwiZXhwIjoyMDkwMzk4MzQ5fQ.6Bq8WNEliXFo2vHd4WbD8n2s9Q3y0Cqem2UH-Pl6FYU';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://vonkqyiczeqhuqhahsxm.supabase.co';
+const SRK = process.env.SUPABASE_SERVICE_KEY;
+
+if (!SRK) {
+  console.error('ERROR: SUPABASE_SERVICE_KEY environment variable is required.');
+  process.exit(1);
+}
 const supabase = createClient(SUPABASE_URL, SRK);
 
 admin.initializeApp({ credential: admin.credential.applicationDefault() });

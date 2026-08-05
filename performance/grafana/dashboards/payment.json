@@ -1,0 +1,20 @@
+{
+  "dashboard": {
+    "title": "SmartSoko - Payment System",
+    "uid": "smartsoko-payment",
+    "tags": ["smartsoko", "payment"],
+    "timezone": "browser",
+    "refresh": "10s",
+    "time": {"from": "now-1h", "to": "now"},
+    "panels": [
+      {"id": 1, "title": "Payment Init Latency (p95)", "type": "graph", "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(payment_init_latency_seconds_bucket[1m]))", "legendFormat": "init p95"}]},
+      {"id": 2, "title": "Callback Latency (p95)", "type": "graph", "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(payment_callback_latency_seconds_bucket[1m]))", "legendFormat": "callback p95"}]},
+      {"id": 3, "title": "Status Check Latency (p95)", "type": "graph", "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(payment_status_latency_seconds_bucket[1m]))", "legendFormat": "status p95"}]},
+      {"id": 4, "title": "Payment Success Rate", "type": "graph", "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8}, "targets": [{"expr": "rate(payment_success_total[1m])", "legendFormat": "success/min"}, {"expr": "rate(payment_failure_total[1m])", "legendFormat": "failure/min"}, {"expr": "rate(payment_timeout_total[1m])", "legendFormat": "timeout/min"}]},
+      {"id": 5, "title": "Duplicate Detection Rate", "type": "singlestat", "gridPos": {"x": 0, "y": 16, "w": 6, "h": 4}, "targets": [{"expr": "rate(duplicate_detection_total[5m]) * 100", "legendFormat": "%"}]},
+      {"id": 6, "title": "Transaction Consistency", "type": "singlestat", "gridPos": {"x": 6, "y": 16, "w": 6, "h": 4}, "targets": [{"expr": "rate(transaction_consistency_total[5m]) * 100", "legendFormat": "%"}]},
+      {"id": 7, "title": "Callback Processing Rate", "type": "graph", "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8}, "targets": [{"expr": "rate(callback_processing_total[1m])", "legendFormat": "callbacks/min"}]}
+    ]
+  },
+  "overwrite": true
+}

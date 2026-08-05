@@ -1,0 +1,15 @@
+FROM node:20-alpine
+
+WORKDIR /datagen
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy data generation script
+COPY generate-data.js ./
+
+# Run as non-root user
+USER node
+
+CMD ["node", "generate-data.js"]

@@ -1,226 +1,209 @@
 /**
- * PesaPal API 3.0 Integration Service
- * Handles: Authentication, IPN Registration, Order Submission, Transaction Status
+ * PesaPal Payment Integration v3
+ * PesaPal API documentation: https://developer.pesapal.com
  */
+const express = require('express');
+const router = express.Router();
+const crypto = require('crypto');
 
-const PESAPAL_ENV = process.env.PESAPAL_ENV || 'sandbox';
-const CONSUMER_KEY = process.env.PESAPAL_CONSUMER_KEY;
-const CONSUMER_SECRET = process.env.PESAPAL_CONSUMER_SECRET;
+const PESAPAL_BASE = process.env.PESAPAL_ENV === 'live'
+  ? 'https://pay.pesapal.com/v3'
+  : 'https://cybqa.pesapal.com/pesapalv3';
 
-const BASE_URLS = {
-  sandbox: 'https://cybqa.pesapal.com/pesapalv3',
-  live: 'https://pay.pesapal.com/v3'
-};
+const CONSUMER_KEY = process.env.PESAPAL_CONSUMER_KEY || '';
+const CONSUMER_SECRET = process.env.PESAPAL_CONSUMER_SECRET || '';
 
-const BASE_URL = BASE_URLS[PESAPAL_ENV];
-
-const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' };
-
-let tokenCache = { token: null, expiry: null };
-
-async function apiPost(path, body, authToken) {
-  const opts = {
-    method: 'POST',
-    headers: { ...headers },
-    body: JSON.stringify(body)
-  };
-  if (authToken) opts.headers['Authorization'] = `Bearer ${authToken}`;
-  const res = await fetch(`${BASE_URL}${path}`, opts);
-  return res.json();
-}
-
-async function apiGet(path, authToken) {
-  const opts = {
-    method: 'GET',
-    headers: { ...headers }
-  };
-  if (authToken) opts.headers['Authorization'] = `Bearer ${authToken}`;
-  const res = await fetch(`${BASE_URL}${path}`, opts);
-  return res.json();
-}
+let db = null;
+let authMiddleware = null;
+let ipnId = null;
+let tokenCache = { token: null, expiresAt: 0 };
+const topupOrders = new Map(); // orderTrackingId -> { email, amount, status, merchantReference, createdAt }
 
 async function getAccessToken() {
-  if (tokenCache.token && tokenCache.expiry && Date.now() < tokenCache.expiry) {
+  if (tokenCache.token && Date.now() < tokenCache.expiresAt) {
     return tokenCache.token;
   }
 
-  const data = await apiPost('/api/Auth/RequestToken', {
-    consumer_key: CONSUMER_KEY,
-    consumer_secret: CONSUMER_SECRET
+  const auth = Buffer.from(`${CONSUMER_KEY}:${CONSUMER_SECRET}`).toString('base64');
+  const res = await fetch(`${PESAPAL_BASE}/api/Auth/RequestToken`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${auth}`
+    }
   });
 
-  if (data.error && data.error.code) {
-    throw new Error(`PesaPal auth error ${data.error.code}: ${data.error.message || data.error.error_type}`);
-  }
-  if (data.error) {
-    throw new Error(`PesaPal auth error: ${data.error.message || JSON.stringify(data.error)}`);
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`PesaPal auth failed: ${res.status} ${err}`);
   }
 
+  const data = await res.json();
   tokenCache = {
-    token: data.token,
-    expiry: new Date(data.expiryDate).getTime() - 60000
+    token: data.access_token,
+    expiresAt: Date.now() + (data.expires_in || 3600) * 1000 - 60000
+  };
+  return data.access_token;
+}
+
+async function registerIPN() {
+  try {
+    const token = await getAccessToken();
+    const baseUrl = process.env.PESAPAL_CALLBACK_BASE || `http://localhost:${process.env.PORT || 3000}`;
+    const ipnUrl = `${baseUrl}/api/payments/pesapal/ipn`;
+
+    const res = await fetch(`${PESAPAL_BASE}/api/URLSetup/RegisterIPN`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        url: ipnUrl,
+        ipn_notification_type: 'POST'
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`IPN registration failed: ${res.status} ${err}`);
+    }
+
+    const data = await res.json();
+    ipnId = data.ipn_id;
+    return data;
+  } catch (error) {
+    console.error('PesaPal IPN registration:', error.message);
+    return null;
+  }
+}
+
+async function submitOrder({ amount, currency, description, customerEmail, customerPhone, customerFirstName, customerLastName, callbackUrl }) {
+  const token = await getAccessToken();
+  if (!ipnId) await registerIPN();
+
+  const merchantReference = `INV-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+
+  const body = {
+    id: merchantReference,
+    currency: currency || 'TZS',
+    amount: parseFloat(amount).toFixed(2),
+    description: description || 'Payment',
+    callback_url: callbackUrl || '',
+    notification_id: ipnId || '',
+    billing_address: {
+      email_address: customerEmail || '',
+      phone_number: customerPhone || '',
+      first_name: customerFirstName || '',
+      last_name: customerLastName || ''
+    }
   };
 
-  return data.token;
-}
+  const res = await fetch(`${PESAPAL_BASE}/api/Transactions/SubmitOrderRequest`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(body)
+  });
 
-async function registerIPNUrl(ipnUrl, notificationType = 'GET') {
-  const token = await getAccessToken();
-  const data = await apiPost('/api/URLSetup/RegisterIPN',
-    { url: ipnUrl, ipn_notification_type: notificationType },
-    token
-  );
-
-  if (data.error) {
-    throw new Error(`PesaPal IPN registration error: ${data.error.message}`);
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`PesaPal order submission failed: ${res.status} ${err}`);
   }
 
-  return data;
-}
-
-async function getRegisteredIPNs() {
-  const token = await getAccessToken();
-  return await apiGet('/api/URLSetup/GetIPNs', token);
-}
-
-async function submitOrderRequest({
-  id, currency, amount, description, callback_url, notification_id,
-  cancellation_url, redirect_mode, branch = '', billing_address
-}) {
-  const token = await getAccessToken();
-  const payload = {
-    id,
-    currency,
-    amount: parseFloat(amount.toFixed(2)),
-    description,
-    callback_url,
-    notification_id,
-    branch,
-    billing_address
+  const data = await res.json();
+  return {
+    ...data,
+    merchantReference
   };
-
-  if (redirect_mode) payload.redirect_mode = redirect_mode;
-  if (cancellation_url) payload.cancellation_url = cancellation_url;
-
-  const data = await apiPost('/api/Transactions/SubmitOrderRequest', payload, token);
-
-  if (data.error) {
-    throw new Error(`PesaPal submit order error: ${data.error.message}`);
-  }
-
-  return data;
 }
 
 async function getTransactionStatus(orderTrackingId) {
   const token = await getAccessToken();
-  return await apiGet(`/api/Transactions/GetTransactionStatus?orderTrackingId=${orderTrackingId}`, token);
+
+  const res = await fetch(
+    `${PESAPAL_BASE}/api/Transactions/GetTransactionStatus?orderTrackingId=${orderTrackingId}`,
+    {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    }
+  );
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`PesaPal status query failed: ${res.status} ${err}`);
+  }
+
+  return res.json();
 }
 
-async function submitRefundRequest({
-  confirmationCode, amount, username, remarks, cancellationOnly = false
-}) {
-  const token = await getAccessToken();
-  const payload = {
-    confirmation_code: confirmationCode,
-    amount,
-    username,
-    remarks,
-    cancellation_only: cancellationOnly
-  };
-
-  return await apiPost('/api/Transactions/RefundRequest', payload, token);
+function verifyIPNNotification(body, headers) {
+  const signature = headers['pesapal-notification-signature'] || headers['x-pesapal-signature'] || '';
+  if (!signature) return false;
+  const expected = crypto.createHmac('sha256', CONSUMER_SECRET).update(JSON.stringify(body)).digest('base64');
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
 }
 
-function getIpnConfirmationResponse(orderTrackingId, orderMerchantReference, success = true) {
-  return {
-    orderNotificationType: 'IPNCHANGE',
-    orderTrackingId,
-    orderMerchantReference,
-    status: success ? 200 : 500
-  };
-}
-
-const express = require('express');
-const router = express.Router();
-
-let db = null;
-let admin = null;
-
-function init(firebaseDb, firebaseAdmin) {
+async function init(firebaseDb, authMw) {
   db = firebaseDb;
-  admin = firebaseAdmin;
+  authMiddleware = authMw;
+  if (CONSUMER_KEY && CONSUMER_SECRET) {
+    try {
+      await registerIPN();
+      setInterval(() => registerIPN().catch(() => {}), 86400000);
+    } catch (error) {
+      console.warn('PesaPal IPN registration failed, continuing without PesaPal:', error.message);
+    }
+  }
 }
 
 router.post('/initiate', async (req, res) => {
   try {
-    const {
-      orderId, amount, currency, description, callback_url,
-      customerPhone, customerEmail, customerFirstName, customerLastName,
-      cancellation_url
-    } = req.body;
+    const { amount, currency, description, customerEmail, customerPhone, customerFirstName, customerLastName } = req.body;
 
-    if (!orderId || !amount || !callback_url) {
-      return res.status(400).json({ success: false, error: 'orderId, amount, and callback_url are required' });
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ success: false, error: 'Valid amount is required' });
     }
 
-    const ipnUrl = process.env.PESAPAL_IPN_URL || `${req.protocol}://${req.get('host')}/api/pesapal/ipn`;
-    
-    let notificationId = process.env.PESAPAL_IPN_ID;
-    
-    if (!notificationId) {
-      try {
-        const existingIPNs = await getRegisteredIPNs();
-        if (existingIPNs && existingIPNs.length > 0) {
-          notificationId = existingIPNs[0].ipn_id;
-        }
-      } catch (e) {
-        console.log('No existing IPN found, registering new one');
-      }
-    }
-    
-    if (!notificationId) {
-      const ipnResult = await registerIPNUrl(ipnUrl, 'POST');
-      notificationId = ipnResult.ipn_id;
-      process.env.PESAPAL_IPN_ID = notificationId;
-    }
+    const baseUrl = process.env.PESAPAL_CALLBACK_BASE || `${req.protocol}://${req.get('host')}`;
+    const callbackUrl = `${baseUrl}/api/payments/pesapal/callback`;
 
-    const countryCode = (currency === 'TZS' || currency === 'Tsh') ? 'TZ' : 'KE';
-    const billingAddr = {};
-    if (customerPhone) billingAddr.phone_number = customerPhone;
-    if (customerEmail) billingAddr.email_address = customerEmail;
-    if (customerFirstName) billingAddr.first_name = customerFirstName;
-    if (customerLastName) billingAddr.last_name = customerLastName;
-    if (customerPhone || customerEmail) billingAddr.country_code = countryCode;
-
-    const parsedAmount = Math.round(parseFloat(amount) * 100) / 100;
-    const result = await submitOrderRequest({
-      id: orderId,
+    const result = await submitOrder({
+      amount,
       currency: currency || 'TZS',
-      amount: isNaN(parsedAmount) ? 0 : parsedAmount,
-      description: (description || 'Payment for order').substring(0, 100),
-      callback_url,
-      redirect_mode: 'TOP_WINDOW',
-      notification_id: notificationId,
-      cancellation_url: cancellation_url || callback_url.replace('callback', 'cancel'),
-      billing_address: billingAddr
+      description: description || 'SmartSoko Payment',
+      customerEmail,
+      customerPhone,
+      customerFirstName,
+      customerLastName,
+      callbackUrl
     });
 
-    if (db && admin) {
-      await db.collection('pesapal_transactions').doc(orderId).set({
+    if (db && req.user) {
+      await db.collection('payments').add({
+        userId: req.user.uid,
+        merchantReference: result.merchantReference,
         orderTrackingId: result.order_tracking_id,
-        merchantReference: result.merchant_reference,
-        redirectUrl: result.redirect_url,
-        status: 'pending',
         amount: parseFloat(amount),
         currency: currency || 'TZS',
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
+        status: 'pending',
+        redirectUrl: result.redirect_url,
+        createdAt: new Date().toISOString()
       });
     }
 
     res.json({
       success: true,
+      merchantReference: result.merchantReference,
       orderTrackingId: result.order_tracking_id,
-      merchantReference: result.merchant_reference,
       redirectUrl: result.redirect_url
     });
   } catch (error) {
@@ -229,163 +212,217 @@ router.post('/initiate', async (req, res) => {
   }
 });
 
-router.get('/callback', async (req, res) => {
-  const { OrderTrackingId, OrderMerchantReference, OrderNotificationType } = req.query;
-  
-  if (!OrderTrackingId) {
-    return res.redirect('/checkout?payment=error&message=Invalid+callback');
-  }
-
+router.post('/wallet-topup', async (req, res) => {
   try {
-    const status = await getTransactionStatus(OrderTrackingId);
-    
-    if (db && admin) {
-      const snapshot = await db.collection('pesapal_transactions')
-        .where('orderTrackingId', '==', OrderTrackingId)
-        .limit(1)
-        .get();
+    const { amount, email } = req.body;
 
-      if (!snapshot.empty) {
-        const doc = snapshot.docs[0];
-        await doc.ref.update({
-          paymentStatus: status.payment_status_description,
-          statusCode: status.status_code,
-          confirmationCode: status.confirmation_code,
-          paymentMethod: status.payment_method,
-          paymentAccount: status.payment_account,
-          amount: status.amount,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ success: false, error: 'Valid amount is required' });
+    }
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'Customer email is required' });
+    }
+
+    const baseUrl = process.env.PESAPAL_CALLBACK_BASE || `${req.protocol}://${req.get('host')}`;
+    const callbackUrl = `${baseUrl}/api/payments/pesapal/callback`;
+
+    const result = await submitOrder({
+      amount,
+      currency: 'TZS',
+      description: `Wallet top-up - ${email}`,
+      customerEmail: email,
+      callbackUrl
+    });
+
+    const orderTrackingId = result.order_tracking_id;
+    const merchantReference = result.merchantReference;
+
+    topupOrders.set(orderTrackingId, {
+      email,
+      amount: parseFloat(amount),
+      status: 'pending',
+      merchantReference,
+      createdAt: new Date().toISOString()
+    });
+
+    if (db) {
+      try {
+        await db.collection('wallet_topups').add({
+          email,
+          amount: parseFloat(amount),
+          orderTrackingId,
+          merchantReference,
+          status: 'pending',
+          createdAt: new Date().toISOString()
         });
-
-        if (status.status_code === 1) {
-          await db.collection('orders').doc(doc.data().merchantReference || doc.id).update({
-            paymentStatus: 'completed',
-            paymentMethod: 'pesapal',
-            pesapalTrackingId: OrderTrackingId,
-            pesapalConfirmationCode: status.confirmation_code,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp()
-          });
-        }
+      } catch (e) {
+        console.error('Failed to write topup to Firestore:', e.message);
       }
     }
 
-    const statusMap = {
-      1: 'completed', 0: 'invalid', 2: 'failed', 3: 'reversed'
-    };
-    const paymentStatus = statusMap[status.status_code] || 'pending';
-
-    res.redirect(`/track-order?orderId=${OrderMerchantReference || ''}&payment=${paymentStatus}&trackingId=${OrderTrackingId}`);
+    res.json({
+      success: true,
+      merchantReference,
+      orderTrackingId,
+      redirectUrl: result.redirect_url
+    });
   } catch (error) {
-    console.error('PesaPal callback error:', error);
-    res.redirect(`/checkout?payment=error&message=${encodeURIComponent(error.message)}`);
+    console.error('Wallet top-up error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
+});
+
+router.get('/wallet-status/:orderTrackingId', async (req, res) => {
+  try {
+    const { orderTrackingId } = req.params;
+    const local = topupOrders.get(orderTrackingId);
+
+    let pesapalStatus = null;
+    try {
+      pesapalStatus = await getTransactionStatus(orderTrackingId);
+    } catch (e) {
+      // fall back to local if PesaPal query fails
+    }
+
+    const completed = pesapalStatus
+      ? ['COMPLETED', '00'].includes(pesapalStatus.status_code)
+      : local?.status === 'completed';
+
+    const failed = pesapalStatus
+      ? ['FAILED', '02'].includes(pesapalStatus.status_code)
+      : local?.status === 'failed';
+
+    res.json({
+      success: true,
+      completed,
+      failed,
+      data: pesapalStatus,
+      local: local || null
+    });
+  } catch (error) {
+    console.error('Wallet status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/complete-topup', async (req, res) => {
+  try {
+    const { orderTrackingId, email } = req.body;
+    if (!orderTrackingId) {
+      return res.status(400).json({ success: false, error: 'orderTrackingId is required' });
+    }
+
+    const local = topupOrders.get(orderTrackingId);
+    if (!local) {
+      return res.status(404).json({ success: false, error: 'Top-up order not found' });
+    }
+
+    local.status = 'completed';
+    local.completedAt = new Date().toISOString();
+
+    if (db) {
+      try {
+        const snapshot = await db.collection('wallet_topups')
+          .where('orderTrackingId', '==', orderTrackingId)
+          .limit(1)
+          .get();
+        if (!snapshot.empty) {
+          await snapshot.docs[0].ref.update({
+            status: 'completed',
+            completedAt: new Date().toISOString()
+          });
+        }
+      } catch (e) {
+        console.error('Failed to update Firestore topup:', e.message);
+      }
+    }
+
+    res.json({ success: true, amount: local.amount });
+  } catch (error) {
+    console.error('Complete top-up error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.get('/callback', (req, res) => {
+  const { order_tracking_id, merchant_reference } = req.query;
+  res.redirect(`/wallet.html?topup=success&orderTrackingId=${order_tracking_id || ''}&merchantReference=${merchant_reference || ''}`);
 });
 
 router.post('/ipn', async (req, res) => {
   try {
-    const { OrderTrackingId, OrderMerchantReference, OrderNotificationType } = req.body;
+    const notification = req.body;
+    const { OrderNotificationType, OrderTrackingId, MerchantReference } = notification;
 
-    if (!OrderTrackingId) {
-      return res.status(400).json({ error: 'Missing OrderTrackingId' });
+    // Update in-memory store
+    if (OrderTrackingId && topupOrders.has(OrderTrackingId)) {
+      const local = topupOrders.get(OrderTrackingId);
+      local.status = OrderNotificationType === 1 ? 'completed' : 'failed';
+      local.ipnReceivedAt = new Date().toISOString();
     }
 
-    const status = await getTransactionStatus(OrderTrackingId);
-
-    if (db && admin) {
-      const snapshot = await db.collection('pesapal_transactions')
+    if (db) {
+      const snapshot = await db.collection('payments')
         .where('orderTrackingId', '==', OrderTrackingId)
         .limit(1)
         .get();
 
       if (!snapshot.empty) {
-        const doc = snapshot.docs[0];
-        await doc.ref.update({
-          paymentStatus: status.payment_status_description,
-          statusCode: status.status_code,
-          confirmationCode: status.confirmation_code,
-          paymentMethod: status.payment_method,
-          ipnNotified: true,
-          ipnNotifiedAt: admin.firestore.FieldValue.serverTimestamp(),
-          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        const docRef = snapshot.docs[0].ref;
+        const status = OrderNotificationType === 1 ? 'completed' : 'failed';
+        await docRef.update({
+          status,
+          ipnConfirmed: true,
+          updatedAt: new Date().toISOString()
         });
       }
     }
 
-    res.json(getIpnConfirmationResponse(OrderTrackingId, OrderMerchantReference, true));
+    res.status(200).send('OK');
   } catch (error) {
     console.error('PesaPal IPN error:', error);
-    res.json(getIpnConfirmationResponse(req.body.OrderTrackingId, req.body.OrderMerchantReference, false));
+    res.status(200).send('OK');
   }
 });
 
 router.get('/status/:orderTrackingId', async (req, res) => {
   try {
-    const status = await getTransactionStatus(req.params.orderTrackingId);
-    res.json({ success: true, ...status });
+    const { orderTrackingId } = req.params;
+    const status = await getTransactionStatus(orderTrackingId);
+    res.json({ success: true, data: status });
   } catch (error) {
+    console.error('PesaPal status error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
-const PESAPAL_FEE_PERCENT = 0.035;
-const PLATFORM_COMMISSION = 0.10;
-const SERVICE_FEE_PERCENT = 0.03;
+router.get('/status-by-ref/:merchantReference', async (req, res) => {
+  try {
+    const { merchantReference } = req.params;
+    if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
-function calculateSplitOrder(productPrice, deliveryFee) {
-  const pp = Number(productPrice);
-  const df = Number(deliveryFee);
-  const serviceFee = (pp + df) * SERVICE_FEE_PERCENT;
-  const totalPaid = pp + df + serviceFee;
-  const pesapalFee = totalPaid * PESAPAL_FEE_PERCENT;
-  const netReceived = totalPaid - pesapalFee;
-  const sellerCommission = pp * PLATFORM_COMMISSION;
-  const sellerEarning = pp - sellerCommission;
-  const driverEarning = df;
-  const platformProfit = serviceFee + sellerCommission - pesapalFee;
-  const round = (v) => Math.round(v * 100) / 100;
-  return {
-    total_paid_by_customer: round(totalPaid),
-    pesapal_fee: round(pesapalFee),
-    net_received: round(netReceived),
-    seller_earning: round(sellerEarning),
-    driver_earning: round(driverEarning),
-    platform_profit: round(platformProfit),
-    breakdown: [
-      { label: 'Product Price', amount: pp },
-      { label: 'Delivery Fee', amount: df },
-      { label: 'Service Fee (3%)', amount: round(serviceFee) },
-    ],
-  };
+    const snapshot = await db.collection('payments')
+      .where('merchantReference', '==', merchantReference)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) {
+      return res.status(404).json({ success: false, error: 'Payment not found' });
+    }
+
+    const payment = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+    res.json({ success: true, data: payment });
+  } catch (error) {
+    console.error('Error fetching payment:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch payment' });
+  }
+});
+
+function isConfigured() {
+  return !!(CONSUMER_KEY && CONSUMER_SECRET);
 }
 
-router.post('/calculate-split', (req, res) => {
-  try {
-    const { product_price, delivery_fee } = req.body;
-    if (product_price == null || delivery_fee == null) {
-      return res.status(400).json({ success: false, error: 'product_price and delivery_fee are required' });
-    }
-    res.json({ success: true, ...calculateSplitOrder(product_price, delivery_fee) });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-router.get('/order/:orderId', async (req, res) => {
-  try {
-    if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
-    const doc = await db.collection('pesapal_transactions').doc(req.params.orderId).get();
-    if (!doc.exists) {
-      return res.json({ success: true, payment: null });
-    }
-    const payment = doc.data();
-    if (payment.orderTrackingId) {
-      const liveStatus = await getTransactionStatus(payment.orderTrackingId);
-      return res.json({ success: true, payment: { ...payment, id: doc.id }, liveStatus });
-    }
-    res.json({ success: true, payment: { ...payment, id: doc.id }, liveStatus: null });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-module.exports = { router, init, getAccessToken, registerIPNUrl, submitOrderRequest, getTransactionStatus };
+module.exports = router;
+module.exports.init = init;
+module.exports.registerIPN = registerIPN;
+module.exports.isConfigured = isConfigured;

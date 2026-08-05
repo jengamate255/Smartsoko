@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="light" lang="en">
 <head>
   <!-- Performance: Preconnect to external domains -->
@@ -16,16 +16,12 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preload" href="dist/tailwind.css" as="style">
   <link rel="stylesheet" href="dist/tailwind.css">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
   <!-- Firebase Modular SDK -->
   <script type="module" src="config/firebase-config.js?v=3"></script>
+  <script type="module" src="js/merchant-app.js"></script>
   <script src="auth-check.js?v=4" defer></script>
-  <script src="js/merchant-enhancements.js?v=3"></script>
-  <script src="js/inventory-manager.js" defer></script>
-  <script src="js/vendor-dashboard.js" defer></script>
-  <script src="js/shopify-features.js" defer></script>
-  <script src="js/shopify-dashboard.js" defer></script>
   <script src="nav-component.js" defer></script>
   
   <style> 
@@ -76,122 +72,418 @@
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     .dark ::-webkit-scrollbar-thumb { background: #475569; }
+
+    /* SmartSoko UI Utilities */
+    .smartsoko-logout-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; background: transparent;
+      color: var(--color-on-surface-variant, #64748B);
+      border: none; border-radius: 50%; cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .smartsoko-logout-btn:hover {
+      background: rgba(186, 26, 26, 0.08); color: #B91C1C;
+    }
+    .smartsoko-logout-btn .material-symbols-outlined { font-size: 20px; }
+
+    .card-shadow { box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); }
+    .hover-shadow:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04); }
+
+    .skeleton {
+      background: linear-gradient(90deg, #ECFDF5 25%, #D1FAE5 50%, #ECFDF5 75%);
+      background-size: 200% 100%;
+      animation: skeleton-shimmer 1.5s infinite; border-radius: 6px;
+    }
+    @keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* SmartSoko Android App Design Tokens */
+    :root {
+      --stitch-primary: #064E3B;
+      --stitch-secondary: #059669;
+      --stitch-tertiary: #0EA5E9;
+      --stitch-surface: #F8FAF6;
+      --stitch-surface-container: #ECFDF5;
+      --stitch-surface-container-low: #FFFFFF;
+      --stitch-surface-container-high: #D1FAE5;
+      --stitch-surface-container-highest: #E7F8EE;
+      --stitch-surface-lowest: #FFFFFF;
+      --stitch-on-surface: #022D1D;
+      --stitch-on-surface-variant: #64748B;
+      --stitch-outline: #CBD5E1;
+      --stitch-outline-variant: #E2E8F0;
+      --stitch-primary-container: #D1FAE5;
+      --stitch-secondary-container: #A7F3D0;
+      --stitch-tertiary-container: #BAE6FD;
+      --stitch-error-container: #FEE2E2;
+      --stitch-error: #B91C1C;
+      --stitch-surface-variant: #ECFDF5;
+      --stitch-inverse-surface: #022D1D;
+    }
+
+    .stitch-card {
+      background: var(--stitch-surface-lowest);
+      border: 1px solid var(--stitch-outline-variant);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0px 2px 8px rgba(44, 62, 80, 0.05);
+    }
+
+    .stitch-card:hover {
+      box-shadow: 0px 8px 24px rgba(44, 62, 80, 0.12);
+    }
+
+    .stitch-badge-up {
+      background: rgba(5, 150, 105, 0.16);
+      color: #047857;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .stitch-badge-down {
+      background: rgba(185, 28, 28, 0.12);
+      color: #B91C1C;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .stitch-table-hover tbody tr:hover {
+      background: rgba(236, 253, 245, 0.6);
+    }
+
+    .stitch-table-hover tbody tr {
+      transition: background 0.15s ease;
+    }
+
+    .revenue-gradient {
+      background: linear-gradient(180deg, rgba(6,78,59,0.08) 0%, rgba(255,255,255,0) 100%);
+      pointer-events: none;
+    }
+
+    .font-headline-lg { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 28px; line-height: 1.2; }
+    .font-headline-sm { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 18px; line-height: 1.3; }
+    .font-label-md { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 13px; line-height: 1.4; letter-spacing: 0.01em; }
+    .font-label-sm { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 11px; line-height: 1.4; letter-spacing: 0.02em; }
+    .font-body-sm { font-family: 'Inter', sans-serif; font-weight: 400; font-size: 12px; line-height: 1.5; }
+
+.merchant-main { padding-top: 96px; }
+    @media (max-width: 768px) {
+      .merchant-main { padding-top: 84px; }
+    }
+
+    /* â”€â”€ SmartSoko Android Desktop Shell â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    :root {
+      --stitch-surface-container-low: #FFFFFF;
+      --stitch-surface-container-high: #D1FAE5;
+      --stitch-on-primary-container: #022D1D;
+      --stitch-on-secondary-container: #00210C;
+      --stitch-inverse-surface: #022D1D;
+    }
+
+    #dsSidebar, #dsTopbar { display: none; }
+
+    @media (min-width: 1024px) {
+      #smartnav-topbar { display: none !important; }
+
+      #dsSidebar {
+        display: flex;
+        position: fixed; left: 0; top: 0; bottom: 0;
+        width: 256px; flex-direction: column;
+        background: var(--stitch-surface-container-low);
+        border-right: 1px solid var(--stitch-surface-container);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        z-index: 900;
+      }
+
+      #dsTopbar {
+        display: flex;
+        position: fixed; left: 256px; top: 0; right: 0;
+        height: 64px; align-items: center; justify-content: space-between;
+        gap: 24px; padding: 0 24px;
+        background: var(--stitch-surface);
+        border-bottom: 1px solid var(--stitch-surface-container);
+        z-index: 880;
+      }
+
+      #dsMain {
+        margin-left: 256px; margin-right: auto;
+        padding-top: 64px; max-width: none;
+      }
+    }
+
+    .ds-brand {
+      display: flex; align-items: center; gap: 12px;
+      padding: 24px 24px 16px;
+    }
+    .ds-brand-logo {
+      width: 42px; height: 42px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(180deg, #064E3B 0%, #059669 100%);
+      color: #fff;
+      border-radius: 14px; font-family: 'Montserrat', sans-serif;
+      font-weight: 800; font-size: 16px;
+    }
+    .ds-brand-title { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 20px; color: var(--stitch-primary); }
+    .ds-brand-sub { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; color: var(--stitch-on-surface-variant); opacity: .7; }
+
+    .ds-nav { flex: 1; overflow-y: auto; padding: 0 16px 16px; }
+    .ds-label {
+      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--stitch-outline); padding: 16px 12px 6px;
+    }
+    .ds-link {
+      display: flex; align-items: center; gap: 12px; width: 100%;
+      padding: 11px 16px; border: 0; background: transparent;
+      border-radius: 8px; color: var(--stitch-on-surface-variant);
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+      text-align: left; cursor: pointer;
+      transition: background .15s ease, color .15s ease;
+    }
+    .ds-link:hover { background: var(--stitch-surface-container-high); }
+    .ds-link .material-symbols-outlined { font-size: 20px; }
+    .ds-link.active {
+      background: var(--stitch-primary-container);
+      color: var(--stitch-on-primary-container); font-weight: 700;
+    }
+    .ds-link.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+
+    .ds-footer { padding: 12px 16px 20px; }
+    .ds-cta {
+      width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px; background: var(--stitch-primary);
+      color: #ffffff; border: 0; border-radius: 999px;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer;
+      box-shadow: 0px 2px 8px rgba(44, 62, 80, 0.12);
+      transition: opacity .15s ease, transform .1s ease;
+    }
+    .ds-cta:hover { opacity: .92; }
+    .ds-cta:active { transform: scale(.98); }
+
+    .ds-search { position: relative; width: 320px; }
+    .ds-search .material-symbols-outlined {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      font-size: 20px; color: var(--stitch-outline);
+    }
+    .ds-search input {
+      width: 100%; background: var(--stitch-surface-container-lowest);
+      border: 1px solid var(--stitch-surface-container); border-radius: 999px;
+      padding: 10px 16px 10px 40px;
+      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--stitch-on-surface);
+      outline: none; transition: box-shadow .15s ease, border-color .15s ease;
+    }
+    .ds-search input:focus { box-shadow: 0 0 0 3px rgba(6,78,59,.18); border-color: var(--stitch-primary); }
+
+    .ds-top-right { display: flex; align-items: center; gap: 20px; }
+    .ds-icon-btn {
+      background: transparent; border: 0; cursor: pointer;
+      color: var(--stitch-on-surface-variant); border-radius: 50%;
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      transition: color .15s ease, background .15s ease; font-size: 22px;
+    }
+    .ds-icon-btn:hover { color: var(--stitch-primary); background: var(--stitch-surface-container); }
+    .ds-profile {
+      display: flex; align-items: center; gap: 10px;
+      padding-left: 24px; border-left: 1px solid var(--stitch-outline-variant);
+    }
+    .ds-profile-text { text-align: right; }
+    .ds-profile-name { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: var(--stitch-on-surface); }
+    .ds-profile-sub { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--stitch-secondary); }
+    .ds-avatar {
+      width: 42px; height: 42px; flex-shrink: 0; border-radius: 50%;
+      border: 2px solid var(--stitch-primary);
+      display: flex; align-items: center; justify-content: center;
+      background: var(--stitch-primary); color: #fff;
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 14px;
+      object-fit: cover;
+    }
+
+    /* â”€â”€ Mobile (AfriTrade) Merchant Experience â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    .font-headline-md { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 24px; line-height: 32px; }
+    .font-headline-sm { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 20px; line-height: 28px; }
+
+    @media (max-width: 768px) {
+      .mesh-bg { background-color: #F8FAF6; background-image: none; }
+      .smart-greeting { font-size: 20px; line-height: 28px; }
+      .stitch-card { padding: 16px; }
+    }
+
+    .kpi-card { min-height: 148px; }
+    .kpi-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .kpi-icon .material-symbols-outlined { font-size: 20px; color: #ffffff; }
+    .kpi-label {
+      font-family: 'Inter', sans-serif; font-weight: 600; font-size: 11px;
+      letter-spacing: .06em; text-transform: uppercase;
+      color: var(--stitch-on-surface-variant); margin-top: 14px;
+    }
+    .kpi-value {
+      font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 24px;
+      line-height: 1.25; color: var(--stitch-on-surface); margin-top: 2px;
+    }
+    .kpi-sub { font-family: 'Inter', sans-serif; font-size: 13px; color: var(--stitch-outline); margin-top: 2px; }
+
+    @media (min-width: 1024px) {
+      .kpi-value { font-size: 32px; }
+    }
+
+    .pill {
+      display: inline-flex; align-items: center; padding: 3px 10px;
+      border-radius: 999px; font-size: 11px; font-weight: 700; line-height: 1;
+      letter-spacing: .02em; white-space: nowrap;
+    }
+    .pill-surface   { background: #BAE6FD; color: #001E31; }
+    .pill-secondary { background: #D1FAE5; color: #022D1D; }
+    .pill-tertiary  { background: #A7F3D0; color: #00210C; }
+    .pill-primary   { background: #059669; color: #ffffff; }
+    .pill-outline   { background: #F1F5F9; color: #475569; }
+    .pill-error     { background: #FEE2E2; color: #410002; }
+
+    .order-item {
+      background: var(--stitch-surface-lowest);
+      border: 1px solid var(--stitch-surface-container);
+      border-radius: 12px; padding: 14px 16px; cursor: pointer;
+      transition: box-shadow .2s ease, transform .15s ease;
+    }
+    .order-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .order-avatar {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      background: #D1FAE5; color: #022D1D; font-weight: 700; font-size: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .order-customer { font-weight: 600; font-size: 14px; color: var(--stitch-on-surface); }
+    .order-id { font-size: 12px; color: var(--stitch-outline); font-family: 'Inter', sans-serif; }
+    .order-amount { font-weight: 700; font-size: 14px; color: var(--stitch-on-surface); }
   </style>
 </head>
-<body class="bg-background mesh-bg font-body text-on-surface transition-colors duration-500">
+<body class="bg-background mesh-bg font-body text-on-surface transition-colors duration-500" style="font-family: 'Inter', sans-serif;">
+  <!-- AfriTrade Desktop Sidebar -->
+  <aside id="dsSidebar" aria-label="Merchant navigation">
+    <div class="ds-brand">
+      <div class="ds-brand-logo">SM</div>
+      <div>
+        <div class="ds-brand-title">SmartSoko</div>
+        <div class="ds-brand-sub">Verified Merchant</div>
+      </div>
+    </div>
+    <nav class="ds-nav">
+      <div class="ds-label">Overview</div>
+      <button class="ds-link active" data-tab="orders"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></button>
+      <button class="ds-link" data-tab="finance"><span class="material-symbols-outlined">payments</span><span>Sales</span></button>
+      <button class="ds-link" data-tab="analytics"><span class="material-symbols-outlined">monitoring</span><span>Analytics</span></button>
+      <div class="ds-label">Manage</div>
+      <button class="ds-link" data-tab="menu"><span class="material-symbols-outlined">restaurant</span><span>Menu</span></button>
+      <button class="ds-link" data-tab="inventory"><span class="material-symbols-outlined">inventory_2</span><span>Inventory</span></button>
+      <button class="ds-link" data-tab="promotions"><span class="material-symbols-outlined">sell</span><span>Promotions</span></button>
+      <button class="ds-link" data-tab="reviews"><span class="material-symbols-outlined">star</span><span>Reviews</span></button>
+      <button class="ds-link" data-tab="delivery"><span class="material-symbols-outlined">directions_car</span><span>Delivery</span></button>
+      <button class="ds-link" data-tab="staff"><span class="material-symbols-outlined">groups</span><span>Staff</span></button>
+      <div class="ds-label">Account</div>
+      <a class="ds-link" href="customers.html"><span class="material-symbols-outlined">group</span><span>Customers</span></a>
+      <button class="ds-link" data-tab="profile"><span class="material-symbols-outlined">settings</span><span>Settings</span></button>
+    </nav>
+    <div class="ds-footer">
+      <button class="ds-cta" onclick="dsAddProduct()"><span class="material-symbols-outlined">add</span>New Product</button>
+    </div>
+  </aside>
+
+  <!-- AfriTrade Desktop Topbar -->
+  <header id="dsTopbar">
+    <div class="ds-search">
+      <span class="material-symbols-outlined">search</span>
+      <input id="dsSearchInput" type="text" placeholder="Search orders and menu items..." aria-label="Search orders and menu items">
+    </div>
+    <div class="ds-top-right">
+      <button class="ds-icon-btn" onclick="showNotification('You are all caught up.', 'info')"><span class="material-symbols-outlined">notifications</span></button>
+      <button class="ds-icon-btn" onclick="showNotification('SmartSoko merchant help is on the way.', 'info')"><span class="material-symbols-outlined">help_outline</span></button>
+      <div class="ds-profile">
+        <div class="ds-profile-text">
+          <div class="ds-profile-name" id="dsProfileName">Merchant Profile</div>
+          <div class="ds-profile-sub">Top Rated Seller</div>
+        </div>
+        <div class="ds-avatar" id="dsAvatar">SM</div>
+      </div>
+    </div>
+  </header>
+
   <!-- Navigation handled by SmartNav -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      SmartNav.init({ activePage: 'orders', role: 'merchant' });
+      SmartNav.init({ activePage: 'orders', role: 'merchant', showProfile: false });
     });
   </script>
 
   <!-- Main Content -->
-  <main class="container mx-auto p-4 pt-6 pb-28">
-    <!-- Enhanced Stats Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-5 mb-8">
-      <div class="hover-lift glass-card bg-gradient-to-br from-green-50/80 to-green-100/80 dark:from-green-900/40 dark:to-green-800/40 p-5 rounded-2xl shadow-sm border border-green-200/50 dark:border-green-800/50 relative overflow-hidden">
-        <div class="absolute -right-4 -top-4 w-16 h-16 bg-green-500/10 rounded-full blur-xl"></div>
-        <div class="flex items-center justify-between relative z-10">
-          <div>
-            <p class="text-green-600 dark:text-green-400 text-xs font-bold tracking-wider uppercase mb-1">Today's Sales</p>
-            <p class="text-2xl font-extrabold text-green-800 dark:text-green-100" id="todaySales">TSh 0</p>
-            <p class="text-xs font-medium text-green-500 mt-1" id="salesTrend">+0% vs yesterday</p>
+  <main id="dsMain" class="merchant-main container mx-auto p-4 pb-20">
+    <!-- No Seller Profile Banner -->
+    <div id="noSellerProfile" class="hidden mb-8 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
+      <span class="material-symbols-outlined text-amber-600">storefront</span>
+      <p class="text-sm text-amber-800">No seller profile found for this account. Complete your business setup to activate the dashboard.</p>
+    </div>
+    <!-- Greeting -->
+    <div class="mb-4">
+      <h2 class="font-headline-md smart-greeting" style="color: var(--stitch-on-surface);">Welcome back, <span id="dsGreetingName">Merchant</span></h2>
+      <p class="font-body-sm mt-1" style="color: var(--stitch-on-surface-variant);">Here is your business performance for today.</p>
+    </div>
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <!-- Total Sales -->
+      <div class="stitch-card kpi-card flex flex-col gap-1 hover-shadow transition-shadow duration-200">
+        <div class="flex items-start justify-between">
+          <div class="kpi-icon" style="background: #064E3B;">
+            <span class="material-symbols-outlined">payments</span>
           </div>
-          <div class="w-12 h-12 bg-gradient-to-tr from-green-600 to-green-400 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/30">
-            <span class="material-symbols-outlined text-white">payments</span>
-          </div>
+          <span class="stitch-badge-up" id="salesDeltaBadge">
+            <span class="material-symbols-outlined" style="font-size: 14px;">trending_flat</span>
+            0%
+          </span>
         </div>
+        <p class="kpi-label">Total Sales</p>
+        <p class="kpi-value" id="todaySales">TSh 0</p>
+        <p class="kpi-sub" id="salesLastPeriod">vs yesterday</p>
       </div>
 
-      <div class="hover-lift glass-card bg-gradient-to-br from-blue-50/80 to-blue-100/80 dark:from-blue-900/40 dark:to-blue-800/40 p-5 rounded-2xl shadow-sm border border-blue-200/50 dark:border-blue-800/50 relative overflow-hidden">
-        <div class="absolute -right-4 -top-4 w-16 h-16 bg-blue-500/10 rounded-full blur-xl"></div>
-        <div class="flex items-center justify-between relative z-10">
-          <div>
-            <p class="text-blue-600 dark:text-blue-400 text-xs font-bold tracking-wider uppercase mb-1">Orders</p>
-            <p class="text-2xl font-extrabold text-blue-800 dark:text-blue-100" id="orderCount">0</p>
-            <p class="text-xs font-medium text-blue-500 mt-1" id="pendingOrders">0 pending</p>
+      <!-- Total Orders -->
+      <div class="stitch-card kpi-card flex flex-col gap-1 hover-shadow transition-shadow duration-200">
+        <div class="flex items-start justify-between">
+          <div class="kpi-icon" style="background: #059669;">
+            <span class="material-symbols-outlined">shopping_bag</span>
           </div>
-          <div class="w-12 h-12 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-            <span class="material-symbols-outlined text-white">shopping_bag</span>
-          </div>
+          <span class="stitch-badge-up" id="ordersDeltaBadge">
+            <span class="material-symbols-outlined" style="font-size: 14px;">trending_flat</span>
+            0%
+          </span>
         </div>
+        <p class="kpi-label">Total Orders</p>
+        <p class="kpi-value" id="orderCount">0</p>
+        <p class="kpi-sub" id="pendingOrders">0 pending orders</p>
       </div>
 
-      <div class="hover-lift glass-card bg-gradient-to-br from-yellow-50/80 to-yellow-100/80 dark:from-yellow-900/40 dark:to-yellow-800/40 p-5 rounded-2xl shadow-sm border border-yellow-200/50 dark:border-yellow-800/50 relative overflow-hidden">
-        <div class="absolute -right-4 -top-4 w-16 h-16 bg-yellow-500/10 rounded-full blur-xl"></div>
-        <div class="flex items-center justify-between relative z-10">
-          <div>
-            <p class="text-yellow-600 dark:text-yellow-400 text-xs font-bold tracking-wider uppercase mb-1">Rating</p>
-            <p class="text-2xl font-extrabold text-yellow-800 dark:text-yellow-100" id="restaurantRating">4.5</p>
-            <p class="text-xs font-medium text-yellow-500 mt-1" id="totalReviews">0 reviews</p>
+      <!-- Avg Order Value -->
+      <div class="stitch-card kpi-card flex flex-col gap-1 hover-shadow transition-shadow duration-200">
+        <div class="flex items-start justify-between">
+          <div class="kpi-icon" style="background: #BAE6FD;">
+            <span class="material-symbols-outlined" style="color: #0EA5E9;">trending_up</span>
           </div>
-          <div class="w-12 h-12 bg-gradient-to-tr from-yellow-500 to-amber-400 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/30">
-            <span class="material-symbols-outlined text-white">star</span>
-          </div>
+          <span class="stitch-badge-up" id="aovDeltaBadge">
+            <span class="material-symbols-outlined" style="font-size: 14px;">trending_flat</span>
+            0%
+          </span>
         </div>
-      </div>
-
-      <div class="hover-lift glass-card bg-gradient-to-br from-purple-50/80 to-purple-100/80 dark:from-purple-900/40 dark:to-purple-800/40 p-5 rounded-2xl shadow-sm border border-purple-200/50 dark:border-purple-800/50 relative overflow-hidden">
-        <div class="absolute -right-4 -top-4 w-16 h-16 bg-purple-500/10 rounded-full blur-xl"></div>
-        <div class="flex items-center justify-between relative z-10">
-          <div>
-            <p class="text-purple-600 dark:text-purple-400 text-xs font-bold tracking-wider uppercase mb-1">Menu</p>
-            <p class="text-2xl font-extrabold text-purple-800 dark:text-purple-100" id="menuItemCount">0</p>
-            <p class="text-xs font-medium text-purple-500 mt-1" id="availableItems">0 available</p>
-          </div>
-          <div class="w-12 h-12 bg-gradient-to-tr from-purple-600 to-fuchsia-400 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
-            <span class="material-symbols-outlined text-white">restaurant_menu</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="hover-lift glass-card bg-gradient-to-br from-orange-50/80 to-orange-100/80 dark:from-orange-900/40 dark:to-orange-800/40 p-5 rounded-2xl shadow-sm border border-orange-200/50 dark:border-orange-800/50 relative overflow-hidden lg:col-span-2 xl:col-span-1">
-        <div class="absolute -right-4 -top-4 w-16 h-16 bg-orange-500/10 rounded-full blur-xl"></div>
-        <div class="flex items-center justify-between relative z-10">
-          <div>
-            <p class="text-orange-600 dark:text-orange-400 text-xs font-bold tracking-wider uppercase mb-1">This Week</p>
-            <p class="text-2xl font-extrabold text-orange-800 dark:text-orange-100" id="weeklySales">TSh 0</p>
-            <p class="text-xs font-medium text-orange-500 mt-1" id="weeklyOrders">0 orders</p>
-          </div>
-          <div class="w-12 h-12 bg-gradient-to-tr from-orange-500 to-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/30">
-            <span class="material-symbols-outlined text-white">calendar_view_week</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="hover-lift glass-card bg-gradient-to-br from-teal-50/80 to-teal-100/80 dark:from-teal-900/40 dark:to-teal-800/40 p-5 rounded-2xl shadow-sm border border-teal-200/50 dark:border-teal-800/50 relative overflow-hidden lg:col-span-2 xl:col-span-1">
-        <div class="absolute -right-4 -top-4 w-16 h-16 bg-teal-500/10 rounded-full blur-xl"></div>
-        <div class="flex items-center justify-between relative z-10">
-          <div>
-            <p class="text-teal-600 dark:text-teal-400 text-xs font-bold tracking-wider uppercase mb-1">Avg Order</p>
-            <p class="text-2xl font-extrabold text-teal-800 dark:text-teal-100" id="avgOrderValue">TSh 0</p>
-            <p class="text-xs font-medium text-teal-500 mt-1">per order</p>
-          </div>
-          <div class="w-12 h-12 bg-gradient-to-tr from-teal-500 to-emerald-400 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/30">
-            <span class="material-symbols-outlined text-white">trending_up</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Inventory Stats Card -->
-      <div class="hover-lift glass-card bg-gradient-to-br from-amber-50/80 to-amber-100/80 dark:from-amber-900/40 dark:to-amber-800/40 p-5 rounded-2xl shadow-sm border border-amber-200/50 dark:border-amber-800/50 relative overflow-hidden">
-        <div class="absolute -right-4 -top-4 w-16 h-16 bg-amber-500/10 rounded-full blur-xl"></div>
-        <div class="flex items-center justify-between relative z-10">
-          <div>
-            <p class="text-amber-600 dark:text-amber-400 text-xs font-bold tracking-wider uppercase mb-1">Inventory</p>
-            <p class="text-2xl font-extrabold text-amber-800 dark:text-amber-100">
-              <span id="inventoryInStock">0</span> in stock
-            </p>
-            <p class="text-xs font-medium text-amber-500 mt-1">
-              <span id="inventoryLowStock" class="text-yellow-600">0</span> low | 
-              <span id="inventoryOutOfStock" class="text-red-600">0</span> out
-            </p>
-          </div>
-          <div class="w-12 h-12 bg-gradient-to-tr from-amber-500 to-yellow-400 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30">
-            <span class="material-symbols-outlined text-white">inventory</span>
-          </div>
-        </div>
+        <p class="kpi-label">Avg Order Value</p>
+        <p class="kpi-value" id="avgOrderValue">TSh 0</p>
+        <p class="kpi-sub">per order</p>
       </div>
     </div>
 
@@ -202,11 +494,8 @@
           <button onclick="switchTab('orders', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl bg-primary text-white font-bold shadow-md transition-all duration-300 flex items-center">
             <span class="material-symbols-outlined mr-2 text-[20px]">shopping_cart</span>Orders
           </button>
-          <button onclick="switchTab('storefront', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
-            <span class="material-symbols-outlined mr-2 text-[20px]">storefront</span>Storefront
-          </button>
           <button onclick="switchTab('menu', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
-            <span class="material-symbols-outlined mr-2 text-[20px]">restaurant</span>Inventory
+            <span class="material-symbols-outlined mr-2 text-[20px]">restaurant</span>Menu
           </button>
           <button onclick="switchTab('analytics', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
             <span class="material-symbols-outlined mr-2 text-[20px]">monitoring</span>Analytics
@@ -217,12 +506,21 @@
           <button onclick="switchTab('promotions', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
             <span class="material-symbols-outlined mr-2 text-[20px]">sell</span>Promos
           </button>
-          <button onclick="switchTab('reviews', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
-            <span class="material-symbols-outlined mr-2 text-[20px]">star</span>Reviews
-          </button>
-          <button onclick="switchTab('profile', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
-            <span class="material-symbols-outlined mr-2 text-[20px]">settings</span>Settings
-          </button>
+           <button onclick="switchTab('reviews', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
+             <span class="material-symbols-outlined mr-2 text-[20px]">star</span>Reviews
+           </button>
+           <button onclick="switchTab('inventory', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
+             <span class="material-symbols-outlined mr-2 text-[20px]">inventory_2</span>Inventory
+           </button>
+           <button onclick="switchTab('delivery', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
+             <span class="material-symbols-outlined mr-2 text-[20px]">directions_car</span>Delivery
+           </button>
+           <button onclick="switchTab('staff', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
+             <span class="material-symbols-outlined mr-2 text-[20px]">people</span>Staff
+           </button>
+           <button onclick="switchTab('profile', this)" class="tab-btn whitespace-nowrap px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center">
+             <span class="material-symbols-outlined mr-2 text-[20px]">settings</span>Settings
+           </button>
         </div>
       </div>
 
@@ -271,105 +569,12 @@
         </div>
       </div>
 
-      <!-- Storefront Tab -->
-      <div id="storefrontTab" class="p-6 hidden">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <div>
-            <h2 class="text-xl font-bold">Storefront Branding</h2>
-            <p class="text-sm text-gray-500">Customize your public store page</p>
-          </div>
-          <a id="previewStoreLink" href="#" target="_blank" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 shadow-sm transition-all hover:shadow-md">
-            <span class="material-symbols-outlined text-sm">open_in_new</span>
-            Preview Store
-          </a>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Branding -->
-          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <h3 class="font-semibold mb-4 flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary">palette</span>
-              Brand Identity
-            </h3>
-            <form id="storefrontForm" class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Store URL Slug</label>
-                <div class="flex items-center gap-2">
-                  <span class="text-sm text-gray-500 bg-gray-100 px-3 py-2 rounded-lg">/store/</span>
-                  <input type="text" id="storeSlug" placeholder="juma-electronics" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" required pattern="[a-z0-9-]+">
-                </div>
-                <p class="text-xs text-gray-500 mt-1">Letters, numbers, and hyphens only. This becomes your store URL.</p>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
-                <input type="text" id="storefrontLogo" placeholder="https://..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
-                <div id="logoPreview" class="mt-2 hidden">
-                  <img src="" alt="Logo preview" class="h-16 w-16 object-cover rounded-lg border border-gray-200">
-                </div>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Banner URL</label>
-                <input type="text" id="storefrontBanner" placeholder="https://..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
-                <div id="bannerPreview" class="mt-2 hidden h-24 rounded-lg bg-gray-100 overflow-hidden">
-                  <img src="" alt="Banner preview" class="w-full h-full object-cover">
-                </div>
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Primary Color</label>
-                  <input type="color" id="storePrimaryColor" value="#064e3b" class="w-full h-10 rounded-lg cursor-pointer border border-gray-200">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Secondary Color</label>
-                  <input type="color" id="storeSecondaryColor" value="#065f46" class="w-full h-10 rounded-lg cursor-pointer border border-gray-200">
-                </div>
-              </div>
-              <button type="submit" class="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition-colors font-medium">
-                Save Branding
-              </button>
-            </form>
-          </div>
-          <!-- SEO & About -->
-          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <h3 class="font-semibold mb-4 flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary">search</span>
-              SEO & About
-            </h3>
-            <form id="seoForm" class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Store Description</label>
-                <textarea id="storefrontDesc" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Tell customers about your store..."></textarea>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">SEO Meta Description</label>
-                <textarea id="storefrontSeo" rows="2" maxlength="160" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Brief description for search engines..."></textarea>
-                <p class="text-xs text-gray-500 mt-1">Max 160 characters</p>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Product Collections</label>
-                <div class="flex gap-2 mb-2">
-                  <input type="text" id="newCollectionInput" placeholder="New collection name" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
-                  <button type="button" onclick="addCollection()" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
-                    <span class="material-symbols-outlined text-sm">add</span>
-                  </button>
-                </div>
-                <div id="collectionsList" class="flex flex-wrap gap-2">
-                  <!-- Collections rendered here -->
-                </div>
-              </div>
-              <button type="submit" class="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition-colors font-medium">
-                Save SEO & Collections
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      <!-- Menu / Inventory Tab -->
+      <!-- Menu Tab -->
       <div id="menuTab" class="p-6 hidden">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
           <div>
-            <h2 class="text-xl font-bold">Inventory Management</h2>
-            <p class="text-sm text-gray-500">Manage products, variants, stock levels, and bulk upload</p>
+            <h2 class="text-xl font-bold">Menu Management</h2>
+            <p class="text-sm text-gray-500">Manage your products and inventory</p>
           </div>
           <div class="flex gap-2">
             <div id="bulkActionsMenu" class="hidden items-center gap-2 mr-2 bg-gray-50 px-3 py-1 rounded-lg border border-gray-200">
@@ -409,179 +614,135 @@
             <p class="text-lg font-bold text-blue-600" id="topCategory">-</p>
           </div>
         </div>
-
-        <!-- Low Stock Alerts -->
-        <div id="lowStockSection" class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
-          <h3 class="font-semibold mb-3 flex items-center gap-2">
-            <span class="material-symbols-outlined text-yellow-600">warning</span>
-            Low Stock Alerts
-          </h3>
-          <div id="lowStockAlerts">
-            <p class="text-sm text-gray-500 text-center py-4">Loading stock alerts...</p>
-          </div>
-        </div>
-
-        <!-- CSV Bulk Upload -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
-          <h3 class="font-semibold mb-3 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">upload_file</span>
-            Bulk Upload (CSV)
-          </h3>
-          <div class="flex flex-col md:flex-row gap-4 items-start">
-            <div class="flex-1">
-              <p class="text-sm text-gray-600 mb-2">Upload multiple products at once. CSV columns: name, price, stock, category, collection, image, description</p>
-              <input type="file" id="csvUploadInput" accept=".csv" onchange="handleCSVUpload(this)" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
-            </div>
-            <button onclick="downloadCSVTemplate()" class="text-sm text-primary hover:underline flex items-center gap-1">
-              <span class="material-symbols-outlined text-sm">download</span>
-              Download Template
-            </button>
-          </div>
-          <div id="csvPreview" class="hidden mt-4">
-            <p class="text-sm font-medium text-gray-700 mb-2">Preview (<span id="csvPreviewCount">0</span> products):</p>
-            <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg">
-              <table class="w-full text-sm">
-                <thead class="bg-gray-50 sticky top-0">
-                  <tr><th class="text-left px-3 py-2">Name</th><th class="text-left px-3 py-2">Price</th><th class="text-left px-3 py-2">Stock</th></tr>
-                </thead>
-                <tbody id="csvPreviewBody"></tbody>
-              </table>
-            </div>
-            <div class="flex gap-2 mt-3">
-              <button onclick="confirmCSVUpload()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">Upload All</button>
-              <button onclick="cancelCSVUpload()" class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50">Cancel</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="menuItemsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
+        <div id="menuItemsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <!-- Menu items will be loaded here -->
         </div>
       </div>
 
-      <!-- Analytics / Commerce Dashboard Tab -->
+      <!-- Analytics Tab -->
       <div id="analyticsTab" class="p-6 hidden">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div class="flex justify-between items-center mb-4">
           <div>
-            <h2 class="text-xl font-bold">Commerce Dashboard</h2>
-            <p class="text-sm text-gray-500">Sales, products, and customer insights</p>
+            <h2 class="text-xl font-bold">Sales Analytics</h2>
+            <p class="text-sm text-gray-500">Track your business performance</p>
           </div>
           <div class="flex gap-2">
-            <button onclick="exportSalesReport()" class="bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm font-medium transition-colors">
+            <button onclick="exportAnalyticsCSV()" class="bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm font-medium transition-colors">
               <span class="material-symbols-outlined text-sm">download</span>
-              Export Sales
+              Export CSV
             </button>
-            <button onclick="exportProductsReport()" class="bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm font-medium transition-colors">
-              <span class="material-symbols-outlined text-sm">inventory_2</span>
-              Export Products
-            </button>
-            <select id="analyticsPeriod" onchange="loadCommerceDashboard()" class="border border-gray-300 rounded-lg px-3 py-2 bg-white">
+            <select id="analyticsPeriod" onchange="loadAnalytics()" class="border border-gray-300 rounded-lg px-3 py-2 bg-white">
               <option value="7">Last 7 Days</option>
               <option value="30">Last 30 Days</option>
               <option value="90">Last 3 Months</option>
             </select>
           </div>
         </div>
-
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-            <p class="text-xs text-gray-500 uppercase font-medium">Total Sales</p>
-            <p class="text-2xl font-bold text-green-700" id="dashTotalSales">TSh 0</p>
-          </div>
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-            <p class="text-xs text-gray-500 uppercase font-medium">Orders</p>
-            <p class="text-2xl font-bold text-blue-700" id="dashTotalOrders">0</p>
-          </div>
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-            <p class="text-xs text-gray-500 uppercase font-medium">Avg Order</p>
-            <p class="text-2xl font-bold text-purple-700" id="dashAvgOrder">TSh 0</p>
-          </div>
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-            <p class="text-xs text-gray-500 uppercase font-medium">Net Revenue</p>
-            <p class="text-2xl font-bold text-teal-700" id="dashNetRevenue">TSh 0</p>
-            <p class="text-xs text-gray-400 mt-1">After commission</p>
-          </div>
-        </div>
-
         <!-- Revenue Chart -->
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
-          <h3 class="font-semibold mb-3">Revenue Overview</h3>
-          <div id="revenueChart" class="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-            <canvas id="revenueCanvas" style="width:100%;height:100%;"></canvas>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <!-- Top Products -->
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-            <h3 class="font-semibold mb-3 flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary">trending_up</span>
-              Top Products
-            </h3>
-            <div id="dashTopProducts" class="space-y-2">
-              <p class="text-sm text-gray-500 text-center py-4">Loading...</p>
-            </div>
-          </div>
-          <!-- Peak Hours -->
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-            <h3 class="font-semibold mb-3 flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary">schedule</span>
-              Peak Hours
-            </h3>
-            <div id="dashPeakHours" class="space-y-1">
-              <p class="text-sm text-gray-500 text-center py-4">Loading...</p>
-            </div>
-          </div>
-          <!-- Customer Insights -->
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-            <h3 class="font-semibold mb-3 flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary">group</span>
-              Customers
-            </h3>
-            <div id="dashCustomerInsights">
-              <p class="text-sm text-gray-500 text-center py-4">Loading...</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Category Breakdown -->
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-            <h3 class="font-semibold mb-3 flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary">pie_chart</span>
-              Sales by Category
-            </h3>
-            <div id="dashCategoryChart" class="flex items-center justify-center">
-              <p class="text-sm text-gray-500 text-center py-8">Loading...</p>
-            </div>
-            <div id="dashCategoryList" class="mt-3 space-y-1 border-t border-gray-100 pt-3"></div>
-          </div>
-          <!-- Ratings -->
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-            <h3 class="font-semibold mb-3 flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary">star</span>
-              Store Rating
-            </h3>
-            <div class="flex items-center gap-4 mb-4">
-              <div class="text-center">
-                <p class="text-4xl font-bold text-yellow-600" id="dashAvgRating">0.0</p>
-                <div class="flex gap-0.5 my-1 justify-center" id="dashRatingStars"></div>
+        <div class="stitch-card mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-headline-sm" style="color: #022D1D;">Revenue Overview</h3>
+            <div class="flex items-center gap-4">
+              <div class="flex items-center gap-1.5">
+                <div class="w-3 h-3 rounded-full" style="background: #064E3B;"></div>
+                <span class="font-label-sm" style="color: #64748B;">Gross Revenue</span>
               </div>
-              <div class="flex-1">
-                <p class="text-sm text-gray-500"><span id="dashReviewCount">0</span> reviews</p>
-                <p class="text-sm text-gray-500 mt-1">Repeat rate: <span id="dashRepeatRate" class="font-medium text-green-600">0%</span></p>
+              <div class="flex items-center gap-1.5">
+                <div class="w-3 h-3 rounded-full" style="background: #0EA5E9;"></div>
+                <span class="font-label-sm" style="color: #64748B;">Net Profit</span>
               </div>
             </div>
-            <div class="bg-gray-50 p-3 rounded-lg">
-              <p class="text-xs text-gray-500 uppercase font-medium">Platform Commission</p>
-              <p class="text-lg font-bold text-gray-800" id="dashCommission">TSh 0</p>
+          </div>
+          <div id="revenueChart" class="h-64 bg-gray-50 rounded-lg flex items-center justify-center relative overflow-hidden">
+            <canvas id="revenueCanvas"></canvas>
+            <div class="absolute inset-x-0 bottom-0 h-16 revenue-gradient"></div>
+          </div>
+        </div>
+<!-- Segmentation Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Customer Segmentation -->
+          <div class="stitch-card">
+            <h3 class="font-headline-sm" style="color: #022D1D; margin-bottom: 20px;">Customer Segmentation</h3>
+            <div id="segmentationContent">
+              <p class="text-sm text-gray-500">Loading segmentation...</p>
             </div>
+          </div>
+
+          <!-- Regional Breakdown -->
+          <div class="stitch-card">
+            <h3 class="font-headline-sm" style="color: #022D1D; margin-bottom: 20px;">Regional Breakdown</h3>
+            <div id="regionalBreakdown" class="space-y-4">
+              <p class="text-sm text-gray-500">Loading regions...</p>
+            </div>
+          </div>
+<!-- Best Items Table -->
+      <div class="stitch-card stitch-table-hover mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-headline-sm" style="color: #022D1D;">Best Performing Items</h3>
+          <a href="menu" class="font-body-sm font-medium" style="color: #064E3B; text-decoration: none;">View Full Inventory â†’</a>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b border-surface-container">
+                <th class="pb-3 pr-4 font-label-md" style="color: #64748B;">Product Details</th>
+                <th class="pb-3 pr-4 font-label-md" style="color: #64748B;">Sales Volume</th>
+                <th class="pb-3 pr-4 font-label-md" style="color: #64748B;">Growth</th>
+                <th class="pb-3 pr-4 font-label-md" style="color: #64748B;">Stock Status</th>
+                <th class="pb-3 font-label-md text-right" style="color: #64748B;">Revenue</th>
+              </tr>
+            </thead>
+            <tbody id="bestItemsTable">
+              <tr>
+                <td class="py-4 text-sm text-gray-500" colspan="5">Loading sales data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- Customer Insights Section -->
+      <div class="stitch-card">
+        <h3 class="font-headline-sm" style="color: #022D1D; margin-bottom: 20px;">Customer Insights</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="bg-white p-4 rounded-lg border border-gray-200">
+            <p class="text-xs text-gray-500">Total Customers</p>
+            <p class="text-2xl font-bold text-gray-800" id="totalCustomers">0</p>
+          </div>
+          <div class="bg-white p-4 rounded-lg border border-gray-200">
+            <p class="text-xs text-gray-500">Repeat Rate</p>
+            <p class="text-2xl font-bold text-green-600" id="repeatRate">0%</p>
+          </div>
+          <div class="bg-white p-4 rounded-lg border border-gray-200">
+            <p class="text-xs text-gray-500">Avg LTV</p>
+            <p class="text-2xl font-bold text-blue-600" id="avgLtv">TSh 0</p>
+          </div>
+          <div class="bg-white p-4 rounded-lg border border-gray-200">
+            <p class="text-xs text-gray-500">New This Month</p>
+            <p class="text-2xl font-bold text-purple-600" id="newCustomers">0</p>
+          </div>
+        </div>
+        <div class="stitch-card bg-white">
+          <h4 class="font-medium mb-3" style="color: #022D1D;">Cohort Retention</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead>
+                <tr class="border-b border-surface-container">
+                  <th class="pb-2 pr-4 font-label-md" style="color: #64748B;">Cohort</th>
+                  <th class="pb-2 pr-4 font-label-md" style="color: #64748B;">Week 1</th>
+                  <th class="pb-2 pr-4 font-label-md" style="color: #64748B;">Week 2</th>
+                  <th class="pb-2 pr-4 font-label-md" style="color: #64748B;">Week 3</th>
+                  <th class="pb-2 pr-4 font-label-md" style="color: #64748B;">Week 4</th>
+                  <th class="pb-2 font-label-md" style="color: #64748B;">Month 2</th>
+                </tr>
+              </thead>
+              <tbody id="cohortRetentionTable">
+                <!-- Populated by loadCustomerInsights() -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
-
-      <!-- Reviews Tab -->
       <div id="reviewsTab" class="p-6 hidden">
         <div class="flex justify-between items-center mb-4">
           <div>
@@ -603,11 +764,12 @@
         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-4">
           <div class="flex flex-col md:flex-row items-center gap-6">
             <div class="text-center">
-              <p class="text-4xl font-bold text-yellow-600" id="averageRating">4.5</p>
+              <p class="text-4xl font-bold text-yellow-600" id="averageRating">0.0</p>
               <div class="flex gap-1 my-2" id="ratingStars">
                 <!-- Stars will be inserted here -->
               </div>
               <p class="text-sm text-gray-500"><span id="totalReviewCount">0</span> reviews</p>
+              <p class="text-sm text-gray-500 hidden" id="totalReviews"></p>
             </div>
             <div class="flex-1 w-full">
               <div class="space-y-2" id="ratingBreakdown">
@@ -636,18 +798,51 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div class="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-xl shadow-sm text-white">
             <p class="text-green-100 text-sm font-medium uppercase mb-1">Available Balance</p>
-            <p class="text-3xl font-bold" id="availableBalance">TSh 145,000</p>
+            <p class="text-3xl font-bold" id="availableBalance">TSh 0</p>
             <p class="text-xs text-green-200 mt-2">Ready for withdrawal</p>
           </div>
           <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <p class="text-gray-500 text-sm font-medium uppercase mb-1">Pending Clearance</p>
-            <p class="text-2xl font-bold text-gray-800" id="pendingBalance">TSh 32,500</p>
+            <p class="text-2xl font-bold text-gray-800" id="pendingBalance">TSh 0</p>
             <p class="text-xs text-gray-400 mt-2">From recent orders</p>
           </div>
           <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <p class="text-gray-500 text-sm font-medium uppercase mb-1">Total Lifetime Earnings</p>
-            <p class="text-2xl font-bold text-gray-800" id="lifetimeEarnings">TSh 2,450,000</p>
+            <p class="text-2xl font-bold text-gray-800" id="lifetimeEarnings">TSh 0</p>
             <p class="text-xs text-gray-400 mt-2">After SmartSoko fees</p>
+          </div>
+        </div>
+
+        <!-- Payment Reconciliation -->
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Payment Reconciliation</h3>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+              <p class="text-gray-500 text-sm font-medium uppercase mb-1">Mobile Money (Pending)</p>
+              <p class="text-2xl font-bold text-orange-600" id="pendingMobileMoney">TSh 0</p>
+              <p class="text-xs text-gray-400 mt-1">Awaiting confirmation</p>
+            </div>
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+              <p class="text-gray-500 text-sm font-medium uppercase mb-1">Cash on Delivery (Collected)</p>
+              <p class="text-2xl font-bold text-green-700" id="codCollected">TSh 0</p>
+              <p class="text-xs text-gray-400 mt-1">Delivered COD orders</p>
+            </div>
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+              <p class="text-gray-500 text-sm font-medium uppercase mb-1">Paid (Confirmed)</p>
+              <p class="text-2xl font-bold text-blue-600" id="paidConfirmed">TSh 0</p>
+              <p class="text-xs text-gray-400 mt-1">Mobile money confirmed</p>
+            </div>
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+              <p class="text-gray-500 text-sm font-medium uppercase mb-1">Platform Fee (18%)</p>
+              <p class="text-2xl font-bold text-purple-600" id="platformFee">TSh 0</p>
+              <p class="text-xs text-gray-400 mt-1">Estimated</p>
+            </div>
+          </div>
+          <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+            <h4 class="font-semibold text-gray-900 mb-3">Pending Mobile Money Orders</h4>
+            <div id="pendingMMOrders" class="space-y-2 max-h-64 overflow-y-auto">
+              <p class="text-sm text-gray-500 text-center py-4">Loading...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -656,80 +851,18 @@
       <div id="promotionsTab" class="p-6 hidden">
         <div class="flex justify-between items-center mb-6">
           <div>
-            <h2 class="text-xl font-bold">Promotions & Marketing</h2>
-            <p class="text-sm text-gray-500">Coupons, collections, bundles, and deals</p>
+            <h2 class="text-xl font-bold">Promotions & Discounts</h2>
+            <p class="text-sm text-gray-500">Create special offers to attract more customers</p>
           </div>
+          <button onclick="openPromoModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">add_circle</span>
+            Create Promo Code
+          </button>
         </div>
-
-        <!-- Tab Navigation for Shopify Features -->
-        <div class="flex gap-2 mb-6 border-b border-gray-200 pb-2">
-          <button onclick="switchPromoTab('coupons')" id="promoTab-coupons" class="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white">Coupons</button>
-          <button onclick="switchPromoTab('collections')" id="promoTab-collections" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Collections</button>
-          <button onclick="switchPromoTab('bundles')" id="promoTab-bundles" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Bundles</button>
-          <button onclick="switchPromoTab('deals')" id="promoTab-deals" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Flash Deals</button>
-        </div>
-
-        <!-- Coupons Section -->
-        <div id="promoSection-coupons">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="font-semibold text-gray-700">Discount Coupons</h3>
-            <button onclick="openCouponModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-1">
-              <span class="material-symbols-outlined text-sm">add</span>
-              New Coupon
-            </button>
-          </div>
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
-            <div id="activePromosList" class="space-y-3">
-              <p class="text-sm text-gray-500">Loading coupons...</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Collections Section -->
-        <div id="promoSection-collections" class="hidden">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="font-semibold text-gray-700">Product Collections</h3>
-            <button onclick="openCollectionModal()" class="bg-purple-600 text-white px-3 py-1.5 rounded-lg hover:bg-purple-700 text-sm font-medium flex items-center gap-1">
-              <span class="material-symbols-outlined text-sm">add</span>
-              New Collection
-            </button>
-          </div>
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
-            <div id="collectionsList" class="space-y-3">
-              <p class="text-sm text-gray-500">Loading collections...</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bundles Section -->
-        <div id="promoSection-bundles" class="hidden">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="font-semibold text-gray-700">Product Bundles (Combo Deals)</h3>
-            <button onclick="openBundleModal()" class="bg-orange-600 text-white px-3 py-1.5 rounded-lg hover:bg-orange-700 text-sm font-medium flex items-center gap-1">
-              <span class="material-symbols-outlined text-sm">add</span>
-              New Bundle
-            </button>
-          </div>
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
-            <div id="bundlesList" class="space-y-3">
-              <p class="text-sm text-gray-500">Loading bundles...</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Deals Section -->
-        <div id="promoSection-deals" class="hidden">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="font-semibold text-gray-700">Flash Deals & Daily Offers</h3>
-            <button onclick="openDealModal()" class="bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 text-sm font-medium flex items-center gap-1">
-              <span class="material-symbols-outlined text-sm">add</span>
-              New Deal
-            </button>
-          </div>
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
-            <div id="dealsList" class="space-y-3">
-              <p class="text-sm text-gray-500">Loading deals...</p>
-            </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <h3 class="font-semibold mb-4 text-gray-700">Active Promotions</h3>
+          <div id="activePromosList" class="space-y-3">
+            <p class="text-sm text-gray-500">You currently have no active promotions.</p>
           </div>
         </div>
       </div>
@@ -827,8 +960,176 @@
             Logout
           </button>
         </div>
+       </div>
       </div>
-    </div>
+    
+      <!-- Inventory Tab -->
+      <div id="inventoryTab" class="p-6 hidden">
+        <h2 class="text-xl font-bold mb-4">Inventory Management</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Low Stock Alert -->
+          <div class="bg-red-50 rounded-xl p-6 border border-red-200">
+            <h3 class="font-semibold mb-4 text-red-800 flex items-center gap-2">
+              <span class="material-symbols-outlined text-red-600">warning</span>
+              Low Stock Alert
+            </h3>
+            <div id="lowStockItems" class="space-y-3">
+              <p class="text-sm text-red-700">Loading inventory data...</p>
+            </div>
+          </div>
+          
+          <!-- Supplier Quick Add -->
+          <div class="bg-white rounded-xl p-6 border border-gray-200">
+            <h3 class="font-semibold mb-4">Quick Supplier Action</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Product Name</label>
+                <input type="text" id="supplierProductName" placeholder="E.g. Coffee Beans" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Quantity to Add</label>
+                <input type="number" id="supplierQuantity" min="1" placeholder="1000" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Unit</label>
+                <select id="supplierUnit" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none">
+                  <option value="kg">kg</option>
+                  <option value="pcs">pcs</option>
+                  <option value="liters">liters</option>
+                  <option value="boxes">boxes</option>
+                </select>
+              </div>
+              <button onclick="quickAddStock()" class="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">Add Stock</button>
+            </div>
+          </div>
+          
+          <!-- Inventory Summary -->
+          <div class="bg-white rounded-xl p-6 border border-gray-200">
+            <h3 class="font-semibold mb-4">Inventory Summary</h3>
+            <div class="space-y-3">
+              <div class="flex justify-between py-2 border-b">
+                <span class="text-sm text-gray-600">Total Items</span>
+                <span class="font-medium" id="inventoryTotalItems">0</span>
+              </div>
+              <div class="flex justify-between py-2 border-b">
+                <span class="text-sm text-gray-600">Total Stock</span>
+                <span class="font-medium" id="inventoryTotalStock">0</span>
+              </div>
+              <div class="flex justify-between py-2 border-b">
+                <span class="text-sm text-gray-600">Categories</span>
+                <span class="font-medium" id="inventoryCategories">0</span>
+              </div>
+              <div class="flex justify-between py-2">
+                <span class="text-sm text-gray-600">Out of Stock</span>
+                <span class="font-medium text-red-600" id="inventoryOutOfStock">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <!-- Delivery Requests Tab -->
+      <div id="deliveryTab" class="p-6 hidden">
+        <h2 class="text-xl font-bold mb-4">Delivery Requests</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Active Drivers -->
+          <div class="bg-white rounded-xl p-6 border border-gray-200">
+            <h3 class="font-semibold mb-4">Available Drivers</h3>
+            <div id="availableDrivers" class="space-y-3">
+              <p class="text-sm text-gray-500">Loading drivers...</p>
+            </div>
+          </div>
+          
+          <!-- Driver Assignment -->
+          <div class="bg-white rounded-xl p-6 border border-gray-200">
+            <h3 class="font-semibold mb-4">Assign Driver</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Order ID</label>
+                <input type="text" id="orderIdInput" placeholder="E.g. ORD-001" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Driver</label>
+                <select id="driverSelect" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none">
+                  <option value="">Select Driver</option>
+                </select>
+              </div>
+              <button onclick="assignDriver()" class="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Assign Driver</button>
+            </div>
+          </div>
+          
+          <!-- Delivery Tracking -->
+          <div class="bg-white rounded-xl p-6 border border-gray-200">
+            <h3 class="font-semibold mb-4">Live Tracking</h3>
+            <div id="deliveryMap" class="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+              <p class="text-sm text-gray-500">Map placeholder - real-time driver location</p>
+            </div>
+            <div class="mt-4 space-y-2">
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Active Orders</span>
+                <span class="font-medium" id="activeDeliveries">0</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">ETA</span>
+                <span class="font-medium" id="deliveryEta">00:00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <!-- Staff Management Tab -->
+      <div id="staffTab" class="p-6 hidden">
+        <h2 class="text-xl font-bold mb-4">Staff Management</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Staff List -->
+          <div class="lg:col-span-2 bg-white rounded-xl p-6 border border-gray-200">
+            <h3 class="font-semibold mb-4">Team Members</h3>
+            <div id="staffList" class="space-y-3">
+              <p class="text-sm text-gray-500">Loading staff...</p>
+            </div>
+          </div>
+          
+          <!-- Add Staff Form -->
+          <div class="bg-white rounded-xl p-6 border border-gray-200">
+            <h3 class="font-semibold mb-4">Add Staff Member</h3>
+            <form id="addStaffForm" class="space-y-4" onsubmit="event.preventDefault(); addStaff();">
+              <div>
+                <label class="block text-sm font-medium mb-1">Name</label>
+                <input type="text" id="staffName" placeholder="John Doe" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Email</label>
+                <input type="email" id="staffEmail" placeholder="john@example.com" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Role</label>
+                <select id="staffRole" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none">
+                  <option value="manager">Manager</option>
+                  <option value="cashier">Cashier</option>
+                  <option value="kitchen">Kitchen Staff</option>
+                  <option value="waiter">Waiter</option>
+                  <option value="delivery">Delivery</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Shift</label>
+                <select id="staffShift" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none">
+                  <option value="morning">Morning (8AM - 4PM)</option>
+                  <option value="evening">Evening (4PM - 12AM)</option>
+                  <option value="night">Night (10PM - 6AM)</option>
+                  <option value="full">Full Day (8AM - 8PM)</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="staffPosAccess" class="rounded text-primary">
+                <label for="staffPosAccess" class="text-sm">POS Access</label>
+              </div>
+              <button type="submit" class="w-full py-2 px-4 bg-primary text-white rounded-lg hover:opacity-90 transition-colors font-medium">Add Staff</button>
+            </form>
+          </div>
+        </div>
+      </div>
     
     <!-- Add/Edit Menu Item Modal -->
     <div id="addMenuModal" class="hidden fixed inset-0 z-[100] bg-on-surface/50 backdrop-blur-sm items-center justify-center p-4">
@@ -903,7 +1204,7 @@
                 <label class="flex items-center gap-1 text-sm bg-gray-50 px-2 py-1 rounded border"><input type="checkbox" name="dietaryTags" value="Vegetarian"> Vegetarian</label>
                 <label class="flex items-center gap-1 text-sm bg-gray-50 px-2 py-1 rounded border"><input type="checkbox" name="dietaryTags" value="Gluten-Free"> Gluten-Free</label>
                 <label class="flex items-center gap-1 text-sm bg-gray-50 px-2 py-1 rounded border"><input type="checkbox" name="dietaryTags" value="Halal"> Halal</label>
-                <label class="flex items-center gap-1 text-sm bg-gray-50 px-2 py-1 rounded border"><input type="checkbox" name="dietaryTags" value="Spicy"> Spicy 🌶️</label>
+                <label class="flex items-center gap-1 text-sm bg-gray-50 px-2 py-1 rounded border"><input type="checkbox" name="dietaryTags" value="Spicy"> Spicy ðŸŒ¶ï¸</label>
               </div>
             </div>
 
@@ -918,17 +1219,9 @@
               </div>
             </div>
 
-            <!-- Variant Builder -->
             <div>
-              <label class="block text-xs text-gray-500 mb-1">Product Variants</label>
-              <div id="variantsContainer" class="space-y-2">
-                <!-- Variant rows rendered by InventoryManager -->
-              </div>
-              <button type="button" onclick="InventoryManager.addVariantRow()" class="mt-2 text-sm text-green-600 hover:text-green-700 flex items-center gap-1">
-                <span class="material-symbols-outlined text-sm">add</span>
-                Add Variant
-              </button>
-              <p class="text-xs text-gray-400 mt-1">Example: Size Large, Color Red, etc. Set stock to -1 for unlimited.</p>
+              <label for="menuItemVariations" class="block text-xs text-gray-500 mb-1">Variations & Add-ons (Format: Size Small=+0, Size Large=+1500)</label>
+              <textarea id="menuItemVariations" rows="2" placeholder="Extra Cheese=+500, Regular=+0, Large=+1500" class="w-full px-4 py-2 bg-surface-container border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all text-sm"></textarea>
             </div>
           </div>
           <div class="pt-4 flex gap-3">
@@ -955,149 +1248,6 @@
             <input type="number" id="promoDiscountInput" min="1" max="100" placeholder="10" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none">
           </div>
           <button onclick="savePromoCode()" class="w-full py-3 rounded-xl bg-primary text-white hover:opacity-90 transition-all font-bold">Save Promo</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Coupon Modal -->
-    <div id="couponModal" class="hidden fixed inset-0 z-[100] bg-on-surface/50 backdrop-blur-sm items-center justify-center p-4">
-      <div class="bg-surface rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-        <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface">
-          <h3 class="font-headline font-bold text-lg text-primary">Create Coupon</h3>
-          <button onclick="closeCouponModal()" class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">close</span></button>
-        </div>
-        <div class="p-6 space-y-4">
-          <div>
-            <label class="block text-sm font-medium mb-1">Coupon Code *</label>
-            <input type="text" id="couponCode" placeholder="e.g. SAVE20" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none uppercase">
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium mb-1">Type</label>
-              <select id="couponType" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none">
-                <option value="percentage">Percentage</option>
-                <option value="fixed">Fixed Amount</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-1">Value *</label>
-              <input type="number" id="couponValue" min="1" placeholder="20" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none">
-            </div>
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Min Purchase (TSh)</label>
-            <input type="number" id="couponMinPurchase" min="0" value="0" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none">
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium mb-1">Max Uses</label>
-              <input type="number" id="couponMaxUses" min="1" placeholder="100" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none">
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-1">Expires</label>
-              <input type="date" id="couponEndDate" class="w-full px-4 py-2 border rounded-lg focus:ring-primary outline-none">
-            </div>
-          </div>
-          <button onclick="saveCoupon()" class="w-full py-3 rounded-xl bg-blue-600 text-white hover:opacity-90 transition-all font-bold">Create Coupon</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Collection Modal -->
-    <div id="collectionModal" class="hidden fixed inset-0 z-[100] bg-on-surface/50 backdrop-blur-sm items-center justify-center p-4">
-      <div class="bg-surface rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-        <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface">
-          <h3 class="font-headline font-bold text-lg text-purple-700">Create Collection</h3>
-          <button onclick="closeCollectionModal()" class="text-on-surface-variant hover:text-purple-700 transition-colors"><span class="material-symbols-outlined">close</span></button>
-        </div>
-        <div class="p-6 space-y-4">
-          <div>
-            <label class="block text-sm font-medium mb-1">Collection Name *</label>
-            <input type="text" id="collectionName" placeholder="e.g. Summer Specials" class="w-full px-4 py-2 border rounded-lg focus:ring-purple-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Description</label>
-            <textarea id="collectionDesc" rows="2" placeholder="What's this collection about?" class="w-full px-4 py-2 border rounded-lg focus:ring-purple-500 outline-none"></textarea>
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Image URL</label>
-            <input type="text" id="collectionImage" placeholder="https://..." class="w-full px-4 py-2 border rounded-lg focus:ring-purple-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Products (comma separated IDs)</label>
-            <input type="text" id="collectionProducts" placeholder="prod1,prod2,prod3" class="w-full px-4 py-2 border rounded-lg focus:ring-purple-500 outline-none">
-          </div>
-          <button onclick="saveCollection()" class="w-full py-3 rounded-xl bg-purple-600 text-white hover:opacity-90 transition-all font-bold">Create Collection</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bundle Modal -->
-    <div id="bundleModal" class="hidden fixed inset-0 z-[100] bg-on-surface/50 backdrop-blur-sm items-center justify-center p-4">
-      <div class="bg-surface rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-        <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface">
-          <h3 class="font-headline font-bold text-lg text-orange-700">Create Bundle</h3>
-          <button onclick="closeBundleModal()" class="text-on-surface-variant hover:text-orange-700 transition-colors"><span class="material-symbols-outlined">close</span></button>
-        </div>
-        <div class="p-6 space-y-4">
-          <div>
-            <label class="block text-sm font-medium mb-1">Bundle Name *</label>
-            <input type="text" id="bundleName" placeholder="e.g. Family Feast" class="w-full px-4 py-2 border rounded-lg focus:ring-orange-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Description</label>
-            <textarea id="bundleDesc" rows="2" placeholder="What's included in this bundle?" class="w-full px-4 py-2 border rounded-lg focus:ring-orange-500 outline-none"></textarea>
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Product IDs (comma separated) *</label>
-            <input type="text" id="bundleProducts" placeholder="prod1,prod2,prod3" class="w-full px-4 py-2 border rounded-lg focus:ring-orange-500 outline-none">
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium mb-1">Original Price (TSh)</label>
-              <input type="number" id="bundleOriginalPrice" placeholder="Auto-calculated" class="w-full px-4 py-2 border rounded-lg focus:ring-orange-500 outline-none">
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-1">Bundle Price (TSh) *</label>
-              <input type="number" id="bundlePrice" placeholder="5000" class="w-full px-4 py-2 border rounded-lg focus:ring-orange-500 outline-none">
-            </div>
-          </div>
-          <button onclick="saveBundle()" class="w-full py-3 rounded-xl bg-orange-600 text-white hover:opacity-90 transition-all font-bold">Create Bundle</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Deal Modal -->
-    <div id="dealModal" class="hidden fixed inset-0 z-[100] bg-on-surface/50 backdrop-blur-sm items-center justify-center p-4">
-      <div class="bg-surface rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-        <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface">
-          <h3 class="font-headline font-bold text-lg text-red-700">Create Flash Deal</h3>
-          <button onclick="closeDealModal()" class="text-on-surface-variant hover:text-red-700 transition-colors"><span class="material-symbols-outlined">close</span></button>
-        </div>
-        <div class="p-6 space-y-4">
-          <div>
-            <label class="block text-sm font-medium mb-1">Deal Name *</label>
-            <input type="text" id="dealName" placeholder="e.g. Lunch Special" class="w-full px-4 py-2 border rounded-lg focus:ring-red-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Product IDs (comma separated) *</label>
-            <input type="text" id="dealProducts" placeholder="prod1,prod2" class="w-full px-4 py-2 border rounded-lg focus:ring-red-500 outline-none">
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium mb-1">Deal Price (TSh) *</label>
-              <input type="number" id="dealPrice" placeholder="1500" class="w-full px-4 py-2 border rounded-lg focus:ring-red-500 outline-none">
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-1">Discount %</label>
-              <input type="number" id="dealDiscount" min="1" max="100" placeholder="15" class="w-full px-4 py-2 border rounded-lg focus:ring-red-500 outline-none">
-            </div>
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">End Date (optional)</label>
-            <input type="datetime-local" id="dealEndDate" class="w-full px-4 py-2 border rounded-lg focus:ring-red-500 outline-none">
-          </div>
-          <button onclick="saveDeal()" class="w-full py-3 rounded-xl bg-red-600 text-white hover:opacity-90 transition-all font-bold">Create Deal</button>
         </div>
       </div>
     </div>
@@ -1158,18 +1308,18 @@
     </div>
   </main>
 
-  <!-- Modular Merchant App -->
-  <script src="js/merchant-app.js?v=2"></script>
-  
+  <!-- Modular Merchant App (loaded as ES module in <head>) -->
+
   <!-- Legacy inline script for backward compatibility (will be removed) -->
   <script>
     // Global state
     var currentSeller = null;
-    let products = []; // Global products array for menu items
-    let allOrders = []; // Global orders array for analytics
     
-    // Firestore reference is set by firebase-config.js as window.db
-    // Functions use window.db at call time to ensure Firebase is initialized
+    // Resolve Firestore reference reliably
+    var db = window.db;
+    if (!db) {
+      console.warn('Firestore not initialized');
+    }
 
     // Keep escapeHtml for any inline usage
     function escapeHtml(str) {
@@ -1179,12 +1329,35 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
-      SmartNav.init({ activePage: 'orders', role: 'merchant', breadcrumbs: ['Merchant', 'Dashboard'] });
+      SmartNav.init({ activePage: 'orders', role: 'merchant', showProfile: false, breadcrumbs: ['Merchant', 'Dashboard'], skipTopbar: true });
 
-      // Firebase Auth state listener
+      // â”€â”€ Demo / mock-login mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+      // When the user logged in with a test account (no real Firebase user),
+      // onAuthStateChanged fires with null and would loop back to login.html.
+      // Detect this early and skip the Firebase listener entirely.
+      const authMode = localStorage.getItem('smartsoko_auth_mode');
+      if (authMode === 'demo') {
+        const demoUser = JSON.parse(localStorage.getItem('smartsoko_demo_user') || '{}');
+        if (demoUser.uid && (demoUser.role === 'merchant' || demoUser.role === 'seller')) {
+          // Use a synthetic UID so Firestore queries still work (they'll return empty for mock IDs)
+          (async () => {
+            await loadSellerData(demoUser.uid);
+            if (currentSeller) {
+              setupRealtimeListeners();
+            }
+          })();
+          return; // do NOT attach Firebase listener
+        } else if (demoUser.uid) {
+          // Logged-in demo user but wrong role â€” send to login
+          window.location.href = 'login.html?reason=unauthorized';
+          return;
+        }
+      }
+
+      // â”€â”€ Real Firebase auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       const auth = window.auth;
       if (!auth) {
-        window.location.href = '/login?reason=auth_required';
+        window.location.href = 'login.html?reason=auth_required';
         return;
       }
 
@@ -1195,7 +1368,7 @@
             setupRealtimeListeners();
           }
         } else {
-          window.location.href = '/login';
+          window.location.href = 'login.html';
         }
       });
     });
@@ -1210,14 +1383,15 @@
         if (!snapshot.empty) {
           currentSeller = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
         } else {
-          // No seller profile found
-          console.warn('No seller profile found for user:', uid);
-          // Create minimal seller object to prevent null errors
-          currentSeller = { id: uid, name: 'New Store', rating: 4.5 };
+          // No seller profile found â€” do not fabricate one. The dashboard
+          // renders empty states until the merchant completes setup.
+          currentSeller = null;
+          const noProfile = document.getElementById('noSellerProfile');
+          if (noProfile) noProfile.classList.remove('hidden');
         }
 
         const ratingEl = document.getElementById('restaurantRating');
-        if (ratingEl) ratingEl.textContent = (currentSeller?.rating || '4.5');
+        if (ratingEl) ratingEl.textContent = currentSeller ? (currentSeller.rating || '0.0') : '0.0';
         
         // Load comprehensive stats
         await loadComprehensiveStats();
@@ -1226,22 +1400,12 @@
         loadProducts();
         loadReviews();
         
-        // Initialize Shopify features dashboard
-        if (typeof ShopifyDashboard !== 'undefined') {
-          ShopifyDashboard.init(currentSeller.id);
-        }
-        
         // Populate settings form
-        const storeNameEl = document.getElementById('storeName');
-        const storeLogoEl = document.getElementById('storeLogo');
-        const storeDescEl = document.getElementById('storeDescription');
-        const storeCatEl = document.getElementById('storeCategory');
-        const isOpenEl = document.getElementById('isOpen');
-        if (storeNameEl) storeNameEl.value = currentSeller?.name || '';
-        if (storeLogoEl) storeLogoEl.value = currentSeller?.logoUrl || '';
-        if (storeDescEl) storeDescEl.value = currentSeller?.description || '';
-        if (storeCatEl) storeCatEl.value = currentSeller?.category || 'food';
-        if (isOpenEl) isOpenEl.checked = currentSeller?.isOpen || false;
+        document.getElementById('storeName').value = currentSeller.name || '';
+        document.getElementById('storeLogo').value = currentSeller.logoUrl || '';
+        document.getElementById('storeDescription').value = currentSeller.description || '';
+        document.getElementById('storeCategory').value = currentSeller.category || 'food';
+        document.getElementById('isOpen').checked = currentSeller.isOpen || false;
       } catch (error) {
         console.error('Error loading seller data:', error);
       }
@@ -1264,7 +1428,7 @@
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
         
-        const q = query(collection(db, 'orders'), where('merchantId', '==', currentSeller.id));
+        const q = query(collection(db, 'orders'), where('sellerId', '==', currentSeller.id));
         const ordersSnap = await getDocs(q);
         
         let todaySales = 0;
@@ -1299,21 +1463,21 @@
         });
         
         // Update stats
-        document.getElementById('todaySales').textContent = `TSh ${todaySales.toLocaleString()}`;
-        document.getElementById('orderCount').textContent = orderCount;
-        document.getElementById('pendingOrders').textContent = `${pendingCount} pending`;
-        document.getElementById('weeklySales').textContent = `TSh ${weeklySales.toLocaleString()}`;
-        document.getElementById('weeklyOrders').textContent = `${weeklyOrders} orders`;
+        const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setText('weeklySales', `TSh ${weeklySales.toLocaleString()}`);
+        setText('weeklyOrders', `${weeklyOrders} orders`);
         
         // Calculate trends
         const salesTrend = yesterdaySales > 0 ? ((todaySales - yesterdaySales) / yesterdaySales * 100).toFixed(1) : 0;
         const trendElem = document.getElementById('salesTrend');
-        trendElem.textContent = `${salesTrend >= 0 ? '+' : ''}${salesTrend}% vs yesterday`;
-        trendElem.className = `text-xs mt-1 ${salesTrend >= 0 ? 'text-green-600' : 'text-red-600'}`;
+        if (trendElem) {
+          trendElem.textContent = `${salesTrend >= 0 ? '+' : ''}${salesTrend}% vs yesterday`;
+          trendElem.className = `text-xs mt-1 ${salesTrend >= 0 ? 'text-green-600' : 'text-red-600'}`;
+        }
         
-        // Average order value
-        const avgOrder = orderCount > 0 ? Math.round(totalRevenue / orderCount) : 0;
-        document.getElementById('avgOrderValue').textContent = `TSh ${avgOrder.toLocaleString()}`;
+        // KPI cards (today sales, order count, pending, avg order value) are
+        // owned by loadKPIs in js/merchant-app.js â€” refresh them here on updates.
+        if (typeof window.loadKPIs === 'function') window.loadKPIs();
         
       } catch (error) {
         console.error('Error loading stats:', error);
@@ -1365,7 +1529,7 @@
         const db = window.db;
         if (!db) throw new Error('Firestore not initialized');
         const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-        const q = query(collection(db, 'orders'), where('merchantId', '==', currentSeller.id));
+        const q = query(collection(db, 'orders'), where('sellerId', '==', currentSeller.id));
         const snapshot = await getDocs(q);
 
         let orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -1392,7 +1556,6 @@
         }
         
         allOrders = orders;
-        window.allOrders = orders; // Also expose globally for analytics
         displayOrders(orders);
       } catch (error) {
         console.error('Error loading orders:', error);
@@ -1528,9 +1691,63 @@
             <span class="text-sm text-gray-500">${review.createdAt ? (review.createdAt.toDate ? review.createdAt.toDate().toLocaleDateString() : new Date(review.createdAt).toLocaleDateString()) : ''}</span>
           </div>
           <p class="text-gray-700">${safeComment}</p>
+          ${review.reply && review.reply.text ? `
+            <div class="mt-3 bg-gray-50 border-l-4 border-green-600 rounded-r-lg p-3">
+              <p class="text-xs font-semibold text-green-800 mb-1">${escapeHtml(review.reply.sellerName || 'Seller')} replied:</p>
+              <p class="text-sm text-gray-700">${escapeHtml(review.reply.text)}</p>
+              ${review.reply.repliedAt ? `<p class="text-xs text-gray-400 mt-1">${review.reply.repliedAt.toDate ? review.reply.repliedAt.toDate().toLocaleDateString() : new Date(review.reply.repliedAt).toLocaleDateString()}</p>` : ''}
+            </div>` : ''}
           ${orderIdShort ? `<p class="text-xs text-gray-400 mt-2">Order #${orderIdShort}</p>` : ''}
+          <div class="mt-3">
+            <button onclick="replyToReview('${review.id}')" class="text-xs font-semibold text-green-700 hover:text-green-800 transition-colors">
+              <span class="material-symbols-outlined text-xs align-middle">reply</span> Reply
+            </button>
+            <div id="replyEditor-${review.id}" class="hidden mt-2">
+              <textarea id="replyText-${review.id}" rows="2" placeholder="Write a public reply to this review..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-600 focus:border-green-600 outline-none"></textarea>
+              <div class="flex gap-2 mt-2">
+                <button onclick="saveReply('${review.id}')" class="px-3 py-1.5 bg-green-700 text-white text-xs font-semibold rounded-lg hover:bg-green-800 transition-colors">Save Reply</button>
+                <button onclick="replyToReview('${review.id}')" class="px-3 py-1.5 border border-gray-300 text-gray-600 text-xs font-semibold rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
+              </div>
+            </div>
+          </div>
         </div>
       `}).join('');
+    }
+
+    function replyToReview(reviewId) {
+      const editor = document.getElementById(`replyEditor-${reviewId}`);
+      if (!editor) return;
+      editor.classList.toggle('hidden');
+    }
+
+    async function saveReply(reviewId) {
+      const textarea = document.getElementById(`replyText-${reviewId}`);
+      const text = textarea ? textarea.value.trim() : '';
+      if (!text) return;
+      try {
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        await updateDoc(doc(db, 'reviews', reviewId), {
+          reply: {
+            text,
+            sellerName: (currentSeller && currentSeller.storeName) || 'Seller',
+            sellerId: currentSeller ? currentSeller.id : '',
+            repliedAt: serverTimestamp()
+          }
+        });
+        const review = allReviews.find(r => r.id === reviewId);
+        if (review) review.reply = { text, sellerName: (currentSeller && currentSeller.storeName) || 'Seller', sellerId: currentSeller ? currentSeller.id : '', repliedAt: new Date() };
+        displayReviews(allReviews);
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-6 right-6 bg-green-700 text-white px-5 py-2.5 rounded-full shadow-lg z-[100] text-sm font-semibold';
+        toast.textContent = 'Reply posted';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+      } catch (error) {
+        console.error('Error saving reply:', error);
+        alert('Failed to save reply. Please try again.');
+      }
     }
 
     function filterReviews(rating) {
@@ -1552,7 +1769,8 @@
       
       document.getElementById('averageRating').textContent = avgRating;
       document.getElementById('totalReviewCount').textContent = reviews.length;
-      document.getElementById('totalReviews').textContent = `${reviews.length} reviews`;
+      const totalReviewsEl = document.getElementById('totalReviews');
+      if (totalReviewsEl) totalReviewsEl.textContent = `${reviews.length} reviews`;
       
       // Update stars
       document.getElementById('ratingStars').innerHTML = Array(5).fill(0).map((_, i) => `
@@ -1569,7 +1787,7 @@
         const percentage = (count / reviews.length * 100).toFixed(0);
         return `
           <div class="flex items-center gap-2">
-            <span class="text-sm w-8">${star} ★</span>
+            <span class="text-sm w-8">${star} â˜…</span>
             <div class="flex-1 bg-gray-200 rounded-full h-2">
               <div class="bg-yellow-500 h-2 rounded-full" style="width: ${percentage}%"></div>
             </div>
@@ -1718,24 +1936,20 @@
         // Load today's stats
         const todayStats = await window.getSalesAnalytics('today');
         if (todayStats) {
-          const todaySalesEl = document.getElementById('todaySales');
-          const ordersCompletedEl = document.getElementById('ordersCompleted');
-          if (todaySalesEl) todaySalesEl.textContent = `TSh ${(todayStats.totalSales || 0).toLocaleString()}`;
-          if (ordersCompletedEl) ordersCompletedEl.textContent = todayStats.totalOrders || 0;
+          document.getElementById('todaySales').textContent = `TSh ${todayStats.totalSales.toLocaleString()}`;
+          document.getElementById('ordersCompleted').textContent = todayStats.totalOrders;
         }
 
         // Load week's stats
         const weekStats = await window.getSalesAnalytics('week');
         if (weekStats) {
-          const weekSalesEl = document.getElementById('weekSales');
-          if (weekSalesEl) weekSalesEl.textContent = `TSh ${(weekStats.totalSales || 0).toLocaleString()}`;
+          document.getElementById('weekSales').textContent = `TSh ${weekStats.totalSales.toLocaleString()}`;
         }
 
         // Load month's stats
         const monthStats = await window.getSalesAnalytics('month');
         if (monthStats) {
-          const monthSalesEl = document.getElementById('monthSales');
-          if (monthSalesEl) monthSalesEl.textContent = `TSh ${(monthStats.totalSales || 0).toLocaleString()}`;
+          document.getElementById('monthSales').textContent = `TSh ${monthStats.totalSales.toLocaleString()}`;
         }
 
         // Load top products
@@ -1772,44 +1986,25 @@
 
     async function loadProducts() {
       try {
-        console.log('loadProducts() called, currentSeller:', currentSeller);
-        
         // Use enhanced function if available
         if (typeof window.loadMerchantProducts === 'function') {
-          console.log('Using window.loadMerchantProducts...');
-          const loadedProducts = await window.loadMerchantProducts();
-          console.log('window.loadMerchantProducts returned:', loadedProducts);
-          if (loadedProducts && loadedProducts.length > 0) {
-            products = loadedProducts;
-            displayProducts(products);
-            return;
-          }
-          console.log('window.loadMerchantProducts returned empty, trying fallback...');
+          const products = await window.loadMerchantProducts();
+          displayProducts(products);
+          return;
         }
         
         // Fallback to basic load
-        if (!currentSeller) {
-          console.warn('loadProducts: currentSeller is null');
-          return;
-        }
-        if (!currentSeller.id) {
-          console.warn('loadProducts: currentSeller.id is missing');
-          return;
-        }
-        
+        if (!currentSeller) return;
         const db = window.db;
         if (!db) throw new Error('Firestore not initialized');
-        
-        console.log('Querying products with merchantId:', currentSeller.id);
         const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-        const q = query(collection(db, 'products'), where('merchantId', '==', currentSeller.id));
+        const q = query(collection(db, 'products'), where('sellerId', '==', currentSeller.id));
         const snapshot = await getDocs(q);
         
-        console.log('Products query returned', snapshot.size, 'documents');
         products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log('Loaded products:', products);
         displayProducts(products);
-        document.getElementById('menuItemCount').textContent = products.length;
+        const countEl = document.getElementById('menuItemCount');
+        if (countEl) countEl.textContent = products.length;
       } catch (error) {
         console.error('Error loading products:', error);
       }
@@ -1817,7 +2012,6 @@
 
     function displayProducts(items) {
       const container = document.getElementById('menuItemsList');
-      const products = items || [];
       
       // Update menu stats
       const totalItems = products.length;
@@ -1835,8 +2029,10 @@
       document.getElementById('availableMenuItems').textContent = availableItems;
       document.getElementById('outOfStockItems').textContent = outOfStock;
       document.getElementById('topCategory').textContent = topCategory ? topCategory[0].charAt(0).toUpperCase() + topCategory[0].slice(1) : '-';
-      document.getElementById('menuItemCount').textContent = totalItems;
-      document.getElementById('availableItems').textContent = `${availableItems} available`;
+      const menuItemCountEl = document.getElementById('menuItemCount');
+      if (menuItemCountEl) menuItemCountEl.textContent = totalItems;
+      const availableItemsEl = document.getElementById('availableItems');
+      if (availableItemsEl) availableItemsEl.textContent = `${availableItems} available`;
       
       if (items.length === 0) {
         container.innerHTML = '<p class="text-center text-gray-500 py-8">No products found</p>';
@@ -1863,56 +2059,44 @@
         let varHtml = varCount > 0 ? `<div class="text-[10px] text-primary mt-1 font-medium"><span class="material-symbols-outlined text-[12px] align-middle">tune</span> ${varCount} variation(s)</div>` : '';
 
         return `
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full group">
-          <!-- Image Container - Full Width -->
-          <div class="relative w-full aspect-[4/3] overflow-hidden bg-gray-100">
-            <input type="checkbox" class="product-select-cb absolute top-3 left-3 z-20 w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer" value="${item.id}" onchange="updateBulkActionUI()">
-            <img src="${item.imageUrl || 'images/default-product.png'}" alt="${escapeHtml(item.name)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onerror="this.onerror=null; this.src='images/default-product.png';">
-            
-            <!-- Stock Badge -->
-            <div class="absolute top-3 right-3 z-10">
-              <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${item.isAvailable ? 'bg-green-500 text-white' : 'bg-red-500 text-white'} shadow-lg">
-                ${item.isAvailable ? '● In Stock' : '● Out of Stock'}
-              </span>
-            </div>
-            
-            <!-- Price Badge -->
-            <div class="absolute bottom-3 right-3 z-10">
-              <span class="text-base font-bold text-white bg-primary px-3 py-1.5 rounded-lg shadow-lg">
-                TSh ${(item.price || 0).toLocaleString()}
-              </span>
-            </div>
+        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-white flex flex-col h-full relative group">
+          <div class="absolute top-3 left-3 z-10 bg-white rounded flex items-center justify-center shadow-sm">
+            <input type="checkbox" class="product-select-cb w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer" value="${item.id}" onchange="updateBulkActionUI()">
           </div>
-          
-          <!-- Content -->
-          <div class="p-4 flex flex-col flex-grow">
-            <!-- Title & Category Row -->
-            <div class="mb-2">
-              <h4 class="font-bold text-lg text-gray-900 leading-tight mb-1">${escapeHtml(item.name)}</h4>
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-md font-medium">${escapeHtml(item.category) || 'General'}</span>
-                <span class="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-md font-medium">📦 ${stockDisplay}</span>
+          <div class="w-full h-32 rounded-md mb-3 overflow-hidden bg-gray-100 relative">
+            <img src="${item.imageUrl || 'images/default-product.png'}" alt="${escapeHtml(item.name)}" class="w-full h-full object-cover" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="absolute inset-0 flex items-center justify-center hidden">
+              <div class="text-center">
+                <span class="material-symbols-outlined text-4xl text-gray-400">image</span>
+                <p class="text-xs text-gray-500 mt-1">${escapeHtml(item.name)}</p>
               </div>
             </div>
-            
-            ${tagsHtml}
-            ${timeHtml}
-            ${varHtml}
-            
-            <!-- Description -->
-            <p class="text-gray-600 text-sm my-3 flex-grow line-clamp-3">${escapeHtml(item.description) || 'No description available'}</p>
-            
-            <!-- Actions Footer -->
-            <div class="flex justify-between items-center pt-4 border-t border-gray-100 mt-auto gap-2">
-              <button onclick="toggleProductAvailability('${item.id}')" class="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 ${item.isAvailable ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100' : 'bg-green-50 text-green-700 hover:bg-green-100'} rounded-lg transition-colors font-medium text-sm" title="Toggle Availability">
-                <span class="material-symbols-outlined text-lg">${item.isAvailable ? 'pause_circle' : 'play_circle'}</span>
-                ${item.isAvailable ? 'Pause' : 'Activate'}
+          </div>
+          <div class="flex justify-between items-start mb-1">
+            <div>
+              <h4 class="font-semibold">${escapeHtml(item.name)}</h4>
+              <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">${escapeHtml(item.category) || 'General'}</span>
+              <span class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded ml-1 font-medium shadow-sm border border-blue-100">ðŸ“¦ ${stockDisplay}</span>
+            </div>
+            <span class="text-lg font-bold text-green-600 whitespace-nowrap ml-2">TSh ${(item.price || 0).toLocaleString()}</span>
+          </div>
+          ${tagsHtml}
+          ${timeHtml}
+          ${varHtml}
+          <p class="text-gray-600 text-sm my-3 flex-grow">${escapeHtml(item.description) || 'No description'}</p>
+          <div class="flex justify-between items-center pt-3 border-t border-gray-100 mt-auto">
+            <span class="px-2 py-1 ${item.isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} text-xs rounded-full font-medium">
+              ${item.isAvailable ? 'â— Available' : 'â— Unavailable'}
+            </span>
+            <div class="flex space-x-1">
+              <button onclick="toggleProductAvailability('${item.id}')" class="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" title="Toggle Availability">
+                <span class="material-symbols-outlined text-sm">power_settings_new</span>
               </button>
-              <button onclick="openEditMenuItem('${item.id}')" class="flex items-center justify-center p-2.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors" title="Edit Item">
-                <span class="material-symbols-outlined text-lg">edit</span>
+              <button onclick="openEditMenuItem('${item.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit Item">
+                <span class="material-symbols-outlined text-sm">edit</span>
               </button>
-              <button onclick="deleteProduct('${item.id}')" class="flex items-center justify-center p-2.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors" title="Delete Item">
-                <span class="material-symbols-outlined text-lg">delete</span>
+              <button onclick="deleteProduct('${item.id}')" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete Item">
+                <span class="material-symbols-outlined text-sm">delete</span>
               </button>
             </div>
           </div>
@@ -1951,103 +2135,96 @@
 
     async function loadAnalytics() {
       if (!currentSeller) return;
-      
+
       try {
         const period = parseInt(document.getElementById('analyticsPeriod')?.value || '7');
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - period);
-        
-        // Popular Items
-        const itemCounts = {};
-        const categorySales = {};
-        const hourCounts = {};
+
+        if ((!allOrders || allOrders.length === 0) && window.db) {
+          try {
+            const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+            const snap = await getDocs(query(collection(window.db, 'orders'), where('sellerId', '==', currentSeller.id)));
+            allOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          } catch (_) { /* keep empty */ }
+        }
+
         const dailyRevenue = {};
-        
-        const ordersToProcess = allOrders || window.allOrders || [];
-        ordersToProcess.forEach(order => {
+        const productSales = {};
+        const customerMap = {};
+        const regionMap = {};
+        let periodOrders = 0;
+        let periodRevenue = 0;
+
+        allOrders.forEach(order => {
           const orderDate = order.createdAt ? (order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt)) : null;
-          if (orderDate && orderDate >= startDate) {
-            // Daily revenue for chart
-            const dateKey = orderDate.toLocaleDateString();
-            dailyRevenue[dateKey] = (dailyRevenue[dateKey] || 0) + (order.total || 0);
-            
-            // Category sales
-            if (order.items) {
-              order.items.forEach(item => {
-                itemCounts[item.name] = (itemCounts[item.name] || 0) + (item.quantity || 1);
-                
-                // Get category from products
-                const product = products.find(p => p.name === item.name);
-                const category = product?.category || 'Other';
-                categorySales[category] = (categorySales[category] || 0) + ((item.price || 0) * (item.quantity || 1));
-              });
-            }
-            
-            // Peak hours
-            const hour = orderDate.getHours();
-            hourCounts[hour] = (hourCounts[hour] || 0) + 1;
-          }
+          if (!orderDate || orderDate < startDate) return;
+          if (String(order.status || '').toLowerCase() === 'cancelled') return;
+
+          periodOrders += 1;
+          const total = Number(order.total || 0);
+          periodRevenue += total;
+          const dateKey = orderDate.toLocaleDateString();
+          dailyRevenue[dateKey] = (dailyRevenue[dateKey] || 0) + total;
+
+          const custKey = order.customerId || order.userId || order.customerPhone || order.customerName || 'unknown';
+          customerMap[custKey] = (customerMap[custKey] || 0) + 1;
+
+          const region = order.deliveryAddress?.city || order.city || order.region || order.deliveryZone || 'Unknown';
+          regionMap[region] = (regionMap[region] || 0) + total;
+
+          (order.items || []).forEach(item => {
+            const key = item.name || item.id || 'Item';
+            if (!productSales[key]) productSales[key] = { name: key, qty: 0, revenue: 0 };
+            const qty = Number(item.quantity || item.qty || 1);
+            const price = Number(item.price || 0) + Number(item.variationDelta || 0);
+            productSales[key].qty += qty;
+            productSales[key].revenue += price * qty;
+          });
         });
-        
-        // Display Popular Items
-        const sortedItems = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-        const popularItemsEl = document.getElementById('popularItems');
-        if (popularItemsEl) {
-          popularItemsEl.innerHTML = sortedItems.map(([name, count], index) => `
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${index < 3 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}">
-                ${index + 1}
-              </div>
-              <div class="flex-1">
-                <p class="text-sm font-medium">${name}</p>
-                <p class="text-xs text-gray-500">${count} sold</p>
-              </div>
-            </div>
-          `).join('') || '<p class="text-sm text-gray-500">No data available</p>';
-        }
 
-        // Display Peak Hours
-        const sortedHours = Object.entries(hourCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-        const peakHoursEl = document.getElementById('peakHours');
-        if (peakHoursEl) {
-          peakHoursEl.innerHTML = sortedHours.map(([hour, count]) => {
-          const timeLabel = `${hour}:00 - ${hour}:59`;
-          const totalOrders = allOrders?.length || window.allOrders?.length || 1;
-          const percentage = Math.round((count / totalOrders) * 100) || 0;
-          return `
-            <div class="flex items-center gap-2">
-              <span class="text-sm w-20">${timeLabel}</span>
-              <div class="flex-1 bg-gray-200 rounded-full h-2">
-                <div class="bg-primary h-2 rounded-full" style="width: ${percentage}%"></div>
-              </div>
-              <span class="text-sm text-gray-500 w-8">${count}</span>
-            </div>
-          `;
-        }).join('') || '<p class="text-sm text-gray-500">No data available</p>';
-        }
-
-        // Display Category Sales
-        const sortedCategories = Object.entries(categorySales).sort((a, b) => b[1] - a[1]);
-        const totalSales = sortedCategories.reduce((sum, [, sales]) => sum + sales, 0);
-        const categorySalesEl = document.getElementById('categorySales');
-        if (categorySalesEl) {
-          categorySalesEl.innerHTML = sortedCategories.map(([category, sales]) => {
-          const percentage = totalSales > 0 ? Math.round((sales / totalSales) * 100) : 0;
-          return `
-            <div class="flex items-center gap-2">
-              <span class="text-sm w-24 capitalize">${category}</span>
-              <div class="flex-1 bg-gray-200 rounded-full h-2">
-                <div class="bg-green-500 h-2 rounded-full" style="width: ${percentage}%"></div>
-              </div>
-              <span class="text-sm text-gray-500">TSh ${sales.toLocaleString()}</span>
-            </div>
-          `;
-        }).join('') || '<p class="text-sm text-gray-500">No data available</p>';
-        }
-
-        // Simple revenue chart using canvas
         drawRevenueChart(dailyRevenue, period);
-        
+
+        const topProducts = Object.values(productSales).sort((a, b) => b.revenue - a.revenue).slice(0, 8);
+        const bestTable = document.getElementById('bestItemsTable');
+        if (bestTable) {
+          bestTable.innerHTML = topProducts.length ? topProducts.map(p => `
+            <tr class="border-b border-gray-100">
+              <td class="py-3 pr-4 text-sm font-medium text-gray-900">${escapeHtml(p.name)}</td>
+              <td class="py-3 pr-4 text-sm text-gray-600">${p.qty}</td>
+              <td class="py-3 pr-4 text-sm text-green-700">—</td>
+              <td class="py-3 pr-4 text-sm text-gray-600">In stock</td>
+              <td class="py-3 text-sm font-semibold text-right">TSh ${Number(p.revenue).toLocaleString()}</td>
+            </tr>
+          `).join('') : '<tr><td class="py-4 text-sm text-gray-500" colspan="5">No sales in this period</td></tr>';
+        }
+
+        const customers = Object.values(customerMap);
+        const repeatCustomers = customers.filter(c => c > 1).length;
+        const totalCustomers = customers.length;
+        const segEl = document.getElementById('segmentationContent');
+        if (segEl) {
+          segEl.innerHTML = `
+            <div class="space-y-3">
+              <div class="flex justify-between text-sm"><span class="text-gray-600">Orders (${period}d)</span><span class="font-semibold">${periodOrders}</span></div>
+              <div class="flex justify-between text-sm"><span class="text-gray-600">Revenue (${period}d)</span><span class="font-semibold">TSh ${periodRevenue.toLocaleString()}</span></div>
+              <div class="flex justify-between text-sm"><span class="text-gray-600">Customers</span><span class="font-semibold">${totalCustomers}</span></div>
+              <div class="flex justify-between text-sm"><span class="text-gray-600">Repeat customers</span><span class="font-semibold">${repeatCustomers}</span></div>
+              <div class="flex justify-between text-sm"><span class="text-gray-600">Repeat rate</span><span class="font-semibold">${totalCustomers ? Math.round((repeatCustomers / totalCustomers) * 100) : 0}%</span></div>
+              <div class="flex justify-between text-sm"><span class="text-gray-600">Avg order value</span><span class="font-semibold">TSh ${periodOrders ? Math.round(periodRevenue / periodOrders).toLocaleString() : 0}</span></div>
+            </div>`;
+        }
+
+        const regionEl = document.getElementById('regionalBreakdown');
+        if (regionEl) {
+          const regions = Object.entries(regionMap).sort((a, b) => b[1] - a[1]).slice(0, 6);
+          regionEl.innerHTML = regions.length ? regions.map(([name, rev]) => `
+            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+              <span class="text-sm text-gray-700">${escapeHtml(name)}</span>
+              <span class="text-sm font-semibold">TSh ${Number(rev).toLocaleString()}</span>
+            </div>
+          `).join('') : '<p class="text-sm text-gray-500">No regional data yet</p>';
+        }
       } catch (error) {
         console.error('Error loading analytics:', error);
       }
@@ -2105,43 +2282,145 @@
       });
     }
 
-    function switchTab(tabName, clickedBtn) {
+function switchTab(tabName, clickedBtn) {
       document.querySelectorAll('[id$="Tab"]').forEach(tab => {
         tab.classList.add('hidden');
         tab.classList.remove('animate-fade-in');
       });
-      
+
       const targetTab = document.getElementById(tabName + 'Tab');
-      targetTab.classList.remove('hidden');
-      // Force a reflow to trigger animation
-      void targetTab.offsetWidth;
-      targetTab.classList.add('animate-fade-in');
-      
-      // Load data based on tab
-      if (tabName === 'analytics' && typeof window.getSalesAnalytics === 'function') {
-        loadSalesDashboard();
-      } else if (tabName === 'products') {
-        loadProducts();
-      } else if (tabName === 'orders') {
-        loadOrders();
+      if (targetTab) {
+        targetTab.classList.remove('hidden');
+        void targetTab.offsetWidth;
+        targetTab.classList.add('animate-fade-in');
       }
 
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('bg-primary', 'text-white', 'shadow-md', 'font-bold');
         btn.classList.add('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-800');
       });
-
-      // Use the passed button reference; fall back to the global event target if needed
-      const activeBtn = clickedBtn || (typeof event !== 'undefined' && event.target) || null;
+      const activeBtn = clickedBtn || (typeof event !== 'undefined' && event && event.target) || null;
       if (activeBtn) {
-        // Handle if they clicked the span icon inside the button
-        const actualBtn = activeBtn.closest('button') || activeBtn;
+        const actualBtn = activeBtn.closest ? (activeBtn.closest('button') || activeBtn) : activeBtn;
         actualBtn.classList.remove('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-800');
         actualBtn.classList.add('bg-primary', 'text-white', 'shadow-md', 'font-bold');
       }
 
-      if (tabName === 'analytics') loadAnalytics();
+      if (tabName === 'analytics') {
+        if (typeof window.getSalesAnalytics === 'function') loadSalesDashboard();
+        loadAnalytics();
+      } else if (tabName === 'products') {
+        loadProducts();
+      } else if (tabName === 'orders') {
+        loadOrders();
+      } else if (tabName === 'inventory') {
+        if (typeof loadInventoryTab === 'function') loadInventoryTab();
+      } else if (tabName === 'delivery') {
+        if (typeof loadDeliveryTab === 'function') loadDeliveryTab();
+      } else if (tabName === 'staff') {
+        if (typeof loadStaffTab === 'function') loadStaffTab();
+      } else if (tabName === 'finance') {
+        if (typeof loadFinance === 'function') loadFinance();
+        loadFinanceReconciliation();
+      } else if (tabName === 'promotions') {
+        if (typeof loadPromotions === 'function') loadPromotions();
+      } else if (tabName === 'reviews') {
+        if (typeof loadReviews === 'function') loadReviews();
+      }
     }
+
+    async function loadFinanceReconciliation() {
+      const fmt = (n) => 'TSh ' + Number(n || 0).toLocaleString();
+      const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = typeof val === 'string' ? val : fmt(val); };
+      const listEl = document.getElementById('pendingMMOrders');
+
+      let orders = Array.isArray(allOrders) ? allOrders : [];
+      if ((!orders || orders.length === 0) && currentSeller && window.db) {
+        try {
+          const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+          const snap = await getDocs(query(collection(window.db, 'orders'), where('sellerId', '==', currentSeller.id)));
+          orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          allOrders = orders;
+        } catch (e) {
+          console.error('Finance reconciliation load error:', e);
+        }
+      }
+
+      let pendingMM = 0, codCollected = 0, paidConfirmed = 0, lifetime = 0;
+      const pendingList = [];
+
+      orders.forEach(o => {
+        const total = Number(o.total || 0);
+        lifetime += total;
+        const method = String(o.paymentMethod || o.payment_method || '').toLowerCase();
+        const payStatus = String(o.paymentStatus || o.payment_status || '').toLowerCase();
+        const status = String(o.status || '').toLowerCase();
+        const isCod = method === 'cod' || method === 'cash' || method === 'cash_on_delivery';
+        const isMM = !isCod && (method.includes('mobile') || method.includes('mpesa') || method.includes('tigopesa') || method.includes('airtel') || method === 'mno' || method === 'wallet' || method === '');
+
+        if (isCod && (status === 'delivered' || status === 'completed')) {
+          codCollected += total;
+        } else if (payStatus === 'paid' || payStatus === 'confirmed') {
+          paidConfirmed += total;
+        } else if (isMM && (payStatus === 'pending_confirmation' || payStatus === 'pending' || !payStatus)) {
+          if (status !== 'cancelled' && status !== 'canceled') {
+            pendingMM += total;
+            pendingList.push(o);
+          }
+        }
+      });
+
+      const platformFee = Math.round(lifetime * 0.18);
+      const available = Math.max(0, paidConfirmed + codCollected - platformFee);
+      const pending = pendingMM;
+
+      setText('pendingMobileMoney', pendingMM);
+      setText('codCollected', codCollected);
+      setText('paidConfirmed', paidConfirmed);
+      setText('platformFee', platformFee);
+      setText('availableBalance', available);
+      setText('pendingBalance', pending);
+      setText('lifetimeEarnings', Math.max(0, lifetime - platformFee));
+
+      if (listEl) {
+        if (pendingList.length === 0) {
+          listEl.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No pending mobile money orders</p>';
+        } else {
+          listEl.innerHTML = pendingList.map(o => `
+            <div class="flex items-center justify-between gap-3 p-3 bg-orange-50 rounded-lg border border-orange-100">
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate">#${escapeHtml(String(o.id).slice(-8))} · ${escapeHtml(o.customerName || 'Customer')}</p>
+                <p class="text-xs text-gray-500">${fmt(o.total)} · ${escapeHtml(o.paymentMethod || 'mobile money')}</p>
+              </div>
+              <button onclick="markOrderPaid('${escapeHtml(o.id)}')" class="shrink-0 px-3 py-1.5 text-xs font-medium bg-green-600 text-white rounded-lg hover:bg-green-700">Mark Paid</button>
+            </div>
+          `).join('');
+        }
+      }
+    }
+
+    async function markOrderPaid(orderId) {
+      if (!orderId) return;
+      try {
+        const db = window.db;
+        if (!db) throw new Error('Firestore not initialized');
+        const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        await updateDoc(doc(db, 'orders', orderId), {
+          paymentStatus: 'paid',
+          paidAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        const idx = allOrders.findIndex(o => o.id === orderId);
+        if (idx >= 0) allOrders[idx].paymentStatus = 'paid';
+        showNotification('Order marked as paid', 'success');
+        loadFinanceReconciliation();
+      } catch (e) {
+        console.error('markOrderPaid error:', e);
+        showNotification('Failed to mark order paid', 'error');
+      }
+    }
+    window.markOrderPaid = markOrderPaid;
+    window.loadFinanceReconciliation = loadFinanceReconciliation;
 
     let currentOrderFilter = 'all';
     let selectedOrderId = null;
@@ -2292,6 +2571,8 @@
 
     async function logout() {
       // Clear auth data from localStorage
+      localStorage.removeItem('smartsoko_auth_mode');
+      localStorage.removeItem('smartsoko_demo_user');
       localStorage.removeItem('smartsoko_cart');
       
       // Sign out from Firebase if available
@@ -2303,7 +2584,7 @@
           console.error('Logout error:', error);
         }
       }
-      window.location.href = '/login';
+      window.location.href = 'login.html';
     }
 
     function openAddMenuItem() {
@@ -2316,11 +2597,7 @@
     
     function openEditMenuItem(productId) {
       const product = products.find(p => p.id === productId);
-      if (!product) {
-        console.error('Product not found:', productId);
-        console.log('Available products:', products);
-        return;
-      }
+      if (!product) return;
       
       document.getElementById('menuModalTitle').textContent = 'Edit Menu Item';
       document.getElementById('menuModalSubmitBtn').textContent = 'Save Changes';
@@ -2374,64 +2651,27 @@
       };
     }
 
-    async function handleImageFileSelect(input) {
+    function handleImageFileSelect(input) {
       if (input.files && input.files[0]) {
         const file = input.files[0];
+        const reader = new FileReader();
         
-        // Show preview immediately with local file
-        const preview = document.getElementById('imagePreview');
-        const container = document.getElementById('imagePreviewContainer');
-        const objectUrl = URL.createObjectURL(file);
-        preview.src = objectUrl;
-        container.classList.remove('hidden');
+        reader.onload = function(e) {
+          // Show preview
+          const preview = document.getElementById('imagePreview');
+          const container = document.getElementById('imagePreviewContainer');
+          preview.src = e.target.result;
+          container.classList.remove('hidden');
+          
+          // In a real app, you would upload to server here
+          // For now, we'll create a temporary data URL
+          // Note: To save permanently, the file needs server-side handling
+          
+          // Show notification about upload
+          showNotification(`Selected: ${file.name} (Save to apply changes)`, 'info');
+        };
         
-        showNotification('Uploading image to storage...', 'info');
-        
-        try {
-          // Upload to Firebase Storage
-          const { getStorage, ref, uploadBytes, getDownloadURL } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js');
-          const storage = getStorage();
-          
-          // Create unique filename with timestamp
-          const timestamp = Date.now();
-          const filename = `products/${currentSeller?.id || 'unknown'}/${timestamp}_${file.name}`;
-          const storageRef = ref(storage, filename);
-          
-          // Upload file
-          const snapshot = await uploadBytes(storageRef, file);
-          
-          // Get download URL
-          const downloadUrl = await getDownloadURL(snapshot.ref);
-          
-          // Save URL to form input
-          document.getElementById('menuItemImage').value = downloadUrl;
-          
-          showNotification('Image uploaded successfully!', 'success');
-          
-          // Clean up object URL
-          URL.revokeObjectURL(objectUrl);
-          
-        } catch (error) {
-          console.error('Image upload error:', error);
-          
-          // Handle specific storage errors
-          let errorMessage = 'Image upload failed';
-          if (error.code === 'storage/quota-exceeded') {
-            errorMessage = 'Storage quota exceeded. Please delete old images or contact support.';
-          } else if (error.code === 'storage/unauthorized') {
-            errorMessage = 'Not authorized to upload. Please check your permissions.';
-          } else if (error.code === 'storage/canceled') {
-            errorMessage = 'Upload was cancelled.';
-          } else if (error.code === 'storage/unknown') {
-            errorMessage = 'Network error during upload. Please try again.';
-          } else {
-            errorMessage = 'Image upload failed: ' + error.message;
-          }
-          
-          showNotification(errorMessage, 'error');
-          // Keep the preview but clear the value
-          document.getElementById('menuItemImage').value = '';
-        }
+        reader.readAsDataURL(file);
       }
     }
 
@@ -2528,14 +2768,9 @@
         tags.push(cb.value);
       });
       
-      console.log('submitAddMenuItem - imageUrl field value:', imageUrl);
-      console.log('submitAddMenuItem - menuItemImage element:', document.getElementById('menuItemImage'));
-      
       const productData = { 
         name, price, description, imageUrl, stock, category, tags, availableFrom, availableTo, variations 
       };
-      
-      console.log('submitAddMenuItem - productData.imageUrl:', productData.imageUrl);
       
       if (id) {
         updateProduct(id, productData);
@@ -2550,19 +2785,16 @@
       try {
         const db = window.db;
         if (!db) throw new Error('Firestore not initialized');
-        console.log('Adding product, currentSeller:', currentSeller, 'localStorage sellerId:', localStorage.getItem('sellerId'));
         const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-        const merchantId = currentSeller?.id || localStorage.getItem('sellerId');
-        console.log('Using merchantId:', merchantId);
+        const sellerId = currentSeller?.id || localStorage.getItem('sellerId') || 'demo-seller';
         const product = {
           ...productData,
-          merchantId: merchantId,
-          isActive: true,
+          sellerId: sellerId,
+          isAvailable: true,
           createdAt: new Date().toISOString()
         };
-        console.log('Saving product:', product);
+
         await addDoc(collection(db, 'products'), product);
-        console.log('Product saved successfully');
         showNotification('Product added successfully!', 'success');
         loadProducts();
       } catch (error) {
@@ -2692,14 +2924,7 @@
     }
 
     // Modal Handlers
-    function requestPayout() {
-      // Simulate API call
-      showNotification('Processing payout request...', 'info');
-      setTimeout(() => {
-        showNotification('Payout request of TSh 145,000 submitted successfully! Funds will arrive in 1-2 business days.', 'success');
-        document.getElementById('availableBalance').textContent = 'TSh 0';
-      }, 1500);
-    }
+    // requestPayout is implemented in js/merchant-app.js (real Firestore payout)
 
     function openPromoModal() {
       document.getElementById('promoCodeInput').value = '';
@@ -2735,158 +2960,6 @@
         loadPromotions();
       } catch (error) {
         showNotification('Failed to create promo code', 'error');
-      }
-    }
-
-    // ═══════════════════════════════════════════════════════════
-    // SHOPIFY FEATURES FUNCTIONS
-    // ═══════════════════════════════════════════════════════════
-
-    function switchPromoTab(tab) {
-      const sections = ['coupons', 'collections', 'bundles', 'deals'];
-      sections.forEach(s => {
-        document.getElementById('promoSection-' + s)?.classList.add('hidden');
-        document.getElementById('promoTab-' + s)?.classList.remove('bg-primary', 'text-white');
-        document.getElementById('promoTab-' + s)?.classList.add('text-gray-600');
-      });
-      document.getElementById('promoSection-' + tab)?.classList.remove('hidden');
-      document.getElementById('promoTab-' + tab)?.classList.add('bg-primary', 'text-white');
-      document.getElementById('promoTab-' + tab)?.classList.remove('text-gray-600');
-    }
-
-    // Coupon Modal Functions
-    function openCouponModal() {
-      document.getElementById('couponCode').value = '';
-      document.getElementById('couponType').value = 'percentage';
-      document.getElementById('couponValue').value = '';
-      document.getElementById('couponMinPurchase').value = '0';
-      document.getElementById('couponMaxUses').value = '';
-      document.getElementById('couponEndDate').value = '';
-      document.getElementById('couponModal').classList.remove('hidden');
-      document.getElementById('couponModal').classList.add('flex');
-    }
-
-    function closeCouponModal() {
-      document.getElementById('couponModal').classList.add('hidden');
-      document.getElementById('couponModal').classList.remove('flex');
-    }
-
-    async function saveCoupon() {
-      const code = document.getElementById('couponCode').value.trim().toUpperCase();
-      const type = document.getElementById('couponType').value;
-      const value = parseFloat(document.getElementById('couponValue').value);
-      const minPurchase = parseFloat(document.getElementById('couponMinPurchase').value) || 0;
-      const maxUses = document.getElementById('couponMaxUses').value ? parseInt(document.getElementById('couponMaxUses').value) : null;
-      const endDate = document.getElementById('couponEndDate').value || null;
-
-      if (!code || isNaN(value)) return showNotification('Please fill required fields', 'error');
-
-      await ShopifyDashboard.createCoupon({
-        code, type, value, minPurchase, maxUses, endDate,
-        isActive: true
-      });
-      closeCouponModal();
-    }
-
-    // Collection Modal Functions
-    function openCollectionModal() {
-      document.getElementById('collectionName').value = '';
-      document.getElementById('collectionDesc').value = '';
-      document.getElementById('collectionImage').value = '';
-      document.getElementById('collectionProducts').value = '';
-      document.getElementById('collectionModal').classList.remove('hidden');
-      document.getElementById('collectionModal').classList.add('flex');
-    }
-
-    function closeCollectionModal() {
-      document.getElementById('collectionModal').classList.add('hidden');
-      document.getElementById('collectionModal').classList.remove('flex');
-    }
-
-    async function saveCollection() {
-      const name = document.getElementById('collectionName').value.trim();
-      const description = document.getElementById('collectionDesc').value.trim();
-      const imageUrl = document.getElementById('collectionImage').value.trim();
-      const productIds = document.getElementById('collectionProducts').value.split(',').map(p => p.trim()).filter(p => p);
-
-      if (!name) return showNotification('Collection name is required', 'error');
-
-      await ShopifyDashboard.createCollection({
-        name, description, imageUrl, productIds
-      });
-      closeCollectionModal();
-    }
-
-    // Bundle Modal Functions
-    function openBundleModal() {
-      document.getElementById('bundleName').value = '';
-      document.getElementById('bundleDesc').value = '';
-      document.getElementById('bundleProducts').value = '';
-      document.getElementById('bundleOriginalPrice').value = '';
-      document.getElementById('bundlePrice').value = '';
-      document.getElementById('bundleModal').classList.remove('hidden');
-      document.getElementById('bundleModal').classList.add('flex');
-    }
-
-    function closeBundleModal() {
-      document.getElementById('bundleModal').classList.add('hidden');
-      document.getElementById('bundleModal').classList.remove('flex');
-    }
-
-    async function saveBundle() {
-      const name = document.getElementById('bundleName').value.trim();
-      const description = document.getElementById('bundleDesc').value.trim();
-      const productIds = document.getElementById('bundleProducts').value.split(',').map(p => p.trim()).filter(p => p);
-      const bundlePrice = parseFloat(document.getElementById('bundlePrice').value);
-
-      if (!name || productIds.length < 2 || isNaN(bundlePrice)) {
-        return showNotification('Name, 2+ products, and price required', 'error');
-      }
-
-      await ShopifyDashboard.createBundle({
-        name, description, productIds, bundlePrice
-      });
-      closeBundleModal();
-    }
-
-    // Deal Modal Functions
-    function openDealModal() {
-      document.getElementById('dealName').value = '';
-      document.getElementById('dealProducts').value = '';
-      document.getElementById('dealPrice').value = '';
-      document.getElementById('dealDiscount').value = '';
-      document.getElementById('dealEndDate').value = '';
-      document.getElementById('dealModal').classList.remove('hidden');
-      document.getElementById('dealModal').classList.add('flex');
-    }
-
-    function closeDealModal() {
-      document.getElementById('dealModal').classList.add('hidden');
-      document.getElementById('dealModal').classList.remove('flex');
-    }
-
-    async function saveDeal() {
-      const name = document.getElementById('dealName').value.trim();
-      const productIds = document.getElementById('dealProducts').value.split(',').map(p => p.trim()).filter(p => p);
-      const dealPrice = parseFloat(document.getElementById('dealPrice').value);
-      const discountPercent = document.getElementById('dealDiscount').value ? parseInt(document.getElementById('dealDiscount').value) : 0;
-      const endDate = document.getElementById('dealEndDate').value || null;
-
-      if (!name || productIds.length === 0 || isNaN(dealPrice)) {
-        return showNotification('Name, products, and price required', 'error');
-      }
-
-      await ShopifyDashboard.createDeal({
-        name, productIds, dealPrice, discountPercent, endDate,
-        isActive: true
-      });
-      closeDealModal();
-    }
-
-    // Initialize Shopify Dashboard when seller is loaded
-    function initShopifyFeatures(sellerId) {
-      if (typeof ShopifyDashboard !== 'undefined') {
-        ShopifyDashboard.init(sellerId);
       }
     }
 
@@ -2988,268 +3061,76 @@
       document.getElementById('driverModal').classList.add('hidden');
       document.getElementById('driverModal').classList.remove('flex');
     }
+  </script>
 
-    // ═══════════════════════════════════════════════════════════════
-    // COMMERCE OS FEATURES
-    // ═══════════════════════════════════════════════════════════════
-
-    // ── Storefront Tab ────────────────────────────────────────────
-    async function loadStorefrontData() {
-      if (!currentSeller) return;
-      document.getElementById('storeSlug').value = currentSeller.slug || '';
-      document.getElementById('storefrontLogo').value = currentSeller.logoUrl || '';
-      document.getElementById('storefrontBanner').value = currentSeller.bannerUrl || '';
-      document.getElementById('storefrontDesc').value = currentSeller.description || '';
-      document.getElementById('storefrontSeo').value = currentSeller.seoDescription || '';
-      if (currentSeller.brandColors) {
-        document.getElementById('storePrimaryColor').value = currentSeller.brandColors.primary || '#064e3b';
-        document.getElementById('storeSecondaryColor').value = currentSeller.brandColors.secondary || '#065f46';
+  <!-- AfriTrade Desktop Shell Wiring -->
+  <script>
+    function dsGo(tab) {
+      if (typeof window.switchTab === 'function') {
+        window.switchTab(tab);
       }
-      // Preview link
-      const slug = currentSeller.slug || currentSeller.id;
-      document.getElementById('previewStoreLink').href = `/store?slug=${encodeURIComponent(slug)}`;
-      // Collections
-      renderCollectionsList();
     }
 
-    document.getElementById('storefrontForm')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!currentSeller) return;
-      try {
-        const db = window.db;
-        if (!db) throw new Error('Firestore not initialized');
-        const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-        await updateDoc(doc(db, 'sellers', currentSeller.id), {
-          slug: document.getElementById('storeSlug').value.trim().toLowerCase(),
-          logoUrl: document.getElementById('storefrontLogo').value.trim(),
-          bannerUrl: document.getElementById('storefrontBanner').value.trim(),
-          brandColors: {
-            primary: document.getElementById('storePrimaryColor').value,
-            secondary: document.getElementById('storeSecondaryColor').value
-          },
-          updatedAt: new Date().toISOString()
+    function dsAddProduct() {
+      dsGo('menu');
+      setTimeout(function () {
+        if (typeof openAddMenuItem === 'function') openAddMenuItem();
+      }, 150);
+    }
+
+    function updateDsActive(tab) {
+      document.querySelectorAll('#dsSidebar .ds-link').forEach(function (link) {
+        var active = link.dataset.tab === tab;
+        link.classList.toggle('active', active);
+      });
+    }
+
+    function dsSearch(q) {
+      var s = (q || '').toLowerCase();
+      document.querySelectorAll('#ordersList > div, #menuItemsList > div').forEach(function (el) {
+        el.style.display = (!s || el.textContent.toLowerCase().indexOf(s) !== -1) ? '' : 'none';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var sidebar = document.getElementById('dsSidebar');
+      if (sidebar) {
+        sidebar.querySelectorAll('.ds-link[data-tab]').forEach(function (link) {
+          link.addEventListener('click', function () { dsGo(link.dataset.tab); });
         });
-        showNotification('Storefront branding saved!', 'success');
-        document.getElementById('previewStoreLink').href = `/store?slug=${encodeURIComponent(document.getElementById('storeSlug').value)}`;
-      } catch (error) {
-        showNotification('Failed to save branding', 'error');
       }
-    });
 
-    document.getElementById('seoForm')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!currentSeller) return;
-      try {
-        const db = window.db;
-        if (!db) throw new Error('Firestore not initialized');
-        const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-        await updateDoc(doc(db, 'sellers', currentSeller.id), {
-          description: document.getElementById('storefrontDesc').value.trim(),
-          seoDescription: document.getElementById('storefrontSeo').value.trim(),
-          updatedAt: new Date().toISOString()
-        });
-        showNotification('SEO & About saved!', 'success');
-      } catch (error) {
-        showNotification('Failed to save SEO', 'error');
+      var searchInput = document.getElementById('dsSearchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', function () { dsSearch(searchInput.value); });
       }
-    });
 
-    async function addCollection() {
-      const input = document.getElementById('newCollectionInput');
-      const name = input.value.trim();
-      if (!name || !currentSeller) return;
-      try {
-        await InventoryManager.createCollection(name);
-        input.value = '';
-        showNotification(`Collection "${name}" created`, 'success');
-        renderCollectionsList();
-      } catch (err) {
-        showNotification('Failed to create collection', 'error');
-      }
-    }
-
-    async function renderCollectionsList() {
-      const container = document.getElementById('collectionsList');
-      if (!container || !currentSeller) return;
-      try {
-        const db = window.db;
-        if (!db) return;
-        const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-        const q = query(collection(db, 'product_collections'), where('merchantId', '==', currentSeller.id));
-        const snap = await getDocs(q);
-        if (snap.empty) {
-          container.innerHTML = '<span class="text-xs text-gray-400">No collections yet</span>';
-          return;
-        }
-        container.innerHTML = snap.docs.map(d => {
-          const name = d.data().name || 'Unnamed';
-          return `<span class="text-sm bg-green-50 text-green-700 px-3 py-1 rounded-full border border-green-200">${escapeHtml(name)}</span>`;
-        }).join('');
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    // ── Inventory / Menu Enhancements ─────────────────────────────
-    // Override submitAddMenuItem to include variants
-    const _originalSubmitAddMenuItem = submitAddMenuItem;
-    submitAddMenuItem = function(e) {
-      e.preventDefault();
-      const id = document.getElementById('menuItemId').value;
-      const name = document.getElementById('menuItemName').value;
-      const priceRaw = parseFloat(document.getElementById('menuItemPrice').value);
-      const price = isNaN(priceRaw) ? 0 : priceRaw;
-      const description = document.getElementById('menuItemDesc').value;
-      const imageUrl = document.getElementById('menuItemImage').value;
-      const stockRaw = parseInt(document.getElementById('menuItemStock').value, 10);
-      const stockQuantity = isNaN(stockRaw) ? -1 : stockRaw;
-      const category = document.getElementById('menuItemCategory').value || 'General';
-      const availableFrom = document.getElementById('availableFrom').value || '';
-      const availableTo = document.getElementById('availableTo').value || '';
-      const tags = [];
-      document.querySelectorAll('input[name="dietaryTags"]:checked').forEach(cb => tags.push(cb.value));
-
-      // Collect variants from InventoryManager
-      const variants = typeof InventoryManager !== 'undefined' ? InventoryManager.collectVariants() : [];
-
-      const productData = {
-        name, price, description, imageUrl, stockQuantity, category, tags, availableFrom, availableTo,
-        variants, stock: stockQuantity, isAvailable: true
+      var wrap = window.switchTab;
+      window.switchTab = function (tab, clickedBtn) {
+        var result = wrap ? wrap(tab, clickedBtn) : undefined;
+        updateDsActive(tab);
+        return result;
       };
 
-      if (id) {
-        updateProduct(id, productData);
-      } else {
-        addProduct(productData);
-      }
-      closeAddMenuItem();
-    };
-
-    // Override openAddMenuItem to init variant builder
-    const _originalOpenAddMenuItem = openAddMenuItem;
-    openAddMenuItem = function() {
-      _originalOpenAddMenuItem();
-      if (typeof InventoryManager !== 'undefined') {
-        InventoryManager.buildVariantForm([]);
-      }
-    };
-
-    // Override openEditMenuItem to load variants
-    const _originalOpenEditMenuItem = openEditMenuItem;
-    openEditMenuItem = function(productId) {
-      _originalOpenEditMenuItem(productId);
-      const product = products.find(p => p.id === productId);
-      if (product && typeof InventoryManager !== 'undefined') {
-        InventoryManager.buildVariantForm(product.variants || []);
-      }
-    };
-
-    // CSV Upload Handlers
-    let csvPendingProducts = [];
-    async function handleCSVUpload(input) {
-      if (!input.files || !input.files[0]) return;
-      try {
-        csvPendingProducts = await InventoryManager.handleCSVUpload(input.files[0]);
-        const preview = document.getElementById('csvPreview');
-        const countEl = document.getElementById('csvPreviewCount');
-        const tbody = document.getElementById('csvPreviewBody');
-        countEl.textContent = csvPendingProducts.length;
-        tbody.innerHTML = csvPendingProducts.map(p => `
-          <tr class="border-b border-gray-100"><td class="px-3 py-2">${escapeHtml(p.name)}</td><td class="px-3 py-2">TSh ${(p.price || 0).toLocaleString()}</td><td class="px-3 py-2">${p.stockQuantity === -1 ? 'Unlimited' : p.stockQuantity}</td></tr>
-        `).join('');
-        preview.classList.remove('hidden');
-        showNotification(`${csvPendingProducts.length} products ready to upload`, 'info');
-      } catch (err) {
-        showNotification('CSV parse error: ' + err.message, 'error');
-        console.error(err);
-      }
-    }
-
-    async function confirmCSVUpload() {
-      if (csvPendingProducts.length === 0) return;
-      try {
-        const results = await InventoryManager.bulkUploadProducts(csvPendingProducts);
-        showNotification(`${results.success} uploaded, ${results.failed} failed`, results.failed > 0 ? 'info' : 'success');
-        document.getElementById('csvPreview').classList.add('hidden');
-        document.getElementById('csvUploadInput').value = '';
-        csvPendingProducts = [];
-        loadProducts();
-      } catch (err) {
-        showNotification('Bulk upload failed', 'error');
-      }
-    }
-
-    function cancelCSVUpload() {
-      csvPendingProducts = [];
-      document.getElementById('csvPreview').classList.add('hidden');
-      document.getElementById('csvUploadInput').value = '';
-    }
-
-    function downloadCSVTemplate() {
-      const headers = 'name,price,stock,category,collection,image,description,variants\n';
-      const sample = 'Sample Product,5000,10,Electronics,Featured,https://example.com/img.jpg,Great product,Small=0|Large=1500\n';
-      const blob = new Blob([headers + sample], { type: 'text/csv' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'product_template.csv';
-      link.click();
-      URL.revokeObjectURL(link.href);
-    }
-
-    // ── Commerce Dashboard ──────────────────────────────────────
-    async function loadCommerceDashboard() {
-      if (!currentSeller) return;
-      if (typeof VendorDashboard !== 'undefined') {
-        VendorDashboard.init(currentSeller);
-        const period = parseInt(document.getElementById('analyticsPeriod')?.value || '7');
-        await VendorDashboard.load(period);
-      }
-    }
-
-    async function exportSalesReport() {
-      if (typeof VendorDashboard !== 'undefined') {
-        const period = parseInt(document.getElementById('analyticsPeriod')?.value || '30');
-        await VendorDashboard.exportSalesReport(period);
-      }
-    }
-
-    async function exportProductsReport() {
-      if (typeof VendorDashboard !== 'undefined') {
-        await VendorDashboard.exportProductsReport();
-      }
-    }
-
-    // ── Integration Hooks ───────────────────────────────────────
-    const _originalLoadSellerData = loadSellerData;
-    loadSellerData = async function(uid) {
-      await _originalLoadSellerData(uid);
-      // Init Commerce OS modules
-      if (typeof InventoryManager !== 'undefined') {
-        InventoryManager.init(currentSeller);
-        InventoryManager.renderLowStockAlerts();
-      }
-      if (typeof VendorDashboard !== 'undefined') {
-        VendorDashboard.init(currentSeller);
-      }
-      loadStorefrontData();
-    };
-
-    // Enhanced tab switcher
-    const _originalSwitchTab = switchTab;
-    switchTab = function(tabName, clickedBtn) {
-      _originalSwitchTab(tabName, clickedBtn);
-      if (tabName === 'storefront') loadStorefrontData();
-      if (tabName === 'analytics') loadCommerceDashboard();
-      if (tabName === 'menu' && typeof InventoryManager !== 'undefined') {
-        InventoryManager.renderLowStockAlerts();
-      }
-    };
+      (function pollSellerName() {
+        if (window.currentSeller && window.currentSeller.name) {
+          var nm = document.getElementById('dsProfileName');
+          if (nm) nm.textContent = window.currentSeller.name;
+          var gn = document.getElementById('dsGreetingName');
+          if (gn) gn.textContent = window.currentSeller.name;
+          var av = document.getElementById('dsAvatar');
+          if (av) av.textContent = window.currentSeller.name.split(' ').map(function (w) { return w ? w[0] : ''; }).join('').slice(0, 2).toUpperCase();
+          return;
+        }
+        setTimeout(pollSellerName, 400);
+      })();
+    });
   </script>
 
   <!-- Initialize SmartNav -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      SmartNav.init({ activePage: 'orders', role: 'merchant', breadcrumbs: ['Merchant', 'Dashboard'] });
+      SmartNav.init({ activePage: 'orders', role: 'merchant', showProfile: false, breadcrumbs: ['Merchant', 'Dashboard'], skipTopbar: true });
     });
   </script>
 </body>

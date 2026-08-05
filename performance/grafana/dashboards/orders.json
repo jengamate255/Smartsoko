@@ -1,0 +1,19 @@
+{
+  "dashboard": {
+    "title": "SmartSoko - Order Processing",
+    "uid": "smartsoko-orders",
+    "tags": ["smartsoko", "orders"],
+    "timezone": "browser",
+    "refresh": "10s",
+    "time": {"from": "now-1h", "to": "now"},
+    "panels": [
+      {"id": 1, "title": "Order Creation Latency (p95)", "type": "graph", "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(order_creation_latency_seconds_bucket[1m]))", "legendFormat": "creation p95"}]},
+      {"id": 2, "title": "Order Update Latency (p95)", "type": "graph", "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(order_update_latency_seconds_bucket[1m]))", "legendFormat": "update p95"}]},
+      {"id": 3, "title": "Notification Latency (p95)", "type": "graph", "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(notification_latency_seconds_bucket[1m]))", "legendFormat": "notification p95"}]},
+      {"id": 4, "title": "DB Write Latency (p95)", "type": "graph", "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(db_write_latency_seconds_bucket[1m]))", "legendFormat": "db write p95"}]},
+      {"id": 5, "title": "Order Completion Rate", "type": "singlestat", "gridPos": {"x": 0, "y": 16, "w": 6, "h": 4}, "targets": [{"expr": "rate(order_completion_total[5m]) * 100", "legendFormat": "%"}]},
+      {"id": 6, "title": "Status Transitions/min", "type": "graph", "gridPos": {"x": 6, "y": 16, "w": 18, "h": 8}, "targets": [{"expr": "rate(status_transition_total[1m])", "legendFormat": "{{transition}}"}]}}
+    ]
+  },
+  "overwrite": true
+}

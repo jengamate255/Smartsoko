@@ -8,13 +8,15 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <title>Seller Dashboard - SME Marketplace</title>
   <!-- Firebase Modular SDK -->
   <script type="module" src="config/firebase-config.js?v=3"></script>
+  <script type="module" src="config/cross-platform-service.js?v=4"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="design-system.css">
   <script src="nav-component.js?v=3" defer></script>
-  <style> * {margin: 0;padding: 0;box-sizing: border-box} body {font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background: #f5f5f5} .restaurant-selector {padding: 8px 16px;border: none;border-radius: 6px;background: white;color: #333} .stats {display: grid;grid-template-columns: repeat(auto-fit,minmax(250px,1fr));gap: 20px;padding: 24px} .stat-card {background: white;padding: 20px;border-radius: 12px;box-shadow: 0 2px 8px rgba(0,0,0,0.1)} .stat-card h3 {color: #666;font-size: 14px;margin-bottom: 8px} .stat-card .value {font-size: 32px;font-weight: bold;color: #333} .tabs {display: flex;gap: 8px;padding: 0 24px;overflow-x: auto} .tab {padding: 12px 24px;background: white;border: none;border-radius: 8px 8px 0 0;cursor: pointer;font-size: 14px;white-space: nowrap} .tab.active {background: #064e3b;color: white} .content {margin: 0 24px 24px;background: white;border-radius: 0 8px 8px 8px;box-shadow: 0 2px 8px rgba(0,0,0,0.1)} .orders-table {width: 100%;border-collapse: collapse} .orders-table th,.orders-table td {padding: 16px;text-align: left;border-bottom: 1px solid #eee} .orders-table th {background: #f9f9f9;font-weight: 600;color: #666} .status {padding: 4px 12px;border-radius: 12px;font-size: 12px;font-weight: 600} .status.pending {background: #fff7ed;color: #ea580c} .status.preparing {background: #f0fdf4;color: #059669} .status.ready {background: #ecfdf5;color: #10b981} .status.completed {background: #f8fafc;color: #64748b} .priority {padding: 2px 6px;border-radius: 4px;font-size: 10px;font-weight: bold} .priority.high {background: #fef2f2;color: #dc2626} .priority.medium {background: #fff7ed;color: #ea580c} .priority.low {background: #f0fdf4;color: #059669} .menu-grid {display: grid;grid-template-columns: repeat(auto-fill,minmax(300px,1fr));gap: 20px;padding: 20px} .menu-item {background: #f9f9f9;padding: 20px;border-radius: 12px;position: relative} .menu-item h4 {margin-bottom: 8px} .menu-item .price {color: #064e3b;font-weight: bold;font-size: 18px;margin-bottom: 8px} .menu-item .category {color: #666;font-size: 14px;margin-bottom: 12px} .stock-status {position: absolute;top: 20px;right: 20px;padding: 4px 8px;border-radius: 12px;font-size: 11px;font-weight: bold} .stock-status.in-stock {background: #f0fdf4;color: #059669} .stock-status.low-stock {background: #fff7ed;color: #ea580c} .stock-status.out-of-stock {background: #fef2f2;color: #dc2626} .inventory-form {padding: 20px} .form-group {margin-bottom: 16px} .form-group label {display: block;margin-bottom: 4px;font-weight: bold} .form-group input,.form-group select {width: 100%;padding: 10px;border: 1px solid #ddd;border-radius: 6px} .btn {padding: 10px 20px;border: none;border-radius: 6px;cursor: pointer;font-size: 14px} .btn-primary {background: #064e3b;color: white} .btn-secondary {background: #666;color: white} .btn-success {background: #10b981;color: white} .btn-danger {background: #dc2626;color: white} .actions {display: flex;gap: 8px} .order-time {font-size: 12px;color: #666} .customer-info {display: flex;align-items: center;gap: 8px} .customer-avatar {width: 24px;height: 24px;border-radius: 50%;background: #064e3b;color: white;display: flex;align-items: center;justify-content: center;font-size: 12px;font-weight: bold}
+  <style> * {margin: 0;padding: 0;box-sizing: border-box} body {font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background: #f5f5f5} .restaurant-selector {padding: 8px 16px;border: none;border-radius: 6px;background: white;color: #333} .stats {display: grid;grid-template-columns: repeat(auto-fit,minmax(250px,1fr));gap: 20px;padding: 24px} .stat-card {background: white;padding: 20px;border-radius: 12px;box-shadow: 0 2px 8px rgba(0,0,0,0.1)} .stat-card h3 {color: #666;font-size: 14px;margin-bottom: 8px} .stat-card .value {font-size: 32px;font-weight: bold;color: #333} .tabs {display: flex;gap: 8px;padding: 0 24px;overflow-x: auto} .tab {padding: 12px 24px;background: white;border: none;border-radius: 8px 8px 0 0;cursor: pointer;font-size: 14px;white-space: nowrap} .tab.active {background: #064e3b;color: white} .content {margin: 0 24px 24px;background: white;border-radius: 0 8px 8px 8px;box-shadow: 0 2px 8px rgba(0,0,0,0.1)} .orders-table {width: 100%;border-collapse: collapse} .orders-table th,.orders-table td {padding: 16px;text-align: left;border-bottom: 1px solid #eee} .orders-table th {background: #f9f9f9;font-weight: 600;color: #666} .status {padding: 4px 12px;border-radius: 12px;font-size: 12px;font-weight: 600} .status.pending {background: #fffbeb;color: #f59e0b} .status.preparing {background: #f0fdf4;color: #059669} .status.ready {background: #ecfdf5;color: #10b981} .status.completed {background: #f8fafc;color: #64748b} .priority {padding: 2px 6px;border-radius: 4px;font-size: 10px;font-weight: bold} .priority.high {background: #fef2f2;color: #B91C1C} .priority.medium {background: #fffbeb;color: #f59e0b} .priority.low {background: #f0fdf4;color: #059669} .menu-grid {display: grid;grid-template-columns: repeat(auto-fill,minmax(300px,1fr));gap: 20px;padding: 20px} .menu-item {background: #f9f9f9;padding: 20px;border-radius: 12px;position: relative} .menu-item h4 {margin-bottom: 8px} .menu-item .price {color: #064e3b;font-weight: bold;font-size: 18px;margin-bottom: 8px} .menu-item .category {color: #666;font-size: 14px;margin-bottom: 12px} .stock-status {position: absolute;top: 20px;right: 20px;padding: 4px 8px;border-radius: 12px;font-size: 11px;font-weight: bold} .stock-status.in-stock {background: #f0fdf4;color: #059669} .stock-status.low-stock {background: #fffbeb;color: #f59e0b} .stock-status.out-of-stock {background: #fef2f2;color: #B91C1C} .inventory-form {padding: 20px} .form-group {margin-bottom: 16px} .form-group label {display: block;margin-bottom: 4px;font-weight: bold} .form-group input,.form-group select {width: 100%;padding: 10px;border: 1px solid #ddd;border-radius: 6px} .btn {padding: 10px 20px;border: none;border-radius: 6px;cursor: pointer;font-size: 14px} .btn-primary {background: #064e3b;color: white} .btn-secondary {background: #666;color: white} .btn-success {background: #10b981;color: white} .btn-danger {background: #B91C1C;color: white} .actions {display: flex;gap: 8px} .order-time {font-size: 12px;color: #666} .customer-info {display: flex;align-items: center;gap: 8px} .customer-avatar {width: 24px;height: 24px;border-radius: 50%;background: #064e3b;color: white;display: flex;align-items: center;justify-content: center;font-size: 12px;font-weight: bold}
  .preparation-time {background: #e3f2fd;padding: 4px 8px;border-radius: 4px;font-size: 12px;color: #1976d2} .notification-badge {background: #f44336;color: white;border-radius: 50%;width: 20px;height: 20px;display: inline-flex;align-items: center;justify-content: center;font-size: 11px;margin-left: 8px} .real-time-indicator {width: 8px;height: 8px;background: #4caf50;border-radius: 50%;display: inline-block;margin-left: 8px;animation: pulse 2s infinite} @keyframes pulse {0% {opacity: 1} 50% {opacity: 0.5} 100% {opacity: 1} } </style>
 </head>
 <body class="animate-premium">
@@ -149,8 +151,13 @@
     let orders = [];
     let menuItems = [];
     let notifications = [];
+    let db = window.db;
+    let auth = window.auth;
 
     function loadData() {
+      db = window.db;
+      auth = window.auth;
+      if (!db) { console.warn('Seller: db not ready'); return; }
       loadSellers();
       setupRealtimeListeners();
     }
@@ -235,7 +242,7 @@
       const tbody = document.getElementById('ordersTable');
       tbody.innerHTML = orders.map(order => {
         const customerName = order.customerName || 'Guest';
-        const orderTime = order.createdAt ? order.createdAt.toDate().toLocaleTimeString() : 'N/A';
+        const orderTime = order.createdAt ? (order.createdAt.toDate ? order.createdAt.toDate().toLocaleTimeString() : new Date(order.createdAt).toLocaleTimeString()) : 'N/A';
         const prepTime = order.preparationTime || calculatePrepTime(order);
         const priority = getOrderPriority(order);
         
@@ -304,7 +311,7 @@
     }
 
     function getOrderPriority(order) {
-      const timeSinceOrder = order.createdAt ? Date.now() - order.createdAt.toDate().getTime() : 0;
+      const timeSinceOrder = order.createdAt ? Date.now() - (order.createdAt.toDate ? order.createdAt.toDate().getTime() : new Date(order.createdAt).getTime()) : 0;
       const minutesSinceOrder = timeSinceOrder / 60000;
       
       if (minutesSinceOrder > 30) return 'high';
@@ -325,7 +332,7 @@
       
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const todayOrders = orders.filter(o => o.createdAt && o.createdAt.toDate() >= today);
+      const todayOrders = orders.filter(o => o.createdAt && (o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt)) >= today);
       
       document.getElementById('activeOrders').textContent = orders.filter(o => o.status !== 'completed').length;
       document.getElementById('preparingOrders').textContent = orders.filter(o => o.status === 'preparing').length;
@@ -338,7 +345,7 @@
       const completedOrders = orders.filter(o => o.status === 'completed' && o.preparationStartedAt && o.completedAt);
       if (completedOrders.length > 0) {
         const avgTime = completedOrders.reduce((sum, o) => {
-          const prepTime = o.completedAt.toDate() - o.preparationStartedAt.toDate();
+          const prepTime = (o.completedAt.toDate ? o.completedAt.toDate() : new Date(o.completedAt)) - (o.preparationStartedAt.toDate ? o.preparationStartedAt.toDate() : new Date(o.preparationStartedAt));
           return sum + prepTime;
         }, 0) / completedOrders.length;
         document.getElementById('avgPrepTime').textContent = Math.round(avgTime / 60000) + 'm';
@@ -350,6 +357,7 @@
     }
 
     async function updateOrderStatus(orderId, status) {
+      const svc = window.crossPlatformService;
       const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
       const updateData = { status: status };
       
@@ -359,19 +367,33 @@
         updateData.completedAt = serverTimestamp();
       }
       
-      await updateDoc(doc(db, 'orders', orderId), updateData);
+      if (svc && svc.isReady()) {
+        try { await svc.create('orders', orderId, updateData); } catch(e) { /* silent */ }
+      } else {
+        await updateDoc(doc(db, 'orders', orderId), updateData);
+      }
     }
 
     async function updateStock(itemId) {
+      const svc = window.crossPlatformService;
       const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
       const newStock = parseInt(document.getElementById(`stock-${itemId}`).value);
-      await updateDoc(doc(db, 'menu_items', itemId), { stock: newStock });
+      if (svc && svc.isReady()) {
+        try { await svc.create('menu_items', itemId, { stock: newStock }); } catch(e) { /* silent */ }
+      } else {
+        await updateDoc(doc(db, 'menu_items', itemId), { stock: newStock });
+      }
     }
 
     async function toggleItemAvailability(itemId) {
+      const svc = window.crossPlatformService;
       const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
       const item = menuItems.find(i => i.id === itemId);
-      await updateDoc(doc(db, 'menu_items', itemId), { isAvailable: !item.isAvailable });
+      if (svc && svc.isReady()) {
+        try { await svc.create('menu_items', itemId, { isAvailable: !item.isAvailable }); } catch(e) { /* silent */ }
+      } else {
+        await updateDoc(doc(db, 'menu_items', itemId), { isAvailable: !item.isAvailable });
+      }
     }
 
     function switchTab(tab) {
@@ -393,6 +415,7 @@
     }
 
     async function addMenuItem() {
+      const svc = window.crossPlatformService;
       const name = document.getElementById('newItemName').value;
       const desc = document.getElementById('newItemDesc').value;
       const price = parseInt(document.getElementById('newItemPrice').value);
@@ -405,7 +428,7 @@
       }
 
       const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-      await addDoc(collection(db, 'menu_items'), {
+      const data = {
         restaurantId: currentRestaurant.id,
         name: name,
         description: desc,
@@ -414,7 +437,13 @@
         stock: stock,
         isAvailable: true,
         createdAt: serverTimestamp()
-      });
+      };
+
+      if (svc && svc.isReady()) {
+        try { await svc.create('menu_items', data); } catch(e) { /* silent */ }
+      } else {
+        await addDoc(collection(db, 'menu_items'), data);
+      }
 
       hideAddMenuItem();
       // Clear form
@@ -443,7 +472,7 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
-      SmartNav.init({ activePage: 'orders', role: 'merchant', breadcrumbs: ['Merchant', 'Seller Dashboard'] });
+      if (typeof SmartNav !== 'undefined' && typeof SmartNav.initPageTransition === 'function') SmartNav.initPageTransition();
       loadData();
     });
   </script>

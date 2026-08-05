@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <!-- Performance: Preconnect to external domains -->
@@ -31,7 +31,7 @@
     <div class="nav-search">
       <div class="search-bar">
         <span class="material-icons search-icon">search</span>
-        <input type="text" class="search-input" placeholder="Search fresh products..." value="vegetables">
+        <input type="text" class="search-input" aria-label="Search products" placeholder="Search fresh products..." value="vegetables">
       </div>
     </div>
     
@@ -97,9 +97,9 @@
           <div class="filter-section">
             <h3 class="filter-title">Price Range</h3>
             <div class="price-range">
-              <input type="number" class="price-input" placeholder="Min" value="0">
+              <input type="number" class="price-input" aria-label="Minimum price" placeholder="Min" value="0">
               <span>-</span>
-              <input type="number" class="price-input" placeholder="Max" value="50">
+              <input type="number" class="price-input" aria-label="Maximum price" placeholder="Max" value="50">
             </div>
           </div>
 
@@ -109,19 +109,19 @@
               <div class="filter-option">
                 <input type="checkbox" id="rating-5">
                 <label for="rating-5">
-                  <span style="color: var(--color-gold);">★★★★★</span> (5.0)
+                  <span style="color: var(--color-gold);">â˜…â˜…â˜…â˜…â˜…</span> (5.0)
                 </label>
               </div>
               <div class="filter-option">
                 <input type="checkbox" id="rating-4">
                 <label for="rating-4">
-                  <span style="color: var(--color-gold);">★★★★☆</span> (4.0+)
+                  <span style="color: var(--color-gold);">â˜…â˜…â˜…â˜…â˜†</span> (4.0+)
                 </label>
               </div>
               <div class="filter-option">
                 <input type="checkbox" id="rating-3">
                 <label for="rating-3">
-                  <span style="color: var(--color-gold);">★★★☆☆</span> (3.0+)
+                  <span style="color: var(--color-gold);">â˜…â˜…â˜…â˜†â˜†</span> (3.0+)
                 </label>
               </div>
             </div>
@@ -182,7 +182,7 @@
                 <div class="product-price">TZS 8,500</div>
                 <div class="product-action">
                   <div class="quantity-selector">
-                    <button class="quantity-btn">−</button>
+                    <button class="quantity-btn">âˆ’</button>
                     <span class="quantity-value">1</span>
                     <button class="quantity-btn">+</button>
                   </div>
@@ -204,7 +204,7 @@
                 <div class="product-price">TZS 3,200</div>
                 <div class="product-action">
                   <div class="quantity-selector">
-                    <button class="quantity-btn">−</button>
+                    <button class="quantity-btn">âˆ’</button>
                     <span class="quantity-value">1</span>
                     <button class="quantity-btn">+</button>
                   </div>
@@ -227,7 +227,7 @@
                 <div class="product-price">TZS 4,800</div>
                 <div class="product-action">
                   <div class="quantity-selector">
-                    <button class="quantity-btn">−</button>
+                    <button class="quantity-btn">âˆ’</button>
                     <span class="quantity-value">1</span>
                     <button class="quantity-btn">+</button>
                   </div>
@@ -249,7 +249,7 @@
                 <div class="product-price">TZS 6,500</div>
                 <div class="product-action">
                   <div class="quantity-selector">
-                    <button class="quantity-btn">−</button>
+                    <button class="quantity-btn">âˆ’</button>
                     <span class="quantity-value">1</span>
                     <button class="quantity-btn">+</button>
                   </div>
@@ -271,7 +271,7 @@
                 <div class="product-price">TZS 5,200</div>
                 <div class="product-action">
                   <div class="quantity-selector">
-                    <button class="quantity-btn">−</button>
+                    <button class="quantity-btn">âˆ’</button>
                     <span class="quantity-value">1</span>
                     <button class="quantity-btn">+</button>
                   </div>
@@ -293,7 +293,7 @@
                 <div class="product-price">TZS 7,800</div>
                 <div class="product-action">
                   <div class="quantity-selector">
-                    <button class="quantity-btn">−</button>
+                    <button class="quantity-btn">âˆ’</button>
                     <span class="quantity-value">1</span>
                     <button class="quantity-btn">+</button>
                   </div>
@@ -315,7 +315,7 @@
                 <div class="product-price">TZS 3,500</div>
                 <div class="product-action">
                   <div class="quantity-selector">
-                    <button class="quantity-btn">−</button>
+                    <button class="quantity-btn">âˆ’</button>
                     <span class="quantity-value">1</span>
                     <button class="quantity-btn">+</button>
                   </div>
@@ -338,7 +338,7 @@
                 <div class="product-price">TZS 2,800</div>
                 <div class="product-action">
                   <div class="quantity-selector">
-                    <button class="quantity-btn">−</button>
+                    <button class="quantity-btn">âˆ’</button>
                     <span class="quantity-value">1</span>
                     <button class="quantity-btn">+</button>
                   </div>
@@ -492,7 +492,7 @@
       button.disabled = true;
       button.innerHTML = '<span class="material-icons">check</span> Added';
       
-      showToast(`Added ${quantity} × ${productName} to cart`, 'success');
+      showToast(`Added ${quantity} Ã— ${productName} to cart`, 'success');
       
       // Update cart count
       setTimeout(() => {

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useAuthStore } from '../../store/authStore';
-import { supabase } from '../../services/supabase';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export const RegisterScreen = () => {
@@ -13,9 +12,11 @@ export const RegisterScreen = () => {
   const handleRegister = async () => {
     setLoading(true);
     try {
-      const { user, error } = await supabase.auth.signUp({ email, password });
-      if (error) throw error;
-      register(user);
+      await register(email, password);
+      const storeError = useAuthStore.getState().error;
+      if (storeError) {
+        Alert.alert('Registration failed', storeError);
+      }
     } catch (err: any) {
       Alert.alert('Registration failed', err.message);
     } finally {

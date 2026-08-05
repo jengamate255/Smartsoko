@@ -81,3 +81,27 @@ nul
 serviceAccountKey.json
 *.key
 service-account-base64.txt
+*firebase-adminsdk*.json
+google-services.json
+merchant-creds.json
+
+# Android build outputs & caches
+APK-Builds*/
+*.apk
+*.aab
+.expo/
+.puppeteer*
+build/
+.gradle/
+local.properties
+*.iml
+.idea/
+captures/
+.kotlin/
+
+# Local dev artifacts
+last-order.json
+ui-audit*.json
+ui-detail*.json
+ui-visual-audit.json
+admin-users-tab.png

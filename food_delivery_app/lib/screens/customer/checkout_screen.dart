@@ -274,7 +274,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }).toList();
 
       // Create order
-      final orderId = await orderService.createOrder(
+      final createdOrder = await orderService.createOrder(
         userId: user.id,
         restaurantId: widget.restaurant.id,
         items: orderItems,
@@ -287,19 +287,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       );
 
       // Store orderId for navigation
-      _orderId = orderId;
+      _orderId = createdOrder.id;
 
       // Log order_placed event
       final analytics = context.read<AnalyticsService>();
       await analytics.logOrderPlaced(
-        orderId: orderId,
+        orderId: createdOrder.id,
         orderTotal: _total,
         itemCount: orderItems.fold(0, (sum, item) => sum + item.quantity),
       );
 
       // Initiate M-Pesa payment
       final payment = await paymentService.initiateMpesaPayment(
-        orderId: orderId,
+        orderId: createdOrder.id,
         userId: user.id,
         amount: _total,
         phone: _phoneController.text,

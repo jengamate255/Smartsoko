@@ -2,13 +2,17 @@ package com.fooddelivery.driver.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.fooddelivery.driver.data.LocalDatabase
-import com.fooddelivery.driver.data.PrefsDao
 import com.fooddelivery.driver.data.SupabaseClient
 import com.fooddelivery.driver.network.ApiService
 import com.fooddelivery.driver.repository.OrderRepository
 import com.fooddelivery.driver.realtime.SocketManager
+import com.fooddelivery.driver.data.AuthRepository
 import com.fooddelivery.driver.util.AppConfig
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,6 +22,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -72,12 +77,29 @@ object AppModule {
     }
 
     // ====================
-    // Shared Preferences for auth token
+    // Shared Preferences for auth token (encrypted at rest)
     // ====================
     @Provides
     @Singleton
     fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences("smartsoko_driver_prefs", Context.MODE_PRIVATE)
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+
+        // Migrate away from the legacy plaintext file that shares the same name.
+        // EncryptedSharedPreferences reads it as encrypted values, so it must be removed.
+        val legacyFile = File(context.applicationContext.filesDir, "shared_prefs/smartsoko_driver_prefs.xml")
+        if (legacyFile.exists()) {
+            legacyFile.delete()
+        }
+
+        return EncryptedSharedPreferences.create(
+            context,
+            "smartsoko_driver_prefs",
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
     }
 
     // ====================
@@ -85,9 +107,13 @@ object AppModule {
     // ====================
     @Provides
     @Singleton
-    fun provideSocketManager(sharedPreferences: SharedPreferences): SocketManager {
+    fun provideSocketManager(
+        @ApplicationContext context: Context,
+        sharedPreferences: SharedPreferences
+    ): SocketManager {
         val authToken = sharedPreferences.getString("firebase_auth_token", "") ?: ""
         return SocketManager(
+            context = context,
             serverUrl = AppConfig.WEBSOCKET_URL,
             authToken = authToken
         )
@@ -101,9 +127,22 @@ object AppModule {
         return LocalDatabase.getInstance(context)
     }
 
+    // ====================
+    // Auth Repository (Firebase-based)
+    // ====================
     @Provides
-    fun providePrefsDao(localDatabase: LocalDatabase): PrefsDao {
-        return localDatabase.prefsDao()
+    @Singleton
+    fun provideAuthRepository(): AuthRepository {
+        return AuthRepository()
+    }
+
+    // ====================
+    // Fused Location Provider
+    // ====================
+    @Provides
+    @Singleton
+    fun provideFusedLocationProviderClient(@ApplicationContext context: Context): FusedLocationProviderClient {
+        return LocationServices.getFusedLocationProviderClient(context)
     }
 
     // ====================
@@ -113,12 +152,12 @@ object AppModule {
     fun provideOrderRepository(
         localDatabase: LocalDatabase,
         socketManager: SocketManager,
-        prefsDao: PrefsDao
+        apiService: ApiService
     ): OrderRepository {
         return OrderRepository(
             localDatabase = localDatabase,
             socketManager = socketManager,
-            prefsDao = prefsDao
+            apiService = apiService
         )
     }
 }

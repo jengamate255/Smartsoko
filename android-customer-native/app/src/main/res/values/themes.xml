@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.SmartSokoCustomer" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.SmartSokoCustomer.Splash" parent="Theme.SmartSokoCustomer">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+</resources>

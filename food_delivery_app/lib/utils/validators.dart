@@ -160,7 +160,7 @@ class Validators {
     
     // Allow letters, spaces, hyphens, and apostrophes
     // This prevents injection attacks by restricting to safe characters only
-    final nameRegex = RegExp(r'^[a-zA-Z\s\-\']+$');
+    final nameRegex = RegExp(r"^[a-zA-Z\s\-\']+$");
     if (!nameRegex.hasMatch(trimmed)) {
       return 'Name can only contain letters, spaces, hyphens and apostrophes';
     }
@@ -236,7 +236,8 @@ class Validators {
       return 'PIN must be exactly $length digits';
     }
     
-    if (!RegExp(r'^[0-9]{'+length.toString(radix: 10)+'}$').hasMatch(value)) {
+    final pinPattern = RegExp('^[0-9]{$length}\$');
+    if (!pinPattern.hasMatch(value)) {
       return 'PIN must contain only digits';
     }
     

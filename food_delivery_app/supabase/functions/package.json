@@ -1,0 +1,20 @@
+{
+  "name": "smartmove",
+  "version": "1.0.0",
+  "description": "SmartMove - Ride Hailing Module for SmartSoko",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint supabase/functions/smartmove-*/**/*.ts",
+    "deploy:functions": "supabase functions deploy smartmove-pricing && supabase functions deploy smartmove-matching && supabase functions deploy smartmove-matching-engine && supabase functions deploy smartmove-tracking && supabase functions deploy smartmove-geocoding",
+    "deploy:migrations": "supabase db push",
+    "deploy:all": "npm run deploy:migrations && npm run deploy:functions",
+    "flutter:test": "cd ../../ && flutter test test/models/smartmove/ test/services/smartmove/",
+    "flutter:analyze": "cd ../../ && flutter analyze lib/models/smartmove/ lib/services/smartmove/ lib/screens/smartmove/ lib/widgets/smartmove/"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.10",
+    "eslint": "^9.0.0"
+  }
+}

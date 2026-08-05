@@ -61,6 +61,13 @@ class RestaurantService {
         .map((snapshot) => snapshot.docs.map((doc) => MenuItem.fromFirestore(doc)).toList());
   }
 
+  Stream<List<MenuItem>> getAllMenuItems(String restaurantId) {
+    return _menuItems
+        .where('restaurantId', isEqualTo: restaurantId)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => MenuItem.fromFirestore(doc)).toList());
+  }
+
   Future<MenuItem?> getMenuItem(String itemId) async {
     final doc = await _menuItems.doc(itemId).get();
     if (!doc.exists) return null;

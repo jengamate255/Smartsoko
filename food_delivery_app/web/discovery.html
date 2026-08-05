@@ -1,205 +1,360 @@
 <!DOCTYPE html>
 <html class="light" lang="en">
 <head>
-  <!-- Performance: Preconnect to external domains -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-  <link rel="dns-prefetch" href="https://www.gstatic.com">
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>SmartSoko - Discover</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
   <link rel="preload" href="dist/tailwind.css" as="style">
   <link rel="stylesheet" href="dist/tailwind.css">
   <link rel="stylesheet" href="design-system.css">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-  <!-- Firebase Modular SDK -->
-  <script type="module" src="config/firebase-config.js?v=4"></script>
-  <script src="js/cart-service.js?v=4"></script>
-  <script src="nav-component.js?v=4" defer></script>
-  <style> .material-symbols-outlined {font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24} .hide-scrollbar::-webkit-scrollbar {display: none} .hide-scrollbar {-ms-overflow-style: none;scrollbar-width: none} .gradient-bg {background: #064e3b} body {font-family: 'Be Vietnam Pro',sans-serif;min-height: 100vh} h1,h2,h3 {font-family: 'Plus Jakarta Sans',sans-serif} .product-card {transition: all 0.3s ease} .product-card:hover {transform: translateY(-4px);box-shadow: 0 12px 24px rgba(0,0,0,0.1)} </style>
-</head>
-<body class="bg-background text-on-surface font-body">
-  <!-- Navigation handled by SmartNav -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script type="module" src="config/firebase-config.js?v=5"></script>
+  <script type="module" src="config/cross-platform-service.js?v=4"></script>
+  <script src="js/cart-service.js?v=5" defer></script>
+  <script src="js/location-picker.js?v=5" defer></script>
+  <script src="nav-component.js?v=5" defer></script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display: inline-block; line-height: 1; vertical-align: middle; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Be Vietnam Pro','Plus Jakarta Sans',sans-serif; min-height: 100vh; }
+    h1,h2,h3,h4 { font-family: 'Plus Jakarta Sans',sans-serif; }
+    .gradient-bg { background: #064e3b; }
 
-  <main class="pt-4 pb-32 px-6 max-w-screen-xl mx-auto animate-premium">
-    <!-- Search Section -->
+    /* Header */
+    .top-header { background: linear-gradient(135deg, #064e3b, #065f46); position: sticky; top: 0; z-index: 40; }
+
+    /* Hero Banner */
+    .hero-banner { position: relative; border-radius: 20px; overflow: hidden; height: 300px; margin-bottom: 28px; }
+    @media (min-width: 768px) { .hero-banner { height: 380px; } }
+    .hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform 0.8s; }
+    .hero-banner:hover .hero-bg { transform: scale(1.03); }
+    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.25) 60%, transparent 100%); }
+    .hero-text { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 36px; max-width: 500px; }
+
+    /* Category Scroll */
+    .cat-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+    .cat-pill {
+      display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 999px;
+      font-size: 13px; font-weight: 600; border: 1.5px solid #e5e7eb; background: white; color: #374151;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+    }
+    .cat-pill:hover { border-color: #064e3b; color: #064e3b; background: #f0fdf4; }
+    .cat-pill.active { background: #064e3b; color: white; border-color: #064e3b; }
+
+    /* Filter chips */
+    .filter-chip {
+      display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 999px;
+      font-size: 13px; font-weight: 600; border: 1.5px solid #e5e7eb; background: white; color: #374151;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+    }
+    .filter-chip:hover { border-color: #064e3b; background: #f0fdf4; }
+    .filter-chip.active { background: #064e3b; color: white; border-color: #064e3b; }
+
+    /* Product cards */
+    .product-card {
+      background: white; border-radius: 14px; overflow: hidden; border: 1px solid #f0f0f0;
+      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease;
+      cursor: pointer; display: flex; flex-direction: column;
+    }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(44,62,80,0.12); }
+
+    /* Seller row */
+    .seller-row {
+      display: flex; align-items: center; gap: 14px; padding: 14px; background: white; border-radius: 14px;
+      border: 1px solid #f0f0f0; transition: all 0.3s; cursor: pointer;
+    }
+    .seller-row:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.06); transform: translateY(-2px); }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      background: white; box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+      display: flex; justify-content: space-around; align-items: center;
+      height: 68px; padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    @media (min-width: 768px) { .bottom-nav { display: none; } }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 6px 12px; color: #64748B; font-size: 11px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; border-radius: 12px;
+    }
+    .nav-item.active { color: #064e3b; background: #064e3b15; }
+    .nav-item .material-symbols-outlined { font-size: 22px; }
+
+    /* Skeleton */
+    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @media (prefers-reduced-motion: reduce) {
+      .skeleton { animation: none; }
+      .product-card { animation: none !important; }
+      .hero-bg { transition: none; }
+    }
+  </style>
+</head>
+<body class="bg-[#F8FAF6] text-on-background min-h-screen pb-24 md:pb-0">
+
+  <!-- Header -->
+  <header class="top-header">
+    <div class="flex items-center justify-between px-4 md:px-12 h-16 max-w-[1280px] mx-auto">
+      <div class="flex items-center gap-3">
+        <a href="/home" class="flex items-center gap-2 text-white no-underline">
+          <div class="w-9 h-9 bg-white/15 rounded-lg flex items-center justify-center">
+            <span class="material-symbols-outlined text-white">shopping_basket</span>
+          </div>
+          <span class="text-lg font-bold hidden sm:block">SmartSoko</span>
+        </a>
+      </div>
+      <div class="hidden md:flex flex-1 max-w-md mx-8">
+        <div class="relative w-full">
+          <input id="searchInputDesktop" aria-label="Search products" type="text" placeholder="Search products, sellers..."
+            class="w-full h-10 pl-10 pr-4 rounded-full border-none bg-white/90 text-sm focus:ring-2 focus:ring-white/50 outline-none transition-all"
+            oninput="syncSearch(this.value)"/>
+          <span class="material-symbols-outlined absolute left-3 top-2.5 text-gray-400 text-lg">search</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="document.getElementById('searchInputMobile').focus()" class="md:hidden p-2 text-white/80 hover:text-white rounded-full">
+          <span class="material-symbols-outlined">search</span>
+        </button>
+        <a href="/cart" class="relative p-2 text-white/80 hover:text-white rounded-full">
+          <span class="material-symbols-outlined">shopping_cart</span>
+          <span id="headerCartBadge" class="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-[1280px] mx-auto px-4 md:px-12 pt-5 pb-24">
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+      <div class="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1542838132-92c53300491e?w=1400&q=80');"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-text text-white">
+        <span class="inline-flex items-center gap-1.5 bg-green-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold mb-3 w-fit uppercase tracking-wider">
+          <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">verified</span> Verified Sellers
+        </span>
+        <h1 class="text-2xl md:text-4xl font-extrabold mb-2 leading-tight">Discover Local Quality</h1>
+        <p class="text-white/80 mb-5 text-sm md:text-base">Find authentic, handcrafted products from Africa's most talented artisans and businesses.</p>
+        <div class="flex flex-wrap gap-3">
+          <a href="#productsSection" class="bg-white text-green-800 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-100 transition shadow-lg no-underline">Shop Now</a>
+          <a href="#sellersSection" class="bg-white/15 backdrop-blur-md border border-white/25 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/25 transition no-underline">Meet Sellers</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mobile Search -->
+    <div class="md:hidden mb-4">
+      <div class="relative">
+        <input id="searchInputMobile" aria-label="Search products" type="text" placeholder="Search products, sellers..."
+          class="w-full h-11 pl-10 pr-4 rounded-2xl border border-gray-200 bg-white text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all shadow-sm"
+          oninput="syncSearch(this.value)"/>
+        <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-gray-400 text-lg">search</span>
+      </div>
+    </div>
+
+    <!-- Category Scroll -->
     <section class="mb-6">
-      <div class="relative flex items-center">
-        <span class="absolute left-6 material-symbols-outlined text-on-surface-variant">search</span>
-        <input type="text" id="searchInput" 
-          class="w-full pl-14 pr-6 py-4 bg-white border border-outline rounded-full font-body text-on-surface placeholder:text-on-surface-variant/60 focus:ring-2 focus:ring-primary outline-none transition-all" 
-          placeholder="Search products, sellers, categories..."/>
-        <button onclick="clearSearch()" id="clearBtn" class="absolute right-4 hidden p-2 hover:bg-surface-variant rounded-full transition-colors">
-          <span class="material-symbols-outlined text-sm">close</span>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <span class="material-symbols-outlined text-green-600 text-xl">category</span> Categories
+        </h2>
+      </div>
+      <div class="cat-scroll hide-scrollbar -mx-4 px-4 pb-2">
+        <button onclick="filterByCategory('all')" class="cat-pill active" data-category="all">
+          <span class="material-symbols-outlined text-base">apps</span> All
+        </button>
+        <button onclick="filterByCategory('food')" class="cat-pill" data-category="food">
+          <span class="material-symbols-outlined text-base">restaurant</span> Food
+        </button>
+        <button onclick="filterByCategory('dairy')" class="cat-pill" data-category="dairy">
+          <span class="material-symbols-outlined text-base">local_drink</span> Dairy
+        </button>
+        <button onclick="filterByCategory('fruits')" class="cat-pill" data-category="fruits">
+          <span class="material-symbols-outlined text-base">nutrition</span> Fruits
+        </button>
+        <button onclick="filterByCategory('groceries')" class="cat-pill" data-category="groceries">
+          <span class="material-symbols-outlined text-base">shopping_basket</span> Groceries
+        </button>
+        <button onclick="filterByCategory('bakery')" class="cat-pill" data-category="bakery">
+          <span class="material-symbols-outlined text-base">bakery_dining</span> Bakery
+        </button>
+        <button onclick="filterByCategory('vegetables')" class="cat-pill" data-category="vegetables">
+          <span class="material-symbols-outlined text-base">eco</span> Vegetables
         </button>
       </div>
     </section>
 
-    <!-- Active Filters -->
-    <section id="activeFilters" class="mb-6 hidden">
+    <!-- Filter Chips -->
+    <section class="sticky top-16 bg-[#F8FAF6] z-30 pt-1 pb-3 space-y-3">
+      <div class="flex flex-nowrap items-center gap-2.5 overflow-x-auto hide-scrollbar">
+        <button class="filter-chip active" onclick="this.classList.toggle('active')">
+          <span class="material-symbols-outlined text-base">tune</span> Filters
+        </button>
+        <div class="h-5 w-px bg-gray-200 flex-shrink-0"></div>
+        <button class="filter-chip" onclick="this.classList.toggle('active')">Local Origin</button>
+        <button class="filter-chip" onclick="this.classList.toggle('active')">Delivery Speed</button>
+        <button class="filter-chip" onclick="this.classList.toggle('active')">Price Range</button>
+        <button class="filter-chip" onclick="this.classList.toggle('active')">Verified Only</button>
+      </div>
+      <div class="flex items-center justify-between text-gray-500 border-b border-gray-100 pb-2">
+        <span id="resultsCount" class="text-xs font-medium">0 products found</span>
+        <div class="flex items-center gap-1 cursor-pointer text-xs font-semibold text-green-700">
+          <select id="sortSelect" onchange="sortProducts()" class="bg-transparent text-xs font-semibold text-green-700 outline-none cursor-pointer">
+            <option value="default">Sort: Recommended</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="name">Name A-Z</option>
+          </select>
+          <span class="material-symbols-outlined text-base">expand_more</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Active Filter Tags -->
+    <section id="activeFilters" class="mb-4 hidden">
       <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-sm text-on-surface-variant">Filters:</span>
-        <span id="filterTag" class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium flex items-center gap-2">
-          <span id="filterText">Category</span>
-          <button onclick="clearFilter()" class="hover:bg-primary/20 rounded-full p-0.5">
-            <span class="material-symbols-outlined text-sm">close</span>
+        <span class="text-xs text-gray-500 font-medium">Active:</span>
+        <span id="filterTag" class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-semibold flex items-center gap-1.5">
+          <span id="filterText">Filter</span>
+          <button onclick="clearFilter()" class="hover:bg-green-100 rounded-full p-0.5">
+            <span class="material-symbols-outlined text-xs">close</span>
           </button>
         </span>
       </div>
     </section>
 
-    <!-- Category Chips -->
-    <section class="mb-8">
-      <div class="flex gap-3 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
-        <button onclick="filterByCategory('all')" class="category-chip active px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap bg-primary text-white" data-category="all">
-          All Items
-        </button>
-        <button onclick="filterByCategory('food')" class="category-chip px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap bg-white text-on-surface-variant border border-outline hover:bg-surface-variant" data-category="food">
-          🍔 Food
-        </button>
-        <button onclick="filterByCategory('dairy')" class="category-chip px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap bg-white text-on-surface-variant border border-outline hover:bg-surface-variant" data-category="dairy">
-          🥛 Dairy
-        </button>
-        <button onclick="filterByCategory('fruits')" class="category-chip px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap bg-white text-on-surface-variant border border-outline hover:bg-surface-variant" data-category="fruits">
-          🍎 Fruits
-        </button>
-        <button onclick="filterByCategory('groceries')" class="category-chip px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap bg-white text-on-surface-variant border border-outline hover:bg-surface-variant" data-category="groceries">
-          🛒 Groceries
-        </button>
-        <button onclick="filterByCategory('bakery')" class="category-chip px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap bg-white text-on-surface-variant border border-outline hover:bg-surface-variant" data-category="bakery">
-          🍞 Bakery
-        </button>
-        <button onclick="filterByCategory('vegetables')" class="category-chip px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap bg-white text-on-surface-variant border border-outline hover:bg-surface-variant" data-category="vegetables">
-          🥬 Vegetables
-        </button>
-      </div>
-    </section>
-
-    <!-- Sort & Results Count -->
-    <section class="mb-6 flex justify-between items-center">
-      <h2 id="resultsTitle" class="font-headline text-xl font-bold text-primary">Organic Selections</h2>
-      <div class="flex items-center gap-3">
-        <span id="resultsCount" class="text-sm text-on-surface-variant">0 items</span>
-        <select id="sortSelect" onchange="sortProducts()" class="px-3 py-2 bg-white border border-outline rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none">
-          <option value="default">Sort by</option>
-          <option value="price-low">Price: Low to High</option>
-          <option value="price-high">Price: High to Low</option>
-          <option value="name">Name A-Z</option>
-        </select>
-      </div>
-    </section>
-
     <!-- Products Grid -->
-    <section id="productsSection" class="mb-10">
+    <section id="productsSection" class="mb-8">
       <div id="productsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <!-- Products will be loaded dynamically -->
-        <div class="col-span-full flex justify-center items-center py-12">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <span class="ml-3 text-on-surface-variant">Loading products...</span>
-        </div>
+        <!-- Skeletons while loading -->
+        <div class="product-card"><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton h-3 w-20"></div><div class="skeleton h-4 w-full"></div><div class="skeleton h-3 w-16"></div><div class="skeleton h-5 w-24"></div></div></div>
+        <div class="product-card"><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton h-3 w-20"></div><div class="skeleton h-4 w-full"></div><div class="skeleton h-3 w-16"></div><div class="skeleton h-5 w-24"></div></div></div>
+        <div class="product-card hidden md:flex"><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton h-3 w-20"></div><div class="skeleton h-4 w-full"></div><div class="skeleton h-3 w-16"></div><div class="skeleton h-5 w-24"></div></div></div>
+        <div class="product-card hidden lg:flex"><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton h-3 w-20"></div><div class="skeleton h-4 w-full"></div><div class="skeleton h-3 w-16"></div><div class="skeleton h-5 w-24"></div></div></div>
       </div>
     </section>
 
     <!-- Empty State -->
-    <section id="emptyState" class="hidden text-center py-12">
-      <div class="w-20 h-20 bg-surface-variant rounded-full flex items-center justify-center mx-auto mb-4">
-        <span class="material-symbols-outlined text-4xl text-on-surface-variant">search_off</span>
+    <section id="emptyState" class="hidden text-center py-16">
+      <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <span class="material-symbols-outlined text-4xl text-gray-400">search_off</span>
       </div>
-      <h3 class="font-headline text-lg font-bold text-on-surface mb-2">No products found</h3>
-      <p class="text-on-surface-variant text-sm mb-4">Try adjusting your search or filters</p>
-      <button onclick="clearFilter()" class="gradient-bg text-white px-6 py-3 rounded-full font-medium hover:opacity-90 transition-all">
+      <h3 class="text-lg font-bold text-gray-800 mb-2">No products found</h3>
+      <p class="text-gray-500 text-sm mb-4">Try adjusting your search or filters</p>
+      <button onclick="clearFilter()" class="gradient-bg text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-all">
         Clear Filters
       </button>
     </section>
 
-    <!-- Featured Sellers Section -->
-    <section class="mb-10">
-      <h2 class="font-headline text-xl font-bold text-primary mb-4">Popular Sellers</h2>
-      <div id="sellersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <a href="/discovery?search=Fresh+Mart" class="bg-white rounded-2xl p-4 shadow-sm border border-outline/20 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer">
-          <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <span class="material-symbols-outlined text-primary text-2xl">store</span>
+    <!-- Verified Sellers -->
+    <section id="sellersSection" class="mb-10 mt-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <span class="material-symbols-outlined text-green-600 text-xl" style="font-variation-settings:'FILL' 1;">verified</span>
+          Verified Sellers Near You
+        </h2>
+        <button type="button" data-location-picker class="flex items-center gap-1 text-gray-500 text-xs font-medium cursor-pointer hover:text-green-700 transition-colors bg-transparent border-0 p-0">
+          <span class="material-symbols-outlined text-sm">location_on</span> <span data-location-value>Dar es Salaam</span>
+        </button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <a href="/discovery?search=Fresh+Mart" class="seller-row no-underline">
+          <div class="relative flex-shrink-0">
+            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+              <span class="material-symbols-outlined text-xl text-green-600">store</span>
+            </div>
+            <span class="absolute -bottom-0.5 -right-0.5 bg-green-500 text-white rounded-full p-0.5">
+              <span class="material-symbols-outlined text-[10px]" style="font-variation-settings:'FILL' 1;">verified</span>
+            </span>
           </div>
           <div class="flex-1 min-w-0">
-            <h3 class="font-headline font-bold text-on-surface truncate">Fresh Mart</h3>
-            <p class="text-xs text-on-surface-variant">⭐ 4.8 • Fruits & Vegetables</p>
-            <p class="text-xs text-success">Open now • 25-35 min</p>
+            <h3 class="font-bold text-gray-800 text-sm truncate">Fresh Mart</h3>
+            <p class="text-xs text-gray-500">Verified Gold Member</p>
+            <div class="flex items-center gap-1 mt-0.5">
+              <span class="material-symbols-outlined text-yellow-500 text-xs" style="font-variation-settings:'FILL' 1;">star</span>
+              <span class="text-xs text-gray-500">4.8 Â· 240+ reviews</span>
+            </div>
           </div>
-          <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+          <span class="material-symbols-outlined text-gray-300">chevron_right</span>
         </a>
-        <a href="/discovery?search=Tasty+Kitchen" class="bg-white rounded-2xl p-4 shadow-sm border border-outline/20 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer">
-          <div class="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
-            <span class="material-symbols-outlined text-secondary text-2xl">restaurant</span>
+        <a href="/discovery?search=Tasty+Kitchen" class="seller-row no-underline">
+          <div class="relative flex-shrink-0">
+            <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
+              <span class="material-symbols-outlined text-xl text-orange-600">restaurant</span>
+            </div>
+            <span class="absolute -bottom-0.5 -right-0.5 bg-green-500 text-white rounded-full p-0.5">
+              <span class="material-symbols-outlined text-[10px]" style="font-variation-settings:'FILL' 1;">verified</span>
+            </span>
           </div>
           <div class="flex-1 min-w-0">
-            <h3 class="font-headline font-bold text-on-surface truncate">Tasty Kitchen</h3>
-            <p class="text-xs text-on-surface-variant">⭐ 4.6 • Fast Food</p>
-            <p class="text-xs text-success">Open now • 30-45 min</p>
+            <h3 class="font-bold text-gray-800 text-sm truncate">Tasty Kitchen</h3>
+            <p class="text-xs text-gray-500">Premium Food Vendor</p>
+            <div class="flex items-center gap-1 mt-0.5">
+              <span class="material-symbols-outlined text-yellow-500 text-xs" style="font-variation-settings:'FILL' 1;">star</span>
+              <span class="text-xs text-gray-500">4.6 Â· 112 reviews</span>
+            </div>
           </div>
-          <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+          <span class="material-symbols-outlined text-gray-300">chevron_right</span>
         </a>
-        <a href="/discovery?search=Daily+Bread" class="bg-white rounded-2xl p-4 shadow-sm border border-outline/20 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer">
-          <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-            <span class="material-symbols-outlined text-blue-600 text-2xl">bakery_dining</span>
+        <a href="/discovery?search=Daily+Bread" class="seller-row no-underline">
+          <div class="relative flex-shrink-0">
+            <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
+              <span class="material-symbols-outlined text-xl text-amber-600">bakery_dining</span>
+            </div>
+            <span class="absolute -bottom-0.5 -right-0.5 bg-green-500 text-white rounded-full p-0.5">
+              <span class="material-symbols-outlined text-[10px]" style="font-variation-settings:'FILL' 1;">verified</span>
+            </span>
           </div>
           <div class="flex-1 min-w-0">
-            <h3 class="font-headline font-bold text-on-surface truncate">Daily Bread</h3>
-            <p class="text-xs text-on-surface-variant">⭐ 4.9 • Bakery & Pastries</p>
-            <p class="text-xs text-success">Open now • 20-30 min</p>
+            <h3 class="font-bold text-gray-800 text-sm truncate">Daily Bread</h3>
+            <p class="text-xs text-gray-500">Master Baker</p>
+            <div class="flex items-center gap-1 mt-0.5">
+              <span class="material-symbols-outlined text-yellow-500 text-xs" style="font-variation-settings:'FILL' 1;">star</span>
+              <span class="text-xs text-gray-500">4.9 Â· 89 reviews</span>
+            </div>
           </div>
-          <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+          <span class="material-symbols-outlined text-gray-300">chevron_right</span>
         </a>
       </div>
     </section>
   </main>
 
-  <!-- Cart Sidebar -->
-  <div id="cartSidebar" class="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300">
-    <div class="h-full flex flex-col">
-      <div class="p-6 border-b border-outline/20 flex justify-between items-center">
-        <h2 class="font-headline text-xl font-bold text-primary">Your Cart</h2>
-        <button onclick="toggleCart()" class="p-2 hover:bg-surface-variant rounded-full transition-colors">
-          <span class="material-symbols-outlined">close</span>
-        </button>
+  <!-- Bottom Nav (Mobile) -->
+  <nav class="bottom-nav">
+    <a href="/home" class="nav-item">
+      <span class="material-symbols-outlined">home</span>
+      <span>Home</span>
+    </a>
+    <a href="/discovery" class="nav-item active">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">grid_view</span>
+      <span>Browse</span>
+    </a>
+    <a href="/cart" class="nav-item relative">
+      <div class="relative">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <span id="bottomCartBadge" class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
       </div>
-      <div id="cartItems" class="flex-1 overflow-y-auto p-6">
-        <p class="text-center text-on-surface-variant py-8">Your cart is empty</p>
-      </div>
-      <div class="p-6 border-t border-outline/20">
-        <div class="flex justify-between mb-4">
-          <span class="text-on-surface-variant">Subtotal</span>
-          <span id="cartTotal" class="font-bold text-primary">TSh 0</span>
-        </div>
-        <button onclick="checkout()" class="w-full gradient-bg text-white py-4 rounded-full font-headline font-bold hover:opacity-90 transition-all">
-          Checkout
-        </button>
-      </div>
-    </div>
-  </div>
-  <div id="cartOverlay" class="fixed inset-0 bg-black/50 z-40 hidden" onclick="toggleCart()"></div>
+      <span>Cart</span>
+    </a>
+    <a href="/profile" class="nav-item">
+      <span class="material-symbols-outlined">person</span>
+      <span>Profile</span>
+    </a>
+  </nav>
 
-  <!-- Navigation handled by SmartNav -->
-
-  <!-- Product Quick View Modal -->
-  <div id="productModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
-    <div class="bg-white rounded-t-3xl md:rounded-2xl w-full max-w-md p-6 animate-slide-up">
-      <div class="flex justify-between items-start mb-4">
-        <h3 id="modalProductName" class="font-headline text-xl font-bold text-on-surface">Product Name</h3>
-        <button onclick="hideProductModal()" class="p-2 hover:bg-surface-variant rounded-full transition-colors">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-      <div id="modalProductContent" class="mb-4">
-        <!-- Product details will be populated here -->
-      </div>
-      <button id="modalAddToCart" class="w-full gradient-bg text-white py-4 rounded-full font-headline font-bold hover:opacity-90 transition-all">
-        Add to Cart
-      </button>
-    </div>
-  </div>
+  <!-- Desktop FAB -->
+  <button class="hidden md:flex fixed bottom-8 right-8 bg-green-700 text-white shadow-2xl px-5 py-3 rounded-full items-center gap-2 hover:scale-105 active:scale-95 transition-all z-40 font-semibold text-sm">
+    <span class="material-symbols-outlined">message</span> Chat with Sellers
+  </button>
 
   <script>
     let cart = window.CartService ? CartService.getCart() : (JSON.parse(localStorage.getItem('smartsoko_cart')) || []);
@@ -208,422 +363,301 @@
     let currentCategory = 'all';
     let currentSearch = '';
 
-    // Load products from Firebase
-    async function loadProducts() {
-      const db = window.db;
-      if (!db) {
-        console.warn('Firebase not initialized');
-        return;
-      }
-      
-      try {
-        // Dynamic import for Modular SDK
-        const { collection, query, where, getDocs, limit } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-        
-        let snapshot;
-        
-        // First try menuItems collection (food delivery app structure)
-        try {
-          const menuQuery = query(collection(db, 'menuItems'), limit(100));
-          snapshot = await getDocs(menuQuery);
-        } catch (e) {
-          console.log('menuItems collection not accessible, trying products...');
-        }
-        
-        // Fallback to products collection if menuItems is empty or failed
-        if (!snapshot || snapshot.empty) {
-          const productsQuery = query(collection(db, 'products'), limit(100));
-          snapshot = await getDocs(productsQuery);
-        }
-        
-        allProducts = snapshot.docs.map(doc => {
-          const data = doc.data();
-          // Normalize data - handle both menuItems (restaurantId) and products (sellerId) collections
-          return {
-            id: doc.id,
-            name: data.name || 'Unnamed Item',
-            description: data.description || '',
-            price: data.price || 0,
-            imageUrl: data.imageUrl || data.image || '',
-            category: data.category || 'General',
-            isAvailable: data.isAvailable !== false,
-            // Handle both restaurantId (from menuItems) and sellerId (from products)
-            sellerId: data.sellerId || data.restaurantId || '',
-            seller: data.seller || data.restaurantName || 'SmartSoko',
-            restaurantId: data.restaurantId || data.sellerId || ''
-          };
-        });
-        filteredProducts = [...allProducts];
-        
-        // Check for URL params
-        const urlParams = new URLSearchParams(window.location.search);
-        const categoryParam = urlParams.get('category');
-        const searchParam = urlParams.get('search');
-        
-        if (categoryParam) {
-          filterByCategory(categoryParam);
-        } else if (searchParam) {
-          document.getElementById('searchInput').value = searchParam;
-          performSearch(searchParam);
-        } else {
-          renderProducts(allProducts);
-        }
-      } catch (error) {
-        console.error('Error loading products:', error);
-        document.getElementById('productsGrid').innerHTML = `
-          <div class="col-span-full text-center py-8">
-            <p class="text-red-500 mb-2">Failed to load products.</p>
-            <p class="text-sm text-gray-500">Error: ${error.message || 'Database connection failed'}</p>
-            <button onclick="loadProducts()" class="mt-4 px-4 py-2 bg-primary text-white rounded-full">Retry</button>
-          </div>
-        `;
-      }
+    function syncSearch(val) {
+      document.getElementById('searchInputMobile').value = val;
+      if (document.getElementById('searchInputDesktop')) document.getElementById('searchInputDesktop').value = val;
+      handleSearchInput(val);
     }
 
-    // Render products
-    function renderProducts(products) {
-      const container = document.getElementById('productsGrid');
-      const emptyState = document.getElementById('emptyState');
-      const resultsCount = document.getElementById('resultsCount');
-      
-      resultsCount.textContent = `${products.length} item${products.length !== 1 ? 's' : ''}`;
-      
-      if (products.length === 0) {
-        container.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        return;
-      }
-      
-      emptyState.classList.add('hidden');
-      
-      container.innerHTML = products.map(product => `
-        <a href="/product?id=${product.id}" class="product-card bg-white rounded-2xl p-3 shadow-sm border border-outline/20 cursor-pointer">
-          <div class="relative aspect-square mb-3 bg-surface-variant rounded-xl overflow-hidden flex items-center justify-center">
-            ${getProductImageHtml(product)}
-            <span class="absolute top-2 left-2 px-2 py-1 bg-white/80 backdrop-blur-sm rounded-lg text-[10px] font-medium text-on-surface-variant capitalize">
-              ${product.category || 'General'}
-            </span>
-          </div>
-          <h3 class="font-headline font-bold text-on-surface text-sm leading-tight mb-1 line-clamp-1">${product.name}</h3>
-          <p class="text-xs text-on-surface-variant mb-2">${product.seller || 'SmartSoko'}</p>
-          <div class="flex items-center justify-between">
-            <p class="font-headline text-primary font-extrabold">TSh ${(product.price || 0).toLocaleString()}</p>
-            <button onclick="event.preventDefault(); addToCart('${product.id}')" class="w-8 h-8 gradient-bg text-white rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all hover:scale-105">
-              <span class="material-symbols-outlined text-sm">add</span>
-            </button>
-          </div>
-        </a>
-      `).join('');
-    }
-
-    function getProductImageHtml(product, size = 'medium') {
-      const sizes = {
-        small: 'w-16 h-16',
-        medium: 'w-full h-full',
-        large: 'w-32 h-32'
-      };
-      const sizeClass = sizes[size] || sizes.medium;
-      
-      const imageUrl = product.imageUrl || 'images/default-product.png';
-      return `<img src="${imageUrl}" alt="${escapeHtml(product.name || 'Product')}" class="${sizeClass} object-cover" onerror="this.onerror=null; this.src='images/default-product.png';">`;
-    }
-
-    // XSS sanitization helper
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-    }
-
-    // Filter by category
-    function filterByCategory(category) {
-      currentCategory = category;
-      
-      // Update chip styles
-      document.querySelectorAll('.category-chip').forEach(chip => {
-        if (chip.dataset.category === category) {
-          chip.classList.add('bg-primary', 'text-white');
-          chip.classList.remove('bg-white', 'text-on-surface-variant', 'border', 'border-outline');
-        } else {
-          chip.classList.remove('bg-primary', 'text-white');
-          chip.classList.add('bg-white', 'text-on-surface-variant', 'border', 'border-outline');
-        }
-      });
-      
-      // Update title
-      const titles = {
-        'all': 'All Products',
-        'food': 'Food Items',
-        'dairy': 'Dairy Products',
-        'fruits': 'Fresh Fruits',
-        'groceries': 'Groceries',
-        'bakery': 'Bakery Items',
-        'vegetables': 'Vegetables'
-      };
-      document.getElementById('resultsTitle').textContent = titles[category] || 'Products';
-      
-      // Filter products
-      if (category === 'all') {
-        filteredProducts = currentSearch ? 
-          allProducts.filter(p => p.name.toLowerCase().includes(currentSearch.toLowerCase())) :
-          [...allProducts];
-      } else {
-        filteredProducts = allProducts.filter(p => p.category === category);
-        if (currentSearch) {
-          filteredProducts = filteredProducts.filter(p => 
-            p.name.toLowerCase().includes(currentSearch.toLowerCase())
-          );
-        }
-      }
-      
-      renderProducts(filteredProducts);
-    }
-
-    // Search functionality
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-      const query = e.target.value.trim();
-      document.getElementById('clearBtn').classList.toggle('hidden', !query);
-      
+    function handleSearchInput(val) {
+      const query = val.trim();
       if (query) {
         currentSearch = query;
-        filteredProducts = allProducts.filter(p => 
+        filteredProducts = allProducts.filter(p =>
           p.name.toLowerCase().includes(query.toLowerCase()) ||
-          p.category?.toLowerCase().includes(query.toLowerCase())
+          (p.category || '').toLowerCase().includes(query.toLowerCase()) ||
+          (p.seller || '').toLowerCase().includes(query.toLowerCase())
         );
         if (currentCategory !== 'all') {
           filteredProducts = filteredProducts.filter(p => p.category === currentCategory);
         }
         document.getElementById('activeFilters').classList.remove('hidden');
-        document.getElementById('filterText').textContent = `Search: "${query}"`;
+        document.getElementById('filterText').textContent = `"${query}"`;
       } else {
         currentSearch = '';
         filterByCategory(currentCategory);
         document.getElementById('activeFilters').classList.add('hidden');
       }
-      
-      renderProducts(filteredProducts);
-    });
-
-    function performSearch(query) {
-      if (!query) query = document.getElementById('searchInput').value.trim();
-      if (!query) return;
-      
-      currentSearch = query;
-      document.getElementById('searchInput').value = query;
-      document.getElementById('clearBtn').classList.remove('hidden');
-      
-      filteredProducts = allProducts.filter(p => 
-        p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.category?.toLowerCase().includes(query.toLowerCase())
-      );
-      
-      document.getElementById('activeFilters').classList.remove('hidden');
-      document.getElementById('filterText').textContent = `Search: "${query}"`;
-      document.getElementById('resultsTitle').textContent = 'Search Results';
-      
       renderProducts(filteredProducts);
     }
 
-    function clearSearch() {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('clearBtn').classList.add('hidden');
-      document.getElementById('activeFilters').classList.add('hidden');
-      currentSearch = '';
-      filterByCategory(currentCategory);
+    function normalizeProduct(d) {
+      return {
+        id: d.id,
+        name: d.name || d.product_name || 'Unnamed Item',
+        description: d.description || '',
+        price: d.price || 0,
+        imageUrl: d.imageUrl || d.image_url || d.image || '',
+        category: d.category || 'General',
+        sellerId: d.sellerId || d.seller_id || d.restaurantId || d.restaurant_id || '',
+        seller: d.seller || d.seller_name || d.restaurantName || d.restaurant_name || 'SmartSoko',
+      };
+    }
+
+    async function loadProducts() {
+      const svc = window.crossPlatformService;
+      const db = window.db;
+
+      try {
+        let items = null;
+
+        // Try cross-platform service first (Firebase + Supabase fallback)
+        if (svc && svc.isReady()) {
+          try {
+            items = await svc.list('menuItems', { limit: 100 });
+            console.log(`[CrossPlatform] menuItems: ${items.length} docs (${items[0]?._source})`);
+          } catch (e) { console.log('[CrossPlatform] menuItems:', e.message); }
+          if (!items || items.length === 0) {
+            try {
+              items = await svc.list('products', { limit: 100 });
+              console.log(`[CrossPlatform] products: ${items.length} docs (${items[0]?._source})`);
+            } catch (e) { console.log('[CrossPlatform] products:', e.message); }
+          }
+        }
+
+        // Fallback to direct Firebase
+        if ((!items || items.length === 0) && db && db.collection) {
+          console.log('[Discovery] Falling back to direct Firebase');
+          const { collection, query, getDocs, limit } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+          let snapshot = null;
+          try { snapshot = await getDocs(query(collection(db, 'menuItems'), limit(100))); } catch (e) { /* silent */ }
+          if (!snapshot || snapshot.empty) {
+            try { snapshot = await getDocs(query(collection(db, 'products'), limit(100))); } catch (e) { /* silent */ }
+          }
+          if (snapshot && !snapshot.empty) {
+            items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          }
+        }
+
+        if (!items || items.length === 0) {
+          document.getElementById('productsGrid').innerHTML = '<div class="col-span-full text-center py-12 text-gray-400"><span class="material-symbols-outlined text-5xl mb-2 block">inventory_2</span><p>No products available yet</p></div>';
+          return;
+        }
+
+        allProducts = items.map(normalizeProduct);
+        filteredProducts = [...allProducts];
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const cat = urlParams.get('category');
+        const search = urlParams.get('search');
+
+        if (cat) filterByCategory(cat);
+        else if (search) {
+          document.getElementById('searchInputMobile').value = search;
+          syncSearch(search);
+        } else renderProducts(allProducts);
+      } catch (err) {
+        console.error('Load error:', err);
+        document.getElementById('productsGrid').innerHTML = `<div class="col-span-full text-center py-8"><p class="text-red-500 mb-2">Failed to load products</p><button onclick="loadProducts()" class="mt-3 px-5 py-2 gradient-bg text-white rounded-xl text-sm font-semibold">Retry</button></div>`;
+      }
+    }
+
+    function renderProducts(products) {
+      // Filter out unavailable products
+      products = products.filter(p => p.isAvailable !== false);
+      
+      const container = document.getElementById('productsGrid');
+      const empty = document.getElementById('emptyState');
+      const count = document.getElementById('resultsCount');
+
+      count.textContent = `${products.length} product${products.length !== 1 ? 's' : ''} found`;
+
+      if (products.length === 0) {
+        container.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      const ratingStars = () => {
+        const full = Math.floor(Math.random() * 2) + 4;
+        let html = '';
+        for (let i = 0; i < 5; i++) {
+          html += `<span class="material-symbols-outlined text-[13px] ${i < full ? 'text-amber-400' : 'text-gray-200'}" style="font-variation-settings:'FILL' ${i < full ? 1 : 0};">star</span>`;
+        }
+        return html;
+      };
+
+      container.innerHTML = products.map((p, idx) => {
+        const reviews = Math.floor(Math.random() * 300) + 5;
+        return `
+        <a href="/product?id=${p.id}" class="product-card no-underline" style="animation: fadeIn 0.4s cubic-bezier(0.23,1,0.32,1) ${Math.min(idx, 12) * 0.04}s backwards;">
+          <div class="relative aspect-square bg-gray-50 overflow-hidden">
+            <img src="${p.imageUrl || 'images/default-product.png'}" alt="${p.name}" loading="lazy" decoding="async"
+              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              onerror="this.onerror=null; this.src='images/default-product.png';">
+            <button onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('${p.id}', this)"
+              class="absolute top-2.5 right-2.5 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-sm active:scale-90 transition-transform">
+              <span class="material-symbols-outlined text-base text-gray-400" style="font-variation-settings:'FILL' 0;">favorite</span>
+            </button>
+          </div>
+          <div class="p-3 space-y-1.5 flex-1 flex flex-col">
+            <div class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-green-600 text-[13px]" style="font-variation-settings:'FILL' 1;">verified</span>
+              <span class="text-[11px] text-green-600 font-semibold">Verified</span>
+            </div>
+            <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 leading-tight">${p.name}</h3>
+            <div class="flex items-center gap-1">${ratingStars()}<span class="text-[11px] text-gray-400 ml-0.5">(${reviews})</span></div>
+            <div class="flex items-center justify-between mt-auto pt-1">
+              <span class="text-base font-extrabold text-green-800">TSh ${(p.price || 0).toLocaleString()}</span>
+              <button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}')"
+                class="w-8 h-8 gradient-bg text-white rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all hover:bg-green-800">
+                <span class="material-symbols-outlined text-base">add</span>
+              </button>
+            </div>
+          </div>
+        </a>`;
+      }).join('');
+    }
+
+    function filterByCategory(category) {
+      currentCategory = category;
+      document.querySelectorAll('.cat-pill').forEach(c => {
+        c.classList.toggle('active', c.dataset.category === category);
+      });
+
+      if (category === 'all') {
+        filteredProducts = currentSearch
+          ? allProducts.filter(p => p.name.toLowerCase().includes(currentSearch.toLowerCase()))
+          : [...allProducts];
+      } else {
+        filteredProducts = allProducts.filter(p => p.category === category);
+        if (currentSearch) {
+          filteredProducts = filteredProducts.filter(p => p.name.toLowerCase().includes(currentSearch.toLowerCase()));
+        }
+      }
+      renderProducts(filteredProducts);
+    }
+
+    function sortProducts() {
+      const v = document.getElementById('sortSelect').value;
+      if (v === 'price-low') filteredProducts.sort((a, b) => a.price - b.price);
+      else if (v === 'price-high') filteredProducts.sort((a, b) => b.price - a.price);
+      else if (v === 'name') filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+      renderProducts(filteredProducts);
     }
 
     function clearFilter() {
-      clearSearch();
-      filterByCategory('all');
-    }
-
-    // Sort products
-    function sortProducts() {
-      const sortValue = document.getElementById('sortSelect').value;
-      
-      switch(sortValue) {
-        case 'price-low':
-          filteredProducts.sort((a, b) => a.price - b.price);
-          break;
-        case 'price-high':
-          filteredProducts.sort((a, b) => b.price - a.price);
-          break;
-        case 'name':
-          filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
-          break;
-      }
-      
+      document.getElementById('searchInputMobile').value = '';
+      if (document.getElementById('searchInputDesktop')) document.getElementById('searchInputDesktop').value = '';
+      document.getElementById('activeFilters').classList.add('hidden');
+      currentSearch = '';
+      currentCategory = 'all';
+      document.querySelectorAll('.cat-pill').forEach(c => c.classList.toggle('active', c.dataset.category === 'all'));
+      filteredProducts = [...allProducts];
       renderProducts(filteredProducts);
     }
 
-    // Product Modal
-    function showProductModal(productId) {
-      const product = allProducts.find(p => p.id === productId);
-      if (!product) return;
-      
-      document.getElementById('modalProductName').textContent = product.name;
-      const modalImageUrl = product.imageUrl || 'images/default-product.png';
-      document.getElementById('modalProductContent').innerHTML = `
-        <div class="bg-surface-variant rounded-xl p-6 mb-4 flex items-center justify-center overflow-hidden">
-          <img src="${modalImageUrl}" alt="${escapeHtml(product.name || 'Product')}" class="w-full h-48 object-cover rounded-xl" onerror="this.onerror=null; this.src='images/default-product.png';">
-        </div>
-        <p class="text-on-surface-variant mb-2">Category: <span class="text-on-surface font-medium capitalize">${escapeHtml(product.category || 'General')}</span></p>
-        <p class="text-on-surface-variant mb-2">Seller: <span class="text-on-surface font-medium">${escapeHtml(product.seller || 'SmartSoko')}</span></p>
-        <p class="text-2xl font-headline font-bold text-primary">TSh ${(product.price || 0).toLocaleString()}</p>
-      `;
-      
-      const addBtn = document.getElementById('modalAddToCart');
-      addBtn.onclick = () => {
-        addToCart(productId);
-        hideProductModal();
-      };
-      
-      document.getElementById('productModal').classList.remove('hidden');
+    function toggleWishlist(id, btn) {
+      const icon = btn.querySelector('.material-symbols-outlined');
+      const isFilled = icon.style.fontVariationSettings.includes("'FILL' 1");
+      icon.style.fontVariationSettings = isFilled ? "'FILL' 0" : "'FILL' 1";
+      icon.classList.toggle('text-red-500', !isFilled);
+      icon.classList.toggle('text-gray-400', isFilled);
     }
 
-    function hideProductModal() {
-      document.getElementById('productModal').classList.add('hidden');
-    }
-
-    // Cart functions
     function addToCart(productId) {
       const product = allProducts.find(p => p.id === productId);
       if (!product) return;
-
-      const existing = cart.find(item => item.id === productId);
-      if (existing) {
-        existing.quantity++;
-      } else {
-        cart.push({ ...product, quantity: 1 });
-      }
-
+      const existing = cart.find(i => i.id === productId);
+      if (existing) existing.quantity++;
+      else cart.push({ ...product, quantity: 1 });
       saveCart();
       updateCartUI();
       showToast(`${product.name} added to cart`);
     }
 
-    function removeFromCart(productId) {
-      cart = cart.filter(item => item.id !== productId);
-      saveCart();
-      updateCartUI();
-    }
-
-    function updateQuantity(productId, delta) {
-      const item = cart.find(item => item.id === productId);
-      if (item) {
-        item.quantity += delta;
-        if (item.quantity <= 0) {
-          removeFromCart(productId);
-        } else {
-          saveCart();
-          updateCartUI();
-        }
-      }
-    }
-
     function saveCart() {
-      if (window.CartService) {
-        CartService.saveCart(cart);
-      } else {
-        localStorage.setItem('smartsoko_cart', JSON.stringify(cart));
-      }
+      if (window.CartService) CartService.saveCart(cart);
+      else localStorage.setItem('smartsoko_cart', JSON.stringify(cart));
     }
 
     function updateCartUI() {
-      // Sync with global SmartNav badge
-      if (typeof SmartNav !== 'undefined' && SmartNav.updateCartBadge) {
-        SmartNav.updateCartBadge();
-      }
-
-      const cartItems = document.getElementById('cartItems');
-      const cartTotal = document.getElementById('cartTotal');
-      const cartBadge = document.getElementById('cartBadge');
-      const bottomCartBadge = document.getElementById('bottomCartBadge');
-
-      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-      if (cartTotal) cartTotal.textContent = `TSh ${total.toLocaleString()}`;
-
-      if (count > 0) {
-        if (cartBadge) {
-          cartBadge.classList.remove('hidden');
-          cartBadge.textContent = count;
-        }
-        if (bottomCartBadge) {
-          bottomCartBadge.classList.remove('hidden');
-          bottomCartBadge.textContent = count;
-        }
-      } else {
-        if (cartBadge) cartBadge.classList.add('hidden');
-        if (bottomCartBadge) bottomCartBadge.classList.add('hidden');
-      }
-
-      if (cartItems) {
-        if (cart.length === 0) {
-          cartItems.innerHTML = '<p class="text-center text-on-surface-variant py-8">Your cart is empty</p>';
-        } else {
-          cartItems.innerHTML = cart.map(item => `
-            <div class="flex gap-3 mb-4 p-3 bg-surface-variant rounded-xl">
-              <div class="w-16 h-16 bg-white rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                <img src="${item.imageUrl || 'images/default-product.png'}" alt="${escapeHtml(item.name || 'Item')}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='images/default-product.png';">
-              </div>
-              <div class="flex-1 min-w-0">
-                <h4 class="font-semibold text-on-surface text-sm truncate">${item.name}</h4>
-                <p class="text-primary font-bold text-sm">TSh ${(item.price * item.quantity).toLocaleString()}</p>
-                <div class="flex items-center gap-2 mt-2">
-                  <button onclick="updateQuantity('${item.id}', -1)" class="w-6 h-6 bg-white rounded-full flex items-center justify-center text-on-surface-variant hover:bg-primary hover:text-white transition-all">
-                    <span class="material-symbols-outlined text-xs">remove</span>
-                  </button>
-                  <span class="text-sm font-medium w-6 text-center">${item.quantity}</span>
-                  <button onclick="updateQuantity('${item.id}', 1)" class="w-6 h-6 bg-white rounded-full flex items-center justify-center text-on-surface-variant hover:bg-primary hover:text-white transition-all">
-                    <span class="material-symbols-outlined text-xs">add</span>
-                  </button>
-                </div>
-              </div>
-              <button onclick="removeFromCart('${item.id}')" class="text-error hover:opacity-80 self-start">
-                <span class="material-symbols-outlined text-sm">delete</span>
-              </button>
-            </div>
-          `).join('');
-        }
-      }
-    }
-
-    function toggleCart() {
-      const sidebar = document.getElementById('cartSidebar');
-      const overlay = document.getElementById('cartOverlay');
-      
-      if (sidebar.classList.contains('translate-x-full')) {
-        sidebar.classList.remove('translate-x-full');
-        overlay.classList.remove('hidden');
-      } else {
-        sidebar.classList.add('translate-x-full');
-        overlay.classList.add('hidden');
-      }
-    }
-
-    function checkout() {
-      if (cart.length === 0) {
-        showToast('Your cart is empty');
-        return;
-      }
-      window.location.href = 'customer.html';
+      if (typeof SmartNav !== 'undefined' && SmartNav.updateCartBadge) SmartNav.updateCartBadge();
+      const count = cart.reduce((s, i) => s + (i.quantity || 1), 0);
+      const badges = [document.getElementById('headerCartBadge'), document.getElementById('bottomCartBadge')];
+      badges.forEach(b => {
+        if (!b) return;
+        if (count > 0) { b.classList.remove('hidden'); b.textContent = count; }
+        else b.classList.add('hidden');
+      });
     }
 
     function showToast(message) {
-      const toast = document.createElement('div');
-      toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-on-surface text-white px-6 py-3 rounded-full shadow-lg z-50 text-sm font-medium';
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
+      if (typeof SmartNav !== 'undefined' && SmartNav.showToast) { SmartNav.showToast(message, 'success'); return; }
+      const t = document.createElement('div');
+      t.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-5 py-2.5 rounded-full shadow-lg z-50 text-sm font-medium';
+      t.textContent = message;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2500);
     }
 
-    // Initialize
+    function tryLoadProducts() {
+      if (window.crossPlatformService?.isReady() || window.db) loadProducts();
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      SmartNav.init({ activePage: 'discover', role: 'customer', breadcrumbs: ['Home', 'Discover'] });
-      loadProducts();
+      if (typeof SmartNav !== 'undefined' && typeof SmartNav.initPageTransition === 'function') SmartNav.initPageTransition();
       updateCartUI();
+      tryLoadProducts();
+      document.addEventListener('firebase-initialized', tryLoadProducts, { once: true });
+      document.addEventListener('data-service-ready', tryLoadProducts, { once: true });
     });
+
+    document.getElementById('searchInputMobile').addEventListener('input', e => syncSearch(e.target.value));
   </script>
+
+  <!-- Footer -->
+  <footer class="bg-surface-container-lowest dark:bg-inverse-surface border-t border-outline-variant mt-auto">
+    <div class="max-w-[1280px] mx-auto px-4 md:px-12 py-8 md:py-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <h3 class="text-xl font-bold text-primary mb-4">SmartSoko</h3>
+          <p class="text-body-sm text-on-surface-variant">Your local marketplace for fresh food, groceries, and everyday essentials. Fast delivery across Dar es Salaam.</p>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4">Quick Links</h4>
+          <ul class="space-y-2 text-body-sm text-on-surface-variant">
+            <li><a href="/home" class="hover:text-primary transition-colors">Home</a></li>
+            <li><a href="/discovery" class="hover:text-primary transition-colors">Discover</a></li>
+            <li><a href="/cart" class="hover:text-primary transition-colors">Cart</a></li>
+            <li><a href="/login" class="hover:text-primary transition-colors">Sign In</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4">Support</h4>
+          <ul class="space-y-2 text-body-sm text-on-surface-variant">
+            <li><a href="#" class="hover:text-primary transition-colors">Help Center</a></li>
+            <li><a href="#" class="hover:text-primary transition-colors">Contact Us</a></li>
+            <li><a href="#" class="hover:text-primary transition-colors">FAQs</a></li>
+            <li><a href="#" class="hover:text-primary transition-colors">Delivery Info</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4">Connect</h4>
+          <div class="flex gap-4 text-on-surface-variant">
+            <a href="#" class="hover:text-primary transition-colors" aria-label="Facebook"><span class="material-symbols-outlined text-xl">facebook</span></a>
+            <a href="#" class="hover:text-primary transition-colors" aria-label="Twitter"><span class="material-symbols-outlined text-xl">alternate_email</span></a>
+            <a href="#" class="hover:text-primary transition-colors" aria-label="Instagram"><span class="material-symbols-outlined text-xl">camera</span></a>
+            <a href="#" class="hover:text-primary transition-colors" aria-label="WhatsApp"><span class="material-symbols-outlined text-xl">chat</span></a>
+          </div>
+        </div>
+      </div>
+      <div class="border-t border-outline-variant mt-8 pt-6 text-center text-body-sm text-on-surface-variant">
+        <p>&copy; 2024 SmartSoko. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
 </body>
 </html>

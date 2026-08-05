@@ -1,93 +1,149 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
-    function isAdmin() {
-      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-
-    // Users
-    match /users/{userId} {
-      allow read: if true;
-      allow write: if isOwner(userId) || isAdmin();
-    }
-
-    // Sellers/Merchants - public read, vendor-only write
+    // Sellers - public read, seller-only write via ownerId match
     match /sellers/{sellerId} {
       allow read: if true;
-      allow write: if isAuthenticated() && (request.auth.uid == resource.data.ownerId || request.auth.uid == sellerId || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
     }
 
-    // Products - public read for storefront, vendor-only write
+    // Products - public read, authenticated write
     match /products/{productId} {
       allow read: if true;
-      allow create: if isAuthenticated() && request.resource.data.merchantId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.merchantId == request.auth.uid;
-    }
-
-    // Orders
-    match /orders/{orderId} {
-      allow read: if true;
       allow create: if isAuthenticated();
-      allow update: if isAuthenticated() && (resource.data.merchantId == request.auth.uid || resource.data.customerId == request.auth.uid || isAdmin());
+      allow update, delete: if isAuthenticated();
     }
 
-    // Drivers
+    // Orders - authenticated only
+    match /orders/{orderId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+    }
+
+    // Drivers - public read, driver-only write via ownerId match
     match /drivers/{driverId} {
       allow read: if true;
-      allow write: if isOwner(driverId) || isAdmin();
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
     }
 
-    // Customers
+    // Customers - public read, customer-only write via ownerId match
     match /customers/{customerId} {
       allow read: if true;
-      allow write: if isOwner(customerId) || isAdmin();
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
     }
 
-    // Reviews
+    // Users - any authenticated user can read (social profiles, messaging,
+    // wishlist owners); users can only write their own profile
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Reviews - public read, authenticated write
     match /reviews/{reviewId} {
       allow read: if true;
       allow create: if isAuthenticated();
-      allow update, delete: if isAuthenticated() && resource.data.customerId == request.auth.uid;
+      allow update, delete: if isAuthenticated();
     }
 
-    // Payments
-    match /payments/{paymentId} {
-      allow read: if isAuthenticated() && (resource.data.customerId == request.auth.uid || resource.data.merchantId == request.auth.uid || isAdmin());
-      allow write: if isAdmin();
-    }
-
-    // Inventory logs - vendor read own, admin all
-    match /inventory_logs/{logId} {
-      allow read: if isAuthenticated() && (resource.data.merchantId == request.auth.uid || isAdmin());
-      allow write: if isAdmin();
-    }
-
-    // Product collections - public read, vendor write own
-    match /product_collections/{collectionId} {
+    // Social feed - public read, authors write their own content
+    match /posts/{postId} {
       allow read: if true;
-      allow create: if isAuthenticated() && request.resource.data.merchantId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.merchantId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
     }
 
-    // Promotions
-    match /promotions/{promoId} {
+    match /post_comments/{commentId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+    }
+
+    // 24h stories - public read, author writes own stories
+    match /stories/{storyId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+    }
+
+    // Follows - public read, authenticated manage own follow records
+    match /follows/{followId} {
       allow read: if true;
       allow create: if isAuthenticated();
-      allow update, delete: if isAuthenticated() && resource.data.sellerId == request.auth.uid;
+      allow delete: if isAuthenticated();
+      allow update: if false;
     }
 
-    // Admin data
-    match /admin/{document=**} {
-      allow read, write: if isAdmin();
+    // Wishlists - public read (shared collections), owner writes
+    match /wishlists/{wishlistId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // Conversations - participants only
+    match /conversations/{convId} {
+      allow read, update: if isAuthenticated() && request.auth.uid in resource.data.participants;
+      allow create: if isAuthenticated() && request.auth.uid in request.resource.data.participants;
+      allow delete: if false;
+    }
+
+    match /conversations/{convId}/messages/{msgId} {
+      allow read, create: if isAuthenticated() &&
+        request.auth.uid in get(/databases/$(database)/documents/conversations/$(convId)).data.participants;
+      allow update, delete: if false;
+    }
+
+    // Order chats (customer <-> driver) - authenticated participants
+    match /chats/{chatId} {
+      allow read, update: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow delete: if false;
+    }
+
+    match /chats/{chatId}/messages/{msgId} {
+      allow read, create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
+    // Promo codes - public read (checkout validation), authenticated write
+    match /promotions/{promoId} {
+      allow read: if true;
+      allow create, update, delete: if isAuthenticated();
+    }
+
+    // Merchant staff roster
+    match /staff/{staffId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAuthenticated();
+    }
+
+    // Staff invite codes (signup applies invite)
+    match /staffInvites/{inviteId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated();
+      allow delete: if isAuthenticated();
+    }
+
+    // Merchant payout requests
+    match /payouts/{payoutId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated();
+    }
+
+    // Health check
+    match /_health/{doc} {
+      allow read: if true;
     }
 
     // Default deny

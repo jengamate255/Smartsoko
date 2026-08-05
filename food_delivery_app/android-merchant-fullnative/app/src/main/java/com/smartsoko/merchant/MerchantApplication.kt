@@ -1,4 +1,4 @@
-package com.smartsoko.merchant
+﻿package com.smartsoko.merchant
 
 import android.app.Application
 import com.google.firebase.FirebaseApp

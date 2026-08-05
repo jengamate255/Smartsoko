@@ -207,14 +207,17 @@
   </div>
 
   <div class="feed-viewport" id="feedViewport">
-    <!-- Cards injected by JS -->
+    <section class="feed-card skeleton-card" style="height:calc(100vh - 120px)"><div class="skeleton skeleton-thumbnail" style="width:100%;height:70%"></div><div class="info"><div class="skeleton skeleton-text-sm"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:40%"></div></div></section>
+    <section class="feed-card skeleton-card" style="height:calc(100vh - 120px)"><div class="skeleton skeleton-thumbnail" style="width:100%;height:70%"></div><div class="info"><div class="skeleton skeleton-text-sm"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:40%"></div></div></section>
+    <section class="feed-card skeleton-card" style="height:calc(100vh - 120px)"><div class="skeleton skeleton-thumbnail" style="width:100%;height:70%"></div><div class="info"><div class="skeleton skeleton-text-sm"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:40%"></div></div></section>
+    <section class="feed-card skeleton-card" style="height:calc(100vh - 120px)"><div class="skeleton skeleton-thumbnail" style="width:100%;height:70%"></div><div class="info"><div class="skeleton skeleton-text-sm"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:40%"></div></div></section>
   </div>
 
   <div class="swipe-hint" data-i18n="feed.swipeHint">Swipe up for more</div>
 
-  <script src="js/i18n.js"></script>
-  <script src="js/cart-service.js"></script>
-  <script src="js/soko-features.js"></script>
+  <script src="js/i18n.js" defer></script>
+  <script src="js/cart-service.js" defer></script>
+  <script src="js/soko-features.js" defer></script>
   <script>
     const FALLBACK = [
       { id:'f1', name:'Vitumbua vya Mama Amina',  price: 1000, sellerName:'Mama Amina', description:'Vitambaa vitamu vya kila asubuhi — hupikwa masoko Mwenge.', category:'Bakery',  emoji:'🥞' },
@@ -312,6 +315,7 @@
 
     // Lang button reflect
     document.addEventListener('DOMContentLoaded', () => {
+      if (window.SmartNav) SmartNav.initPageTransition();
       render();
       const lang = I18N.getLang();
       document.getElementById('langSw').classList.toggle('active', lang === 'sw');

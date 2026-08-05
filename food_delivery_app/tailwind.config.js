@@ -1,29 +1,29 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./web/**/*.{html,js}"],
+  content: ["./web/**/*.{html,js}", "./components/**/*.{html,js}"],
   theme: {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#012d1d', // Organic Curator Primary (Deep forest green)
-          dark: '#002114',
-          light: '#c1ecd4',
+          DEFAULT: '#064e3b',
+          dark: '#043020',
+          light: '#d1fae5',
         },
-        secondary: '#934b00', // Organic Curator Secondary
+        secondary: '#059669',
         accent: '#fd8603',
         surface: {
-          DEFAULT: '#fbf9f5', // Organic Curator Surface
-          variant: '#efeeea',
+          DEFAULT: '#f8faf6',
+          variant: '#ecfdf5',
         },
-        background: '#fbf9f5',
+        background: '#f8faf6',
         'on-primary': '#ffffff',
         'on-surface': {
-          DEFAULT: '#1b1c1a',
-          variant: '#414844',
+          DEFAULT: '#022d1d',
+          variant: '#64748b',
         },
-        outline: '#717973',
-        error: '#ba1a1a',
-        success: '#16a34a',
+        outline: '#cbd5e1',
+        error: '#b91c1c',
+        success: '#059669',
         warning: '#f59e0b',
       },
       fontFamily: {
@@ -38,5 +38,15 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addBase, theme }) {
+      addBase({
+        ':root': {
+          '--sb-primary': theme('colors.accent'),
+        },
+      });
+    },
+    require('tailwindcss/plugins/forms'),
+    require('tailwindcss/plugins/container-queries'),
+  ],
 }

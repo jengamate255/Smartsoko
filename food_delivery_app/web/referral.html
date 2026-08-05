@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Refer &amp; Earn - SmartSoko</title>
+  <meta name="description" content="Refer friends to SmartSoko and earn TSh 5,000 per successful order"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="dist/tailwind.css" as="style">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script type="module" src="config/firebase-config.js?v=5"></script>
+  <script type="module" src="config/cross-platform-service.js?v=4"></script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display: inline-block; line-height: 1; vertical-align: middle; }
+    .filled-icon { font-variation-settings: 'FILL' 1; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter','Montserrat',sans-serif; min-height: 100vh; background: #F8FAF6; }
+    h1,h2,h3,h4,h5,h6 { font-family: 'Montserrat',sans-serif; }
+    .gradient-bg { background: #064e3b; }
+  </style>
+</head>
+<body class="text-gray-900 min-h-screen pb-24 md:pb-0">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-40">
+    <div class="max-w-lg mx-auto flex items-center justify-between px-4 h-16">
+      <a href="/home" class="flex items-center gap-2 no-underline">
+        <img src="favicon.svg" alt="SmartSoko" class="w-8 h-8">
+        <span class="font-extrabold text-green-800 text-lg">SmartSoko</span>
+      </a>
+      <a href="/profile" class="material-symbols-outlined text-gray-600">close</a>
+    </div>
+  </header>
+
+  <main class="max-w-lg mx-auto px-4 py-6" id="signedIn">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <span class="material-symbols-outlined text-3xl text-green-700 filled-icon">redeem</span>
+      </div>
+      <h1 class="text-2xl font-extrabold text-gray-900">Refer &amp; Earn</h1>
+      <p class="text-sm text-gray-500 mt-1">Invite a friend — you both earn <span class="font-bold text-green-700">TSh 5,000</span> after their first order.</p>
+    </div>
+
+    <!-- Referral code card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-4">
+      <p class="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-2">Your referral code</p>
+      <div class="flex items-center gap-2">
+        <input id="referralCode" readonly class="flex-1 text-center font-extrabold text-green-800 text-xl bg-green-50 border-2 border-dashed border-green-300 rounded-xl py-3 tracking-widest outline-none cursor-pointer" value="---">
+        <button onclick="copyReferralCode()" class="gradient-bg text-white w-12 h-12 rounded-xl flex items-center justify-center active:scale-95 transition-transform" title="Copy code">
+          <span class="material-symbols-outlined">content_copy</span>
+        </button>
+      </div>
+      <button onclick="shareReferralLink()" class="w-full mt-3 bg-white border-2 border-green-700 text-green-700 py-3 rounded-xl font-bold text-sm hover:bg-green-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-lg">share</span> Share Invite Link
+      </button>
+      <p id="shareHint" class="text-center text-xs text-green-700 font-medium mt-2 hidden">Link copied — send it to a friend!</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 text-center">
+        <p class="text-2xl font-extrabold text-gray-900" id="statInvites">0</p>
+        <p class="text-xs text-gray-500 font-medium mt-0.5">Invites sent</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 text-center">
+        <p class="text-2xl font-extrabold text-green-700" id="statRewards">TSh 0</p>
+        <p class="text-xs text-gray-500 font-medium mt-0.5">Earned</p>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h2 class="font-bold text-gray-900 mb-3">How it works</h2>
+      <div class="space-y-3">
+        <div class="flex items-start gap-3">
+          <span class="w-7 h-7 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
+          <p class="text-sm text-gray-600">Share your code or invite link with friends</p>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="w-7 h-7 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
+          <p class="text-sm text-gray-600">They sign up with your code and place their first order</p>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="w-7 h-7 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
+          <p class="text-sm text-gray-600">You both get <span class="font-bold text-green-700">TSh 5,000</span> credited to your wallets</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Not signed in state -->
+  <div id="notSignedIn" class="hidden max-w-lg mx-auto px-4 py-24 text-center">
+    <span class="material-symbols-outlined text-5xl text-gray-400 mb-4">no_accounts</span>
+    <p class="text-gray-500 mb-6">Sign in to start earning referral rewards.</p>
+    <a href="/login" class="inline-block gradient-bg text-white px-8 py-3 rounded-full font-semibold text-sm hover:opacity-90 transition-all">Sign In</a>
+  </div>
+
+  <!-- Bottom Nav (Mobile) -->
+  <nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe border-t border-gray-200 bg-white md:hidden z-50">
+    <a href="/home" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1"><span class="material-symbols-outlined">home</span><span class="text-[10px] font-semibold">Home</span></a>
+    <a href="/discovery" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1"><span class="material-symbols-outlined">search</span><span class="text-[10px] font-semibold">Browse</span></a>
+    <a href="/cart" class="flex flex-col items-center justify-center bg-green-100 text-green-700 rounded-full px-3 py-1"><span class="material-symbols-outlined filled-icon">shopping_cart</span><span class="text-[10px] font-semibold">Cart</span></a>
+    <a href="/profile" class="flex flex-col items-center justify-center bg-green-100 text-green-700 rounded-full px-3 py-1"><span class="material-symbols-outlined filled-icon">person</span><span class="text-[10px] font-semibold">Profile</span></a>
+  </nav>
+
+  <script type="module">
+    let referralCode = '';
+
+    function makeCode(uid) {
+      let hash = 0;
+      for (let i = 0; i < uid.length; i++) hash = (hash * 31 + uid.charCodeAt(i)) >>> 0;
+      return 'SS-' + hash.toString(36).toUpperCase().slice(0, 6);
+    }
+
+    window.copyReferralCode = async function () {
+      const input = document.getElementById('referralCode');
+      try {
+        await navigator.clipboard.writeText(referralCode);
+      } catch (e) {
+        input.select();
+        document.execCommand('copy');
+      }
+      showHint();
+    };
+
+    window.shareReferralLink = function () {
+      const url = window.location.origin + '/signup?ref=' + encodeURIComponent(referralCode);
+      if (navigator.share) {
+        navigator.share({ title: 'Join SmartSoko', text: 'Get TSh 5,000 when you join SmartSoko with my code: ' + referralCode, url: url }).catch(() => {});
+      } else {
+        copyText(url);
+        showHint();
+      }
+    };
+
+    function copyText(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+
+    function showHint() {
+      const hint = document.getElementById('shareHint');
+      hint.classList.remove('hidden');
+      setTimeout(() => hint.classList.add('hidden'), 2500);
+    }
+
+    function initReferral() {
+      const auth = window.auth;
+      if (!auth) {
+        document.getElementById('signedIn').classList.add('hidden');
+        document.getElementById('notSignedIn').classList.remove('hidden');
+        return;
+      }
+      import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js').then(({ onAuthStateChanged }) => {
+        onAuthStateChanged(auth, user => {
+          if (!user) {
+            document.getElementById('signedIn').classList.add('hidden');
+            document.getElementById('notSignedIn').classList.remove('hidden');
+            return;
+          }
+          referralCode = makeCode(user.uid);
+          document.getElementById('referralCode').value = referralCode;
+
+          try {
+            const stats = JSON.parse(localStorage.getItem('smartsoko_referral_stats') || '{}');
+            const invites = parseInt(stats[user.uid + '_invites'] || 0, 10);
+            const rewards = parseInt(stats[user.uid + '_rewards'] || 0, 10);
+            document.getElementById('statInvites').textContent = invites;
+            document.getElementById('statRewards').textContent = 'TSh ' + rewards.toLocaleString();
+          } catch (e) { /* ignore */ }
+
+          const referredBy = localStorage.getItem('smartsoko_referrer');
+          const byLine = document.getElementById('referredByLine');
+          if (referredBy && byLine) byLine.textContent = 'Joined via code ' + referredBy;
+        });
+      });
+    }
+
+    initReferral();
+  </script>
+</body>
+</html>

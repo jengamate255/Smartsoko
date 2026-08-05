@@ -15,6 +15,12 @@ interface OrderDao {
     @Query("SELECT * FROM orders ORDER BY createdAt DESC")
     fun getAllOrders(): Flow<List<OrderEntity>>
 
+    @Query("SELECT * FROM orders WHERE status IN ('delivered', 'completed', 'cancelled') ORDER BY createdAt DESC")
+    fun getPastOrders(): Flow<List<OrderEntity>>
+
+    @Query("SELECT COALESCE(SUM(totalAmount), 0) FROM orders WHERE status IN ('delivered', 'completed')")
+    fun getTotalEarnings(): Flow<Double>
+
     @Query("SELECT * FROM orders WHERE isSynced = 0")
     fun getUnsyncedOrders(): Flow<List<OrderEntity>>
 

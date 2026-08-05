@@ -1,406 +1,266 @@
 package com.fooddelivery.driver.ui.screens
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
-import android.os.Bundle
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.viewinterop.AndroidView
 import com.fooddelivery.driver.R
 import com.fooddelivery.driver.data.model.Order
-import com.fooddelivery.driver.ui.theme.SmartSokoDriverTheme
+import com.fooddelivery.driver.network.RouteData
+import com.fooddelivery.driver.network.RouteProvider
+import com.fooddelivery.driver.util.AppConfig
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.CompassView
+import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.MapView
-import com.mapbox.maps.ResourceOptions
+import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
-import com.mapbox.maps.extension.compose.CameraState
-import com.mapbox.maps.extension.compose.MapboxMap
-import com.mapbox.maps.extension.compose.createMarkerManager
-import com.mapbox.maps.extension.compose.marker
-import com.mapbox.maps.plugin.animation.CameraAnimationsPluginKt
-import com.mapbox.maps.plugin.animation.gesture.AnimateToOptions
-import com.mapbox.maps.plugin.animation.gesture.AnimationListener
-import com.mapbox.maps.plugin.annotationgateway.PointAnnotationManager
-import com.mapbox.maps.plugin.annotationgateway.PointAnnotationManagerKt
-import com.mapbox.maps.plugin.annotationgateway.PointAnnotationOptions
-import com.mapbox.maps.plugin.locationcomponent.LocationComponentPluginKt
-import com.mapbox.maps.plugin.locationcomponent.RenderMode
-import com.mapbox.maps.plugin.locationcomponent.callback.NewLocationData
-import com.mapbox.maps.plugin.locationcomponent.callback.OnMyLocationChangeListener
-import com.mapbox.maps.plugin.locationcomponent.location.Lost
-import com.mapbox.maps.plugin.locationcomponent.location.Venue
-import com.mapbox.maps.plugin.locationcomponent.locationEngine.AndroidLocationEngineProvider
-import com.mapbox.maps.plugin.locationcomponent.locationEngine.LocationEngine
-import com.mapbox.maps.plugin.locationcomponent.locationEngine.LocationEngineCallback
-import com.mapbox.maps.plugin.locationcomponent.locationEngine.LocationEngineProvider
-import com.mapbox.maps.plugin.locationcomponent.locationEngine.LocationEngineRequest
-import com.mapbox.maps.plugin.locationcomponent.locationEngine.LocationEngineResult
-import com.mapbox.maps.plugin.locationcomponent.settings.LocationComponentOptions
-import com.mapbox.maps.plugin.locationcomponent.settings.LocationComponentVisibility
-import com.mapbox.maps.plugin.locationcomponent.viewstate.CameraUpdateMode
-import com.mapbox.maps.plugin.locationcomponent.viewstate.InputStatus
-import com.mapbox.maps.plugin.locationcomponent.viewstate.Puck2DViewState
-import com.mapbox.maps.plugin.locationcomponent.viewstate.PuckBearing
-import com.mapbox.maps.plugin.locationcomponent.viewstate.PuckType
-import com.mapbox.maps.plugin.locationcomponent.viewstate.PuckVisibility
-import com.mapbox.maps.plugin.locationcomponent.viewstate.VehicleState
-import com.mapbox.maps.plugin.locationcomponent.viewstate.VehicleStateBuilder
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.json.JSONObject
+import com.mapbox.maps.extension.style.layers.addLayer
+import com.mapbox.maps.extension.style.layers.generated.lineLayer
+import com.mapbox.maps.extension.style.sources.addSource
+import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
+import com.mapbox.maps.plugin.annotation.annotations
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotation
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 
-import java.util.List
+private const val ROUTE_SOURCE_ID = "delivery-route-source"
+private const val ROUTE_LAYER_ID = "delivery-route-layer"
 
-/**
- * MapScreen showing real-time location tracking and navigation to destinations.
- * Uses Mapbox SDK for mapping and location services.
- */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
-    // We will pass in the viewModel or state later
     activeOrder: Order? = null,
     driverLocation: Location? = null,
-    onOrderStatusUpdated: ((String, String) -> Unit) = {},
-    onNavigateToDestination: ((Double, Double, String) -> Unit) = {}
+    onOrderStatusUpdated: (String, String) -> Unit = { _, _ -> },
+    onNavigateToDestination: (Double, Double, String) -> Unit = { _, _, _ -> }
 ) {
-    SmartSokoDriverTheme {
-        // Request location permission
-        val context = LocalContext.current
-        val locationPermissionResult = rememberLauncherForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted: Boolean ->
-            if (isGranted) {
-                // Permission granted, start location updates
-            } else {
-                // Permission denied
-            }
-        }
+    val context = LocalContext.current
+    var mapView by remember { mutableStateOf<MapView?>(null) }
+    var mapboxMap by remember { mutableStateOf<MapboxMap?>(null) }
+    val routeProvider = remember { RouteProvider(AppConfig.MAPBOX_ACCESS_TOKEN) }
+    var routeData by remember { mutableStateOf<RouteData?>(null) }
+    var routeSource by remember { mutableStateOf<GeoJsonSource?>(null) }
 
-        // Request location permission if not already granted
-        LaunchedEffect(Unit) {
-            if (androidx.core.content.ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                locationPermissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-            }
-        }
-
-        Column(modifier = Modifier.fillMaxSize()) {
-            // App Bar
-            TopAppBar(
-                title = { Text(text = "Navigation") },
-                backgroundColor = MaterialTheme.colorScheme.primary
+    // Fetch the driving route (driver -> restaurant -> customer) once locations are known
+    LaunchedEffect(activeOrder, driverLocation) {
+        val order = activeOrder ?: return@LaunchedEffect
+        val driver = driverLocation ?: return@LaunchedEffect
+        routeData = null
+        routeData = routeProvider.fetchRoute(
+            listOf(
+                driver.latitude to driver.longitude,
+                order.restaurantLocation.lat to order.restaurantLocation.lng,
+                order.customerLocation.lat to order.customerLocation.lng
             )
+        )
+    }
 
-            if (driverLocation == null) {
-                // Loading state - waiting for location
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_location_searching),
-                            contentDescription = "Finding location",
-                            modifier = Modifier.size(80.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Getting your location...",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+    // Update the route source geometry and fit camera when route data arrives
+    LaunchedEffect(routeData, routeSource) {
+        val data = routeData ?: return@LaunchedEffect
+        val src = routeSource ?: return@LaunchedEffect
+        if (data.points.size < 2) return@LaunchedEffect
+
+        val points = data.points.map { Point.fromLngLat(it.second, it.first) }
+        val lineString = LineString.fromLngLats(points)
+
+        // Update the source with the new geometry
+        src.data(lineString.toJson(), "route")
+
+        // Fit camera to the route
+        mapboxMap?.getStyle { style ->
+            mapboxMap?.setCamera(
+                mapboxMap!!.cameraForCoordinates(
+                    points,
+                    EdgeInsets(80.0, 80.0, 80.0, 80.0),
+                    null,
+                    null
+                )
+            )
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        TopAppBar(
+            title = { Text(text = "Navigation") },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
+        )
+
+        if (driverLocation == null) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Getting your location...", style = MaterialTheme.typography.titleMedium)
                 }
-            } else {
-                // Map view with location tracking and navigation
-                Box(modifier = Modifier.fillMaxSize()) {
-                    MapViewWithLocationTracking(
-                        initialLocation = driverLocation,
-                        activeOrder = activeOrder,
-                        onOrderStatusUpdated = onOrderStatusUpdated,
-                        onNavigateToDestination = onNavigateToDestination
-                    )
+            }
+        } else {
+            Box(modifier = Modifier.fillMaxSize()) {
+                AndroidView(
+                    factory = { ctx ->
+                        MapView(ctx).also { mv ->
+                            mv.getMapboxMap().loadStyleUri(Style.MAPBOX_STREETS) { style ->
+                                val map: MapboxMap = mv.getMapboxMap()
+                                val annotationApi = mv.annotations
+                                val pointManager = annotationApi.createPointAnnotationManager()
 
-                    // UI controls overlay
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(16.dp)
-                    ) {
-                        if (activeOrder != null && activeOrder.delivery != null) {
-                            Button(
-                                onClick = {
-                                    onNavigateToDestination(
-                                        activeOrder.delivery.lat!!,
-                                        activeOrder.delivery.lng!!,
-                                        activeOrder.delivery.address
+                                pointManager.create(
+                                    PointAnnotationOptions()
+                                        .withPoint(Point.fromLngLat(driverLocation.longitude, driverLocation.latitude))
+                                        .withTextField("Your Location")
+                                )
+
+                                activeOrder?.let { order ->
+                                    pointManager.create(
+                                        PointAnnotationOptions()
+                                            .withPoint(Point.fromLngLat(order.restaurantLocation.lng, order.restaurantLocation.lat))
+                                            .withTextField(order.restaurantName)
                                     )
-                                },
-                                modifier = Modifier.width(56.dp).height(56.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                ),
-                                shape = MaterialTheme.shapes.small
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.MyLocation,
-                                    contentDescription = "Navigate to destination",
-                                    tint = MaterialTheme.colorScheme.onPrimary
+                                    pointManager.create(
+                                        PointAnnotationOptions()
+                                            .withPoint(Point.fromLngLat(order.customerLocation.lng, order.customerLocation.lat))
+                                            .withTextField(order.customerName ?: "Customer")
+                                    )
+                                }
+
+                                // Create empty route source + layer - capture the source reference
+                                val source = geoJsonSource(ROUTE_SOURCE_ID) {
+                                    featureCollection(FeatureCollection.fromFeatures(emptyList()))
+                                }
+                                routeSource = source
+                                style.addSource(source)
+
+                                style.addLayer(
+                                    lineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID) {
+                                        lineWidth(4.0)
+                                        lineColor(Color.parseColor("#1a73e8"))
+                                    }
+                                )
+
+                                map.setCamera(
+                                    CameraOptions.Builder()
+                                        .center(Point.fromLngLat(driverLocation.longitude, driverLocation.latitude))
+                                        .zoom(13.0)
+                                        .build()
                                 )
                             }
+                            mapView = mv
+                            mapboxMap = mv.getMapboxMap()
                         }
-                    }
-                }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                DeliveryInfoContent(
+                    activeOrder = activeOrder,
+                    driverLocation = driverLocation,
+                    routeData = routeData,
+                    onNavigateToDestination = onNavigateToDestination
+                )
             }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            mapView?.onDestroy()
         }
     }
 }
 
 @Composable
-fun MapViewWithLocationTracking(
-    initialLocation: Location?,
+private fun DeliveryInfoContent(
     activeOrder: Order?,
-    onOrderStatusUpdated: ((String, String) -> Unit),
+    driverLocation: Location,
+    routeData: RouteData?,
     onNavigateToDestination: ((Double, Double, String) -> Unit)
 ) {
-    // Mapbox Map implementation with location tracking
-    var mapboxMap by remember { mutableStateOf<MapboxMap?>(null) }
-    var cameraState by remember { mutableStateOf<CameraState?>(null) }
-    
-    // Location tracking state
-    var lastKnownLocation by remember { mutableStateOf<Location?>(initialLocation) }
-    var isTrackingLocation by remember { mutableStateOf<Boolean>(false) }
-    
-    // Markers and annotations
-    val pointAnnotationManager = remember {
-        pointAnnotationManagerFactory { mapboxMap ->
-            mapboxMap?.let { map ->
-                PointAnnotationManager(
-                    map,
-                    PointAnnotationManagerOptions()
-                        .withClickListener { pointAnnotation ->
-                            // Handle annotation click if needed
-                            false
-                        }
-                )
-            } ?: PointAnnotationManagerFactory().create(null)!!
-        }
-    }
-    
-    // Location component for showing user location
-    val locationComponentPlugin = remember {
-        locationComponentPluginFactory { mapboxMap ->
-            mapboxMap?.let { map ->
-                LocationComponentPluginKt.getLocationComponentPlugin(map)
-            } ?: LocationComponentPluginKt.getLocationComponentPlugin(null!!) // This is unsafe but necessary for the factory
-        }
-    } ?: LocationComponentPluginKt.getLocationComponentPlugin(null!!)
-    
-    // Set up initial camera position if we have a location
-    LaunchedEffect(initialLocation) {
-        if (initialLocation != null) {
-            cameraState = CameraState.Builder()
-                .fromLatLngZoom(
-                    android.location.LocationCompat.getLatitude(initialLocation),
-                    android.location.LocationCompat.getLongitude(initialLocation),
-                    15.0
-                )
-                .build()
-        }
-    }
-    
-    // Handle location updates from ViewModel (in real app, this would come from location service)
-    // For now, we'll simulate location updates
-    LaunchedEffect(Unit) {
-        isTrackingLocation = true
-        // Simulate location updates every 5 seconds
-        val job = launch {
-            while (isTrackingLocation) {
-                delay(5000)
-                // In a real app, this would come from FusedLocationProviderClient
-                // For simulation, we'll just slightly perturb the current location
-                val newLocation = if (lastKnownLocation != null) {
-                    Location("").apply {
-                        latitude = lastKnownLocation!!.latitude + (Math.random() - 0.5) * 0.001
-                        longitude = lastKnownLocation!!.longitude + (Math.random() - 0.5) * 0.001
-                        time = System.currentTimeMillis()
-                        accuracy = 10.0f
-                    }
-                } else {
-                    initialLocation
-                }
-                lastKnownLocation = newLocation
-                
-                // Update Mapbox location component
-                if (newLocation != null && mapboxMap != null) {
-                    val locationComponent = mapboxMap!!.getLocationComponent()
-                    if (locationComponent != null) {
-                        locationComponent.forceLocationUpdate(
-                            NewLocationData.Builder()
-                                .withLatitude(android.location.LocationCompat.getLatitude(newLocation))
-                                .withLongitude(android.location.LocationCompat.getLongitude(newLocation))
-                                .withTimestamp(System.currentTimeMillis())
-                                .withAccuracy(10.0)
-                                .build()
-                        )
-                    }
-                }
-            }
-        }
-        
-        // Clean up when composable disposes
-        onDispose {
-            isTrackingLocation = false
-            job.cancel()
-        }
-    }
-    
-    Box(
-        modifier = Modifier.fillMaxSize()
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        MapboxMap(
-            cameraState = cameraState,
-            style = Style.STREETS,
-            onMapReady = { mapboxMap_ ->
-                mapboxMap = mapboxMap_
-                // Initialize location component when map is ready
-                if (mapboxMap_ != null) {
-                    val locationComponent = mapboxMap_.getLocationComponent()
-                    locationComponent.activateLocationComponent(
-                        LocationComponentOptions.builder()
-                            .withRenderMode(RenderMode.COMPASS)
-                            .withPuck2DViewState(
-                                Puck2DViewState.builder()
-                                    .withPuckType(PuckType.DEFAULT)
-                                    .build()
-                            )
-                            .build()
-                    )
-                    locationComponent.isLocationComponentEnabled = true
-                }
-            }
-        )
-        
-        // Add user location indicator (handled by location component above)
-        
-        // Add destination marker if we have an active order
+        Text("Location Tracking", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text("Latitude: %.4f".format(driverLocation.latitude), style = MaterialTheme.typography.bodyLarge)
+        Text("Longitude: %.4f".format(driverLocation.longitude), style = MaterialTheme.typography.bodyLarge)
+        Spacer(modifier = Modifier.height(16.dp))
+
         if (activeOrder != null) {
-            // Pickup marker
-            PointAnnotationManagerKt.createPointAnnotation(
-                pointAnnotationManager,
-                PointAnnotationOptions()
-                    .withPoint(Point.fromLngLat(
-                        activeOrder.restaurantLng,
-                        activeOrder.restaurantLat
-                    ))
-                    .withIconImage("pickup-marker") // We'd need to add this to resources
-                    .withTextField("Pickup")
-                    .withTextOffset(arrayOf(0f, -10f))
-            )
-            
-            // Delivery marker
-            PointAnnotationManagerKt.createPointAnnotation(
-                pointAnnotationManager,
-                PointAnnotationOptions()
-                    .withPoint(Point.fromLngLat(
-                        activeOrder.customerLng,
-                        activeOrder.customerLat
-                    ))
-                    .withIconImage("delivery-marker") // We'd need to add this to resources
-                    .withTextField("Delivery")
-                    .withTextOffset(arrayOf(0f, -10f))
-            )
-            
-            // Draw route between pickup and delivery (simplified)
-            // In a real app, you'd use Mapbox Directions API
-            // For now, we'll just show a line between the two points
-        }
-        
-        // UI controls overlay
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            if (activeOrder != null) {
-                Button(
-                    onClick = {
-                        // Navigate to pickup location first, then delivery
-                        onNavigateToDestination(
-                            activeOrder.restaurantLat,
-                            activeOrder.restaurantLng,
-                            activeOrder.restaurantAddress
-                        )
-                    },
-                    modifier = Modifier.width(56.dp).height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    shape = MaterialTheme.shapes.small
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MyLocation,
-                        contentDescription = "Navigate to pickup",
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Button(
-                    onClick = {
-                        onNavigateToDestination(
-                            activeOrder.customerLat,
-                            activeOrder.customerLng,
-                            activeOrder.customerAddress
-                        )
-                    },
-                    modifier = Modifier.width(56.dp).height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    shape = MaterialTheme.shapes.small
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Map,
-                        contentDescription = "Navigate to delivery",
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Active Order", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Restaurant: ${activeOrder.restaurantName}", style = MaterialTheme.typography.bodyMedium)
+                    Text("Customer: ${activeOrder.customerName ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    if (routeData != null) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = MaterialTheme.shapes.small,
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            Text(
+                                text = "Delivery route: %.1f km • about %d min".format(
+                                    routeData.distanceKm,
+                                    routeData.durationMinutes
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    Button(
+                        onClick = {
+                            onNavigateToDestination(
+                                activeOrder.restaurantLocation.lat,
+                                activeOrder.restaurantLocation.lng,
+                                activeOrder.restaurantAddress
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Navigate to Restaurant")
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = {
+                            onNavigateToDestination(
+                                activeOrder.customerLocation.lat,
+                                activeOrder.customerLocation.lng,
+                                activeOrder.customerAddress
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Navigate to Customer")
+                    }
                 }
             }
         }
     }
 }
-
-// TODO: Implement LocationTrackingService as a foreground service
-// TODO: Implement OrderStatusUpdate use case
-// TODO: Implement NavigationHelper for route calculation

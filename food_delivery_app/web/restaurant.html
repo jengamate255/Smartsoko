@@ -17,6 +17,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="nav-component.js" defer></script>
+  <script type="module" src="config/firebase-config.js"></script>
+  <script type="module" src="config/cross-platform-service.js?v=4"></script>
   <style> body {font-family: 'Plus Jakarta Sans',sans-serif} .gradient-bg {background: #012d1d} </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -24,6 +26,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       SmartNav.init({ activePage: 'home', role: 'customer' });
+      SmartNav.initPageTransition();
     });
   </script>
   <div class="h-16 md:h-20"></div>
@@ -244,6 +247,7 @@
           }
         }
 
+        const svc = window.crossPlatformService;
         const sellerData = {
           name: document.getElementById('businessName').value,
           category: document.getElementById('category').value,
@@ -256,23 +260,34 @@
           imageUrl: imageUrl,
           isOpen: true,
           rating: 0,
-          createdAt: serverTimestamp()
+          createdAt: new Date().toISOString()
         };
 
-        // Add to restaurants collection (consistent with app structure)
-        const restaurantRef = await addDoc(collection(db, 'restaurants'), {
-          ...sellerData,
-          isActive: true,
-          totalOrders: 0,
-          totalRevenue: 0
-        });
-        
-        // Also create seller reference
-        await setDoc(doc(db, 'sellers', restaurantRef.id), {
-          restaurantId: restaurantRef.id,
-          role: 'merchant',
-          createdAt: sellerData.createdAt
-        });
+        if (svc && svc.isReady()) {
+          const result = await svc.create('restaurants', sellerData);
+          // Also create seller reference
+          await svc.update('sellers', result.id, {
+            restaurantId: result.id,
+            role: 'merchant',
+            createdAt: sellerData.createdAt
+          });
+        } else {
+          sellerData.createdAt = serverTimestamp();
+          // Add to restaurants collection (consistent with app structure)
+          const restaurantRef = await addDoc(collection(db, 'restaurants'), {
+            ...sellerData,
+            isActive: true,
+            totalOrders: 0,
+            totalRevenue: 0
+          });
+          
+          // Also create seller reference
+          await setDoc(doc(db, 'sellers', restaurantRef.id), {
+            restaurantId: restaurantRef.id,
+            role: 'merchant',
+            createdAt: sellerData.createdAt
+          });
+        }
         
         document.getElementById('sellerForm').classList.add('hidden');
         document.getElementById('successMessage').classList.remove('hidden');
@@ -303,6 +318,7 @@
     }
     document.addEventListener('DOMContentLoaded', () => {
       SmartNav.init({ activePage: 'home', role: 'customer', breadcrumbs: ['Home', 'Seller Registration'] });
+      SmartNav.initPageTransition();
     });
   </script>
 </body>

@@ -1,0 +1,19 @@
+{
+  "name": "smartsoko-performance-datagen",
+  "version": "1.0.0",
+  "description": "Data generation for SmartSoko performance testing",
+  "main": "generate-data.js",
+  "scripts": {
+    "generate": "node generate-data.js",
+    "generate:users": "node generate-users.js",
+    "generate:products": "node generate-products.js",
+    "generate:orders": "node generate-orders.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0",
+    "@faker-js/faker": "^8.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

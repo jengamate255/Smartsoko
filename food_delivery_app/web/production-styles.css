@@ -11,8 +11,8 @@
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.6;
-  color: #2C2C2C;
-  background-color: #F5F1E8;
+  color: #022D1D;
+  background-color: #F8FAF6;
 }
 
 /* Container utilities */
@@ -65,16 +65,16 @@ body {
 /* Color utilities */
 .text-white { color: #FFFFFF; }
 .text-gray-600 { color: #666666; }
-.text-gray-500 { color: #8B8680; }
+.text-gray-500 { color: #64748B; }
 .text-blue-600 { color: #2563eb; }
 .text-green-600 { color: #059669; }
-.text-primary { color: #ea580c; }
+.text-primary { color: #064E3B; }
 .text-purple-600 { color: #9333ea; }
 
 /* Background colors */
 .bg-white { background-color: #FFFFFF; }
 .bg-blue-600 { background-color: #2563eb; }
-.bg-primary { background-color: #ea580c; }
+.bg-primary { background-color: #064E3B; }
 .bg-green-500 { background-color: #10b981; }
 .bg-purple-600 { background-color: #9333ea; }
 .bg-gray-50 { background-color: #f9fafb; }
@@ -125,7 +125,7 @@ body {
 
 /* Hover states */
 .hover\:bg-blue-700:hover { background-color: #1d4ed8; }
-.hover\:bg-orange-700:hover { background-color: #c2410c; }
+.hover\:bg-orange-700:hover { background-color: #043020; }
 .hover\:shadow-lg:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
 
 /* Focus states */
@@ -134,7 +134,7 @@ body {
 
 /* Custom SMARTSOKO components */
 .hero-gradient {
-  background: linear-gradient(135deg, #D4A574 0%, #A0522D 100%);
+  background: linear-gradient(135deg, #064E3B 0%, #059669 100%);
   position: relative;
   overflow: hidden;
 }
@@ -214,24 +214,24 @@ body {
 }
 
 .btn-primary {
-  background-color: #D4A574;
-  color: #2C2C2C;
+  background-color: #064E3B;
+  color: #FFFFFF;
 }
 
 .btn-primary:hover {
-  background-color: #C1945F;
+  background-color: #043020;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+  box-shadow: 0 4px 12px rgba(6, 78, 59, 0.3);
 }
 
 .btn-secondary {
   background-color: transparent;
-  color: #D4A574;
-  border: 2px solid #D4A574;
+  color: #064E3B;
+  border: 2px solid #064E3B;
 }
 
 .btn-secondary:hover {
-  background-color: rgba(212, 165, 116, 0.1);
+  background-color: rgba(6, 78, 59, 0.1);
 }
 
 /* Form elements */
@@ -243,10 +243,10 @@ textarea,
 select {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #D4C5B9;
+  border: 1px solid #E2E8F0;
   border-radius: 8px;
   font-size: 16px;
-  background-color: #F5F1E8;
+  background-color: #F8FAF6;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -254,14 +254,14 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: #D4A574;
-  box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
+  border-color: #064E3B;
+  box-shadow: 0 0 0 3px rgba(6, 78, 59, 0.1);
 }
 
 /* Navigation */
 .nav-top {
   background-color: #FFFFFF;
-  border-bottom: 1px solid #D4C5B9;
+  border-bottom: 1px solid #E2E8F0;
   padding: 16px 0;
   position: sticky;
   top: 0;
@@ -270,7 +270,7 @@ select:focus {
 
 .nav-bottom {
   background-color: #FFFFFF;
-  border-top: 1px solid #D4C5B9;
+  border-top: 1px solid #E2E8F0;
   padding: 12px 0;
   position: fixed;
   bottom: 0;
@@ -300,7 +300,7 @@ select:focus {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #D4C5B9 25%, #F5F1E8 50%, #D4C5B9 75%);
+  background: linear-gradient(90deg, #E2E8F0 25%, #F8FAF6 50%, #E2E8F0 75%);
   background-size: 200% 100%;
   animation: loading 1.2s ease-in-out infinite;
   border-radius: 8px;
@@ -317,7 +317,7 @@ select:focus {
   bottom: 80px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #2C2C2C;
+  background-color: #022D1D;
   color: #FFFFFF;
   padding: 12px 24px;
   border-radius: 8px;
@@ -332,15 +332,15 @@ select:focus {
 }
 
 .toast.success {
-  background-color: #5D8B5A;
+  background-color: #059669;
 }
 
 .toast.error {
-  background-color: #C1440E;
+  background-color: #B91C1C;
 }
 
 .toast.warning {
-  background-color: #E67E22;
+  background-color: #F59E0B;
 }
 
 /* Accessibility */
@@ -358,7 +358,7 @@ select:focus {
 
 /* Focus visible for better accessibility */
 .focus-visible\:ring-2:focus-visible {
-  outline: 2px solid #D4A574;
+  outline: 2px solid #064E3B;
   outline-offset: 2px;
 }
 

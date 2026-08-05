@@ -1,0 +1,4 @@
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep class com.smartsoko.admin.data.remote.dto.** { *; }
+-keep class com.smartsoko.admin.domain.model.** { *; }

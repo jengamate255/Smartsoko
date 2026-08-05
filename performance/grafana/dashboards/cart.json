@@ -1,0 +1,20 @@
+{
+  "dashboard": {
+    "title": "SmartSoko - Cart Operations",
+    "uid": "smartsoko-cart",
+    "tags": ["smartsoko", "cart"],
+    "timezone": "browser",
+    "refresh": "10s",
+    "time": {"from": "now-1h", "to": "now"},
+    "panels": [
+      {"id": 1, "title": "Add to Cart Latency (p95)", "type": "graph", "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(cart_add_latency_seconds_bucket[1m]))", "legendFormat": "add p95"}]},
+      {"id": 2, "title": "Update Quantity Latency (p95)", "type": "graph", "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(cart_update_latency_seconds_bucket[1m]))", "legendFormat": "update p95"}]},
+      {"id": 3, "title": "Remove from Cart Latency (p95)", "type": "graph", "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(cart_remove_latency_seconds_bucket[1m]))", "legendFormat": "remove p95"}]},
+      {"id": 4, "title": "Fetch Cart Latency (p95)", "type": "graph", "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(cart_fetch_latency_seconds_bucket[1m]))", "legendFormat": "fetch p95"}]},
+      {"id": 5, "title": "Cart Consistency Rate", "type": "singlestat", "gridPos": {"x": 0, "y": 16, "w": 6, "h": 4}, "targets": [{"expr": "rate(cart_consistency_check_success[5m]) / rate(cart_consistency_check_total[5m]) * 100", "legendFormat": "%"}]},
+      {"id": 6, "title": "Cart Error Rate", "type": "graph", "gridPos": {"x": 6, "y": 16, "w": 12, "h": 8}, "targets": [{"expr": "rate(cart_error_total[1m])", "legendFormat": "error rate"}]},
+      {"id": 7, "title": "Cart Operations RPS", "type": "graph", "gridPos": {"x": 18, "y": 16, "w": 6, "h": 8}, "targets": [{"expr": "sum(rate(http_requests_total{job=~\"k6.*\",operation=~\"cart.*\"}[1m])) by (operation)", "legendFormat": "{{operation}}"}]}
+    ]
+  },
+  "overwrite": true
+}

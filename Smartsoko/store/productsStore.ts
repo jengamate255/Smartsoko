@@ -50,7 +50,11 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
         .select();
 
       if (error) throw error;
-      
+
+      if (!data || data.length === 0) {
+        throw new Error('Product was not created');
+      }
+
       // Update local state with the new product
       set((state) => ({
         products: [data[0] as Product, ...state.products],
@@ -71,7 +75,11 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
         .select();
 
       if (error) throw error;
-      
+
+      if (!data || data.length === 0) {
+        throw new Error('Product was not found');
+      }
+
       // Update local state
       set((state) => ({
         products: state.products.map(p => 

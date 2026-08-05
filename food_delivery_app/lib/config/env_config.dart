@@ -14,7 +14,11 @@ class EnvConfig {
   static String get mpesaShortcode => dotenv.env['MPESA_SHORTCODE'] ?? '';
   static String get mpesaCallbackUrl => dotenv.env['MPESA_CALLBACK_URL'] ?? '';
   
+  static String get supabaseUrl => dotenv.env['SUPABASE_URL']?.isNotEmpty == true ? dotenv.env['SUPABASE_URL']! : 'https://vonkqyiczeqhuqhahsxm.supabase.co';
+  static String get supabaseAnonKey => dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+  
   static String get googleMapsApiKey => dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
+  static String get mapboxToken => dotenv.env['MAPBOX_TOKEN'] ?? '';
   
   static Future<void> load() async {
     await dotenv.load(fileName: '.env');

@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/analytics_service.dart';
+import '../../config/app_config.dart';
+import '../../utils/validators.dart';
+import '../auth/role_selection_screen.dart';
+import 'main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -38,10 +42,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
      try {
        final authService = context.read<AuthService>();
-       final normalizedPhone = authService._normalizePhone(_phoneController.text);
-       
+       final normalizedPhone = authService.normalizePhone(_phoneController.text);
+        
        // Check if user exists first
-       final existingUserDoc = await authService._firestore
+       final existingUserDoc = await authService.firestore
            .collection(AppConfig.usersCollection)
            .where('phone', isEqualTo: normalizedPhone)
            .limit(1)
@@ -139,6 +143,18 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         )
                       : const Text('Continue'),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => const MainScreen()),
+                    );
+                  },
+                  child: Text(
+                    'Skip (Demo)',
+                    style: TextStyle(color: Colors.grey[500], fontSize: 14),
+                  ),
                 ),
               ],
             ),

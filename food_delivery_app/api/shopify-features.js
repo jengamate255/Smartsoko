@@ -8,10 +8,27 @@ const router = express.Router();
 
 let db = null;
 let admin = null;
+let auth = null;
+let validate = null;
 
-function init(firebaseDb, firebaseAdmin) {
+function init(firebaseDb, firebaseAdmin, authMiddleware, validateInput) {
   db = firebaseDb;
   admin = firebaseAdmin;
+  auth = authMiddleware;
+  validate = validateInput;
+}
+
+// Lazy auth middleware wrappers (auth is null at module load time, set via init)
+function requireAuth(...roles) {
+  return (req, res, next) => {
+    if (!auth) return res.status(503).json({ success: false, error: 'Auth not initialized' });
+    const middleware = roles.length ? auth.requireRole(...roles) : ((r, r2, n) => n());
+    return auth.verifyToken(req, res, (err) => {
+      if (err) return next(err);
+      if (roles.length) return auth.requireRole(...roles)(req, res, next);
+      next();
+    });
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -19,7 +36,7 @@ function init(firebaseDb, firebaseAdmin) {
 // ═══════════════════════════════════════════════════════════════
 
 // Create product variant
-router.post('/variants', async (req, res) => {
+router.post('/variants', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -80,7 +97,7 @@ router.get('/variants/:productId', async (req, res) => {
 });
 
 // Update variant
-router.put('/variants/:id', async (req, res) => {
+router.put('/variants/:id', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -100,7 +117,7 @@ router.put('/variants/:id', async (req, res) => {
 });
 
 // Delete variant
-router.delete('/variants/:id', async (req, res) => {
+router.delete('/variants/:id', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -119,7 +136,7 @@ router.delete('/variants/:id', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 
 // Get inventory for merchant
-router.get('/inventory', async (req, res) => {
+router.get('/inventory', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -183,7 +200,7 @@ router.get('/inventory', async (req, res) => {
 });
 
 // Update stock
-router.put('/inventory/:type/:id', async (req, res) => {
+router.put('/inventory/:type/:id', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -221,7 +238,7 @@ router.put('/inventory/:type/:id', async (req, res) => {
 });
 
 // Bulk stock update
-router.post('/inventory/bulk', async (req, res) => {
+router.post('/inventory/bulk', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -254,7 +271,7 @@ router.post('/inventory/bulk', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 
 // Create collection
-router.post('/collections', async (req, res) => {
+router.post('/collections', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -338,7 +355,7 @@ router.get('/collections/:id', async (req, res) => {
 });
 
 // Update collection
-router.put('/collections/:id', async (req, res) => {
+router.put('/collections/:id', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -358,7 +375,7 @@ router.put('/collections/:id', async (req, res) => {
 });
 
 // Delete collection
-router.delete('/collections/:id', async (req, res) => {
+router.delete('/collections/:id', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -373,7 +390,7 @@ router.delete('/collections/:id', async (req, res) => {
 });
 
 // Add products to collection
-router.post('/collections/:id/products', async (req, res) => {
+router.post('/collections/:id/products', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -409,7 +426,7 @@ router.post('/collections/:id/products', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 
 // Create coupon
-router.post('/coupons', async (req, res) => {
+router.post('/coupons', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -444,7 +461,7 @@ router.post('/coupons', async (req, res) => {
 });
 
 // Get coupons
-router.get('/coupons', async (req, res) => {
+router.get('/coupons', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -551,7 +568,7 @@ router.post('/coupons/validate', async (req, res) => {
 });
 
 // Redeem coupon (increment usage)
-router.post('/coupons/:id/redeem', async (req, res) => {
+router.post('/coupons/:id/redeem', requireAuth(), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -575,7 +592,7 @@ router.post('/coupons/:id/redeem', async (req, res) => {
 });
 
 // Delete coupon
-router.delete('/coupons/:id', async (req, res) => {
+router.delete('/coupons/:id', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -594,7 +611,7 @@ router.delete('/coupons/:id', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 
 // Create review
-router.post('/reviews', async (req, res) => {
+router.post('/reviews', requireAuth(), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -676,7 +693,7 @@ router.get('/reviews', async (req, res) => {
 });
 
 // Get merchant's product reviews
-router.get('/reviews/merchant', async (req, res) => {
+router.get('/reviews/merchant', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -729,7 +746,7 @@ router.get('/reviews/merchant', async (req, res) => {
 });
 
 // Delete review
-router.delete('/reviews/:id', async (req, res) => {
+router.delete('/reviews/:id', requireAuth(), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -789,7 +806,7 @@ async function updateProductRating(productId) {
 // ═══════════════════════════════════════════════════════════════
 
 // Create bundle
-router.post('/bundles', async (req, res) => {
+router.post('/bundles', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -882,7 +899,7 @@ router.get('/bundles/:id', async (req, res) => {
 });
 
 // Update bundle
-router.put('/bundles/:id', async (req, res) => {
+router.put('/bundles/:id', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -917,7 +934,7 @@ router.put('/bundles/:id', async (req, res) => {
 });
 
 // Delete bundle
-router.delete('/bundles/:id', async (req, res) => {
+router.delete('/bundles/:id', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -976,7 +993,7 @@ router.post('/waitlist', async (req, res) => {
 });
 
 // Get waitlist for product
-router.get('/waitlist/:productId', async (req, res) => {
+router.get('/waitlist/:productId', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 
@@ -999,7 +1016,7 @@ router.get('/waitlist/:productId', async (req, res) => {
 });
 
 // Mark as notified
-router.put('/waitlist/:id/notified', async (req, res) => {
+router.put('/waitlist/:id/notified', requireAuth('merchant', 'admin'), async (req, res) => {
   try {
     if (!db) return res.status(503).json({ success: false, error: 'Database not available' });
 

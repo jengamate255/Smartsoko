@@ -4,16 +4,36 @@
  */
 
 const { z } = require('zod');
+const { createClient } = require('@supabase/supabase-js');
 
 // Store admin reference (set by server)
 let admin = null;
+let supabaseClient = null;
+const roleCache = new Map();
+const ROLE_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// Known admin emails (fallback when Firestore is unavailable)
+const ADMIN_EMAILS = ['dd396515@gmail.com'];
 
 function setAdmin(adminInstance) {
   admin = adminInstance;
 }
 
-// Verify Firebase ID Token
+function getCachedRole(uid) {
+  const entry = roleCache.get(uid);
+  if (entry && Date.now() - entry.ts < ROLE_CACHE_TTL) {
+    return entry.role;
+  }
+  return null;
+}
+
+function setCachedRole(uid, role) {
+  roleCache.set(uid, { role, ts: Date.now() });
+}
+
+// Verify Firebase ID Token or Supabase JWT
 async function verifyToken(req, res, next) {
+  let token;
   try {
     const authHeader = req.headers.authorization;
 
@@ -24,53 +44,94 @@ async function verifyToken(req, res, next) {
       });
     }
 
-    const idToken = authHeader.split('Bearer ')[1];
+    token = authHeader.split('Bearer ')[1];
 
-    if (!admin) {
-      return res.status(500).json({
-        error: 'Server Error',
-        message: 'Authentication service not initialized'
-      });
-    }
-
-    // Verify the ID token
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    req.user = decodedToken;
-
-    // Check multiple collections for user role
-    const userId = decodedToken.uid;
-    const collections = ['users', 'drivers', 'restaurants', 'sellers'];
-    let userRole = 'customer';
-
-    for (const colName of collections) {
+    // Try Firebase first
+    if (admin) {
       try {
-        const userDoc = await admin.firestore().collection(colName).doc(userId).get();
-        if (userDoc.exists) {
-          const data = userDoc.data();
-          // Determine role based on collection
-          if (colName === 'users') {
-            userRole = data.role || 'customer';
-          } else if (colName === 'drivers') {
-            userRole = 'driver';
-          } else if (colName === 'restaurants' || colName === 'sellers') {
-            userRole = 'merchant';
-          }
-          break;
-        }
-      } catch (e) {
-        // Collection might not exist, continue
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        req.user = decodedToken;
+        return resolveUserAndContinue(req, res, next);
+      } catch (fbError) {
+        // Firebase failed — fall through to Supabase
       }
     }
 
-    req.user.role = userRole;
+    // Try Supabase JWT
+    if (!supabaseClient) {
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (supabaseUrl && supabaseKey) {
+        supabaseClient = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
+      }
+    }
 
-    next();
+    if (supabaseClient) {
+      const { data, error } = await supabaseClient.auth.getUser(token);
+      if (!error && data?.user) {
+        const user = data.user;
+        req.user = {
+          uid: user.id,
+          email: user.email || '',
+          name: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+          role: user.user_metadata?.role || 'customer'
+        };
+        return next();
+      }
+    }
+
+    return res.status(401).json({
+      error: 'Unauthorized',
+      message: 'Invalid or expired token'
+    });
   } catch (error) {
     console.error('Token verification failed:', error.message);
     return res.status(401).json({
       error: 'Unauthorized',
       message: 'Invalid or expired token'
     });
+  }
+}
+
+async function resolveUserAndContinue(req, res, next) {
+  try {
+    const decodedToken = req.user;
+    const userId = decodedToken.uid;
+    const userEmail = decodedToken.email || '';
+    let userRole = getCachedRole(userId);
+
+    if (!userRole) {
+      if (ADMIN_EMAILS.includes(userEmail)) {
+        userRole = 'admin';
+      } else if (admin) {
+        const collections = ['users', 'drivers', 'restaurants', 'sellers'];
+        userRole = 'customer';
+        for (const colName of collections) {
+          try {
+            const userDoc = await admin.firestore().collection(colName).doc(userId).get();
+            if (userDoc.exists) {
+              const data = userDoc.data();
+              if (colName === 'users') {
+                userRole = data.role || 'customer';
+              } else if (colName === 'drivers') {
+                userRole = 'driver';
+              } else if (colName === 'restaurants' || colName === 'sellers') {
+                userRole = 'merchant';
+              }
+              break;
+            }
+          } catch (e) { /* skip */ }
+        }
+      }
+      setCachedRole(userId, userRole);
+    }
+
+    req.user.role = userRole;
+    next();
+  } catch (error) {
+    console.error('Role resolution failed:', error.message);
+    req.user.role = 'customer';
+    next();
   }
 }
 
@@ -272,6 +333,26 @@ function sanitizeInput(req, res, next) {
   next();
 }
 
+// Static role resolver (used by WebSocket and other non-Express contexts)
+async function resolveUserRole(uid, db) {
+  if (!db) return 'customer';
+  try {
+    const collections = ['users', 'drivers', 'restaurants', 'sellers'];
+    for (const colName of collections) {
+      const doc = await db.collection(colName).doc(uid).get();
+      if (doc.exists) {
+        const data = doc.data();
+        if (colName === 'users') return data.role || 'customer';
+        if (colName === 'drivers') return 'driver';
+        if (colName === 'restaurants' || colName === 'sellers') return 'merchant';
+      }
+    }
+  } catch (error) {
+    console.error('Failed to resolve user role:', error.message);
+  }
+  return 'customer';
+}
+
 module.exports = {
   setAdmin,
   verifyToken,
@@ -281,5 +362,6 @@ module.exports = {
   requireOrderAccess,
   validateInput,
   sanitizeInput,
+  resolveUserRole,
   ROLE_HIERARCHY
 };

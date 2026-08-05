@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/analytics_service.dart';
+import '../../services/supabase_service.dart';
 import '../../models/user.dart';
+import '../../config/app_config.dart';
+import '../../utils/logger.dart';
 
 class RoleSelectionScreen extends StatefulWidget {
   final String phoneNumber;
@@ -45,8 +48,8 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
       final authService = context.read<AuthService>();
       
       // Check if user already exists
-      final normalizedPhone = authService._normalizePhone(widget.phoneNumber);
-      final existingUserDoc = await authService._firestore
+      final normalizedPhone = authService.normalizePhone(widget.phoneNumber);
+      final existingUserDoc = await authService.firestore
           .collection(AppConfig.usersCollection)
           .where('phone', isEqualTo: normalizedPhone)
           .limit(1)
@@ -64,7 +67,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
           createdAt: DateTime.now(),
         );
 
-        final docRef = await authService._firestore
+        final docRef = await authService.firestore
             .collection(AppConfig.usersCollection)
             .add(newUser.toFirestore());
 
@@ -80,7 +83,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
         
         // Also create in Supabase for sync
         try {
-          await authService._supabaseService.client.from('profiles').insert({
+          await authService.supabaseService.client.from('profiles').insert({
             'id': createdUser.id,
             'phone': normalizedPhone,
             'role': _selectedRole!.name,

@@ -1,0 +1,112 @@
+﻿Starting a Gradle Daemon, 1 busy Daemon could not be reused, use --status for details
+.\gradlew.bat : Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of 
+version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were 
+released at different times.
+At line:1 char:1
++ .\gradlew.bat assembleDebug --console=plain 2>&1 | Out-File -Encoding ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Warning: SDK pr...ifferent times.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:processDebugGoogleServices UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:l8DexDesugarLibDebug UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:kaptGenerateStubsDebugKotlin
+> Task :app:mergeExtDexDebug
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :app:kaptDebugKotlin UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:compileDebugKotlin
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/data/remote/network/ApiClient.kt:123:47 'create(MediaType?, String): RequestBody' is deprecated. Moved to extension function. Put the 'content' argument first to fix Java
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/address/AddressFormScreen.kt:28:55 'MapIdleEventData' is deprecated. This data class is deprecated, and will be removed in next major release.
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/address/AddressFormScreen.kt:30:51 'OnMapIdleListener' is deprecated. This listener is deprecated, and will be removed in next major release. use MapIdleCallback instead.
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/address/AddressFormScreen.kt:122:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/address/AddressFormScreen.kt:148:39 'getMapboxMap(): MapboxMap' is deprecated. This method is deprecated, and will be removed in next major release. Use [mapboxMap] property instead.
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/address/AddressFormScreen.kt:152:33 'addOnMapIdleListener(OnMapIdleListener): Unit' is deprecated. This method is deprecated, and will be removed in next major release. use [subscribeMapIdle] instead.
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/address/AddressFormScreen.kt:152:63 'OnMapIdleListener' is deprecated. This listener is deprecated, and will be removed in next major release. use MapIdleCallback instead.
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/address/AddressFormScreen.kt:153:67 'MapIdleEventData' is deprecated. This data class is deprecated, and will be removed in next major release.
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/address/AddressListScreen.kt:56:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/address/AddressViewModel.kt:185:24 'constructor JsonParser()' is deprecated. Deprecated in Java
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/address/AddressViewModel.kt:185:37 'parse(String!): JsonElement!' is deprecated. Deprecated in Java
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/auth/LoginScreen.kt:79:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/auth/SignupScreen.kt:55:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/cart/CartScreen.kt:61:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/cart/CartScreen.kt:174:29 'Divider(Modifier = ..., Dp = ..., Color = ...): Unit' is deprecated. Renamed to HorizontalDivider
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/checkout/CheckoutScreen.kt:47:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/home/HomeScreen.kt:129:49 'ReceiptLong: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ReceiptLong
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/home/HomeScreen.kt:249:55 'ArrowForward: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowForward
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/home/HomeScreen.kt:266:5 Parameter 'onSearch' is never used
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/onboarding/OnboardingScreen.kt:28:5 Parameter 'onNavigateToHome' is never used
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/onboarding/OnboardingScreen.kt:33:9 Variable 'scope' is never used
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/orders/OrdersScreen.kt:52:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/orders/OrdersScreen.kt:105:50 'ReceiptLong: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ReceiptLong
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/productdetails/ProductDetailsScreen.kt:41:9 Variable 'scope' is never used
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/productdetails/ProductDetailsScreen.kt:77:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/productdetails/ProductDetailsScreen.kt:225:60 Unnecessary safe call on a non-null receiver of type String
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/productdetails/ProductDetailsScreen.kt:234:61 Elvis operator (?:) always returns the left operand of non-nullable type String
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/productdetails/ProductDetailsScreen.kt:256:52 Elvis operator (?:) always returns the left operand of non-nullable type String
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/productlist/ProductListScreen.kt:69:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/productlist/ProductListViewModel.kt:27:62 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/profile/ProfileScreen.kt:83:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/profile/ProfileScreen.kt:295:88 'Logout: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.Logout
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/search/SearchScreen.kt:72:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/search/SearchScreen.kt:177:44 'ArrowForward: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowForward
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/tracking/OrderTrackingScreen.kt:57:44 'ArrowBack: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.ArrowBack
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/tracking/OrderTrackingScreen.kt:150:13 'Divider(Modifier = ..., Dp = ..., Color = ...): Unit' is deprecated. Renamed to HorizontalDivider
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/tracking/OrderTrackingScreen.kt:163:5 Parameter 'isFirst' is never used
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/tracking/OrderTrackingScreen.kt:249:40 'Chat: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.Chat
+w: file:///E:/Project/notsmartsoko/Smartsoko/android-customer-native/app/src/main/java/com/smartsoko/customer/presentation/tracking/OrderTrackingScreen.kt:311:40 'Chat: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.Chat
+
+> Task :app:compileDebugJavaWithJavac
+> Task :app:hiltAggregateDepsDebug UP-TO-DATE
+> Task :app:hiltJavaCompileDebug
+> Task :app:processDebugJavaRes
+> Task :app:transformDebugClassesWithAsm
+> Task :app:mergeDebugJavaResource
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :app:mergeProjectDexDebug
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleDebug
+w: Detected multiple Kotlin daemon sessions at kotlin\sessions
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.9/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 10m 23s
+44 actionable tasks: 11 executed, 33 up-to-date

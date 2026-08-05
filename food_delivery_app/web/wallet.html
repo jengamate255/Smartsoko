@@ -1,57 +1,93 @@
 <!DOCTYPE html>
 <html class="light" lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>SmartSoko - My Wallet</title>
   <meta name="theme-color" content="#064E3B">
-  <link rel="stylesheet" href="design-system.css">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" href="dist/tailwind.css" as="style">
   <link rel="stylesheet" href="dist/tailwind.css">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-  <script type="module" src="config/firebase-config.js?v=4"></script>
+  <link rel="stylesheet" href="design-system.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script type="module" src="config/firebase-config.js?v=5"></script>
+  <script type="module" src="config/cross-platform-service.js?v=4"></script>
   <script src="auth-check.js?v=5" defer></script>
-  <script src="nav-component.js" defer></script>
+  <script src="nav-component.js?v=5" defer></script>
   <style>
-    .material-symbols-outlined {font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
-    body {min-height: max(884px,100dvh); background: #f0fdf4;
-      background-image: radial-gradient(at 40% 20%, hsla(140,100%,88%,0.4) 0px, transparent 50%),
-        radial-gradient(at 80% 0%, hsla(160,100%,85%,0.4) 0px, transparent 50%);}
-    .dashboard-card {background: rgba(255,255,255,0.7); backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.5); border-radius: 1rem; padding: 1.25rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease;}
-    .dashboard-card:hover {transform: translateY(-4px) scale(1.01); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);}
-    .topup-btn {transition: all 0.2s ease;}
-    .topup-btn:hover {transform: translateY(-2px); box-shadow: 0 8px 16px -4px rgba(0,0,0,0.15);}
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display: inline-block; line-height: 1; vertical-align: middle; }
+    .filled-icon { font-variation-settings: 'FILL' 1; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter','Montserrat',sans-serif; min-height: 100vh; }
+    h1,h2,h3,h4,h5,h6 { font-family: 'Montserrat',sans-serif; }
+    .gradient-bg { background: #064e3b; }
+    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .wallet-card { background: white; border-radius: 14px; box-shadow: 0 2px 8px rgba(44,62,80,0.05); border: 1px solid #f0f0f0; transition: transform 0.2s, box-shadow 0.2s; }
+    .wallet-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(44,62,80,0.08); }
+    .tab-btn { padding: 10px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; border: 1.5px solid #e5e7eb; background: white; color: #374151; cursor: pointer; transition: all 0.2s; }
+    .tab-btn:hover { border-color: #064e3b; color: #064e3b; background: #f0fdf4; }
+    .tab-btn.active { background: #064e3b; color: white; border-color: #064e3b; }
+    .topup-btn { padding: 14px 10px; border-radius: 14px; background: #f0fdf4; border: 1.5px solid #dcfce7; color: #064e3b; font-weight: 700; cursor: pointer; transition: all 0.25s; text-align: center; }
+    .topup-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(6,78,59,0.12); border-color: #86efac; }
+    .topup-btn .label { font-size: 11px; color: #16a34a; margin-top: 4px; }
+    .status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-completed { background: #dcfce7; color: #166534; }
+    .status-failed { background: #fee2e2; color: #991b1b; }
+    .status-refunded { background: #dbeafe; color: #1e40af; }
   </style>
 </head>
-<body class="font-body">
-  <main class="container mx-auto p-4 pt-6 pb-28">
+<body class="bg-[#F8FAF6] text-on-background min-h-screen pb-24 md:pb-0">
+
+  <!-- Top Header -->
+  <header class="bg-white/80 backdrop-blur-xl fixed top-0 w-full z-50 shadow-sm flex justify-between items-center px-4 md:px-12 h-16">
+    <div class="flex items-center gap-2">
+      <a href="/home" class="flex items-center gap-2 text-white no-underline">
+        <div class="w-9 h-9 bg-green-700/15 rounded-lg flex items-center justify-center">
+          <span class="material-symbols-outlined text-green-700">shopping_basket</span>
+        </div>
+        <span class="text-lg font-bold hidden sm:block">SmartSoko</span>
+      </a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="/wallet" class="relative p-2 text-green-700/80 hover:text-green-700 rounded-full">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+        <span id="headerWalletBadge" class="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-[1280px] mx-auto px-4 md:px-12 pt-20 pb-24 md:pb-8">
+    <!-- Header -->
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-gray-800">My Wallet</h1>
-        <p class="text-sm text-gray-500">Manage your balance, top up, and view history</p>
+        <h1 class="font-headline-md text-headline-md font-bold text-primary">My Wallet</h1>
+        <p class="text-sm text-on-surface-variant mt-1">Manage your balance, top up, and view transaction history</p>
       </div>
-      <button onclick="refreshWallet()" class="flex items-center gap-1 px-3 py-2 bg-white rounded-lg border border-gray-200 text-sm font-medium hover:bg-gray-50">
+      <button onclick="refreshWallet()" class="flex items-center gap-1.5 px-3 py-2 bg-white rounded-lg border border-gray-200 text-sm font-medium hover:bg-gray-50 transition-all">
         <span class="material-symbols-outlined text-base">refresh</span> Refresh
       </button>
     </div>
 
     <!-- Balance Card -->
-    <div class="dashboard-card bg-gradient-to-br from-green-600 to-green-800 text-white mb-6 p-6">
-      <div class="flex items-start justify-between mb-4">
+    <div class="wallet-card bg-gradient-to-br from-green-700 to-green-900 text-white mb-6 p-6 relative overflow-hidden">
+      <div class="absolute -right-4 -top-4 w-16 h-16 bg-white/10 rounded-full blur-xl"></div>
+      <div class="flex items-start justify-between mb-4 relative z-10">
         <div>
           <p class="text-green-100 text-sm font-medium uppercase tracking-wider">Available Balance</p>
-          <p class="text-4xl font-extrabold mt-1" id="walletBalance">--</p>
+          <p class="text-4xl font-extrabold mt-1" id="walletBalance"><span class="skeleton skeleton-heading" style="height:40px;width:150px"></span></p>
           <p class="text-green-200 text-xs mt-1">Ready to use for purchases</p>
         </div>
         <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
           <span class="material-symbols-outlined text-3xl">account_balance_wallet</span>
         </div>
       </div>
-      <div class="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-white/20 text-sm">
+      <div class="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-white/20 text-sm relative z-10">
         <div>
           <p class="text-green-200 text-xs">Spent Today</p>
           <p class="font-semibold" id="spentToday">--</p>
@@ -68,42 +104,42 @@
     </div>
 
     <!-- Quick Top-up -->
-    <div class="dashboard-card mb-6">
-      <h2 class="text-lg font-bold text-gray-800 mb-3">Quick Top-up</h2>
+    <div class="wallet-card mb-6 p-5">
+      <h2 class="text-lg font-bold text-gray-900 mb-2">Quick Top-up</h2>
       <p class="text-sm text-gray-500 mb-4">Add money to your wallet for instant checkout. Choose an amount below.</p>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        <button onclick="topupWallet(10000)" class="topup-btn p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 text-center hover:shadow-md cursor-pointer">
+        <button onclick="topupWallet(10000)" class="topup-btn">
           <p class="text-xl font-bold text-green-700">TSh 10K</p>
-          <p class="text-xs text-green-500 mt-1">Quick top-up</p>
+          <p class="label">Quick top-up</p>
         </button>
-        <button onclick="topupWallet(20000)" class="topup-btn p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 text-center hover:shadow-md cursor-pointer">
+        <button onclick="topupWallet(20000)" class="topup-btn">
           <p class="text-xl font-bold text-green-700">TSh 20K</p>
-          <p class="text-xs text-green-500 mt-1">Popular</p>
+          <p class="label">Popular</p>
         </button>
-        <button onclick="topupWallet(50000)" class="topup-btn p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 text-center hover:shadow-md cursor-pointer">
+        <button onclick="topupWallet(50000)" class="topup-btn">
           <p class="text-xl font-bold text-green-700">TSh 50K</p>
-          <p class="text-xs text-green-500 mt-1">Best value</p>
+          <p class="label">Best value</p>
         </button>
-        <button onclick="topupWallet(100000)" class="topup-btn p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 text-center hover:shadow-md cursor-pointer">
+        <button onclick="topupWallet(100000)" class="topup-btn">
           <p class="text-xl font-bold text-green-700">TSh 100K</p>
-          <p class="text-xs text-green-500 mt-1">Large</p>
+          <p class="label">Large</p>
         </button>
       </div>
       <div class="flex gap-2">
-        <input id="customTopupAmount" type="number" placeholder="Custom amount" class="flex-1 p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none">
-        <button onclick="topupWallet(parseInt(document.getElementById('customTopupAmount').value) || 0)" class="px-6 py-2.5 bg-primary text-white rounded-lg font-medium text-sm hover:bg-primary-dark">Top Up</button>
+        <input id="customTopupAmount" aria-label="Custom top-up amount" type="number" placeholder="Custom amount" class="flex-1 p-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-700/20 focus:border-green-700 outline-none">
+        <button onclick="topupWallet(parseInt(document.getElementById('customTopupAmount').value) || 0)" class="px-6 py-3 gradient-bg text-white rounded-lg font-medium text-sm hover:opacity-90 transition-all">Top Up</button>
       </div>
     </div>
 
-    <!-- Sub-tabs: Transactions / Refunds -->
+    <!-- Sub-tabs -->
     <div class="flex gap-2 mb-4 border-b border-gray-200 pb-2">
-      <button onclick="switchWalletTab('transactions')" id="wtab-transactions" class="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white">Transactions</button>
-      <button onclick="switchWalletTab('refunds')" id="wtab-refunds" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Refunds</button>
+      <button onclick="switchWalletTab('transactions')" id="wtab-transactions" class="tab-btn active">Transactions</button>
+      <button onclick="switchWalletTab('refunds')" id="wtab-refunds" class="tab-btn">Refunds</button>
     </div>
 
     <!-- Transactions Tab -->
     <div id="wcontent-transactions">
-      <div class="dashboard-card p-0 overflow-hidden">
+      <div class="wallet-card p-0 overflow-hidden">
         <table class="w-full text-sm">
           <thead class="bg-gray-50 text-left">
             <tr>
@@ -114,7 +150,7 @@
             </tr>
           </thead>
           <tbody id="walletTransactions" class="divide-y divide-gray-100">
-            <tr><td colspan="4" class="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
+            <tr><td colspan="4" class="px-4 py-8 text-center text-gray-400"><div class="skeleton skeleton-text" style="width:100px;margin:0 auto 8px"></div><div class="skeleton skeleton-text" style="width:80px;margin:0 auto"></div></td></tr>
           </tbody>
         </table>
       </div>
@@ -123,7 +159,7 @@
 
     <!-- Refunds Tab -->
     <div id="wcontent-refunds" class="hidden">
-      <div class="dashboard-card p-0 overflow-hidden">
+      <div class="wallet-card p-0 overflow-hidden">
         <table class="w-full text-sm">
           <thead class="bg-gray-50 text-left">
             <tr>
@@ -141,76 +177,46 @@
     </div>
   </main>
 
-  <!-- Top-up PesaPal Modal -->
+  <!-- Top-up Modal -->
   <div id="topupModal" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-gray-800">Complete Top-up</h3>
-        <button onclick="closeTopupModal()" class="p-1 hover:bg-gray-100 rounded-lg">
-          <span class="material-symbols-outlined">close</span>
-        </button>
+        <h3 class="font-bold text-lg text-gray-900">Complete Top-up</h3>
+        <button onclick="closeTopupModal()" class="p-1 hover:bg-gray-100 rounded-lg"><span class="material-symbols-outlined">close</span></button>
       </div>
       <p class="text-sm text-gray-500 mb-4" id="topupModalInfo">Processing your top-up...</p>
       <div id="topupIframeContainer" class="w-full min-h-[400px] rounded-lg border border-gray-200"></div>
       <div id="topupSuccess" class="hidden text-center py-6">
-        <span class="material-symbols-outlined text-5xl text-green-500 mb-3">check_circle</span>
-        <p class="text-lg font-bold text-gray-800">Top-up Complete!</p>
+        <span class="material-symbols-outlined text-5xl text-green-500 mb-3 filled-icon">check_circle</span>
+        <p class="text-lg font-bold text-gray-900">Top-up Complete!</p>
         <p class="text-sm text-gray-500 mt-1" id="topupSuccessAmount"></p>
-        <button onclick="closeTopupModal();refreshWallet()" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg font-medium">Done</button>
+        <button onclick="closeTopupModal();refreshWallet()" class="mt-4 px-6 py-2 gradient-bg text-white rounded-lg font-medium">Done</button>
       </div>
     </div>
   </div>
 
+  <!-- Bottom Nav (Mobile) -->
+  <nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe border-t border-gray-200 bg-white shadow-[0_-4px_12px_rgba(0,0,0,0.06)] md:hidden z-50">
+    <a href="/home" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1"><span class="material-symbols-outlined">home</span><span class="text-[10px] font-semibold">Home</span></a>
+    <a href="/discovery" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1"><span class="material-symbols-outlined">search</span><span class="text-[10px] font-semibold">Browse</span></a>
+    <a href="/cart" class="flex flex-col items-center justify-center bg-green-100 text-green-700 rounded-full px-3 py-1"><span class="material-symbols-outlined filled-icon">shopping_cart</span><span class="text-[10px] font-semibold">Cart</span></a>
+    <a href="/profile" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1"><span class="material-symbols-outlined">person</span><span class="text-[10px] font-semibold">Profile</span></a>
+  </nav>
+
   <script>
-    // ── Supabase Setup ──────────────────────────────────────────
     const WALLET_SUPABASE_URL = 'https://vonkqyiczeqhuqhahsxm.supabase.co';
     const WALLET_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvbmtxeWljemVxaHVxaGFoc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjIzNDksImV4cCI6MjA5MDM5ODM0OX0.UKAT3re6P_oAB3E1svwCFdqTQWZL6yulJ1ZX4nAgJJ8';
-
     let _walletSupabase = null;
-    async function getWalletSupabase() {
-      if (_walletSupabase) return _walletSupabase;
-      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
-      _walletSupabase = createClient(WALLET_SUPABASE_URL, WALLET_SUPABASE_ANON_KEY);
-      return _walletSupabase;
-    }
-
-    async function walletRPC(fnName, params = {}) {
-      const supabase = await getWalletSupabase();
-      const { data, error } = await supabase.rpc(fnName, params);
-      if (error) throw error;
-      return data;
-    }
-
-    // ── Auth Helpers ────────────────────────────────────────────
+    async function getWalletSupabase() { if (_walletSupabase) return _walletSupabase; const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'); _walletSupabase = createClient(WALLET_SUPABASE_URL, WALLET_SUPABASE_ANON_KEY); return _walletSupabase; }
+    async function walletRPC(fnName, params = {}) { const supabase = await getWalletSupabase(); const { data, error } = await supabase.rpc(fnName, params); if (error) throw error; return data; }
     let _currentUserEmail = null;
+    async function getCustomerEmail() { if (_currentUserEmail) return _currentUserEmail; try { const { getAuth } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js'); const user = getAuth().currentUser; if (user?.email) { _currentUserEmail = user.email; return user.email; } } catch (e) {} return null; }
+    function fmt(amount) { return 'TSh ' + (amount || 0).toLocaleString(); }
+    function fmtDate(d) { if (!d) return 'N/A'; return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
 
-    async function getCustomerEmail() {
-      if (_currentUserEmail) return _currentUserEmail;
-      try {
-        const { getAuth } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
-        const user = getAuth().currentUser;
-        if (user?.email) { _currentUserEmail = user.email; return user.email; }
-      } catch (e) {}
-      return null;
-    }
-
-    // ── Formatting ──────────────────────────────────────────────
-    function fmt(amount) {
-      return 'TSh ' + (amount || 0).toLocaleString();
-    }
-
-    function fmtDate(d) {
-      if (!d) return 'N/A';
-      return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    }
-
-    // ── Wallet Loading ──────────────────────────────────────────
     async function loadWallet() {
       const email = await getCustomerEmail();
-      if (!email) {
-        document.getElementById('walletBalance').textContent = 'Sign in to view';
-        return;
-      }
+      if (!email) { document.getElementById('walletBalance').textContent = 'Sign in to view'; return; }
       try {
         const data = await walletRPC('get_customer_wallet_summary', { p_email: email });
         if (data) {
@@ -219,10 +225,7 @@
           document.getElementById('toppedUpToday').textContent = fmt(data.topped_up_today);
           document.getElementById('pendingRefunds').textContent = fmt(data.pending_refunds);
         }
-      } catch (e) {
-        console.error('loadWallet error:', e);
-        document.getElementById('walletBalance').textContent = 'Error loading';
-      }
+      } catch (e) { console.error('loadWallet error:', e); document.getElementById('walletBalance').textContent = 'Error loading'; }
     }
 
     async function loadTransactions() {
@@ -238,7 +241,7 @@
         }
         tbody.innerHTML = result.data.map(tx => {
           const isCredit = tx.type === 'credit' || tx.type === 'refund';
-          const icon = isCredit ? '⬇️' : '⬆️';
+          const icon = isCredit ? '<span class="material-symbols-outlined text-[12px] filled-icon">add_circle</span>' : '<span class="material-symbols-outlined text-[12px] filled-icon">remove_circle</span>';
           const cls = isCredit ? 'text-green-600' : 'text-red-600';
           return '<tr class="hover:bg-gray-50">'
             + '<td class="px-4 py-3 font-medium ' + cls + '">' + icon + ' ' + tx.type + '</td>'
@@ -248,9 +251,7 @@
             + '</tr>';
         }).join('');
         document.getElementById('walletTxCount').textContent = 'Showing ' + result.data.length + ' of ' + (result.total || result.data.length) + ' transactions';
-      } catch (e) {
-        console.error('loadTransactions error:', e);
-      }
+      } catch (e) { console.error('loadTransactions error:', e); }
     }
 
     async function loadRefunds() {
@@ -260,10 +261,7 @@
         const result = await walletRPC('get_customer_transactions', { p_email: email, p_limit: 100, p_offset: 0 });
         const tbody = document.getElementById('walletRefunds');
         const refunds = (result?.data || []).filter(tx => tx.type === 'credit' && (tx.description || '').toLowerCase().includes('refund'));
-        if (refunds.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400">No refunds yet</td></tr>';
-          return;
-        }
+        if (refunds.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400">No refunds yet</td></tr>'; return; }
         tbody.innerHTML = refunds.map(r => {
           return '<tr class="hover:bg-gray-50">'
             + '<td class="px-4 py-3 font-mono text-xs">' + ((r.order_id || '').substring(0, 8) || 'N/A') + '...</td>'
@@ -272,20 +270,12 @@
             + '<td class="px-4 py-3 text-xs text-gray-500">' + fmtDate(r.created_at) + '</td>'
             + '</tr>';
         }).join('');
-      } catch (e) {
-        console.error('loadRefunds error:', e);
-      }
+      } catch (e) { console.error('loadRefunds error:', e); }
     }
 
-    function refreshWallet() {
-      loadWallet();
-      loadTransactions();
-      loadRefunds();
-    }
+    function refreshWallet() { loadWallet(); loadTransactions(); loadRefunds(); }
 
-    // ── Top-up via PesaPal ──────────────────────────────────────
-    // Flow: create_topup_order → pesapal-payment → poll → complete_wallet_topup
-    let _topupOrderId = null;
+    let _topupOrderTrackingId = null;
     let _topupPoll = null;
 
     async function topupWallet(amount) {
@@ -305,78 +295,37 @@
       info.textContent = 'Creating top-up order...';
 
       try {
-        // Step 1: Create dummy order for PesaPal reference
-        const topupResult = await walletRPC('create_topup_order', { p_email: email, p_amount: amount });
-        if (!topupResult || !topupResult.success) {
-          throw new Error(topupResult?.error || 'Failed to create top-up order');
-        }
-        _topupOrderId = topupResult.order_id;
-
-        // Step 2: Initiate PesaPal payment using the order ID
-        const edgeUrl = WALLET_SUPABASE_URL + '/functions/v1/pesapal-payment';
-        const resp = await fetch(edgeUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': WALLET_SUPABASE_ANON_KEY },
-          body: JSON.stringify({
-            orderId: _topupOrderId,
-            amount: amount,
-            currency: 'TZS',
-            description: 'Wallet top-up - ' + email,
-            customerEmail: email,
-            callbackUrl: window.location.origin + '/wallet.html?topup=success&amount=' + amount
-          })
-        });
+        const resp = await fetch('/api/payments/pesapal/wallet-topup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, email }) });
         const result = await resp.json();
-        if (!result.success || !result.redirectUrl) {
-          throw new Error(result.error || 'Failed to initiate payment');
-        }
-
-        // Step 3: Show PesaPal iframe
+        if (!result.success || !result.redirectUrl) { throw new Error(result.error || 'Failed to initiate payment'); }
+        _topupOrderTrackingId = result.orderTrackingId;
         container.innerHTML = '<iframe src="' + result.redirectUrl + '" class="w-full h-[400px] rounded-lg" allow="payment"></iframe>';
         info.textContent = 'Complete payment in the iframe above. We\'ll credit your wallet automatically.';
 
-        // Step 4: Poll payment status via RPC
         if (_topupPoll) clearInterval(_topupPoll);
         _topupPoll = setInterval(async () => {
           try {
-            const status = await walletRPC('check_topup_payment_status', { p_order_id: _topupOrderId });
-            if (!status) return;
+            const resp = await fetch('/api/payments/pesapal/wallet-status/' + _topupOrderTrackingId);
+            const status = await resp.json();
+            if (!status.success) return;
             if (status.completed) {
-              clearInterval(_topupPoll);
-              _topupPoll = null;
-              // Step 5: Credit wallet
-              const credit = await walletRPC('complete_wallet_topup', { p_order_id: _topupOrderId });
-              if (credit && credit.success) {
-                container.innerHTML = '';
-                success.classList.remove('hidden');
-                document.getElementById('topupSuccessAmount').textContent = fmt(amount) + ' added to your wallet';
-                info.textContent = 'Top-up complete!';
-              } else {
-                throw new Error(credit?.error || 'Failed to credit wallet');
-              }
+              clearInterval(_topupPoll); _topupPoll = null;
+              try { await fetch('/api/payments/pesapal/complete-topup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderTrackingId: _topupOrderTrackingId, email }) }); } catch (e) { console.error('Complete topup call failed:', e); }
+              container.innerHTML = '';
+              success.classList.remove('hidden');
+              document.getElementById('topupSuccessAmount').textContent = fmt(amount) + ' added to your wallet';
+              info.textContent = 'Top-up complete!';
+              loadWallet();
             } else if (status.failed) {
-              clearInterval(_topupPoll);
-              _topupPoll = null;
+              clearInterval(_topupPoll); _topupPoll = null;
               showNotification('Top-up failed. Please try again.', 'error');
               closeTopupModal();
             }
-          } catch (e) {
-            console.error('Poll error:', e);
-          }
+          } catch (e) { console.error('Poll error:', e); }
         }, 3000);
 
-        // Auto-timeout after 5 minutes
-        setTimeout(() => {
-          if (_topupPoll) {
-            clearInterval(_topupPoll);
-            _topupPoll = null;
-            info.textContent = 'Payment timed out. Close and try again.';
-          }
-        }, 300000);
-      } catch (e) {
-        info.textContent = 'Error: ' + e.message;
-        container.innerHTML = '<div class="text-center py-8 text-red-500">Payment initiation failed. <button onclick="closeTopupModal()" class="underline">Close</button></div>';
-      }
+        setTimeout(() => { if (_topupPoll) { clearInterval(_topupPoll); _topupPoll = null; info.textContent = 'Payment timed out. Close and try again.'; } }, 300000);
+      } catch (e) { info.textContent = 'Error: ' + e.message; container.innerHTML = '<div class="text-center py-8 text-red-500">Payment initiation failed. <button onclick="closeTopupModal()" class="underline">Close</button></div>'; }
     }
 
     function closeTopupModal() {
@@ -384,35 +333,35 @@
       document.getElementById('topupModal').classList.remove('flex');
     }
 
-    // ── Tab Switching ───────────────────────────────────────────
     function switchWalletTab(tab) {
       ['transactions', 'refunds'].forEach(t => {
         document.getElementById('wcontent-' + t)?.classList.add('hidden');
-        document.getElementById('wtab-' + t)?.classList.remove('bg-primary', 'text-white');
+        document.getElementById('wtab-' + t)?.classList.remove('active', 'bg-primary', 'text-white');
         document.getElementById('wtab-' + t)?.classList.add('text-gray-600', 'hover:bg-gray-100');
       });
       document.getElementById('wcontent-' + tab)?.classList.remove('hidden');
       const btn = document.getElementById('wtab-' + tab);
-      if (btn) btn.classList.add('bg-primary', 'text-white');
+      if (btn) btn.classList.add('active', 'bg-primary', 'text-white');
       if (tab === 'transactions') loadTransactions();
       if (tab === 'refunds') loadRefunds();
     }
 
-    // ── Notification ────────────────────────────────────────────
     function showNotification(msg, type) {
+      if (typeof SmartNav !== 'undefined' && SmartNav.showToast) { SmartNav.showToast(msg, type === 'error' ? 'error' : 'success'); return; }
       const el = document.createElement('div');
-      el.className = 'fixed top-4 right-4 z-[999] px-4 py-3 rounded-lg shadow-lg text-sm font-medium '
-        + (type === 'error' ? 'bg-red-500 text-white' : 'bg-green-600 text-white');
+      el.className = 'fixed top-4 right-4 z-[999] px-4 py-3 rounded-lg shadow-lg text-sm font-medium ' + (type === 'error' ? 'bg-red-500 text-white' : 'bg-green-600 text-white');
       el.textContent = msg;
       document.body.appendChild(el);
       setTimeout(() => el.remove(), 4000);
     }
 
-    // ── Init ────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
-      SmartNav.init({ activePage: 'wallet', role: 'customer', breadcrumbs: ['My Wallet'] });
+      if (typeof SmartNav !== 'undefined' && typeof SmartNav.initPageTransition === 'function') SmartNav.initPageTransition();
+      document.getElementById('walletBalance').innerHTML = '<div class="skeleton skeleton-heading" style="height:40px;width:150px"></div>';
       refreshWallet();
     });
+
+    async function refreshWallet() { loadWallet(); loadTransactions(); loadRefunds(); }
   </script>
 </body>
 </html>

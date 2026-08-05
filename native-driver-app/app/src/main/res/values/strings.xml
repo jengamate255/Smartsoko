@@ -22,7 +22,7 @@
     <string name="navigate_to_delivery">Navigate to Delivery</string>
     <string name="order_picked_up">Order Picked Up</string>
     <string name="order_delivered">Order Delivered</string>
-    <string name="mapbox_access_token">YOUR_MAPBOX_PUBLIC_TOKEN_HERE</string>
+    <string name="mapbox_access_token">pk.eyJ1IjoiZGF2ZXkxMDEiLCJhIjoiY2p1ZWc3aWh1MDJ5cjQ0cXd1ZXh2cmd2eCJ9.iE0RngMfwyivH7OrYO_Bag</string>
     
     <!-- Chat screen -->
     <string name="chat_with_customer">Chat with Customer</string>

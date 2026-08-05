@@ -1,15 +1,25 @@
 package com.fooddelivery.driver.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsStateWithLifecycle
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.aspectRatio
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.fooddelivery.driver.R
@@ -18,17 +28,18 @@ import com.fooddelivery.driver.ui.theme.SmartSokoDriverTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     viewModel: AppViewModel = viewModel()
 ) {
     SmartSokoDriverTheme {
         // Collect state from ViewModel
-        val user by viewModel.user.collectAsStateWithLifecycle()
-        val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-        val error by viewModel.error.collectAsStateWithLifecycle()
-        val earnings by viewModel.earnings.collectAsStateWithLifecycle(0.0)
-        val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+        val user by viewModel.user.observeAsState()
+        val isLoading by viewModel.isLoading.observeAsState(false)
+        val error by viewModel.error.observeAsState()
+        val earnings by viewModel.earnings.observeAsState(0.0)
+        val isOnline by viewModel.isOnline.observeAsState(false)
 
         Column(modifier = Modifier.fillMaxSize()) {
             // App Bar
@@ -39,7 +50,9 @@ fun ProfileScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                 },
-                backgroundColor = MaterialTheme.colorScheme.primary
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
             )
 
             // Show error if any
@@ -47,13 +60,11 @@ fun ProfileScreen(
                 Snackbar(
                     modifier = Modifier.fillMaxWidth(),
                     action = {
-                        TextButton(onClick = { /* TODO: Dismiss snackbar */ }) {
+                        TextButton(onClick = { }) {
                             Text("Dismiss")
                         }
                     },
-                    label = { Text(text = errorMessage) },
-                    backgroundColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError
+                    content = { Text(text = errorMessage) }
                 )
             }
 
@@ -74,13 +85,15 @@ fun ProfileScreen(
                 }
                 user == null -> {
                     // Show login screen
-                    LoginScreen(
+                    AuthScreen(
+                        viewModel = viewModel,
                         onLoginSuccess = { email, password ->
                             viewModel.signIn(email, password)
                         }
                     )
                 }
                 else -> {
+                    val userData = user!!
                     // Profile content
                     LazyColumn(
                         modifier = Modifier
@@ -96,13 +109,13 @@ fun ProfileScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 // Profile picture
-                                Image(
-                                    painter = painterResource(id = R.drawable.ic_person),
+                                Icon(
+                                    imageVector = Icons.Default.Person,
                                     contentDescription = "Profile picture",
                                     modifier = Modifier
                                         .size(80.dp)
                                         .aspectRatio(1f)
-                                        .clip(CircleShape)
+                                        .clip(androidx.compose.foundation.shape.CircleShape)
                                         .border(
                                             width = 2.dp,
                                             color = MaterialTheme.colorScheme.primary
@@ -110,33 +123,32 @@ fun ProfileScreen(
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
-                                    text = "${user.firstName} ${user.lastName}",
+                                    text = userData.fullName,
                                     style = MaterialTheme.typography.titleLarge,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = user.email,
+                                    text = userData.email,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(24.dp))
                                 // Status indicator (online/offline)
                                 Row(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Icon(
-                                        imageVector = if (isOnline) Icons.Default.Circle else Icons.Default.CircleOutlined,
+                                        imageVector = if (isOnline) Icons.Default.Circle else Icons.Default.Circle,
                                         contentDescription = "Status",
-                                        tint = if (isOnline) MaterialTheme.colorScheme.success else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        tint = if (isOnline) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(12.dp)
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
                                         text = if (isOnline) "Online" else "Offline",
                                         style = MaterialTheme.typography.labelLarge,
-                                        color = if (isOnline) MaterialTheme.colorScheme.success else MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = if (isOnline) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
@@ -266,8 +278,7 @@ private fun StatsItem(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+        ) {
         Icon(
             imageVector = icon,
             contentDescription = label,
@@ -301,8 +312,7 @@ private fun SettingsItem(
             .fillMaxWidth()
             .padding(vertical = 12.dp)
             .clickable { onClick() },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+        ) {
         Icon(
             imageVector = icon,
             contentDescription = label,
@@ -322,102 +332,5 @@ private fun SettingsItem(
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(20.dp)
         )
-    }
-}
-
-@Composable
-private fun LoginScreen(
-    onLoginSuccess: (String, String) -> Unit
-) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var loading by remember { mutableStateOf(false) }
-
-    SmartSokoDriverTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp)
-        ) {
-            Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_logo),
-                    contentDescription = "SmartSoko Driver",
-                    modifier = Modifier.size(80.dp)
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = "Welcome to SmartSoko Driver",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                TextField(
-                    label = { Text("Email") },
-                    value = email,
-                    onValueChange = { email = it },
-                    isError = email.isEmpty(),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Email,
-                            contentDescription = "Email",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                OutlinedTextField(
-                    label = { Text("Password") },
-                    value = password,
-                    onValueChange = { password = it },
-                    isError = password.isEmpty(),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = "Password",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    },
-                    isPassword = true
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(
-                    onClick = {
-                        if (email.isNotEmpty() && password.isNotEmpty()) {
-                            loading = true
-                            onLoginSuccess(email, password)
-                            loading = false
-                        }
-                    },
-                    enabled = !loading,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    if (loading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Text(
-                            text = "Sign In",
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Don't have an account? Contact support to create one.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
     }
 }

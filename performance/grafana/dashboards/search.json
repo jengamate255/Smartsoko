@@ -1,0 +1,20 @@
+{
+  "dashboard": {
+    "title": "SmartSoko - Search Performance",
+    "uid": "smartsoko-search",
+    "tags": ["smartsoko", "search"],
+    "timezone": "browser",
+    "refresh": "10s",
+    "time": {"from": "now-1h", "to": "now"},
+    "panels": [
+      {"id": 1, "title": "Keyword Search Latency (p95)", "type": "graph", "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(search_latency_seconds_bucket{type=\"keyword\"}[1m]))", "legendFormat": "keyword p95"}]},
+      {"id": 2, "title": "Category Filter Latency (p95)", "type": "graph", "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(filter_latency_seconds_bucket{type=\"category\"}[1m]))", "legendFormat": "category p95"}]},
+      {"id": 3, "title": "Price Filter Latency (p95)", "type": "graph", "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(filter_latency_seconds_bucket{type=\"price\"}[1m]))", "legendFormat": "price p95"}]},
+      {"id": 4, "title": "Sort Latency (p95)", "type": "graph", "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(sort_latency_seconds_bucket[1m]))", "legendFormat": "sort p95"}]},
+      {"id": 5, "title": "Pagination Latency (p95)", "type": "graph", "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(pagination_latency_seconds_bucket[1m]))", "legendFormat": "pagination p95"}]},
+      {"id": 6, "title": "Search Error Rate", "type": "graph", "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8}, "targets": [{"expr": "rate(search_error_total[1m])", "legendFormat": "error rate"}]},
+      {"id": 7, "title": "Results Count Distribution", "type": "graph", "gridPos": {"x": 0, "y": 24, "w": 18, "h": 8}, "targets": [{"expr": "rate(search_result_count_total[1m])", "legendFormat": "results/min"}]}
+    ]
+  },
+  "overwrite": true
+}

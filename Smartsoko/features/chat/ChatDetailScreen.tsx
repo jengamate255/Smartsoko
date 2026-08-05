@@ -84,6 +84,7 @@ export const ChatDetailScreen = ({ route }: { route: { params: { chatId: string 
             </Text>
           </View>
         )}
+      >
       </FlatList>
       <View style={{ flexDirection: 'row', padding: 10, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#eee' }}>
         <TouchableOpacity

@@ -1,4 +1,4 @@
-package com.smartsoko.merchant.data.model
+﻿package com.smartsoko.merchant.data.model
 
 import java.util.Date
 
@@ -23,7 +23,7 @@ data class Product(
     val updatedAt: Date = Date()
 ) {
     val formattedPrice: String
-        get() = "KSh %.2f".format(price)
+        get() = "tsh %.2f".format(price)
 
     val hasDiscount: Boolean
         get() = originalPrice != null && originalPrice > price

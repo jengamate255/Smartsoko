@@ -1,0 +1,372 @@
+[
+  {
+    "route": "login",
+    "status": "ok",
+    "title": "SmartSoko - Sign In",
+    "bodyText": "store SmartSoko Empowering Local Commerce Connecting local markets with technology for seamless trade. Trusted by 10k+ Vendors Welcome Back Access you",
+    "errors": []
+  },
+  {
+    "route": "home",
+    "status": "ok",
+    "title": "SmartSoko - Your Local Marketplace | Shop Food, Groceries & More",
+    "bodyText": "shopping_basket SmartSoko location_on Deliver to Dar es Salaam search shopping_cart Flash Sale Fresh Groceries Delivered Fast Up to 40% off on fresh f",
+    "errors": []
+  },
+  {
+    "route": "customer",
+    "status": "ok",
+    "title": "SmartSoko - Sign In",
+    "bodyText": "store SmartSoko Empowering Local Commerce Connecting local markets with technology for seamless trade. Trusted by 10k+ Vendors Welcome Back Access you",
+    "errors": []
+  },
+  {
+    "route": "merchant",
+    "status": "ok",
+    "title": "SmartSoko - Sign In",
+    "bodyText": "store SmartSoko Empowering Local Commerce Connecting local markets with technology for seamless trade. Trusted by 10k+ Vendors Welcome Back Access you",
+    "errors": [
+      "PAGEERROR: Cannot use import statement outside a module",
+      "PAGEERROR: Duplicate export of 'loadAnalytics'"
+    ]
+  },
+  {
+    "route": "driver",
+    "status": "ok",
+    "title": "SmartSoko - Driver Partner",
+    "bodyText": "shopping_basket SmartSoko local_shipping SmartSoko Driver Partner Portal Welcome back Email Address Secure Password Authenticate New partner? Join the",
+    "errors": []
+  },
+  {
+    "route": "admin",
+    "status": "ok",
+    "title": "SmartSoko - Sign In",
+    "bodyText": "store SmartSoko Empowering Local Commerce Connecting local markets with technology for seamless trade. Trusted by 10k+ Vendors Welcome Back Access you",
+    "errors": []
+  },
+  {
+    "route": "discovery",
+    "status": "ok",
+    "title": "SmartSoko - Discover",
+    "bodyText": "shopping_basket SmartSoko search shopping_cart verified VERIFIED SELLERS Discover Local Quality Find authentic, handcrafted products from Africa's mos",
+    "errors": []
+  },
+  {
+    "route": "profile",
+    "status": "ok",
+    "title": "SmartSoko - Sign In",
+    "bodyText": "store SmartSoko Empowering Local Commerce Connecting local markets with technology for seamless trade. Trusted by 10k+ Vendors Welcome Back Access you",
+    "errors": []
+  },
+  {
+    "route": "cart",
+    "status": "ok",
+    "title": "SmartSoko - Cart",
+    "bodyText": "shopping_basket SmartSoko shopping_cart Cart 0 Items shopping_cart Your cart is empty Start Shopping",
+    "errors": []
+  },
+  {
+    "route": "orders",
+    "status": "ok",
+    "title": "SmartSoko - Sign In",
+    "bodyText": "store SmartSoko Empowering Local Commerce Connecting local markets with technology for seamless trade. Trusted by 10k+ Vendors Welcome Back Access you",
+    "errors": []
+  },
+  {
+    "route": "product",
+    "status": "ok",
+    "title": "SmartSoko - Product Details",
+    "bodyText": "shopping_basket SmartSoko location_on Deliver to Dar es Salaam search shopping_cart Home chevron_right Discover chevron_right Product Error per unit s",
+    "errors": []
+  },
+  {
+    "route": "restaurant",
+    "status": "ERROR",
+    "error": "Navigation timeout of 30000 ms exceeded"
+  },
+  {
+    "route": "chat",
+    "status": "ok",
+    "title": "SmartSoko - Chat with Rider",
+    "bodyText": "shopping_basket SmartSoko arrow_back receipt Order #- 2 items • TSh 0 Today Hello! I'm your delivery rider. I'll be delivering your order soon. Feel f",
+    "errors": []
+  },
+  {
+    "route": "track-order",
+    "status": "ok",
+    "title": "SmartSoko - Track Order",
+    "bodyText": "shopping_basket SmartSoko arrow_back Track Order Order #--- Pending schedule Estimated Delivery --:-- ... Delivery Progress check Order Placed -- rest",
+    "errors": [
+      "Error loading order: TypeError: Cannot read properties of null (reading 'indexOf')",
+      "Error loading order: TypeError: Cannot read properties of null (reading 'indexOf')"
+    ]
+  },
+  {
+    "route": "checkout",
+    "status": "ok",
+    "title": "SmartSoko - Checkout",
+    "bodyText": "arrow_back Checkout notifications shopping_cart shopping_cart Your cart is empty Add items to get started storefront Browse Sellers",
+    "errors": []
+  },
+  {
+    "route": "404",
+    "status": "ok",
+    "title": "404 - Page Not Found | SmartSoko",
+    "bodyText": "error_outline 404 Page Not Found The page you're looking for doesn't exist or has been moved. Let's get you back to shopping! home Back to Home shoppi",
+    "errors": [
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "wallet",
+    "status": "ok",
+    "title": "SmartSoko - My Wallet",
+    "bodyText": "shopping_basket SmartSoko account_balance_wallet My Wallet Manage your balance, top up, and view transaction history refresh Refresh AVAILABLE BALANCE",
+    "errors": []
+  },
+  {
+    "route": "store",
+    "status": "ok",
+    "title": "SmartSoko Store",
+    "bodyText": "storefront Store Not Found The store you're looking for doesn't exist or has been removed. Browse Stores",
+    "errors": [
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "signup",
+    "status": "ok",
+    "title": "SmartSoko - Create Account",
+    "bodyText": "eco spa local_florist nutrition person_add Create Account Join SmartSoko marketplace Full Name person Email Address email Phone Number phone Password ",
+    "errors": []
+  },
+  {
+    "route": "main",
+    "status": "ok",
+    "title": "SmartSoko - Your Local Marketplace | Tanzania's Premier Shopping Platform",
+    "bodyText": "shopping_basket SmartSoko search shopping_cart Cart person search local_fire_department Joto la Kipekee Soko Lako, Karibu Nyumbani Soko la kienyeji li",
+    "errors": []
+  },
+  {
+    "route": "seller",
+    "status": "ok",
+    "title": "Seller Dashboard - SME Marketplace",
+    "bodyText": "Active Orders 0 Preparing 0 Ready for Pickup 0 Revenue Today TSh 0 Avg Prep Time 0m Low Stock Items 0 Orders Products Inventory Analytics Order ID Cus",
+    "errors": []
+  },
+  {
+    "route": "index",
+    "status": "ok",
+    "title": "SmartSoko",
+    "bodyText": "Loading SmartSoko...",
+    "errors": [
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "onboarding",
+    "status": "ok",
+    "title": "SmartSoko - Sign In",
+    "bodyText": "store SmartSoko Empowering Local Commerce Connecting local markets with technology for seamless trade. Trusted by 10k+ Vendors Welcome Back Access you",
+    "errors": []
+  },
+  {
+    "route": "check-user",
+    "status": "ok",
+    "title": "Check User | SmartSoko",
+    "bodyText": "User Diagnostic Firebase Auth Status: ✗ NOT LOGGED IN No Firebase Auth user found. Login Test Merchant Refresh Check Go to Login You need to login fir",
+    "errors": [
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "fleet-manager",
+    "status": "ok",
+    "title": "SmartSoko - Sign In",
+    "bodyText": "store SmartSoko Empowering Local Commerce Connecting local markets with technology for seamless trade. Trusted by 10k+ Vendors Welcome Back Access you",
+    "errors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "API GET error: Error: Missing or invalid Authorization header. Format: Bearer <token>",
+      "Error loading orders: Error: Missing or invalid Authorization header. Format: Bearer <token>"
+    ]
+  },
+  {
+    "route": "admin-panel",
+    "status": "ok",
+    "title": "SmartSoko Admin - Control Center",
+    "bodyText": "admin_panel_settings SmartSoko Admin Control Center with AI Email Password Sign In Back to Store",
+    "errors": [
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "supabase",
+    "status": "ok",
+    "title": "SmartSoko - Supabase Admin",
+    "bodyText": "🍔 SmartSoko Admin Email Password Sign In Create Account",
+    "errors": [
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "seed-merchant",
+    "status": "ok",
+    "title": "Seed Test Merchant | SmartSoko",
+    "bodyText": "Seed Test Merchant This creates a test merchant account with sample products in Firestore. Create Test Merchant Go to Login →",
+    "errors": [
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "smartsoko-home",
+    "status": "ok",
+    "title": "SMARTSOKO - Your Local. Your Fresh. Your Market.",
+    "bodyText": "SMARTSOKO search Browse Vendors About Contact person Account shopping_cart Cart Your Local. Your Fresh. Your Market. A beautiful marketplace celebrati",
+    "errors": [
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "smartsoko-products",
+    "status": "ok",
+    "title": "Browse Products - SMARTSOKO",
+    "bodyText": "SMARTSOKO search Browse Vendors About Contact favorite_border shopping_cart Cart (3) Home / Vegetables / Fresh Produce Categories Leafy Greens (24) Ro",
+    "errors": [
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "smartsoko-vendor",
+    "status": "ok",
+    "title": "Kilimanjaro Fresh - SMARTSOKO",
+    "bodyText": "SMARTSOKO search Browse Vendors About Contact favorite_border shopping_cart Cart (3) eco ✓ VERIFIED VENDOR Kilimanjaro Fresh Farm-fresh vegetables and",
+    "errors": [
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "smartsoko-cart",
+    "status": "ok",
+    "title": "Shopping Cart - SMARTSOKO",
+    "bodyText": "SMARTSOKO search Browse Vendors About Contact favorite_border shopping_cart Cart (4) Home / Shopping Cart Shopping Cart Organic Vine Tomatoes Kilimanj",
+    "errors": [
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "smartsoko-checkout",
+    "status": "ok",
+    "title": "Checkout - SMARTSOKO",
+    "bodyText": "SMARTSOKO search Browse Vendors About Contact favorite_border shopping_cart Cart (3) Home / Cart / Checkout ✓ Cart 2 Details 3 Payment 4 Confirm locat",
+    "errors": [
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "wishlists",
+    "status": "ok",
+    "title": "404 - Page Not Found | SmartSoko",
+    "bodyText": "error_outline 404 Page Not Found The page you're looking for doesn't exist or has been moved. Let's get you back to shopping! home Back to Home shoppi",
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "store-settings",
+    "status": "ok",
+    "title": "404 - Page Not Found | SmartSoko",
+    "bodyText": "error_outline 404 Page Not Found The page you're looking for doesn't exist or has been moved. Let's get you back to shopping! home Back to Home shoppi",
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "social",
+    "status": "ok",
+    "title": "404 - Page Not Found | SmartSoko",
+    "bodyText": "error_outline 404 Page Not Found The page you're looking for doesn't exist or has been moved. Let's get you back to shopping! home Back to Home shoppi",
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "social-profile",
+    "status": "ok",
+    "title": "404 - Page Not Found | SmartSoko",
+    "bodyText": "error_outline 404 Page Not Found The page you're looking for doesn't exist or has been moved. Let's get you back to shopping! home Back to Home shoppi",
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "messages",
+    "status": "ok",
+    "title": "404 - Page Not Found | SmartSoko",
+    "bodyText": "error_outline 404 Page Not Found The page you're looking for doesn't exist or has been moved. Let's get you back to shopping! home Back to Home shoppi",
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "customers",
+    "status": "ok",
+    "title": "SmartSoko - Your Local Marketplace",
+    "bodyText": "shopping_basket SmartSoko shopping_cart location_on DELIVER TO Dar es Salaam search shopping_cart category Shop by Category apps All restaurant Food l",
+    "errors": []
+  },
+  {
+    "route": "create-store",
+    "status": "ok",
+    "title": "404 - Page Not Found | SmartSoko",
+    "bodyText": "error_outline 404 Page Not Found The page you're looking for doesn't exist or has been moved. Let's get you back to shopping! home Back to Home shoppi",
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "discovery-feed",
+    "status": "ok",
+    "title": "404 - Page Not Found | SmartSoko",
+    "bodyText": "error_outline 404 Page Not Found The page you're looking for doesn't exist or has been moved. Let's get you back to shopping! home Back to Home shoppi",
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "index_marketplace",
+    "status": "ok",
+    "title": "404 - Page Not Found | SmartSoko",
+    "bodyText": "error_outline 404 Page Not Found The page you're looking for doesn't exist or has been moved. Let's get you back to shopping! home Back to Home shoppi",
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "stores",
+    "status": "ok",
+    "title": "404 - Page Not Found | SmartSoko",
+    "bodyText": "error_outline 404 Page Not Found The page you're looking for doesn't exist or has been moved. Let's get you back to shopping! home Back to Home shoppi",
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  },
+  {
+    "route": "setup",
+    "status": "ok",
+    "title": "404 - Page Not Found | SmartSoko",
+    "bodyText": "error_outline 404 Page Not Found The page you're looking for doesn't exist or has been moved. Let's get you back to shopping! home Back to Home shoppi",
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: net::ERR_SSL_PROTOCOL_ERROR"
+    ]
+  }
+]

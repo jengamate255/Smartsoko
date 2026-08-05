@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useAuthStore } from '../../store/authStore';
-import { supabase } from '../../services/supabase';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export const LoginScreen = () => {
@@ -13,9 +12,11 @@ export const LoginScreen = () => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const { user, error } = await supabase.auth.signIn({ email, password });
-      if (error) throw error;
-      login(user);
+      await login(email, password);
+      const storeError = useAuthStore.getState().error;
+      if (storeError) {
+        Alert.alert('Login failed', storeError);
+      }
     } catch (err: any) {
       Alert.alert('Login failed', err.message);
     } finally {

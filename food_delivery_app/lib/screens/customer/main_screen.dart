@@ -5,6 +5,7 @@ import 'discovery_screen.dart';
 import 'home_screen.dart';
 import 'orders_screen.dart';
 import 'profile_screen.dart';
+import '../smartmove/customer/ride_booking_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -17,15 +18,17 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 1;
 
   final List<Widget> _screens = [
-    const DiscoveryScreen(),
     const HomeScreen(),
+    const DiscoveryScreen(),
+    const RideBookingScreen(),
     const OrdersScreen(),
     const ProfileScreen(),
   ];
 
   final List<String> _screenNames = [
-    'Discovery',
     'Home',
+    'Search',
+    'Ride',
     'Orders',
     'Profile',
   ];
@@ -90,9 +93,14 @@ class _MainScreenState extends State<MainScreen> {
                 label: 'Search',
               ),
               NavigationDestination(
-                icon: Icon(Icons.shopping_cart_outlined),
-                selectedIcon: Icon(Icons.shopping_cart),
-                label: 'Cart',
+                icon: Icon(Icons.directions_car_outlined),
+                selectedIcon: Icon(Icons.directions_car),
+                label: 'Ride',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.receipt_outlined),
+                selectedIcon: Icon(Icons.receipt),
+                label: 'Orders',
               ),
               NavigationDestination(
                 icon: Icon(Icons.person_outline),

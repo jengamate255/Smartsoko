@@ -8,7 +8,7 @@ const MAPBOX_CONFIG = {
   // Mapbox PUBLIC access token (client-side safe)
   // Secret keys (sk.*) should ONLY be used server-side
   // Replace with your public token from: https://account.mapbox.com/access-tokens/
-  accessToken: process.env.MAPBOX_PUBLIC_TOKEN || 'YOUR_MAPBOX_PUBLIC_TOKEN_HERE',
+  accessToken: 'pk.eyJ1IjoiZGF2ZXkxMDEiLCJhIjoiY2p1ZWc3aWh1MDJ5cjQ0cXd1ZXh2cmd2eCJ9.iE0RngMfwyivH7OrYO_Bag',
 
   // Default map style
   style: 'mapbox://styles/mapbox/streets-v12',
@@ -243,17 +243,13 @@ function calculateDistance(point1, point2) {
   return R * c;
 }
 
-// Export for use in other files
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    MAPBOX_CONFIG,
-    getMapboxToken,
-    setMapboxToken,
-    initMapbox,
-    addMarker,
-    drawRoute,
-    getCurrentLocation,
-    watchLocation,
-    calculateDistance
-  };
-}
+// Export for use in other files (browser-compatible)
+window.MAPBOX_CONFIG = MAPBOX_CONFIG;
+window.getMapboxToken = getMapboxToken;
+window.setMapboxToken = setMapboxToken;
+window.initMapbox = initMapbox;
+window.addMarker = addMarker;
+window.drawRoute = drawRoute;
+window.getCurrentLocation = getCurrentLocation;
+window.watchLocation = watchLocation;
+window.calculateDistance = calculateDistance;

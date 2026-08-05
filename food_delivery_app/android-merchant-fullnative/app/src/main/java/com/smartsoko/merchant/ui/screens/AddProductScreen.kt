@@ -1,4 +1,4 @@
-package com.smartsoko.merchant.ui.screens
+﻿package com.smartsoko.merchant.ui.screens
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -6,12 +6,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +21,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.smartsoko.merchant.ui.components.*
+
+private val CATEGORIES = listOf(
+    "Fresh Produce", "Meat & Poultry", "Fish & Seafood", "Dairy & Eggs",
+    "Bakery", "Beverages", "Snacks", "Grains & Cereals", "Spices & Condiments",
+    "Frozen Foods", "Prepared Meals", "Household Items"
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +42,9 @@ fun AddProductScreen(
     var category by remember { mutableStateOf("") }
     var unit by remember { mutableStateOf("item") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var nameError by remember { mutableStateOf(false) }
+    var priceError by remember { mutableStateOf(false) }
+    var categoryError by remember { mutableStateOf(false) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -67,7 +77,7 @@ fun AddProductScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(SmartRadiusSmall)
                     .clickable { if (!isLoading) imagePickerLauncher.launch("image/*") },
                 contentAlignment = Alignment.Center
             ) {
@@ -87,7 +97,7 @@ fun AddProductScreen(
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Icon(Icons.Default.AddAPhoto, contentDescription = null, size = 48.dp)
+                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(48.dp))
                             Spacer(modifier = Modifier.height(8.dp))
                             Text("Add Product Photo")
                         }
@@ -97,10 +107,12 @@ fun AddProductScreen(
 
             OutlinedTextField(
                 value = name,
-                onValueChange = { name = it },
-                label = { Text("Product Name") },
+                onValueChange = { name = it; nameError = false },
+                label = { Text("Product Name *") },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !isLoading
+                enabled = !isLoading,
+                isError = nameError,
+                supportingText = if (nameError) {{ Text("Product name is required") }} else null
             )
 
             OutlinedTextField(
@@ -115,11 +127,13 @@ fun AddProductScreen(
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
                     value = price,
-                    onValueChange = { price = it },
-                    label = { Text("Price (KSh)") },
+                    onValueChange = { price = it; priceError = false },
+                    label = { Text("Price (tsh) *") },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    enabled = !isLoading
+                    enabled = !isLoading,
+                    isError = priceError,
+                    supportingText = if (priceError) {{ Text("Valid price is required") }} else null
                 )
 
                 OutlinedTextField(
@@ -131,35 +145,53 @@ fun AddProductScreen(
                 )
             }
 
-            OutlinedTextField(
-                value = category,
-                onValueChange = { category = it },
-                label = { Text("Category") },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !isLoading
-            )
+            var expanded by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { if (!isLoading) expanded = it }
+            ) {
+                OutlinedTextField(
+                    value = category,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Category *") },
+                    isError = categoryError,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                    enabled = !isLoading
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    CATEGORIES.forEach { cat ->
+                        DropdownMenuItem(
+                            text = { Text(cat) },
+                            onClick = {
+                                category = cat
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
+            PrimaryButton(
+                text = "Save Product",
                 onClick = {
-                    val priceVal = price.toDoubleOrNull() ?: 0.0
-                    onSave(name, description, priceVal, category, unit, selectedImageUri)
+                    nameError = name.isBlank()
+                    priceError = price.toDoubleOrNull() == null || price.toDoubleOrNull()!! <= 0.0
+                    categoryError = category.isBlank()
+                    if (!nameError && !priceError && !categoryError) {
+                        val priceVal = price.toDoubleOrNull() ?: 0.0
+                        onSave(name.trim(), description.trim(), priceVal, category.trim(), unit.trim(), selectedImageUri)
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !isLoading && name.isNotEmpty() && price.isNotEmpty(),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text("Save Product", style = MaterialTheme.typography.titleMedium)
-                }
-            }
+                isLoading = isLoading
+            )
         }
     }
 }

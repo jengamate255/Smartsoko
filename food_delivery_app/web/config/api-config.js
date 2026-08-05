@@ -3,6 +3,7 @@
 
 const SUPABASE_PROJECT_ID = 'vonkqyiczeqhuqhahsxm';
 const SUPABASE_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co`;
+const SUPABASE_FUNCTIONS_URL = `${SUPABASE_URL}/functions/v1`;
 
 const getApiBaseUrl = () => {
   const hostname = window.location.hostname;
@@ -20,6 +21,22 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 const USE_SUPABASE = false; // Primary API is Express, Supabase for specific features
+
+// Circuit breaker: supabase schema/endpoint errors are persistent - back off
+// for 5 minutes instead of hitting the network on every request.
+const SUPABASE_BREAKER_MS = 5 * 60 * 1000;
+let _supabaseBreakerUntil = 0;
+
+function _supabaseBreakerOpen() {
+  return Date.now() < _supabaseBreakerUntil;
+}
+
+function _tripSupabaseBreaker() {
+  if (_supabaseBreakerUntil === 0) {
+    console.warn('[API] Supabase endpoint errors detected - pausing Supabase requests for 5 minutes');
+  }
+  _supabaseBreakerUntil = Date.now() + SUPABASE_BREAKER_MS;
+}
 
 // Intelligent routing: determine best service for each use case
 const getBestApiService = (endpoint) => {
@@ -71,6 +88,11 @@ console.log('API Configuration:', {
 // Get Firebase ID token for authenticated requests
 async function getAuthToken() {
   try {
+    // Modular SDK exposes the auth instance as window.auth
+    if (window.auth && window.auth.currentUser) {
+      return await window.auth.currentUser.getIdToken(true);
+    }
+    // Fallback for namespaced (compat) SDK
     if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
       return await firebase.auth().currentUser.getIdToken(true);
     }
@@ -96,8 +118,7 @@ async function buildHeaders(customHeaders = {}) {
 }
 
 // API Routes mapping - supports both local API and Supabase Edge Functions
-if (typeof API_ROUTES === 'undefined') {
-  var API_ROUTES = {
+var API_ROUTES = {
     // Supabase Edge Functions endpoints (for production)
     SUPABASE: {
       HEALTH_CHECK: '/health-check',
@@ -107,6 +128,19 @@ if (typeof API_ROUTES === 'undefined') {
       RIDER: (id) => `/riders-management/${id}`,
       DRIVER_PROFILE: '/driver-profile',
       ROUTE_OPTIMIZE: '/route-optimization',
+    },
+    // Admin API via Supabase Edge Function
+    ADMIN_API: {
+      BASE: `${SUPABASE_FUNCTIONS_URL}/admin-api`,
+      ORDERS: `${SUPABASE_FUNCTIONS_URL}/admin-api/orders`,
+      ORDER: (id) => `${SUPABASE_FUNCTIONS_URL}/admin-api/orders/${id}`,
+      ORDER_STATUS: (id) => `${SUPABASE_FUNCTIONS_URL}/admin-api/orders/${id}/status`,
+      ORDER_ASSIGN: (id) => `${SUPABASE_FUNCTIONS_URL}/admin-api/orders/${id}/assign`,
+      SELLERS: `${SUPABASE_FUNCTIONS_URL}/admin-api/sellers`,
+      SELLER: (id) => `${SUPABASE_FUNCTIONS_URL}/admin-api/sellers/${id}`,
+      USERS: `${SUPABASE_FUNCTIONS_URL}/admin-api/users`,
+      DRIVERS: `${SUPABASE_FUNCTIONS_URL}/admin-api/drivers`,
+      LOG: `${SUPABASE_FUNCTIONS_URL}/admin-api/admin/log`,
     },
     // Legacy local API endpoints (for development)
     CUSTOMER: {
@@ -145,19 +179,36 @@ if (typeof API_ROUTES === 'undefined') {
       ROUTE_OPTIMIZE: '/route-optimization',
     }
   };
-}
 
-// API Helper Functions - only declare if not already defined
-if (typeof apiHelpers === 'undefined') {
-  var apiHelpers = {
+// API Helper Functions
+var apiHelpers = {
+    // In-flight request deduplication (coalesce concurrent identical GET requests)
+    _inflight: new Map(),
+
+    _getInflightKey(endpoint, options) {
+      return endpoint + '?' + JSON.stringify(options.params || {});
+    },
+
+    async _dedupedGet(endpoint, options = {}) {
+      const key = this._getInflightKey(endpoint, options);
+      const existing = this._inflight.get(key);
+      if (existing) {
+        return existing;
+      }
+      const promise = this._makeRequest(endpoint, 'GET', null, options).finally(() => {
+        this._inflight.delete(key);
+      });
+      this._inflight.set(key, promise);
+      return promise;
+    },
     // Helper to handle response and common errors
-    async _handleResponse(response) {
-      // Handle 401 - redirect to login
+    async _handleResponse(response, method = 'GET') {
+      // Handle 401 - redirect to login for page-level reads; for mutations
+      // (e.g. order placement) just throw so the caller can fall back.
       if (response.status === 401) {
         const data = await response.json().catch(() => ({}));
         console.warn('Authentication required:', data.message);
-        // Redirect to login if token expired or missing
-        if (window.location.pathname !== '/login') {
+        if (method === 'GET' && window.location.pathname !== '/login') {
           window.location.href = '/login?reason=session_expired';
         }
         throw new Error(data.message || 'Authentication required');
@@ -212,12 +263,15 @@ if (typeof apiHelpers === 'undefined') {
         ...restOptions
       });
 
-      return await this._handleResponse(response);
+      return await this._handleResponse(response, method);
     },
 
     // Make request to Supabase
     async _makeSupabaseRequest(endpoint, method, data, options) {
       try {
+        if (_supabaseBreakerOpen()) {
+          throw new Error(`Supabase request skipped: circuit open`);
+        }
         // Map endpoint to Supabase operations
         if (endpoint.includes('/analytics/sales')) {
           const { days = 30 } = options.params || {};
@@ -262,8 +316,11 @@ if (typeof apiHelpers === 'undefined') {
           body: data ? JSON.stringify(data) : undefined
         });
 
-        return await this._handleResponse(response);
+        return await this._handleResponse(response, method);
       } catch (error) {
+        if (/failed: [45]\d\d|PGRST\d+|status (4|5)\d\d|circuit open/i.test(String(error.message))) {
+          _tripSupabaseBreaker();
+        }
         console.error('Supabase request error:', error);
         throw error;
       }
@@ -271,7 +328,7 @@ if (typeof apiHelpers === 'undefined') {
 
     async get(endpoint, options = {}) {
       try {
-        return await this._makeRequest(endpoint, 'GET', null, options);
+        return await this._dedupedGet(endpoint, options);
       } catch (error) {
         console.error('API GET error:', error);
         throw error;
@@ -280,16 +337,19 @@ if (typeof apiHelpers === 'undefined') {
 
     async post(endpoint, data = {}, options = {}) {
       try {
-        return await this._makeRequest(endpoint, 'POST', data, options);
+        const result = await this._makeRequest(endpoint, 'POST', data, options);
+        this._invalidateCache(endpoint);
+        return result;
       } catch (error) {
-        // Silently fail - caller should fallback to Firestore
         throw error;
       }
     },
 
     async put(endpoint, data = {}, options = {}) {
       try {
-        return await this._makeRequest(endpoint, 'PUT', data, options);
+        const result = await this._makeRequest(endpoint, 'PUT', data, options);
+        this._invalidateCache(endpoint);
+        return result;
       } catch (error) {
         console.error('API PUT error:', error);
         throw error;
@@ -298,24 +358,34 @@ if (typeof apiHelpers === 'undefined') {
 
     async delete(endpoint, options = {}) {
       try {
-        return await this._makeRequest(endpoint, 'DELETE', null, options);
+        const result = await this._makeRequest(endpoint, 'DELETE', null, options);
+        this._invalidateCache(endpoint);
+        return result;
       } catch (error) {
         console.error('API DELETE error:', error);
         throw error;
       }
     },
 
+    _invalidateCache(endpoint) {
+      // Clear in-flight GET requests for this endpoint (and collection)
+      const base = endpoint.split('/')[1]; // e.g., 'admin, sellers, users, orders
+      for (const [key, promise] of this._inflight) {
+        if (key.startsWith('/' + base + '/') || key.startsWith('/api/' + base + '/')) {
+          this._inflight.delete(key);
+        }
+      }
+    },
+
     // Utility: Check if user is authenticated
     isAuthenticated() {
-      return typeof firebase !== 'undefined' &&
-             firebase.auth &&
-             !!firebase.auth().currentUser;
+      return !!(window.auth && window.auth.currentUser);
     },
 
     // Utility: Get current user info
     async getCurrentUser() {
-      if (typeof firebase === 'undefined' || !firebase.auth) return null;
-      const user = firebase.auth().currentUser;
+      const user = (window.auth && window.auth.currentUser) ||
+        (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser);
       if (!user) return null;
 
       return {
@@ -351,6 +421,5 @@ if (typeof apiHelpers === 'undefined') {
       });
     }
   };
-}
 
 console.log('✅ API Configuration loaded - Base URL:', API_BASE_URL);

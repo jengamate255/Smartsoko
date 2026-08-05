@@ -1,14 +1,28 @@
-package com.smartsoko.merchant.ui.screens
+﻿package com.smartsoko.merchant.ui.screens
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.smartsoko.merchant.data.model.Order
+import com.smartsoko.merchant.ui.components.*
 import com.smartsoko.merchant.data.model.OrderStatus
 import com.smartsoko.merchant.ui.viewmodel.OrderFilter
 import java.text.SimpleDateFormat
@@ -19,20 +33,52 @@ import java.util.*
 fun OrdersScreen(
     orders: List<Order>,
     currentFilter: OrderFilter,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    onOrderClick: (Order) -> Unit,
     onFilterChange: (OrderFilter) -> Unit,
     onAcceptOrder: (String) -> Unit,
     onRejectOrder: (String) -> Unit,
     onMarkReady: (String) -> Unit,
-    onMarkDelivered: (String) -> Unit
+    onMarkDelivered: (String) -> Unit,
+    onRefresh: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        // Filter tabs
-        ScrollableTabRow(selectedTabIndex = currentFilter.ordinal) {
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchQueryChange,
+            placeholder = { Text("Search orders") },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+            trailingIcon = {
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { onSearchQueryChange("") }) {
+                        Icon(Icons.Default.Clear, contentDescription = "Clear")
+                    }
+                }
+            },
+            singleLine = true,
+            shape = SmartRadiusSmall,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+
+        ScrollableTabRow(
+            selectedTabIndex = currentFilter.ordinal,
+            edgePadding = 16.dp,
+            divider = {}
+        ) {
             OrderFilter.values().forEach { filter ->
                 Tab(
                     selected = currentFilter == filter,
                     onClick = { onFilterChange(filter) },
-                    text = { Text(filter.name) }
+                    text = {
+                        Text(
+                            filter.name,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = if (currentFilter == filter) FontWeight.SemiBold else FontWeight.Normal
+                        )
+                    }
                 )
             }
         }
@@ -42,17 +88,30 @@ fun OrdersScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text("No orders found", style = MaterialTheme.typography.bodyLarge)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        if (searchQuery.isNotEmpty()) "No orders match your search" else "No orders found",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        "New orders will appear here",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(orders) { order ->
                     OrderCard(
                         order = order,
+                        onClick = { onOrderClick(order) },
                         onAccept = { onAcceptOrder(order.id) },
                         onReject = { onRejectOrder(order.id) },
                         onReady = { onMarkReady(order.id) },
@@ -67,6 +126,7 @@ fun OrdersScreen(
 @Composable
 fun OrderCard(
     order: Order,
+    onClick: () -> Unit,
     onAccept: () -> Unit,
     onReject: () -> Unit,
     onReady: () -> Unit,
@@ -74,11 +134,10 @@ fun OrderCard(
 ) {
     val dateFormat = remember { SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()) }
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    SmartCard(
+        modifier = Modifier
+            .clickable(onClick = onClick),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -88,117 +147,145 @@ fun OrderCard(
                     text = "Order #${order.id.take(8)}",
                     style = MaterialTheme.typography.titleMedium
                 )
-                StatusChip(status = order.status)
+                OrderStatusChip(status = order.status)
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            Text(
-                text = order.customerName,
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = order.customerPhone,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    modifier = Modifier.size(36.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            order.customerName.take(1).uppercase(),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = order.customerName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    if (order.customerPhone.isNotEmpty()) {
+                        Text(
+                            text = order.customerPhone,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Text(
                 text = order.formattedItems,
                 style = MaterialTheme.typography.bodyMedium,
-                maxLines = 2
+                maxLines = 2,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = dateFormat.format(order.createdAt),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = dateFormat.format(order.createdAt),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 Text(
                     text = order.formattedTotal,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
                 )
             }
 
-            // Action buttons
             when (order.status) {
                 OrderStatus.PENDING -> {
+                    Spacer(modifier = Modifier.height(12.dp))
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 12.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        OutlinedButton(
+                        SecondaryButton(
+                            text = "Decline",
                             onClick = onReject,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Reject")
-                        }
-                        Button(
+                            modifier = Modifier.weight(1f),
+                            leadingIcon = { Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                        )
+                        PrimaryButton(
+                            text = "Accept",
                             onClick = onAccept,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Accept")
-                        }
+                            modifier = Modifier.weight(1f),
+                            leadingIcon = { Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                        )
                     }
                 }
                 OrderStatus.ACCEPTED -> {
-                    Button(
+                    Spacer(modifier = Modifier.height(12.dp))
+                    PrimaryButton(
+                        text = "Mark as Ready",
                         onClick = onReady,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 12.dp)
-                    ) {
-                        Text("Mark as Ready")
-                    }
+                        modifier = Modifier.fillMaxWidth(),
+                        leadingIcon = { Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                    )
                 }
                 OrderStatus.READY -> {
-                    Button(
+                    Spacer(modifier = Modifier.height(12.dp))
+                    PrimaryButton(
+                        text = "Mark as Delivered",
                         onClick = onDelivered,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 12.dp)
-                    ) {
-                        Text("Mark as Delivered")
-                    }
+                        modifier = Modifier.fillMaxWidth(),
+                        leadingIcon = { Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                    )
                 }
                 else -> {}
             }
-        }
     }
 }
 
 @Composable
-fun StatusChip(status: OrderStatus) {
-    val (color, text) = when (status) {
-        OrderStatus.PENDING -> MaterialTheme.colorScheme.tertiary to "Pending"
-        OrderStatus.ACCEPTED -> MaterialTheme.colorScheme.primary to "Accepted"
-        OrderStatus.READY -> MaterialTheme.colorScheme.secondary to "Ready"
-        OrderStatus.DELIVERED -> MaterialTheme.colorScheme.primary to "Delivered"
-        OrderStatus.COMPLETED -> MaterialTheme.colorScheme.primary to "Completed"
-        OrderStatus.CANCELLED -> MaterialTheme.colorScheme.error to "Cancelled"
-        OrderStatus.REJECTED -> MaterialTheme.colorScheme.error to "Rejected"
+fun OrderStatusChip(status: OrderStatus) {
+    val (containerColor, contentColor, label) = when (status) {
+        OrderStatus.PENDING -> Triple(MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer, "Pending")
+        OrderStatus.ACCEPTED -> Triple(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer, "Accepted")
+        OrderStatus.READY -> Triple(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer, "Ready")
+        OrderStatus.DELIVERED -> Triple(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer, "Delivered")
+        OrderStatus.COMPLETED -> Triple(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer, "Completed")
+        OrderStatus.CANCELLED -> Triple(MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.onErrorContainer, "Cancelled")
+        OrderStatus.REJECTED -> Triple(MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.onErrorContainer, "Rejected")
     }
 
     Surface(
-        color = color.copy(alpha = 0.2f),
-        shape = MaterialTheme.shapes.small
+        color = containerColor,
+        shape = RoundedCornerShape(8.dp)
     ) {
         Text(
-            text = text,
-            color = color,
+            text = label,
+            color = contentColor,
             style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
         )
     }
 }

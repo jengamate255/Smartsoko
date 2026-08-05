@@ -1,38 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="light" lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>SmartSoko Admin - Control Center</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <meta name="theme-color" content="#064e3b">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" href="dist/tailwind.css" as="style">
   <link rel="stylesheet" href="dist/tailwind.css">
   <link rel="stylesheet" href="design-system.css">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="config/firebase-config.js" type="module"></script>
-  <script src="config/admin-data.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script type="module" src="config/firebase-config.js?v=5"></script>
+  <script type="module" src="config/cross-platform-service.js?v=4"></script>
+  <script src="config/api-config.js?v=6" defer></script>
+  <script src="config/admin-data.js" defer></script>
   <style>
-    .material-symbols-outlined {font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
-    body{min-height:100dvh}
-    .sidebar-link{transition:all .2s}
-    .sidebar-link:hover,.sidebar-link.active{background:var(--os-primary);color:#fff}
-    .stat-card{transition:transform .2s}
-    .stat-card:hover{transform:translateY(-2px)}
-    .ai-badge{background:linear-gradient(135deg,#667eea,#764ba2)}
-    .alert-critical{border-left:4px solid #ef4444}
-    .alert-warning{border-left:4px solid #f59e0b}
-    .alert-info{border-left:4px solid #3b82f6}
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display: inline-block; line-height: 1; vertical-align: middle; }
+    .filled-icon { font-variation-settings: 'FILL' 1; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter','Montserrat',sans-serif; min-height: 100vh; background: #F8FAF6; }
+    h1,h2,h3,h4,h5,h6 { font-family: 'Montserrat',sans-serif; }
+    .gradient-bg { background: #064e3b; }
+    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .admin-card { background: white; border-radius: 14px; box-shadow: 0 2px 8px rgba(44,62,80,0.05); border: 1px solid #f0f0f0; }
+    .sidebar-link { padding: 10px 14px; border-radius: 12px; font-size: 13px; font-weight: 600; color: #374151; display: flex; align-items: center; gap: 10px; transition: all 0.2s; }
+    .sidebar-link:hover, .sidebar-link.active { background: #064e3b; color: white; }
+    .sidebar-link .material-symbols-outlined { font-size: 20px; }
+    .stat-card { background: white; border-radius: 14px; padding: 16px; box-shadow: 0 2px 8px rgba(44,62,80,0.05); border: 1px solid #f0f0f0; border-left: 4px solid #064e3b; }
+    .status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-confirmed { background: #dbeafe; color: #1e40af; }
+    .status-preparing { background: #f3e8ff; color: #6b21a8; }
+    .status-ready { background: #dcfce7; color: #166534; }
+    .status-dispatched { background: #e0e7ff; color: #312e81; }
+    .status-delivered { background: #dcfce7; color: #166534; }
+    .status-cancelled { background: #fee2e2; color: #991b1b; }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-900 min-h-screen">
-  <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#012d1d] to-[#024a2b] p-4">
+<body class="bg-[#F8FAF6] text-gray-900 min-h-screen">
+
+  <!-- Login Screen -->
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-800 to-green-900 p-4">
     <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
       <div class="text-center mb-8">
-        <div class="w-16 h-16 bg-[#012d1d]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <span class="material-symbols-outlined text-3xl text-[#012d1d]">admin_panel_settings</span>
+        <div class="w-16 h-16 bg-green-700/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <span class="material-symbols-outlined text-3xl text-green-700">admin_panel_settings</span>
         </div>
         <h1 class="text-2xl font-bold text-gray-900">SmartSoko Admin</h1>
         <p class="text-gray-500 mt-1">Control Center with AI</p>
@@ -41,25 +60,26 @@
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input type="email" id="adminEmail" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#012d1d] focus:border-[#012d1d]" placeholder="admin@smartsoko.com">
+          <input type="email" id="adminEmail" aria-label="Admin email" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-700/20 focus:border-green-700 outline-none" placeholder="admin@smartsoko.com">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-          <input type="password" id="adminPassword" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#012d1d] focus:border-[#012d1d]" placeholder="Enter password">
+          <input type="password" id="adminPassword" aria-label="Admin password" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-700/20 focus:border-green-700 outline-none" placeholder="Enter password">
         </div>
-        <button id="loginBtn" class="w-full py-3 bg-[#012d1d] text-white rounded-xl font-bold hover:bg-[#012d1d]/90 transition-all">Sign In</button>
+        <button id="loginBtn" class="w-full py-3 gradient-bg text-white rounded-xl font-bold hover:opacity-90 transition-all">Sign In</button>
       </div>
       <div class="mt-6 pt-6 border-t text-center">
-        <a href="/home" class="text-sm text-[#012d1d] hover:underline">Back to Store</a>
+        <a href="/home" class="text-sm text-green-700 hover:underline">Back to Store</a>
       </div>
     </div>
   </div>
 
+  <!-- Admin Layout -->
   <div id="adminLayout" class="hidden flex min-h-screen">
     <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full">
       <div class="p-4 border-b border-gray-200">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-[#012d1d] rounded-xl flex items-center justify-center">
+          <div class="w-10 h-10 bg-green-700 rounded-xl flex items-center justify-center">
             <span class="material-symbols-outlined text-white">admin_panel_settings</span>
           </div>
           <div>
@@ -70,41 +90,66 @@
       </div>
       <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
         <a href="#" onclick="showSection('dashboard')" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="dashboard">
-          <span class="material-symbols-outlined text-lg">dashboard</span> Dashboard
+          <span class="material-symbols-outlined">dashboard</span> Dashboard
         </a>
         <a href="#" onclick="showSection('server')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="server">
-          <span class="material-symbols-outlined text-lg">dns</span> Server Status
+          <span class="material-symbols-outlined">dns</span> Server Status
         </a>
         <a href="#" onclick="showSection('logs')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="logs">
-          <span class="material-symbols-outlined text-lg">article</span> Logs
+          <span class="material-symbols-outlined">article</span> Logs
         </a>
         <a href="#" onclick="showSection('reports')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="reports">
-          <span class="material-symbols-outlined text-lg">description</span> Reports
+          <span class="material-symbols-outlined">description</span> Reports
         </a>
         <a href="#" onclick="showSection('ai-moderation')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="ai-moderation">
-          <span class="material-symbols-outlined text-lg">psychology</span> AI Moderation
-          <span class="ai-badge px-2 py-0.5 rounded-full text-[10px] text-white ml-auto">AI</span>
+          <span class="material-symbols-outlined">psychology</span> AI Moderation
+          <span class="bg-gradient-to-r from-purple-500 to-pink-500 px-2 py-0.5 rounded-full text-[10px] text-white ml-auto">AI</span>
         </a>
         <a href="#" onclick="showSection('users')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="users">
-          <span class="material-symbols-outlined text-lg">people</span> Users
+          <span class="material-symbols-outlined">people</span> Users
         </a>
         <a href="#" onclick="showSection('sellers')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="sellers">
-          <span class="material-symbols-outlined text-lg">store</span> Sellers
+          <span class="material-symbols-outlined">store</span> Sellers
         </a>
         <a href="#" onclick="showSection('drivers')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="drivers">
-          <span class="material-symbols-outlined text-lg">delivery_dining</span> Drivers
+          <span class="material-symbols-outlined">delivery_dining</span> Drivers
         </a>
         <a href="#" onclick="showSection('orders')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="orders">
-          <span class="material-symbols-outlined text-lg">receipt_long</span> Orders
+          <span class="material-symbols-outlined">receipt_long</span> Orders
         </a>
         <a href="#" onclick="showSection('analytics')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="analytics">
-          <span class="material-symbols-outlined text-lg">analytics</span> Analytics
+          <span class="material-symbols-outlined">analytics</span> Analytics
+        </a>
+        <div class="pt-3 pb-1 px-4"><p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Admin Ops</p></div>
+        <a href="#" onclick="showSection('risk-scoring')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="risk-scoring">
+          <span class="material-symbols-outlined">shield</span> Risk Scoring
+        </a>
+        <a href="#" onclick="showSection('payouts')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="payouts">
+          <span class="material-symbols-outlined">payments</span> Payouts
+        </a>
+        <a href="#" onclick="showSection('rbac')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="rbac">
+          <span class="material-symbols-outlined">admin_panel_settings</span> Roles & Permissions
+        </a>
+        <a href="#" onclick="showSection('webhooks')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="webhooks">
+          <span class="material-symbols-outlined">webhook</span> Webhooks
+        </a>
+        <a href="#" onclick="showSection('api-keys')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="api-keys">
+          <span class="material-symbols-outlined">key</span> API Keys
+        </a>
+        <a href="#" onclick="showSection('notifications')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="notifications">
+          <span class="material-symbols-outlined">notifications</span> Notifications
+        </a>
+        <a href="#" onclick="showSection('settings')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="settings">
+          <span class="material-symbols-outlined">settings</span> Platform Config
+        </a>
+        <a href="#" onclick="showSection('audit-logs')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium" data-section="audit-logs">
+          <span class="material-symbols-outlined">assignment</span> Audit Logs
         </a>
       </nav>
       <div class="p-3 border-t border-gray-200">
         <div class="flex items-center gap-3 px-4 py-2">
-          <div class="w-8 h-8 bg-[#012d1d]/10 rounded-full flex items-center justify-center">
-            <span class="material-symbols-outlined text-sm text-[#012d1d]">person</span>
+          <div class="w-8 h-8 bg-green-700/10 rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-sm text-green-700">person</span>
           </div>
           <div class="flex-1 min-w-0">
             <p class="text-sm font-medium truncate" id="adminName">Admin</p>
@@ -119,84 +164,93 @@
     <main class="flex-1 ml-64">
       <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
         <div>
-          <h1 class="text-xl font-bold" id="pageTitle">Dashboard</h1>
+          <h1 class="text-xl font-bold text-gray-900" id="pageTitle">Dashboard</h1>
           <p class="text-sm text-gray-500" id="pageSubtitle">Real-time overview</p>
         </div>
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full">
             <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            <span class="text-xs font-medium text-green-700" id="connectionStatus">Demo Mode</span>
+            <span class="text-xs font-medium text-green-700" id="connectionStatus">Live</span>
           </div>
-          <div class="flex items-center gap-2 px-3 py-1.5 ai-badge rounded-full">
-            <span class="material-symbols-outlined text-white text-sm">psychology</span>
-            <span class="text-xs font-medium text-white">AI Active</span>
+          <div class="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-white text-xs font-medium">
+            <span class="material-symbols-outlined text-sm">psychology</span> AI Active
           </div>
         </div>
       </header>
 
       <div class="p-6" id="mainContent">
+        <!-- Dashboard -->
         <div id="section-dashboard" class="section-content">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-            <div class="stat-card bg-white rounded-xl p-4 shadow-sm border-l-4 border-blue-500">
+            <div class="stat-card">
               <p class="text-xs text-gray-500">Total Orders</p>
-              <p class="text-xl font-bold" id="statOrders">-</p>
+              <p class="text-xl font-bold text-gray-900" id="statOrders"><span class="skeleton skeleton-heading" style="height:24px;width:60px"></span></p>
             </div>
-            <div class="stat-card bg-white rounded-xl p-4 shadow-sm border-l-4 border-green-500">
+            <div class="stat-card border-l-green-500">
               <p class="text-xs text-gray-500">Revenue</p>
-              <p class="text-xl font-bold" id="statRevenue">-</p>
+              <p class="text-xl font-bold text-gray-900" id="statRevenue"><span class="skeleton skeleton-heading" style="height:24px;width:80px"></span></p>
             </div>
-            <div class="stat-card bg-white rounded-xl p-4 shadow-sm border-l-4 border-purple-500">
+            <div class="stat-card border-l-purple-500">
               <p class="text-xs text-gray-500">Active Vendors</p>
-              <p class="text-xl font-bold" id="statVendors">-</p>
+              <p class="text-xl font-bold text-gray-900" id="statVendors"><span class="skeleton skeleton-heading" style="height:24px;width:60px"></span></p>
             </div>
-            <div class="stat-card bg-white rounded-xl p-4 shadow-sm border-l-4 border-amber-500">
+            <div class="stat-card border-l-amber-500">
               <p class="text-xs text-gray-500">Active Users</p>
-              <p class="text-xl font-bold" id="statUsers">-</p>
+              <p class="text-xl font-bold text-gray-900" id="statUsers"><span class="skeleton skeleton-heading" style="height:24px;width:60px"></span></p>
             </div>
-            <div class="stat-card bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-4 shadow-sm text-white">
+            <div class="stat-card bg-gradient-to-br from-purple-500 to-pink-500 text-white">
               <p class="text-xs text-white/80">AI Alerts</p>
-              <p class="text-xl font-bold" id="statAIAlerts">0</p>
+              <p class="text-xl font-bold" id="statAIAlerts"><span class="skeleton skeleton-heading" style="height:24px;width:60px"></span></p>
             </div>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
               <div class="flex items-center gap-2 mb-4">
                 <span class="material-symbols-outlined text-purple-600">lightbulb</span>
-                <h3 class="font-bold">AI Smart Insights</h3>
+                <h3 class="font-bold text-gray-900">AI Smart Insights</h3>
               </div>
-              <div id="aiInsights" class="space-y-3"></div>
+              <div id="aiInsights" class="space-y-3">
+                <div class="skeleton skeleton-text" style="width:100%"></div>
+                <div class="skeleton skeleton-text" style="width:80%"></div>
+              </div>
             </div>
-            <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
               <div class="flex items-center gap-2 mb-4">
                 <span class="material-symbols-outlined text-green-600">trending_up</span>
-                <h3 class="font-bold">Trending Now</h3>
+                <h3 class="font-bold text-gray-900">Trending Now</h3>
               </div>
-              <div id="trendingProducts" class="space-y-2"></div>
+              <div id="trendingProducts" class="space-y-2">
+                <div class="skeleton skeleton-text" style="width:100%"></div>
+                <div class="skeleton skeleton-text" style="width:80%"></div>
+              </div>
             </div>
-            <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
               <div class="flex items-center gap-2 mb-4">
                 <span class="material-symbols-outlined text-blue-600">rule</span>
-                <h3 class="font-bold">AI Recommendations</h3>
+                <h3 class="font-bold text-gray-900">AI Recommendations</h3>
               </div>
-              <div id="aiRecommendations" class="space-y-2"></div>
+              <div id="aiRecommendations" class="space-y-2">
+                <div class="skeleton skeleton-text" style="width:100%"></div>
+                <div class="skeleton skeleton-text" style="width:80%"></div>
+              </div>
             </div>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div class="bg-white rounded-xl p-6 shadow-sm">
-              <h3 class="font-bold mb-4">Revenue Trend</h3>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h3 class="font-bold mb-4 text-gray-900">Revenue Trend</h3>
               <canvas id="revenueChart" height="200"></canvas>
             </div>
-            <div class="bg-white rounded-xl p-6 shadow-sm">
-              <h3 class="font-bold mb-4">Orders by Status</h3>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h3 class="font-bold mb-4 text-gray-900">Orders by Status</h3>
               <canvas id="orderStatusChart" height="200"></canvas>
             </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="p-4 border-b flex justify-between items-center">
-              <h3 class="font-bold">Recent Orders</h3>
+              <h3 class="font-bold text-gray-900">Recent Orders</h3>
               <div class="flex items-center gap-2">
                 <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 <span class="text-xs text-green-600">Live</span>
@@ -213,319 +267,260 @@
                   <th class="px-4 py-3 text-left">AI Score</th>
                 </tr>
               </thead>
-              <tbody id="recentOrdersTable" class="divide-y">
-                <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Loading...</td></tr>
+              <tbody id="recentOrdersTable" class="divide-y divide-gray-100">
+                <tr><td colspan="6" class="px-4 py-6"><div class="flex flex-col gap-3"><div class="skeleton-line"><div class="skeleton skeleton-avatar"></div><div style="flex:1"><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text-sm"></div></div></div><div class="skeleton-line"><div class="skeleton skeleton-avatar"></div><div style="flex:1"><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text-sm"></div></div></div><div class="skeleton-line"><div class="skeleton skeleton-avatar"></div><div style="flex:1"><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text-sm"></div></div></div></div></td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
+        <!-- AI Moderation -->
         <div id="section-ai-moderation" class="section-content hidden">
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-6 text-white">
               <h3 class="font-bold mb-2">Platform Health</h3>
-              <p class="text-4xl font-bold" id="platformHealthScore">95%</p>
+              <p class="text-4xl font-bold" id="platformHealthScore"><span class="skeleton skeleton-heading" style="height:40px;width:80px"></span></p>
             </div>
-            <div class="bg-white rounded-xl p-6 shadow-sm border-l-4 border-red-500">
-              <h3 class="font-bold mb-2">Flagged Products</h3>
-              <p class="text-2xl font-bold" id="flaggedProducts">3</p>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 border-l-4 border-red-500">
+              <h3 class="font-bold mb-2 text-gray-900">Flagged Products</h3>
+              <p class="text-2xl font-bold text-gray-900" id="flaggedProducts"><span class="skeleton skeleton-heading" style="height:32px;width:60px"></span></p>
             </div>
-            <div class="bg-white rounded-xl p-6 shadow-sm border-l-4 border-amber-500">
-              <h3 class="font-bold mb-2">Suspicious Orders</h3>
-              <p class="text-2xl font-bold" id="suspiciousOrders">2</p>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 border-l-4 border-amber-500">
+              <h3 class="font-bold mb-2 text-gray-900">Suspicious Orders</h3>
+              <p class="text-2xl font-bold text-gray-900" id="suspiciousOrders"><span class="skeleton skeleton-heading" style="height:32px;width:60px"></span></p>
             </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow-sm">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100">
             <div class="p-4 border-b bg-purple-50">
-              <h3 class="font-bold">AI Detection Rules Active</h3>
+              <h3 class="font-bold text-gray-900">AI Detection Rules Active</h3>
             </div>
             <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <span class="material-symbols-outlined text-green-600">check_circle</span>
-                <div><p class="font-medium text-sm">Fake Product Detection</p></div>
-              </div>
-              <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <span class="material-symbols-outlined text-green-600">check_circle</span>
-                <div><p class="font-medium text-sm">Price Anomaly Detection</p></div>
-              </div>
-              <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <span class="material-symbols-outlined text-green-600">check_circle</span>
-                <div><p class="font-medium text-sm">Scam Listing Detection</p></div>
-              </div>
-              <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <span class="material-symbols-outlined text-green-600">check_circle</span>
-                <div><p class="font-medium text-sm">Review Manipulation</p></div>
-              </div>
+              <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"><span class="material-symbols-outlined text-green-600">check_circle</span><div><p class="font-medium text-sm">Fake Product Detection</p></div></div>
+              <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"><span class="material-symbols-outlined text-green-600">check_circle</span><div><p class="font-medium text-sm">Price Anomaly Detection</p></div></div>
+              <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"><span class="material-symbols-outlined text-green-600">check_circle</span><div><p class="font-medium text-sm">Scam Listing Detection</p></div></div>
+              <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"><span class="material-symbols-outlined text-green-600">check_circle</span><div><p class="font-medium text-sm">Review Manipulation</p></div></div>
             </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow-sm mt-6">
-            <div class="p-4 border-b">
-              <h3 class="font-bold">AI Flagged Items</h3>
-            </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
+            <div class="p-4 border-b"><h3 class="font-bold text-gray-900">AI Flagged Items</h3></div>
             <table class="w-full">
               <thead class="bg-gray-50 text-xs uppercase text-gray-500">
-                <tr>
-                  <th class="px-4 py-3 text-left">Type</th>
-                  <th class="px-4 py-3 text-left">Item</th>
-                  <th class="px-4 py-3 text-left">Issue</th>
-                  <th class="px-4 py-3 text-left">Confidence</th>
-                  <th class="px-4 py-3 text-left">Actions</th>
-                </tr>
+                <tr><th class="px-4 py-3 text-left">Type</th><th class="px-4 py-3 text-left">Item</th><th class="px-4 py-3 text-left">Issue</th><th class="px-4 py-3 text-left">Confidence</th><th class="px-4 py-3 text-left">Actions</th></tr>
               </thead>
-              <tbody id="flaggedItemsTable" class="divide-y">
-                <tr class="alert-warning">
-                  <td class="px-4 py-3"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs">Product</span></td>
-                  <td class="px-4 py-3 font-medium">iPhone 15 Pro - $50</td>
-                  <td class="px-4 py-3">Price too low - scam indicator</td>
-                  <td class="px-4 py-3"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs">92%</span></td>
-                  <td class="px-4 py-3">
-                    <button class="text-red-600 hover:underline text-sm mr-2">Remove</button>
-                    <button class="text-gray-600 hover:underline text-sm">Review</button>
-                  </td>
-                </tr>
-                <tr class="alert-warning">
-                  <td class="px-4 py-3"><span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs">Order</span></td>
-                  <td class="px-4 py-3 font-medium">ORD-8923</td>
-                  <td class="px-4 py-3">Multiple orders same address</td>
-                  <td class="px-4 py-3"><span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs">78%</span></td>
-                  <td class="px-4 py-3">
-                    <button class="text-amber-600 hover:underline text-sm mr-2">Hold</button>
-                    <button class="text-gray-600 hover:underline text-sm">Investigate</button>
-                  </td>
-                </tr>
+              <tbody id="flaggedItemsTable" class="divide-y divide-gray-100">
+                <tr class="bg-amber-50"><td class="px-4 py-3"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs">Product</span></td><td class="px-4 py-3 font-medium">iPhone 15 Pro - $50</td><td class="px-4 py-3">Price too low - scam indicator</td><td class="px-4 py-3"><span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs">92%</span></td><td class="px-4 py-3"><button class="text-red-600 hover:underline text-sm mr-2">Remove</button><button class="text-gray-600 hover:underline text-sm">Review</button></td></tr>
+                <tr class="bg-amber-50"><td class="px-4 py-3"><span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs">Order</span></td><td class="px-4 py-3 font-medium">ORD-8923</td><td class="px-4 py-3">Multiple orders same address</td><td class="px-4 py-3"><span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs">78%</span></td><td class="px-4 py-3"><button class="text-amber-600 hover:underline text-sm mr-2">Hold</button><button class="text-gray-600 hover:underline text-sm">Investigate</button></td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
+        <!-- Server Status -->
         <div id="section-server" class="section-content hidden">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-green-500">
-              <p class="text-xs text-gray-500">Status</p>
-              <p class="text-xl font-bold text-green-600" id="serverStatus">Online</p>
-            </div>
-            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-blue-500">
-              <p class="text-xs text-gray-500">Uptime</p>
-              <p class="text-xl font-bold" id="serverUptime">-</p>
-            </div>
-            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-purple-500">
-              <p class="text-xs text-gray-500">Memory Used</p>
-              <p class="text-xl font-bold" id="serverMemory">-</p>
-            </div>
-            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-amber-500">
-              <p class="text-xs text-gray-500">CPU Usage</p>
-              <p class="text-xl font-bold" id="serverCPU">-</p>
-            </div>
+            <div class="stat-card border-l-green-500"><p class="text-xs text-gray-500">Status</p><p class="text-xl font-bold text-green-600" id="serverStatus">Online</p></div>
+            <div class="stat-card border-l-blue-500"><p class="text-xs text-gray-500">Uptime</p><p class="text-xl font-bold text-gray-900" id="serverUptime">-</p></div>
+            <div class="stat-card border-l-purple-500"><p class="text-xs text-gray-500">Memory Used</p><p class="text-xl font-bold text-gray-900" id="serverMemory">-</p></div>
+            <div class="stat-card border-l-amber-500"><p class="text-xs text-gray-500">CPU Usage</p><p class="text-xl font-bold text-gray-900" id="serverCPU">-</p></div>
           </div>
-
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white rounded-xl p-6 shadow-sm">
-              <h3 class="font-bold mb-4">System Details</h3>
-              <div id="systemDetails" class="space-y-2 text-sm">
-                <div class="flex justify-between py-2 border-b"><span>Environment</span><span class="font-mono" id="sysEnv">-</span></div>
-                <div class="flex justify-between py-2 border-b"><span>Node Version</span><span class="font-mono" id="sysVersion">-</span></div>
-                <div class="flex justify-between py-2 border-b"><span>Firebase</span><span class="font-mono text-green-600" id="sysFirebase">-</span></div>
-                <div class="flex justify-between py-2 border-b"><span>Supabase</span><span class="font-mono text-green-600" id="sysSupabase">-</span></div>
-              </div>
-            </div>
-            <div class="bg-white rounded-xl p-6 shadow-sm">
-              <h3 class="font-bold mb-4">Memory Breakdown</h3>
-              <canvas id="memoryChart" height="180"></canvas>
-            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6"><h3 class="font-bold mb-4 text-gray-900">System Details</h3><div id="systemDetails" class="space-y-2 text-sm"><div class="flex justify-between py-2 border-b"><span>Environment</span><span class="font-mono" id="sysEnv">-</span></div><div class="flex justify-between py-2 border-b"><span>Node Version</span><span class="font-mono" id="sysVersion">-</span></div><div class="flex justify-between py-2 border-b"><span>Firebase</span><span class="font-mono text-green-600" id="sysFirebase">-</span></div><div class="flex justify-between py-2 border-b"><span>Supabase</span><span class="font-mono text-green-600" id="sysSupabase">-</span></div></div></div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6"><h3 class="font-bold mb-4 text-gray-900">Memory Breakdown</h3><canvas id="memoryChart" height="180"></canvas></div>
           </div>
         </div>
 
+        <!-- Logs -->
         <div id="section-logs" class="section-content hidden">
-          <div class="bg-white rounded-xl shadow-sm">
-            <div class="p-4 border-b flex justify-between items-center">
-              <h3 class="font-bold">Server Logs</h3>
-              <div class="flex gap-2">
-                <select id="logTypeFilter" class="p-2 border rounded text-sm" onchange="loadLogs()">
-                  <option value="all">All Types</option>
-                  <option value="error">Errors</option>
-                  <option value="warn">Warnings</option>
-                  <option value="info">Info</option>
-                </select>
-                <button onclick="loadLogs()" class="px-3 py-1 bg-[#012d1d] text-white rounded text-sm">Refresh</button>
-              </div>
-            </div>
-            <div class="max-h-96 overflow-y-auto">
-              <table class="w-full">
-                <thead class="bg-gray-50 text-xs uppercase text-gray-500 sticky top-0">
-                  <tr>
-                    <th class="px-4 py-3 text-left">Time</th>
-                    <th class="px-4 py-3 text-left">Type</th>
-                    <th class="px-4 py-3 text-left">Message</th>
-                  </tr>
-                </thead>
-                <tbody id="logsTable" class="divide-y font-mono text-sm"></tbody>
-              </table>
-            </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="p-4 border-b flex justify-between items-center"><h3 class="font-bold text-gray-900">Server Logs</h3><div class="flex gap-2"><select id="logTypeFilter" class="p-2 border border-gray-200 rounded text-sm" onchange="loadLogs()"><option value="all">All Types</option><option value="error">Errors</option><option value="warn">Warnings</option><option value="info">Info</option></select><button onclick="loadLogs()" class="px-3 py-1 gradient-bg text-white rounded text-sm hover:opacity-90">Refresh</button></div></div>
+            <div class="max-h-96 overflow-y-auto"><table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500 sticky top-0"><tr><th class="px-4 py-3 text-left">Time</th><th class="px-4 py-3 text-left">Type</th><th class="px-4 py-3 text-left">Message</th></tr></thead><tbody id="logsTable" class="divide-y divide-gray-100 font-mono text-sm"></tbody></table></div>
           </div>
         </div>
 
+        <!-- Reports -->
         <div id="section-reports" class="section-content hidden">
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-blue-500">
-              <p class="text-xs text-gray-500">Period</p>
-              <select id="reportPeriod" class="w-full p-2 border rounded mt-1" onchange="loadReports()">
-                <option value="24h">Last 24 Hours</option>
-                <option value="7d" selected>Last 7 Days</option>
-                <option value="30d">Last 30 Days</option>
-              </select>
-            </div>
-            <div class="bg-white rounded-xl p-4 shadow-sm">
-              <p class="text-xs text-gray-500">Total Orders</p>
-              <p class="text-2xl font-bold" id="reportOrders">-</p>
-            </div>
-            <div class="bg-white rounded-xl p-4 shadow-sm">
-              <p class="text-xs text-gray-500">Total Revenue</p>
-              <p class="text-2xl font-bold text-green-600" id="reportRevenue">-</p>
-            </div>
-            <div class="bg-white rounded-xl p-4 shadow-sm">
-              <p class="text-xs text-gray-500">Active Users</p>
-              <p class="text-2xl font-bold" id="reportUsers">-</p>
-            </div>
+            <div class="stat-card border-l-blue-500"><p class="text-xs text-gray-500">Period</p><select id="reportPeriod" class="w-full p-2 border border-gray-200 rounded mt-1" onchange="loadReports()"><option value="24h">Last 24 Hours</option><option value="7d" selected>Last 7 Days</option><option value="30d">Last 30 Days</option></select></div>
+            <div class="stat-card"><p class="text-xs text-gray-500">Total Orders</p><p class="text-2xl font-bold text-gray-900" id="reportOrders">-</p></div>
+            <div class="stat-card"><p class="text-xs text-gray-500">Total Revenue</p><p class="text-2xl font-bold text-green-600" id="reportRevenue">-</p></div>
+            <div class="stat-card"><p class="text-xs text-gray-500">Active Users</p><p class="text-2xl font-bold text-gray-900" id="reportUsers">-</p></div>
           </div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div class="bg-white rounded-xl p-6 shadow-sm">
-              <h3 class="font-bold mb-4">Orders by Status</h3>
-              <canvas id="reportOrdersChart" height="200"></canvas>
-            </div>
-            <div class="bg-white rounded-xl p-6 shadow-sm">
-              <h3 class="font-bold mb-4">Revenue by Category</h3>
-              <canvas id="reportRevenueChart" height="200"></canvas>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-xl p-6 shadow-sm">
-            <h3 class="font-bold mb-4">Export Reports</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button onclick="exportReport('orders')" class="p-4 border rounded-xl hover:bg-gray-50 text-left">
-                <span class="material-symbols-outlined text-2xl">receipt_long</span>
-                <p class="font-medium mt-2">Orders Report</p>
-                <p class="text-xs text-gray-500">Download CSV</p>
-              </button>
-              <button onclick="exportReport('users')" class="p-4 border rounded-xl hover:bg-gray-50 text-left">
-                <span class="material-symbols-outlined text-2xl">people</span>
-                <p class="font-medium mt-2">Users Report</p>
-                <p class="text-xs text-gray-500">Download CSV</p>
-              </button>
-              <button onclick="exportReport('financial')" class="p-4 border rounded-xl hover:bg-gray-50 text-left">
-                <span class="material-symbols-outlined text-2xl">payments</span>
-                <p class="font-medium mt-2">Financial Report</p>
-                <p class="text-xs text-gray-500">Download CSV</p>
-              </button>
-            </div>
-          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6"><div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6"><h3 class="font-bold mb-4 text-gray-900">Orders by Status</h3><canvas id="reportOrdersChart" height="200"></canvas></div><div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6"><h3 class="font-bold mb-4 text-gray-900">Revenue by Category</h3><canvas id="reportRevenueChart" height="200"></canvas></div></div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6"><h3 class="font-bold mb-4 text-gray-900">Export Reports</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><button onclick="exportReport('orders')" class="p-4 border border-gray-200 rounded-xl hover:bg-gray-50 text-left"><span class="material-symbols-outlined text-2xl">receipt_long</span><p class="font-medium mt-2">Orders Report</p><p class="text-xs text-gray-500">Download CSV</p></button><button onclick="exportReport('users')" class="p-4 border border-gray-200 rounded-xl hover:bg-gray-50 text-left"><span class="material-symbols-outlined text-2xl">people</span><p class="font-medium mt-2">Users Report</p><p class="text-xs text-gray-500">Download CSV</p></button><button onclick="exportReport('financial')" class="p-4 border border-gray-200 rounded-xl hover:bg-gray-50 text-left"><span class="material-symbols-outlined text-2xl">payments</span><p class="font-medium mt-2">Financial Report</p><p class="text-xs text-gray-500">Download CSV</p></button></div></div>
         </div>
 
+        <!-- Users -->
         <div id="section-users" class="section-content hidden">
-          <div class="bg-white rounded-xl shadow-sm">
-            <table class="w-full">
-              <thead class="bg-gray-50 text-xs uppercase text-gray-500">
-                <tr>
-                  <th class="px-4 py-3 text-left">User</th>
-                  <th class="px-4 py-3 text-left">Contact</th>
-                  <th class="px-4 py-3 text-left">Role</th>
-                  <th class="px-4 py-3 text-left">Status</th>
-                  <th class="px-4 py-3 text-left">AI Risk</th>
-                </tr>
-              </thead>
-              <tbody id="usersTable" class="divide-y"></tbody>
-            </table>
-          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100"><table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-4 py-3 text-left">User</th><th class="px-4 py-3 text-left">Contact</th><th class="px-4 py-3 text-left">Role</th><th class="px-4 py-3 text-left">Status</th><th class="px-4 py-3 text-left">AI Risk</th></tr></thead><tbody id="usersTable" class="divide-y divide-gray-100"></tbody></table></div>
         </div>
 
+        <!-- Sellers -->
+        <div id="section-sellers" class="section-content hidden">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100"><div class="p-4 border-b flex justify-between items-center"><h3 class="font-bold text-gray-900">All Sellers</h3><input type="text" id="sellerSearch" aria-label="Search sellers" placeholder="Search sellers..." class="p-2 border border-gray-200 rounded text-sm" onkeyup="searchSellers()"></div><table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-4 py-3 text-left">Seller</th><th class="px-4 py-3 text-left">Category</th><th class="px-4 py-3 text-left">Status</th><th class="px-4 py-3 text-left">Orders</th><th class="px-4 py-3 text-left">Actions</th></tr></thead><tbody id="sellersTable" class="divide-y divide-gray-100"></tbody></table></div>
+        </div>
+
+        <!-- Drivers -->
+        <div id="section-drivers" class="section-content hidden">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100"><div class="p-4 border-b flex justify-between items-center"><h3 class="font-bold text-gray-900">All Drivers</h3><input type="text" id="driverSearch" aria-label="Search drivers" placeholder="Search drivers..." class="p-2 border border-gray-200 rounded text-sm" onkeyup="searchDrivers()"></div><table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-4 py-3 text-left">Driver</th><th class="px-4 py-3 text-left">Phone</th><th class="px-4 py-3 text-left">Status</th><th class="px-4 py-3 text-left">Ratings</th><th class="px-4 py-3 text-left">Actions</th></tr></thead><tbody id="driversTable" class="divide-y divide-gray-100"></tbody></table></div>
+        </div>
+
+        <!-- Orders -->
         <div id="section-orders" class="section-content hidden">
-          <div class="bg-white rounded-xl shadow-sm">
-            <div class="p-4 border-b flex justify-between items-center flex-wrap gap-4">
-              <h3 class="font-bold">All Orders</h3>
-              <div class="flex gap-3">
-                <select id="orderStatusFilter" onchange="loadOrders()" class="p-2 border rounded text-sm">
-                  <option value="">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="preparing">Preparing</option>
-                  <option value="dispatched">Dispatched</option>
-                  <option value="delivered">Delivered</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-                <input type="text" id="orderSearch" placeholder="Search orders..." class="p-2 border rounded text-sm" onkeyup="searchOrders()">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100"><div class="p-4 border-b flex flex-col md:flex-row md:items-center md:justify-between gap-4"><h3 class="font-bold text-gray-900">All Orders</h3><div class="flex gap-3"><select id="orderStatusFilter" onchange="loadOrders()" class="p-2 border border-gray-200 rounded text-sm"><option value="">All Status</option><option value="pending">Pending</option><option value="preparing">Preparing</option><option value="dispatched">Dispatched</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select><input type="text" id="orderSearch" aria-label="Search orders" placeholder="Search orders..." class="p-2 border border-gray-200 rounded text-sm" onkeyup="searchOrders()"></div></div><div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-4 py-3 text-left">Order ID</th><th class="px-4 py-3 text-left">Customer</th><th class="px-4 py-3 text-left">Vendor</th><th class="px-4 py-3 text-left">Driver</th><th class="px-4 py-3 text-left">Total</th><th class="px-4 py-3 text-left">Status</th><th class="px-4 py-3 text-left">Actions</th></tr></thead><tbody id="ordersTable" class="divide-y divide-gray-100"></tbody></table></div></div>
+        </div>
+
+        <!-- Analytics -->
+        <div id="section-analytics" class="section-content hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6"><h3 class="font-bold mb-4 text-gray-900">Sales Trend</h3><canvas id="salesTrendChart" height="200"></canvas></div><div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6"><h3 class="font-bold mb-4 text-gray-900">Revenue by Category</h3><canvas id="categoryChart" height="200"></canvas></div></div>
+        </div>
+
+        <!-- Risk Scoring -->
+        <div id="section-risk-scoring" class="section-content hidden">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="stat-card border-l-red-500"><p class="text-xs text-gray-500">High Risk Orders</p><p class="text-2xl font-bold text-red-600" id="riskHighOrders">-</p></div>
+            <div class="stat-card border-l-amber-500"><p class="text-xs text-gray-500">Medium Risk</p><p class="text-2xl font-bold text-amber-600" id="riskMediumOrders">-</p></div>
+            <div class="stat-card border-l-green-500"><p class="text-xs text-gray-500">Safe Orders</p><p class="text-2xl font-bold text-green-600" id="riskSafeOrders">-</p></div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h3 class="font-bold mb-4 text-gray-900">Risk Assessment</h3>
+              <div class="space-y-4" id="riskAssessments">
+                <div class="p-4 bg-gray-50 rounded-lg text-center text-gray-500">Loading risk data...</div>
               </div>
             </div>
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead class="bg-gray-50 text-xs uppercase text-gray-500">
-                  <tr>
-                    <th class="px-4 py-3 text-left">Order ID</th>
-                    <th class="px-4 py-3 text-left">Customer</th>
-                    <th class="px-4 py-3 text-left">Vendor</th>
-                    <th class="px-4 py-3 text-left">Driver</th>
-                    <th class="px-4 py-3 text-left">Total</th>
-                    <th class="px-4 py-3 text-left">Status</th>
-                    <th class="px-4 py-3 text-left">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="ordersTable" class="divide-y"></tbody>
-              </table>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h3 class="font-bold mb-4 text-gray-900">Fraud Patterns</h3>
+              <canvas id="riskPatternChart" height="200"></canvas>
             </div>
           </div>
-        </div>
-
-        <div id="section-sellers" class="section-content hidden">
-          <div class="bg-white rounded-xl shadow-sm">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100">
             <div class="p-4 border-b flex justify-between items-center">
-              <h3 class="font-bold">All Sellers</h3>
-              <input type="text" id="sellerSearch" placeholder="Search sellers..." class="p-2 border rounded" onkeyup="searchSellers()">
+              <h3 class="font-bold text-gray-900">Risk Flagged Entities</h3>
+              <div class="flex gap-2">
+                <select id="riskEntityFilter" class="p-2 border border-gray-200 rounded text-sm" onchange="loadRiskScoring()">
+                  <option value="all">All Entities</option>
+                  <option value="orders">Orders</option>
+                  <option value="users">Users</option>
+                  <option value="sellers">Sellers</option>
+                </select>
+                <button onclick="loadRiskScoring()" class="px-3 py-1 gradient-bg text-white rounded text-sm hover:opacity-90">Refresh</button>
+              </div>
             </div>
-            <table class="w-full">
-              <thead class="bg-gray-50 text-xs uppercase text-gray-500">
-                <tr>
-                  <th class="px-4 py-3 text-left">Seller</th>
-                  <th class="px-4 py-3 text-left">Category</th>
-                  <th class="px-4 py-3 text-left">Status</th>
-                  <th class="px-4 py-3 text-left">Orders</th>
-                  <th class="px-4 py-3 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="sellersTable" class="divide-y"></tbody>
-            </table>
+            <table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-4 py-3 text-left">Entity</th><th class="px-4 py-3 text-left">ID</th><th class="px-4 py-3 text-left">Risk Score</th><th class="px-4 py-3 text-left">Flags</th><th class="px-4 py-3 text-left">Actions</th></tr></thead><tbody id="riskTable" class="divide-y divide-gray-100"></tbody></table>
           </div>
         </div>
 
-        <div id="section-drivers" class="section-content hidden">
-          <div class="bg-white rounded-xl shadow-sm">
+        <!-- Payouts -->
+        <div id="section-payouts" class="section-content hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-gray-900 text-lg">Payout Batches</h3>
+            <button onclick="showCreatePayoutModal()" class="px-4 py-2 gradient-bg text-white rounded-lg text-sm font-bold hover:opacity-90">+ New Payout</button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="stat-card border-l-blue-500"><p class="text-xs text-gray-500">Total Batches</p><p class="text-2xl font-bold text-gray-900" id="payoutTotal">-</p></div>
+            <div class="stat-card border-l-green-500"><p class="text-xs text-gray-500">Completed</p><p class="text-2xl font-bold text-green-600" id="payoutCompleted">-</p></div>
+            <div class="stat-card border-l-amber-500"><p class="text-xs text-gray-500">Pending</p><p class="text-2xl font-bold text-amber-600" id="payoutPending">-</p></div>
+            <div class="stat-card border-l-red-500"><p class="text-xs text-gray-500">Failed</p><p class="text-2xl font-bold text-red-600" id="payoutFailed">-</p></div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100">
             <div class="p-4 border-b flex justify-between items-center">
-              <h3 class="font-bold">All Drivers</h3>
-              <input type="text" id="driverSearch" placeholder="Search drivers..." class="p-2 border rounded" onkeyup="searchDrivers()">
+              <h3 class="font-bold text-gray-900">All Payout Batches</h3>
+              <select id="payoutStatusFilter" class="p-2 border border-gray-200 rounded text-sm" onchange="loadPayouts()">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="completed">Completed</option>
+                <option value="failed">Failed</option>
+              </select>
             </div>
-            <table class="w-full">
-              <thead class="bg-gray-50 text-xs uppercase text-gray-500">
-                <tr>
-                  <th class="px-4 py-3 text-left">Driver</th>
-                  <th class="px-4 py-3 text-left">Phone</th>
-                  <th class="px-4 py-3 text-left">Status</th>
-                  <th class="px-4 py-3 text-left">Ratings</th>
-                  <th class="px-4 py-3 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="driversTable" class="divide-y"></tbody>
-            </table>
+            <table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-4 py-3 text-left">Batch Name</th><th class="px-4 py-3 text-left">Amount</th><th class="px-4 py-3 text-left">Recipients</th><th class="px-4 py-3 text-left">Status</th><th class="px-4 py-3 text-left">Created</th><th class="px-4 py-3 text-left">Actions</th></tr></thead><tbody id="payoutsTable" class="divide-y divide-gray-100"></tbody></table>
           </div>
         </div>
 
-        <div id="section-analytics" class="section-content hidden">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white rounded-xl p-6 shadow-sm">
-              <h3 class="font-bold mb-4">Sales Trend</h3>
-              <canvas id="salesTrendChart" height="200"></canvas>
+        <!-- RBAC -->
+        <div id="section-rbac" class="section-content hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-gray-900">Admin Roles</h3>
+                <button onclick="showCreateRoleModal()" class="px-3 py-1 gradient-bg text-white rounded text-sm font-bold hover:opacity-90">+ New Role</button>
+              </div>
+              <div id="rolesList" class="space-y-3"></div>
             </div>
-            <div class="bg-white rounded-xl p-6 shadow-sm">
-              <h3 class="font-bold mb-4">Revenue by Category</h3>
-              <canvas id="categoryChart" height="200"></canvas>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-gray-900">User Role Assignments</h3>
+                <button onclick="showAssignRoleModal()" class="px-3 py-1 gradient-bg text-white rounded text-sm font-bold hover:opacity-90">+ Assign</button>
+              </div>
+              <div id="userRolesList" class="space-y-3"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Webhooks -->
+        <div id="section-webhooks" class="section-content hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-gray-900 text-lg">Webhook Endpoints</h3>
+            <button onclick="showCreateWebhookModal()" class="px-4 py-2 gradient-bg text-white rounded-lg text-sm font-bold hover:opacity-90">+ Add Webhook</button>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+            <table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-4 py-3 text-left">Name</th><th class="px-4 py-3 text-left">URL</th><th class="px-4 py-3 text-left">Events</th><th class="px-4 py-3 text-left">Status</th><th class="px-4 py-3 text-left">Actions</th></tr></thead><tbody id="webhooksTable" class="divide-y divide-gray-100"></tbody></table>
+          </div>
+        </div>
+
+        <!-- API Keys -->
+        <div id="section-api-keys" class="section-content hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-gray-900 text-lg">API Keys</h3>
+            <button onclick="showCreateApiKeyModal()" class="px-4 py-2 gradient-bg text-white rounded-lg text-sm font-bold hover:opacity-90">+ Generate Key</button>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+            <table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-4 py-3 text-left">Name</th><th class="px-4 py-3 text-left">Key</th><th class="px-4 py-3 text-left">Permissions</th><th class="px-4 py-3 text-left">Status</th><th class="px-4 py-3 text-left">Created</th><th class="px-4 py-3 text-left">Actions</th></tr></thead><tbody id="apiKeysTable" class="divide-y divide-gray-100"></tbody></table>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div id="section-notifications" class="section-content hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-gray-900 text-lg">Admin Notifications</h3>
+            <button onclick="showSendNotificationModal()" class="px-4 py-2 gradient-bg text-white rounded-lg text-sm font-bold hover:opacity-90">+ Broadcast</button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="stat-card border-l-blue-500"><p class="text-xs text-gray-500">Total Sent</p><p class="text-2xl font-bold text-gray-900" id="notifTotal">-</p></div>
+            <div class="stat-card border-l-green-500"><p class="text-xs text-gray-500">Active</p><p class="text-2xl font-bold text-green-600" id="notifActive">-</p></div>
+            <div class="stat-card border-l-gray-500"><p class="text-xs text-gray-500">Drafts</p><p class="text-2xl font-bold text-gray-600" id="notifDrafts">-</p></div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="p-4 border-b"><h3 class="font-bold text-gray-900">Notification History</h3></div>
+            <table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-4 py-3 text-left">Title</th><th class="px-4 py-3 text-left">Type</th><th class="px-4 py-3 text-left">Target</th><th class="px-4 py-3 text-left">Sent</th><th class="px-4 py-3 text-left">Actions</th></tr></thead><tbody id="notificationsTable" class="divide-y divide-gray-100"></tbody></table>
+          </div>
+        </div>
+
+        <!-- Platform Config -->
+        <div id="section-settings" class="section-content hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h3 class="font-bold mb-4 text-gray-900">General Settings</h3>
+              <div class="space-y-4" id="generalSettings"></div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h3 class="font-bold mb-4 text-gray-900">System Information</h3>
+              <div class="space-y-3" id="systemInfo"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audit Logs -->
+        <div id="section-audit-logs" class="section-content hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-gray-900 text-lg">Admin Audit Trail</h3>
+            <button onclick="loadAuditLogs()" class="px-3 py-1 gradient-bg text-white rounded text-sm hover:opacity-90">Refresh</button>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="max-h-[600px] overflow-y-auto">
+              <table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500 sticky top-0"><tr><th class="px-4 py-3 text-left">Time</th><th class="px-4 py-3 text-left">Admin</th><th class="px-4 py-3 text-left">Action</th><th class="px-4 py-3 text-left">Entity</th><th class="px-4 py-3 text-left">Details</th></tr></thead><tbody id="auditLogsTable" class="divide-y divide-gray-100 font-mono text-sm"></tbody></table>
             </div>
           </div>
         </div>
@@ -564,9 +559,12 @@
 
       if (typeof window.auth !== 'undefined') {
         try {
-          const cred = await window.auth.signInWithEmailAndPassword(window.auth, email, password);
+          const { signInWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+          const cred = await signInWithEmailAndPassword(window.auth, email, password);
           currentAdmin = { email: cred.user.email, name: cred.user.displayName || 'Admin', role: 'admin' };
           localStorage.setItem('smartsoko_admin', JSON.stringify(currentAdmin));
+          // Extract and store ID token for API calls
+          window.currentAdminToken = await cred.user.getIdToken();
           await initDataService();
           showDashboard();
         } catch (e) {
@@ -600,17 +598,13 @@
       if (liveMode) {
         statusEl.textContent = 'Live';
         statusEl.parentElement.className = 'flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full';
-      } else {
-        statusEl.textContent = 'Demo Mode';
-        statusEl.parentElement.className = 'flex items-center gap-2 px-3 py-1.5 bg-amber-50 rounded-full';
-        statusEl.className = 'text-xs font-medium text-amber-700';
       }
     }
 
     function showSection(section) {
-      document.querySelectorAll('.section-content').forEach(function(el) { el.classList.add('hidden'); });
+      document.querySelectorAll('.section-content').forEach(el => el.classList.add('hidden'));
       document.getElementById('section-' + section).classList.remove('hidden');
-      document.querySelectorAll('.sidebar-link').forEach(function(el) { el.classList.remove('active'); });
+      document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
       document.querySelector('[data-section="' + section + '"]').classList.add('active');
 
       var titles = {
@@ -618,12 +612,20 @@
         server: ['Server Status', 'System monitoring'],
         logs: ['Server Logs', 'Debug & diagnostics'],
         reports: ['Reports', 'Business reports'],
-        'ai-moderation': ['AI Moderation', 'Fraud detection'],
+        'ai-moderation': ['AI Moderation', 'Fraud detection & AI oversight'],
         users: ['Users', 'User management'],
         sellers: ['Sellers', 'Seller management'],
         drivers: ['Drivers', 'Driver management'],
         orders: ['Orders', 'Order management'],
-        analytics: ['Analytics', 'Business insights']
+        analytics: ['Analytics', 'Business insights'],
+        'risk-scoring': ['Risk Scoring', 'Fraud & risk assessment'],
+        payouts: ['Payouts', 'Financial operations'],
+        rbac: ['Roles & Permissions', 'Access control'],
+        webhooks: ['Webhooks', 'Integration endpoints'],
+        'api-keys': ['API Keys', 'Developer access'],
+        notifications: ['Notifications', 'Admin broadcast system'],
+        settings: ['Platform Config', 'System settings'],
+        'audit-logs': ['Audit Logs', 'Admin activity trail']
       };
       document.getElementById('pageTitle').textContent = titles[section][0];
       document.getElementById('pageSubtitle').textContent = titles[section][1];
@@ -638,35 +640,79 @@
       else if (section === 'drivers') loadDrivers();
       else if (section === 'orders') loadOrders();
       else if (section === 'analytics') loadAnalytics();
+      else if (section === 'risk-scoring') loadRiskScoring();
+      else if (section === 'payouts') loadPayouts();
+      else if (section === 'rbac') loadRBAC();
+      else if (section === 'webhooks') loadWebhooks();
+      else if (section === 'api-keys') loadApiKeys();
+      else if (section === 'notifications') loadNotifications();
+      else if (section === 'settings') loadPlatformSettings();
+      else if (section === 'audit-logs') loadAuditLogs();
     }
 
-    function esc(str) {
-      if (!str) return '';
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
+    function esc(str) { if (!str) return ''; return String(str).replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"'); }
 
     async function loadDashboardData() {
       try {
-        var stats = await dataService.getDashboardStats();
+        const svc = window.crossPlatformService;
+        var stats = null;
+        if (svc && svc.isReady()) {
+          try {
+            var svcOrders = await svc.list('orders');
+            var svcUsers = await svc.list('users');
+            stats = {
+              totalOrders: svcOrders.length,
+              totalRevenue: svcOrders.reduce(function(s, o) { return s + (o.amount || 0); }, 0),
+              activeVendors: new Set((svcOrders||[]).filter(function(o) { return o.vendor; }).map(function(o) { return o.vendor; })).size,
+              totalUsers: svcUsers.length
+            };
+          } catch(e) { /* silent */ }
+        }
+        if (!stats) stats = await dataService.getDashboardStats();
         document.getElementById('statOrders').textContent = stats.totalOrders.toLocaleString();
         document.getElementById('statRevenue').textContent = 'TZS ' + (stats.totalRevenue / 1000000).toFixed(1) + 'M';
-        document.getElementById('statVendors').textContent = stats.activeVendors.toLocaleString();
-        document.getElementById('statUsers').textContent = stats.totalUsers.toLocaleString();
+        document.getElementById('statVendors').textContent = stats.activeVendors;
+        document.getElementById('statUsers').textContent = stats.totalUsers;
 
-        var flagged = await dataService.getFlaggedItems();
+        var flagged = null;
+        if (svc && svc.isReady()) {
+          try {
+            var flaggedProds = await svc.list('products', { where: [['flagged', '==', true]] });
+            var flaggedOrds = await svc.list('orders', { where: [['flagged', '==', true]] });
+            flagged = { products: flaggedProds || [], orders: flaggedOrds || [] };
+          } catch(e) { /* silent */ }
+        }
+        if (!flagged) flagged = await dataService.getFlaggedItems();
         var alertCount = flagged.products.length + flagged.orders.length;
         document.getElementById('statAIAlerts').textContent = alertCount;
 
         document.getElementById('aiInsights').innerHTML = generateInsights(stats, flagged);
 
-        var topProducts = await dataService.getTopProducts();
-        document.getElementById('trendingProducts').innerHTML = topProducts.map(function(p) {
+        var topProducts = null;
+        if (svc && svc.isReady()) {
+          try {
+            var svcProducts = await svc.list('products');
+            topProducts = (svcProducts || []).slice(0, 5).map(function(p, i) {
+              return { rank: i + 1, name: p.name, count: p.sold || 0 };
+            });
+          } catch(e) { /* silent */ }
+        }
+        if (!topProducts) topProducts = await dataService.getTopProducts();
+        document.getElementById('trendingProducts').innerHTML = topProducts.length ? topProducts.map(function(p) {
           return '<div class="flex justify-between p-2 bg-green-50 rounded"><span class="text-sm font-medium">' + p.rank + '. ' + esc(p.name) + '</span><span class="text-sm text-green-600">' + p.count + ' sold</span></div>';
-        }).join('') || '<p class="text-sm text-gray-500">No product data available</p>';
+        }).join('') : '<p class="text-sm text-gray-500">No product data available</p>';
 
         document.getElementById('aiRecommendations').innerHTML = generateRecommendations(stats);
 
-        var orders = await dataService.getRecentOrders(10);
+        var orders = null;
+        if (svc && svc.isReady()) {
+          try {
+            orders = (svcOrders || await svc.list('orders')).slice(0, 10).map(function(o) {
+              return { id: o.id, customer: o.customer || o.userName, vendor: o.vendor || o.restaurantName, amount: o.amount || 0, status: o.status, aiScore: o.aiScore || 0 };
+            });
+          } catch(e) { /* silent */ }
+        }
+        if (!orders) orders = await dataService.getRecentOrders(10);
         var statusColors = { pending: 'bg-yellow-100 text-yellow-800', preparing: 'bg-purple-100 text-purple-800', dispatched: 'bg-indigo-100 text-indigo-800', delivered: 'bg-green-100 text-green-800', completed: 'bg-green-100 text-green-800', cancelled: 'bg-red-100 text-red-800' };
 
         document.getElementById('recentOrdersTable').innerHTML = orders.length ? orders.map(function(o) {
@@ -682,11 +728,7 @@
         }).join('') : '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No orders yet</td></tr>';
 
         setupRealtimeOrders();
-      } catch (e) {
-        console.error('Dashboard load error:', e);
-        loadDashboardFallback();
-      }
-
+      } catch (e) { console.error('Dashboard load error:', e); loadDashboardFallback(); }
       initCharts();
     }
 
@@ -704,39 +746,24 @@
 
     function generateInsights(stats, flagged) {
       var insights = [];
-      if (stats.totalOrders > 0) {
-        insights.push('<div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-500"><p class="text-sm">' + stats.totalOrders + ' orders processed on platform</p></div>');
-      }
-      if (flagged.products.length > 0) {
-        insights.push('<div class="p-3 bg-red-50 rounded-lg border-l-4 border-red-500"><p class="text-sm">' + flagged.products.length + ' products flagged for price review</p></div>');
-      }
-      if (flagged.orders.length > 0) {
-        insights.push('<div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500"><p class="text-sm">' + flagged.orders.length + ' orders flagged for manual review</p></div>');
-      }
-      if (insights.length === 0) {
-        insights.push('<div class="p-3 bg-gray-50 rounded-lg"><p class="text-sm text-gray-500">No insights yet - add data to get started</p></div>');
-      }
+      if (stats.totalOrders > 0) insights.push('<div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-500"><p class="text-sm">' + stats.totalOrders + ' orders processed on platform</p></div>');
+      if (flagged.products.length > 0) insights.push('<div class="p-3 bg-red-50 rounded-lg border-l-4 border-red-500"><p class="text-sm">' + flagged.products.length + ' products flagged for price review</p></div>');
+      if (flagged.orders.length > 0) insights.push('<div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500"><p class="text-sm">' + flagged.orders.length + ' orders flagged for manual review</p></div>');
+      if (insights.length === 0) insights.push('<div class="p-3 bg-gray-50 rounded-lg"><p class="text-sm text-gray-500">No insights yet - add data to get started</p></div>');
       return insights.join('');
     }
 
     function generateRecommendations(stats) {
       var recs = [];
-      if (stats.totalUsers > 10) {
-        recs.push('<div class="p-3 bg-blue-50 rounded-lg"><span class="text-sm">Consider enabling vendor verification for ' + stats.activeVendors + ' active vendors</span></div>');
-      }
-      if (stats.totalRevenue > 0) {
-        recs.push('<div class="p-3 bg-blue-50 rounded-lg"><span class="text-sm">Set up automated payout schedules for vendors</span></div>');
-      }
+      if (stats.totalUsers > 10) recs.push('<div class="p-3 bg-blue-50 rounded-lg"><span class="text-sm">Consider enabling vendor verification for ' + stats.activeVendors + ' active vendors</span></div>');
+      if (stats.totalRevenue > 0) recs.push('<div class="p-3 bg-blue-50 rounded-lg"><span class="text-sm">Set up automated payout schedules for vendors</span></div>');
       recs.push('<div class="p-3 bg-blue-50 rounded-lg"><span class="text-sm">Enable AI fraud detection rules for all new listings</span></div>');
       return recs.join('');
     }
 
     function setupRealtimeOrders() {
       if (orderSubscription) return;
-      orderSubscription = dataService.subscribeToOrders(function(payload) {
-        console.log('Real-time order update:', payload);
-        loadDashboardData();
-      });
+      orderSubscription = dataService.subscribeToOrders(function(payload) { console.log('Real-time order update:', payload); loadDashboardData(); });
     }
 
     async function loadAIModeration() {
@@ -750,11 +777,9 @@
         var allItems = flagged.products.concat(flagged.orders);
         if (allItems.length > 0) {
           document.getElementById('flaggedItemsTable').innerHTML = allItems.map(function(item) {
-            var rowClass = item.confidence > 80 ? 'alert-critical' : item.confidence > 60 ? 'alert-warning' : '';
+            var rowClass = item.confidence > 80 ? 'bg-red-50' : item.confidence > 60 ? 'bg-amber-50' : '';
             var typeColor = item.type === 'Product' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700';
-            var actionBtn = item.type === 'Product'
-              ? '<button class="text-red-600 hover:underline text-sm mr-2">Remove</button><button class="text-gray-600 hover:underline text-sm">Review</button>'
-              : '<button class="text-amber-600 hover:underline text-sm mr-2">Hold</button><button class="text-gray-600 hover:underline text-sm">Investigate</button>';
+            var actionBtn = item.type === 'Product' ? '<button class="text-red-600 hover:underline text-sm mr-2">Remove</button><button class="text-gray-600 hover:underline text-sm">Review</button>' : '<button class="text-amber-600 hover:underline text-sm mr-2">Hold</button><button class="text-gray-600 hover:underline text-sm">Investigate</button>';
             return '<tr class="' + rowClass + '">' +
               '<td class="px-4 py-3"><span class="px-2 py-1 ' + typeColor + ' rounded text-xs">' + esc(item.type) + '</span></td>' +
               '<td class="px-4 py-3 font-medium">' + esc(item.item) + '</td>' +
@@ -774,9 +799,20 @@
       }
     }
 
+    async function adminApi(path, options) {
+      var base = (window.API_ROUTES && API_ROUTES.ADMIN_API && API_ROUTES.ADMIN_API.BASE) || 'https://vonkqyiczeqhuqhahsxm.supabase.co/functions/v1/admin-api';
+      var opts = options || {};
+      var headers = Object.assign({}, opts.headers || {});
+      var token = window.currentAdminToken || '';
+      if (!token && typeof window.getAuthToken === 'function') { try { token = await window.getAuthToken(); } catch (e) {} }
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      if (opts.body) headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+      return fetch(base + path, Object.assign({}, opts, { headers: headers }));
+    }
+
     async function loadServerStatus() {
       try {
-        var response = await fetch('/api/admin/system/status', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        var response = await adminApi('/system/status', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
         var result = await response.json();
         if (result.success) {
           var s = result.data;
@@ -789,15 +825,13 @@
           document.getElementById('sysFirebase').textContent = s.firebase;
           document.getElementById('sysSupabase').textContent = s.supabase || 'N/A';
         }
-      } catch (e) {
-        console.error('Server status error:', e);
-      }
+      } catch (e) { console.error('Server status error:', e); }
     }
 
     async function loadLogs() {
       try {
         var typeFilter = document.getElementById('logTypeFilter').value;
-        var response = await fetch('/api/admin/system/logs?type=' + typeFilter + '&limit=100', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        var response = await adminApi('/system/logs?type=' + typeFilter + '&limit=100', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
         var result = await response.json();
         if (result.success) {
           document.getElementById('logsTable').innerHTML = result.data.map(function(l) {
@@ -809,15 +843,13 @@
             '</tr>';
           }).join('') || '<tr><td colspan="3" class="px-4 py-8 text-center text-gray-500">No logs</td></tr>';
         }
-      } catch (e) {
-        document.getElementById('logsTable').innerHTML = '<tr><td colspan="3" class="px-4 py-8 text-center text-red-500">Unable to load logs</td></tr>';
-      }
+      } catch (e) { document.getElementById('logsTable').innerHTML = '<tr><td colspan="3" class="px-4 py-8 text-center text-red-500">Unable to load logs</td></tr>'; }
     }
 
     async function loadReports() {
       try {
         var period = document.getElementById('reportPeriod').value;
-        var response = await fetch('/api/admin/reports?period=' + period, { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        var response = await adminApi('/reports?period=' + period, { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
         var result = await response.json();
         if (result.success) {
           var r = result.data;
@@ -825,18 +857,14 @@
           document.getElementById('reportRevenue').textContent = 'TZS ' + ((r.orders?.totalRevenue || 0) / 1000000).toFixed(1) + 'M';
           document.getElementById('reportUsers').textContent = r.users?.total || 0;
         }
-      } catch (e) {
-        console.error('Reports error:', e);
-      }
+      } catch (e) { console.error('Reports error:', e); }
     }
 
-    function exportReport(type) {
-      alert('Export feature for ' + type + ' - Coming soon');
-    }
+    function exportReport(type) { alert('Export feature for ' + type + ' - Coming soon'); }
 
     async function loadSellers() {
       try {
-        var response = await fetch('/api/admin/sellers', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        var response = await adminApi('/sellers', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
         var result = await response.json();
         if (result.success) {
           document.getElementById('sellersTable').innerHTML = result.data.map(function(s) {
@@ -846,20 +874,18 @@
               '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ' + (s.isOpen ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') + '">' + (s.isOpen ? 'Open' : 'Closed') + '</span></td>' +
               '<td class="px-4 py-3 text-sm">' + (s.totalOrders || 0) + '</td>' +
               '<td class="px-4 py-3">' +
-                '<button onclick="updateSeller(\'' + s.id + '\', \'toggle\')" class="text-[#012d1d] hover:underline text-sm mr-2">' + (s.isOpen ? 'Close' : 'Open') + '</button>' +
+                '<button onclick="updateSeller(\'' + s.id + '\', \'toggle\')" class="text-green-700 hover:underline text-sm mr-2">' + (s.isOpen ? 'Close' : 'Open') + '</button>' +
                 '<button onclick="deleteSeller(\'' + s.id + '\', \'' + esc(s.name) + '\')" class="text-red-600 hover:underline text-sm">Delete</button>' +
               '</td>' +
             '</tr>';
           }).join('') || '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No sellers</td></tr>';
         }
-      } catch (e) {
-        document.getElementById('sellersTable').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-red-500">Unable to load sellers</td></tr>';
-      }
+      } catch (e) { document.getElementById('sellersTable').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-red-500">Unable to load sellers</td></tr>'; }
     }
 
     async function loadDrivers() {
       try {
-        var response = await fetch('/api/admin/drivers', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        var response = await adminApi('/drivers', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
         var result = await response.json();
         if (result.success) {
           document.getElementById('driversTable').innerHTML = result.data.map(function(d) {
@@ -868,24 +894,19 @@
               '<td class="px-4 py-3 text-sm">' + esc(d.phone) + '</td>' +
               '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ' + (d.available ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800') + '">' + (d.available ? 'Available' : 'Busy') + '</span></td>' +
               '<td class="px-4 py-3 text-sm">' + (d.rating || '-') + '</td>' +
-              '<td class="px-4 py-3">' +
-                '<button class="text-[#012d1d] hover:underline text-sm">View</button>' +
-              '</td>' +
+              '<td class="px-4 py-3"><button class="text-green-700 hover:underline text-sm">View</button></td>' +
             '</tr>';
           }).join('') || '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No drivers</td></tr>';
         }
-      } catch (e) {
-        document.getElementById('driversTable').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-red-500">Unable to load drivers</td></tr>';
-      }
+      } catch (e) { document.getElementById('driversTable').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-red-500">Unable to load drivers</td></tr>'; }
     }
 
     async function loadUsers() {
       try {
         var users = await dataService.getUsers();
         var roleColors = { super_admin: 'bg-red-100 text-red-800', admin: 'bg-red-100 text-red-800', vendor: 'bg-purple-100 text-purple-800', driver: 'bg-blue-100 text-blue-800', customer: 'bg-gray-100 text-gray-800' };
-
         document.getElementById('usersTable').innerHTML = users.length ? users.map(function(u) {
-          var rowClass = u.aiRisk > 70 ? 'alert-warning' : 'hover:bg-gray-50';
+          var rowClass = u.aiRisk > 70 ? 'bg-amber-50' : 'hover:bg-gray-50';
           return '<tr class="' + rowClass + '">' +
             '<td class="px-4 py-3 font-medium">' + esc(u.name) + '</td>' +
             '<td class="px-4 py-3 text-sm">' + esc(u.email) + '</td>' +
@@ -894,24 +915,24 @@
             '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ' + (u.aiRisk > 70 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800') + '">' + u.aiRisk + '%</span></td>' +
           '</tr>';
         }).join('') : '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No users found</td></tr>';
-      } catch (e) {
-        document.getElementById('usersTable').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">Unable to load users</td></tr>';
-      }
+      } catch (e) { document.getElementById('usersTable').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">Unable to load users</td></tr>'; }
     }
 
     var allOrders = [];
 
     async function loadOrders() {
       try {
-        var orders = await dataService.getOrders();
-        allOrders = orders || [];
-        
-        // Apply status filter
-        var statusFilter = document.getElementById('orderStatusFilter')?.value;
-        if (statusFilter) {
-          orders = orders.filter(o => o.status === statusFilter);
+        const svc = window.crossPlatformService;
+        var orders = null;
+        if (svc && svc.isReady()) {
+          try {
+            orders = await svc.list('orders');
+          } catch(e) { /* silent */ }
         }
-        
+        if (!orders) orders = await dataService.getOrders();
+        allOrders = orders || [];
+        var statusFilter = document.getElementById('orderStatusFilter')?.value;
+        if (statusFilter) orders = orders.filter(o => o.status === statusFilter);
         renderOrders(orders);
       } catch (e) {
         console.error('Error loading orders:', e);
@@ -921,22 +942,16 @@
 
     function searchOrders() {
       var searchTerm = document.getElementById('orderSearch')?.value.toLowerCase() || '';
-      var filtered = allOrders.filter(o => 
-        (o.id && o.id.toLowerCase().includes(searchTerm)) ||
-        (o.customer && o.customer.toLowerCase().includes(searchTerm)) ||
-        (o.vendor && o.vendor.toLowerCase().includes(searchTerm))
-      );
+      var filtered = allOrders.filter(o => (o.id && o.id.toLowerCase().includes(searchTerm)) || (o.customer && o.customer.toLowerCase().includes(searchTerm)) || (o.vendor && o.vendor.toLowerCase().includes(searchTerm)));
       renderOrders(filtered);
     }
 
     function renderOrders(orders) {
       var statusColors = { pending: 'bg-yellow-100 text-yellow-800', preparing: 'bg-purple-100 text-purple-800', dispatched: 'bg-indigo-100 text-indigo-800', delivered: 'bg-green-100 text-green-800', completed: 'bg-green-100 text-green-800', cancelled: 'bg-red-100 text-red-800' };
-
       document.getElementById('ordersTable').innerHTML = orders.length ? orders.map(function(o) {
         var canAssignDriver = ['pending', 'preparing'].includes(o.status);
         var canCancel = ['pending', 'preparing'].includes(o.status);
         var canUpdateStatus = !['delivered', 'cancelled'].includes(o.status);
-        
         return '<tr class="hover:bg-gray-50">' +
           '<td class="px-4 py-3 font-mono text-sm">' + esc(o.id?.substring(0, 8)) + '...</td>' +
           '<td class="px-4 py-3">' + esc(o.customer) + '</td>' +
@@ -946,7 +961,7 @@
           '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ' + (statusColors[o.status] || 'bg-gray-100 text-gray-800') + '">' + esc(o.status) + '</span></td>' +
           '<td class="px-4 py-3">' +
             (canAssignDriver ? '<button onclick="showAssignDriverModal(\'' + o.id + '\')" class="text-blue-600 hover:underline text-sm mr-2">Assign Driver</button>' : '') +
-            (canUpdateStatus ? '<button onclick="updateOrderStatus(\'' + o.id + '\')" class="text-[#012d1d] hover:underline text-sm mr-2">Update</button>' : '') +
+            (canUpdateStatus ? '<button onclick="updateOrderStatus(\'' + o.id + '\')" class="text-green-700 hover:underline text-sm mr-2">Update</button>' : '') +
             (canCancel ? '<button onclick="cancelOrder(\'' + o.id + '\')" class="text-red-600 hover:underline text-sm">Cancel</button>' : '') +
           '</td>' +
         '</tr>';
@@ -956,9 +971,15 @@
     async function showAssignDriverModal(orderId) {
       try {
         var drivers = await dataService.getDrivers ? await dataService.getDrivers() : [];
-        
         if (!drivers || drivers.length === 0) {
-          // Fallback: try to fetch from Firestore
+          const svc = window.crossPlatformService;
+          if (svc && svc.isReady()) {
+            try {
+              drivers = await svc.list('drivers', { where: [['available', '==', true]] });
+            } catch(e) { /* fall through */ }
+          }
+        }
+        if (!drivers || drivers.length === 0) {
           const db = window.db;
           if (db) {
             const { collection, getDocs, query, where } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
@@ -966,177 +987,101 @@
             drivers = driversSnap.docs.map(d => ({ id: d.id, ...d.data() }));
           }
         }
-        
-        if (drivers.length === 0) {
-          alert('No available drivers found');
-          return;
-        }
-        
-        var driverOptions = drivers.map(d => 
-          '<option value="' + d.id + '">' + esc(d.name) + ' (' + (d.phone || 'No phone') + ')</option>'
-        ).join('');
-        
-        var driverId = prompt('Select driver to assign:\n\nAvailable Drivers:\n' + 
-          drivers.map((d, i) => (i + 1) + '. ' + d.name + ' - ' + (d.phone || 'No phone')).join('\n') +
-          '\n\nEnter driver number (1-' + drivers.length + '):');
-        
+        if (drivers.length === 0) { alert('No available drivers found'); return; }
+        var driverId = prompt('Select driver to assign:\n\nAvailable Drivers:\n' + drivers.map((d, i) => (i + 1) + '. ' + d.name + ' - ' + (d.phone || 'No phone')).join('\n') + '\n\nEnter driver number (1-' + drivers.length + '):');
         if (driverId) {
           var selectedIndex = parseInt(driverId) - 1;
-          if (selectedIndex >= 0 && selectedIndex < drivers.length) {
-            await assignDriver(orderId, drivers[selectedIndex].id, drivers[selectedIndex].name);
-          } else {
-            alert('Invalid driver selection');
-          }
+          if (selectedIndex >= 0 && selectedIndex < drivers.length) { await assignDriver(orderId, drivers[selectedIndex].id, drivers[selectedIndex].name); }
+          else { alert('Invalid driver selection'); }
         }
-      } catch (e) {
-        console.error('Error loading drivers:', e);
-        alert('Error loading drivers: ' + e.message);
-      }
+      } catch (e) { console.error('Error loading drivers:', e); alert('Error loading drivers: ' + e.message); }
     }
 
     async function assignDriver(orderId, driverId, driverName) {
       try {
-        const db = window.db;
-        if (!db) {
-          alert('Database not available');
-          return;
+        const svc = window.crossPlatformService;
+        if (svc && svc.isReady()) {
+          try {
+            await svc.update('orders', orderId, { driverId: driverId, driverName: driverName, status: 'dispatched', dispatchedAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+            await svc.update('drivers', driverId, { available: false, currentOrderId: orderId });
+            alert('Driver ' + driverName + ' assigned successfully'); loadOrders(); return;
+          } catch(e) { /* fall through to Firestore */ }
         }
-        
+        const db = window.db;
+        if (!db) { alert('Database not available'); return; }
         const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-        
-        await updateDoc(doc(db, 'orders', orderId), {
-          driverId: driverId,
-          driverName: driverName,
-          status: 'dispatched',
-          dispatchedAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-        
-        // Update driver status
-        await updateDoc(doc(db, 'drivers', driverId), {
-          available: false,
-          currentOrderId: orderId
-        });
-        
-        alert('Driver ' + driverName + ' assigned successfully');
-        loadOrders();
-      } catch (e) {
-        console.error('Error assigning driver:', e);
-        alert('Error assigning driver: ' + e.message);
-      }
+        await updateDoc(doc(db, 'orders', orderId), { driverId: driverId, driverName: driverName, status: 'dispatched', dispatchedAt: serverTimestamp(), updatedAt: serverTimestamp() });
+        await updateDoc(doc(db, 'drivers', driverId), { available: false, currentOrderId: orderId });
+        alert('Driver ' + driverName + ' assigned successfully'); loadOrders();
+      } catch (e) { console.error('Error assigning driver:', e); alert('Error assigning driver: ' + e.message); }
     }
 
     async function cancelOrder(orderId) {
-      if (!confirm('Are you sure you want to cancel this order?\n\nThis action cannot be undone.')) {
-        return;
-      }
-      
+      if (!confirm('Are you sure you want to cancel this order?\n\nThis action cannot be undone.')) return;
       try {
-        const db = window.db;
-        if (!db) {
-          alert('Database not available');
-          return;
+        const svc = window.crossPlatformService;
+        if (svc && svc.isReady()) {
+          try {
+            let orderData = await svc.get('orders', orderId);
+            if (orderData) {
+              await svc.update('orders', orderId, { status: 'cancelled', cancelledAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+              if (orderData.driverId) { await svc.update('drivers', orderData.driverId, { available: true, currentOrderId: null }); }
+              alert('Order cancelled successfully'); loadOrders(); return;
+            }
+          } catch(e) { /* fall through to Firestore */ }
         }
-        
+        const db = window.db;
+        if (!db) { alert('Database not available'); return; }
         const { doc, updateDoc, serverTimestamp, getDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-        
-        // Get current order to check if driver was assigned
         const orderSnap = await getDoc(doc(db, 'orders', orderId));
         const orderData = orderSnap.data();
-        
-        await updateDoc(doc(db, 'orders', orderId), {
-          status: 'cancelled',
-          cancelledAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-        
-        // Free up driver if assigned
-        if (orderData?.driverId) {
-          await updateDoc(doc(db, 'drivers', orderData.driverId), {
-            available: true,
-            currentOrderId: null
-          });
-        }
-        
-        alert('Order cancelled successfully');
-        loadOrders();
-      } catch (e) {
-        console.error('Error cancelling order:', e);
-        alert('Error cancelling order: ' + e.message);
-      }
+        await updateDoc(doc(db, 'orders', orderId), { status: 'cancelled', cancelledAt: serverTimestamp(), updatedAt: serverTimestamp() });
+        if (orderData?.driverId) { await updateDoc(doc(db, 'drivers', orderData.driverId), { available: true, currentOrderId: null }); }
+        alert('Order cancelled successfully'); loadOrders();
+      } catch (e) { console.error('Error cancelling order:', e); alert('Error cancelling order: ' + e.message); }
     }
 
     async function updateOrderStatus(orderId) {
       var statuses = ['pending', 'preparing', 'dispatched', 'delivered'];
       var newStatus = prompt('Enter new status:\n\n1. pending\n2. preparing\n3. dispatched\n4. delivered\n\nEnter number (1-4):');
-      
       if (!newStatus) return;
-      
       var index = parseInt(newStatus) - 1;
-      if (index < 0 || index >= statuses.length) {
-        alert('Invalid selection');
-        return;
-      }
-      
+      if (index < 0 || index >= statuses.length) { alert('Invalid selection'); return; }
       try {
-        const db = window.db;
-        if (!db) {
-          alert('Database not available');
-          return;
+        const svc = window.crossPlatformService;
+        if (svc && svc.isReady()) {
+          try {
+            await svc.update('orders', orderId, { status: statuses[index], updatedAt: new Date().toISOString() });
+            alert('Order status updated to ' + statuses[index]); loadOrders(); return;
+          } catch(e) { /* fall through to Firestore */ }
         }
-        
+        const db = window.db;
+        if (!db) { alert('Database not available'); return; }
         const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-        
-        await updateDoc(doc(db, 'orders', orderId), {
-          status: statuses[index],
-          updatedAt: serverTimestamp()
-        });
-        
-        alert('Order status updated to ' + statuses[index]);
-        loadOrders();
-      } catch (e) {
-        console.error('Error updating order:', e);
-        alert('Error updating order: ' + e.message);
-      }
+        await updateDoc(doc(db, 'orders', orderId), { status: statuses[index], updatedAt: serverTimestamp() });
+        alert('Order status updated to ' + statuses[index]); loadOrders();
+      } catch (e) { console.error('Error updating order:', e); alert('Error updating order: ' + e.message); }
     }
 
     async function loadAnalytics() {
       try {
         var revenueData = await dataService.getRevenueData(7);
         var statusBreakdown = await dataService.getOrderStatusBreakdown();
-
         var salesCtx = document.getElementById('salesTrendChart');
         if (salesCtx && typeof Chart !== 'undefined') {
           if (charts.salesTrend) charts.salesTrend.destroy();
-          charts.salesTrend = new Chart(salesCtx, {
-            type: 'bar',
-            data: {
-              labels: revenueData.labels,
-              datasets: [{ label: 'Orders', data: revenueData.orderCount, backgroundColor: '#012d1d', borderRadius: 6 }]
-            },
-            options: { responsive: true }
-          });
+          charts.salesTrend = new Chart(salesCtx, { type: 'bar', data: { labels: revenueData.labels, datasets: [{ label: 'Orders', data: revenueData.orderCount, backgroundColor: '#012d1d', borderRadius: 6 }] }, options: { responsive: true } });
         }
-
         var categoryCtx = document.getElementById('categoryChart');
         if (categoryCtx && typeof Chart !== 'undefined') {
           if (charts.category) charts.category.destroy();
           var statusLabels = Object.keys(statusBreakdown);
           var statusValues = Object.values(statusBreakdown);
           if (statusLabels.length > 0) {
-            charts.category = new Chart(categoryCtx, {
-              type: 'doughnut',
-              data: {
-                labels: statusLabels.map(s => s.charAt(0).toUpperCase() + s.slice(1)),
-                datasets: [{ data: statusValues, backgroundColor: ['#f59e0b', '#8b5cf6', '#22c55e', '#6366f1', '#dc2626', '#6b7280'] }]
-              },
-              options: { responsive: true }
-            });
+            charts.category = new Chart(categoryCtx, { type: 'doughnut', data: { labels: statusLabels.map(s => s.charAt(0).toUpperCase() + s.slice(1)), datasets: [{ data: statusValues, backgroundColor: ['#f59e0b', '#8b5cf6', '#22c55e', '#6366f1', '#B91C1C', '#6b7280'] }] }, options: { responsive: true } });
           }
         }
-      } catch (e) {
-        console.error('Analytics load error:', e);
-      }
+      } catch (e) { console.error('Analytics load error:', e); }
     }
 
     function initCharts() {
@@ -1144,17 +1089,9 @@
         var revenueCtx = document.getElementById('revenueChart');
         if (revenueCtx && typeof Chart !== 'undefined') {
           if (charts.revenue) charts.revenue.destroy();
-          charts.revenue = new Chart(revenueCtx, {
-            type: 'line',
-            data: {
-              labels: revenueData.labels,
-              datasets: [{ label: 'Revenue (TZS)', data: revenueData.revenue, borderColor: '#012d1d', backgroundColor: 'rgba(1,45,29,0.1)', fill: true, tension: 0.4 }]
-            },
-            options: { responsive: true }
-          });
+          charts.revenue = new Chart(revenueCtx, { type: 'line', data: { labels: revenueData.labels, datasets: [{ label: 'Revenue (TZS)', data: revenueData.revenue, borderColor: '#012d1d', backgroundColor: 'rgba(1,45,29,0.1)', fill: true, tension: 0.4 }] }, options: { responsive: true } });
         }
       });
-
       dataService.getOrderStatusBreakdown().then(function(statusBreakdown) {
         var statusCtx = document.getElementById('orderStatusChart');
         if (statusCtx && typeof Chart !== 'undefined') {
@@ -1162,88 +1099,432 @@
           var statusLabels = Object.keys(statusBreakdown);
           var statusValues = Object.values(statusBreakdown);
           if (statusLabels.length > 0) {
-            charts.orderStatus = new Chart(statusCtx, {
-              type: 'doughnut',
-              data: {
-                labels: statusLabels.map(s => s.charAt(0).toUpperCase() + s.slice(1)),
-                datasets: [{ data: statusValues, backgroundColor: ['#f59e0b', '#8b5cf6', '#22c55e', '#6366f1', '#dc2626', '#6b7280'] }]
-              },
-              options: { responsive: true }
-            });
+            charts.orderStatus = new Chart(statusCtx, { type: 'doughnut', data: { labels: statusLabels.map(s => s.charAt(0).toUpperCase() + s.slice(1)), datasets: [{ data: statusValues, backgroundColor: ['#f59e0b', '#8b5cf6', '#22c55e', '#6366f1', '#B91C1C', '#6b7280'] }] }, options: { responsive: true } });
           }
         }
       });
     }
 
-    async function updateSeller(sellerId, action) {
+    // â”€â”€â”€ Risk Scoring â”€â”€â”€
+    async function loadRiskScoring() {
       try {
-        var response = await fetch('/api/admin/sellers/' + sellerId, {
-          method: 'POST',
-          headers: { 
-            'Authorization': 'Bearer ' + (window.currentAdminToken || ''),
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ action: action })
+        const filter = document.getElementById('riskEntityFilter')?.value || 'all';
+        const response = await adminApi('/risk-score?entity=' + filter, {
+          headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') }
         });
+        const result = await response.json();
+        if (result.success) {
+          const d = result.data;
+          document.getElementById('riskHighOrders').textContent = d.highRisk || 0;
+          document.getElementById('riskMediumOrders').textContent = d.mediumRisk || 0;
+          document.getElementById('riskSafeOrders').textContent = d.safe || 0;
+
+          document.getElementById('riskAssessments').innerHTML = (d.assessments || []).length
+            ? d.assessments.map(function(a) {
+                var scoreClass = a.score > 70 ? 'text-red-600' : a.score > 40 ? 'text-amber-600' : 'text-green-600';
+                return '<div class="p-3 border border-gray-100 rounded-lg flex justify-between items-center">' +
+                  '<div><p class="font-medium text-sm">' + esc(a.entity) + '</p><p class="text-xs text-gray-500">' + esc(a.reason) + '</p></div>' +
+                  '<span class="px-3 py-1 rounded-full text-xs font-bold ' + scoreClass + ' bg-opacity-10">' + a.score + '%</span></div>';
+              }).join('')
+            : '<div class="p-4 bg-gray-50 rounded-lg text-center text-gray-500">No risk assessments available</div>';
+
+          document.getElementById('riskTable').innerHTML = (d.items || []).length
+            ? d.items.map(function(i) {
+                var scoreClass = i.score > 70 ? 'bg-red-100 text-red-800' : i.score > 40 ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800';
+                return '<tr class="' + (i.score > 70 ? 'bg-red-50' : i.score > 40 ? 'bg-amber-50' : 'hover:bg-gray-50') + '">' +
+                  '<td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs ' + (i.type === 'Order' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800') + '">' + esc(i.type) + '</span></td>' +
+                  '<td class="px-4 py-3 font-mono text-sm">' + esc(i.id) + '</td>' +
+                  '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-bold ' + scoreClass + '">' + i.score + '%</span></td>' +
+                  '<td class="px-4 py-3"><span class="text-xs">' + (i.flags || []).join(', ') || 'None' + '</span></td>' +
+                  '<td class="px-4 py-3"><button onclick="resolveRiskItem(\'' + i.id + '\')" class="text-green-700 hover:underline text-sm mr-2">Resolve</button><button onclick="dismissRiskItem(\'' + i.id + '\')" class="text-gray-600 hover:underline text-sm">Dismiss</button></td>' +
+                '</tr>';
+              }).join('')
+            : '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No flagged entities</td></tr>';
+        }
+      } catch (e) { console.error('Risk scoring error:', e);
+        document.getElementById('riskTable').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-red-500">Unable to load risk data</td></tr>'; }
+    }
+
+    async function resolveRiskItem(id) {
+      try {
+        await adminApi('/flagged-items/' + id, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || ''), 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'resolve' }) });
+        loadRiskScoring();
+      } catch (e) { alert('Error resolving: ' + e.message); }
+    }
+
+    async function dismissRiskItem(id) {
+      try {
+        await adminApi('/flagged-items/' + id, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || ''), 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'dismiss' }) });
+        loadRiskScoring();
+      } catch (e) { alert('Error dismissing: ' + e.message); }
+    }
+
+    // â”€â”€â”€ Payouts â”€â”€â”€
+    async function loadPayouts() {
+      try {
+        const statusFilter = document.getElementById('payoutStatusFilter')?.value || '';
+        const response = await adminApi('/payouts?status=' + statusFilter, {
+          headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') }
+        });
+        const result = await response.json();
+        if (result.success) {
+          var data = result.data || [];
+          document.getElementById('payoutTotal').textContent = data.length;
+          document.getElementById('payoutCompleted').textContent = data.filter(function(b) { return b.status === 'completed'; }).length;
+          document.getElementById('payoutPending').textContent = data.filter(function(b) { return b.status === 'pending' || b.status === 'processing'; }).length;
+          document.getElementById('payoutFailed').textContent = data.filter(function(b) { return b.status === 'failed'; }).length;
+
+          var statusColors = { pending: 'bg-amber-100 text-amber-800', processing: 'bg-blue-100 text-blue-800', completed: 'bg-green-100 text-green-800', failed: 'bg-red-100 text-red-800' };
+          document.getElementById('payoutsTable').innerHTML = data.length
+            ? data.map(function(b) {
+                var statusHtml = '<span class="px-2 py-1 rounded-full text-xs font-medium ' + (statusColors[b.status] || 'bg-gray-100') + '">' + esc(b.status) + '</span>';
+                var actionsHtml = b.status === 'pending' ? '<button onclick="processPayout(\'' + b.id + '\')" class="text-green-700 hover:underline text-sm">Process</button>' : '<span class="text-xs text-gray-400">-</span>';
+                return '<tr class="hover:bg-gray-50">' +
+                  '<td class="px-4 py-3 font-medium">' + esc(b.batchName) + '</td>' +
+                  '<td class="px-4 py-3 font-mono">TZS ' + (b.totalAmount || 0).toLocaleString() + '</td>' +
+                  '<td class="px-4 py-3">' + (b.recipientCount || 0) + '</td>' +
+                  '<td class="px-4 py-3">' + statusHtml + '</td>' +
+                  '<td class="px-4 py-3 text-sm text-gray-500">' + (b.createdAt ? new Date(b.createdAt.seconds * 1000 || b.createdAt).toLocaleDateString() : '-') + '</td>' +
+                  '<td class="px-4 py-3">' + actionsHtml + '</td>' +
+                '</tr>';
+              }).join('')
+            : '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No payout batches</td></tr>';
+        }
+      } catch (e) { console.error('Payouts error:', e);
+        document.getElementById('payoutsTable').innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-red-500">Unable to load payouts</td></tr>'; }
+    }
+
+    async function processPayout(batchId) {
+      if (!confirm('Process this payout batch? This action will initiate payments.')) return;
+      try {
+        await adminApi('/payouts/' + batchId + '/process', { method: 'POST', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        alert('Payout processing started'); loadPayouts();
+      } catch (e) { alert('Error: ' + e.message); }
+    }
+
+    function showCreatePayoutModal() {
+      var name = prompt('Enter payout batch name:');
+      if (!name) return;
+      var amount = prompt('Enter total amount (TZS):');
+      if (!amount) return;
+      var count = prompt('Number of recipients:');
+      if (!count) return;
+      adminApi('/payouts', { method: 'POST', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || ''), 'Content-Type': 'application/json' }, body: JSON.stringify({ batchName: name, totalAmount: parseInt(amount), recipientCount: parseInt(count) }) })
+        .then(function(r) { return r.json(); })
+        .then(function(result) { if (result.success) { alert('Payout batch created'); loadPayouts(); } else { alert('Error: ' + (result.error || 'Unknown')); } })
+        .catch(function(e) { alert('Error: ' + e.message); });
+    }
+
+    // â”€â”€â”€ RBAC â”€â”€â”€
+    async function loadRBAC() {
+      try {
+        var [rolesRes, userRolesRes] = await Promise.all([
+          adminApi('/rbac/roles', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } }),
+          adminApi('/rbac/user-roles', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } })
+        ]);
+        var roles = await rolesRes.json();
+        var userRoles = await userRolesRes.json();
+
+        if (roles.success) {
+          document.getElementById('rolesList').innerHTML = roles.data.length
+            ? roles.data.map(function(r) {
+                return '<div class="p-4 border border-gray-100 rounded-lg hover:bg-gray-50">' +
+                  '<div class="flex justify-between items-start"><div><p class="font-bold text-sm">' + esc(r.name) + '</p><p class="text-xs text-gray-500">' + esc(r.description || '') + '</p></div>' +
+                  '<span class="px-2 py-1 bg-gray-100 text-xs rounded-full">' + (r.permissions || []).length + ' perms</span></div>' +
+                  '<div class="mt-2 flex flex-wrap gap-1">' + (r.permissions || []).map(function(p) { return '<span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">' + esc(p) + '</span>'; }).join('') + '</div>' +
+                '</div>';
+              }).join('')
+            : '<p class="text-gray-500 text-sm">No roles defined</p>';
+        }
+
+        if (userRoles.success) {
+          document.getElementById('userRolesList').innerHTML = userRoles.data.length
+            ? userRoles.data.map(function(ur) {
+                return '<div class="p-3 border border-gray-100 rounded-lg flex justify-between items-center">' +
+                  '<div><p class="font-medium text-sm">' + esc(ur.email || ur.userId) + '</p><p class="text-xs text-gray-500">Role: ' + esc(ur.roleId) + '</p></div>' +
+                  '<button onclick="revokeRole(\'' + ur.id + '\')" class="text-red-600 hover:underline text-xs">Revoke</button></div>';
+              }).join('')
+            : '<p class="text-gray-500 text-sm">No role assignments</p>';
+        }
+      } catch (e) { console.error('RBAC error:', e); }
+    }
+
+    function showCreateRoleModal() {
+      var id = prompt('Role ID (e.g., "editor"):');
+      if (!id) return;
+      var name = prompt('Display name:');
+      if (!name) return;
+      var perms = prompt('Permissions (comma-separated):');
+      if (!perms) return;
+      var desc = prompt('Description:') || '';
+      adminApi('/rbac/roles', { method: 'POST', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || ''), 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, name: name, permissions: perms.split(',').map(function(p) { return p.trim(); }), description: desc }) })
+        .then(function(r) { return r.json(); })
+        .then(function(result) { if (result.success) { alert('Role created'); loadRBAC(); } else { alert('Error: ' + (result.error || 'Unknown')); } })
+        .catch(function(e) { alert('Error: ' + e.message); });
+    }
+
+    function showAssignRoleModal() {
+      var userId = prompt('User ID or Email:');
+      if (!userId) return;
+      var roleId = prompt('Role ID (e.g., admin, moderator, support):');
+      if (!roleId) return;
+      adminApi('/rbac/user-roles', { method: 'POST', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || ''), 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: userId, roleId: roleId, email: userId }) })
+        .then(function(r) { return r.json(); })
+        .then(function(result) { if (result.success) { alert('Role assigned'); loadRBAC(); } else { alert('Error: ' + (result.error || 'Unknown')); } })
+        .catch(function(e) { alert('Error: ' + e.message); });
+    }
+
+    async function revokeRole(assignmentId) {
+      if (!confirm('Revoke this role assignment?')) return;
+      try {
+        await adminApi('/rbac/user-roles/' + assignmentId, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        loadRBAC();
+      } catch (e) { alert('Error: ' + e.message); }
+    }
+
+    // â”€â”€â”€ Webhooks â”€â”€â”€
+    async function loadWebhooks() {
+      try {
+        var response = await adminApi('/webhooks', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
         var result = await response.json();
         if (result.success) {
-          loadSellers();
-        } else {
-          alert('Failed to update seller: ' + (result.message || 'Unknown error'));
+          var statusColors = { true: 'bg-green-100 text-green-800', false: 'bg-red-100 text-red-800' };
+          document.getElementById('webhooksTable').innerHTML = (result.data || []).length
+            ? result.data.map(function(w) {
+                return '<tr class="hover:bg-gray-50">' +
+                  '<td class="px-4 py-3 font-medium">' + esc(w.name) + '</td>' +
+                  '<td class="px-4 py-3 font-mono text-sm">' + esc(w.url) + '</td>' +
+                  '<td class="px-4 py-3"><div class="flex flex-wrap gap-1">' + (w.events || []).map(function(e) { return '<span class="px-2 py-0.5 bg-gray-100 rounded text-xs">' + esc(e) + '</span>'; }).join('') + '</div></td>' +
+                  '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ' + (statusColors[w.isActive] || 'bg-gray-100') + '">' + (w.isActive ? 'Active' : 'Inactive') + '</span></td>' +
+                  '<td class="px-4 py-3"><button onclick="toggleWebhook(\'' + w.id + '\', ' + !w.isActive + ')" class="text-blue-600 hover:underline text-sm mr-2">' + (w.isActive ? 'Disable' : 'Enable') + '</button><button onclick="deleteWebhook(\'' + w.id + '\')" class="text-red-600 hover:underline text-sm">Delete</button></td>' +
+                '</tr>';
+              }).join('')
+            : '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No webhooks configured</td></tr>';
         }
-      } catch (e) {
-        console.error('Error updating seller:', e);
-        alert('Error updating seller. Please try again.');
-      }
+      } catch (e) { console.error('Webhooks error:', e); }
+    }
+
+    function showCreateWebhookModal() {
+      var name = prompt('Webhook name:');
+      if (!name) return;
+      var url = prompt('Endpoint URL:');
+      if (!url) return;
+      var events = prompt('Events (comma-separated, e.g., order.created,user.updated):');
+      if (!events) return;
+      adminApi('/webhooks', { method: 'POST', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || ''), 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name, url: url, events: events.split(',').map(function(e) { return e.trim(); }) }) })
+        .then(function(r) { return r.json(); })
+        .then(function(result) { if (result.success) { alert('Webhook created'); loadWebhooks(); } else { alert('Error: ' + (result.error || 'Unknown')); } })
+        .catch(function(e) { alert('Error: ' + e.message); });
+    }
+
+    async function toggleWebhook(id, newState) {
+      try {
+        await adminApi('/webhooks/' + id, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || ''), 'Content-Type': 'application/json' }, body: JSON.stringify({ isActive: newState }) });
+        loadWebhooks();
+      } catch (e) { alert('Error: ' + e.message); }
+    }
+
+    async function deleteWebhook(id) {
+      if (!confirm('Delete this webhook endpoint?')) return;
+      try {
+        await adminApi('/webhooks/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        loadWebhooks();
+      } catch (e) { alert('Error: ' + e.message); }
+    }
+
+    // â”€â”€â”€ API Keys â”€â”€â”€
+    async function loadApiKeys() {
+      try {
+        var response = await adminApi('/api-keys', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        var result = await response.json();
+        if (result.success) {
+          var statusColors = { true: 'bg-green-100 text-green-800', false: 'bg-red-100 text-red-800' };
+          document.getElementById('apiKeysTable').innerHTML = (result.data || []).length
+            ? result.data.map(function(k) {
+                return '<tr class="hover:bg-gray-50">' +
+                  '<td class="px-4 py-3 font-medium">' + esc(k.name) + '</td>' +
+                  '<td class="px-4 py-3 font-mono text-sm">' + esc(k.key) + '</td>' +
+                  '<td class="px-4 py-3"><div class="flex flex-wrap gap-1">' + (k.permissions || []).map(function(p) { return '<span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">' + esc(p) + '</span>'; }).join('') + '</div></td>' +
+                  '<td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ' + (statusColors[k.isActive] || 'bg-gray-100') + '">' + (k.isActive ? 'Active' : 'Revoked') + '</span></td>' +
+                  '<td class="px-4 py-3 text-sm text-gray-500">' + (k.createdAt ? new Date(k.createdAt.seconds * 1000 || k.createdAt).toLocaleDateString() : '-') + '</td>' +
+                  '<td class="px-4 py-3"><button onclick="toggleApiKey(\'' + k.id + '\', ' + !k.isActive + ')" class="text-blue-600 hover:underline text-sm mr-2">' + (k.isActive ? 'Revoke' : 'Restore') + '</button><button onclick="deleteApiKey(\'' + k.id + '\')" class="text-red-600 hover:underline text-sm">Delete</button></td>' +
+                '</tr>';
+              }).join('')
+            : '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">No API keys generated</td></tr>';
+        }
+      } catch (e) { console.error('API keys error:', e); }
+    }
+
+    function showCreateApiKeyModal() {
+      var name = prompt('Key name (e.g., "Production App"):');
+      if (!name) return;
+      var perms = prompt('Permissions (comma-separated: read, write, admin):');
+      if (!perms) return;
+      adminApi('/api-keys', { method: 'POST', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || ''), 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name, permissions: perms.split(',').map(function(p) { return p.trim(); }) }) })
+        .then(function(r) { return r.json(); })
+        .then(function(result) { if (result.success) { alert('API Key created:\n\n' + result.key + '\n\nSave this key - it cannot be shown again!'); loadApiKeys(); } else { alert('Error: ' + (result.error || 'Unknown')); } })
+        .catch(function(e) { alert('Error: ' + e.message); });
+    }
+
+    async function toggleApiKey(id, newState) {
+      try {
+        await adminApi('/api-keys/' + id, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || ''), 'Content-Type': 'application/json' }, body: JSON.stringify({ isActive: newState }) });
+        loadApiKeys();
+      } catch (e) { alert('Error: ' + e.message); }
+    }
+
+    async function deleteApiKey(id) {
+      if (!confirm('Delete this API key permanently?')) return;
+      try {
+        await adminApi('/api-keys/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        loadApiKeys();
+      } catch (e) { alert('Error: ' + e.message); }
+    }
+
+    // â”€â”€â”€ Notifications â”€â”€â”€
+    async function loadNotifications() {
+      try {
+        var response = await adminApi('/notifications', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        var result = await response.json();
+        if (result.success) {
+          var data = result.data || [];
+          document.getElementById('notifTotal').textContent = data.length;
+          document.getElementById('notifActive').textContent = data.filter(function(n) { return n.status === 'active'; }).length;
+          document.getElementById('notifDrafts').textContent = data.filter(function(n) { return n.status === 'draft'; }).length;
+
+          var typeIcons = { info: 'info', warning: 'warning', emergency: 'emergency', promotion: 'campaign' };
+          document.getElementById('notificationsTable').innerHTML = data.length
+            ? data.map(function(n) {
+                return '<tr class="hover:bg-gray-50">' +
+                  '<td class="px-4 py-3"><div><p class="font-medium text-sm">' + esc(n.title) + '</p><p class="text-xs text-gray-500">' + esc((n.message || '').substring(0, 50)) + '...</p></div></td>' +
+                  '<td class="px-4 py-3"><span class="material-symbols-outlined text-sm">' + (typeIcons[n.type] || 'notifications') + '</span> ' + esc(n.type) + '</td>' +
+                  '<td class="px-4 py-3 text-sm">' + esc(n.targetRole || 'all') + '</td>' +
+                  '<td class="px-4 py-3 text-sm text-gray-500">' + (n.sentAt ? new Date(n.sentAt.seconds * 1000 || n.sentAt).toLocaleString() : '-') + '</td>' +
+                  '<td class="px-4 py-3"><button onclick="deleteNotification(\'' + n.id + '\')" class="text-red-600 hover:underline text-sm">Delete</button></td>' +
+                '</tr>';
+              }).join('')
+            : '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No notifications sent</td></tr>';
+        }
+      } catch (e) { console.error('Notifications error:', e); }
+    }
+
+    function showSendNotificationModal() {
+      var title = prompt('Notification title:');
+      if (!title) return;
+      var message = prompt('Message:');
+      if (!message) return;
+      var type = prompt('Type (info, warning, emergency, promotion):') || 'info';
+      var target = prompt('Target role (all, admin, driver, customer, vendor):') || 'all';
+      adminApi('/notifications', { method: 'POST', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || ''), 'Content-Type': 'application/json' }, body: JSON.stringify({ title: title, message: message, type: type, targetRole: target }) })
+        .then(function(r) { return r.json(); })
+        .then(function(result) { if (result.success) { alert('Notification broadcast sent'); loadNotifications(); } else { alert('Error: ' + (result.error || 'Unknown')); } })
+        .catch(function(e) { alert('Error: ' + e.message); });
+    }
+
+    async function deleteNotification(id) {
+      if (!confirm('Delete this notification?')) return;
+      try {
+        await adminApi('/notifications/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        loadNotifications();
+      } catch (e) { alert('Error: ' + e.message); }
+    }
+
+    // â”€â”€â”€ Platform Settings â”€â”€â”€
+    async function loadPlatformSettings() {
+      try {
+        var response = await adminApi('/settings', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        var result = await response.json();
+        if (result.success) {
+          var data = result.data || {};
+          document.getElementById('generalSettings').innerHTML = Object.keys(data).length
+            ? Object.keys(data).map(function(key) {
+                return '<div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">' +
+                  '<div><p class="text-sm font-medium">' + esc(key.replace(/([A-Z])/g, ' $1').replace(/^./, function(s) { return s.toUpperCase(); })) + '</p></div>' +
+                  '<div class="flex items-center gap-2"><span class="text-sm text-gray-600">' + esc(data[key]) + '</span>' +
+                  '<button onclick="editSetting(\'' + key + '\')" class="text-blue-600 hover:underline text-xs">Edit</button></div></div>';
+              }).join('')
+            : '<p class="text-gray-500 text-sm">No settings configured</p>';
+
+          document.getElementById('systemInfo').innerHTML = [
+            { label: 'Platform', value: data.platformName || 'SmartSoko' },
+            { label: 'Version', value: data.version || '1.0.0' },
+            { label: 'Currency', value: data.currency || 'TZS' },
+            { label: 'Timezone', value: data.timezone || 'Africa/Dar_es_Salaam' },
+            { label: 'Maintenance Mode', value: data.maintenanceMode ? 'Active' : 'Inactive' },
+            { label: 'Node.js', value: navigator.userAgent || '-' },
+            { label: 'API Status', value: 'Connected' }
+          ].map(function(i) {
+            return '<div class="flex justify-between py-2 border-b border-gray-100"><span class="text-sm text-gray-600">' + i.label + '</span><span class="text-sm font-medium">' + i.value + '</span></div>';
+          }).join('');
+        }
+      } catch (e) { console.error('Settings error:', e); }
+    }
+
+    function editSetting(key) {
+      var currentVal = prompt('New value for "' + key + '":');
+      if (currentVal === null) return;
+      adminApi('/settings/' + key, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || ''), 'Content-Type': 'application/json' }, body: JSON.stringify({ value: currentVal }) })
+        .then(function(r) { return r.json(); })
+        .then(function(result) { if (result.success) { loadPlatformSettings(); } else { alert('Error: ' + (result.error || 'Unknown')); } })
+        .catch(function(e) { alert('Error: ' + e.message); });
+    }
+
+    // â”€â”€â”€ Audit Logs â”€â”€â”€
+    async function loadAuditLogs() {
+      try {
+        var response = await adminApi('/audit-logs?limit=200', { headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        var result = await response.json();
+        if (result.success) {
+          document.getElementById('auditLogsTable').innerHTML = (result.data || []).length
+            ? result.data.map(function(log) {
+                return '<tr class="hover:bg-gray-50">' +
+                  '<td class="px-4 py-2 text-xs text-gray-500">' + new Date(log.timestamp?.seconds * 1000 || log.timestamp || Date.now()).toLocaleString() + '</td>' +
+                  '<td class="px-4 py-2 text-sm">' + esc(log.adminName || log.adminId || 'system') + '</td>' +
+                  '<td class="px-4 py-2"><span class="px-2 py-0.5 rounded text-xs font-medium ' + (log.action === 'create' ? 'bg-green-100 text-green-700' : log.action === 'delete' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700') + '">' + esc(log.action) + '</span></td>' +
+                  '<td class="px-4 py-2 text-sm">' + esc(log.entityType || '-') + '</td>' +
+                  '<td class="px-4 py-2 text-sm text-gray-600">' + esc(JSON.stringify(log.details || log.changes || {}).substring(0, 80)) + '</td>' +
+                '</tr>';
+              }).join('')
+            : '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No audit logs available</td></tr>';
+        }
+      } catch (e) { console.error('Audit logs error:', e);
+        document.getElementById('auditLogsTable').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-red-500">Unable to load audit logs</td></tr>'; }
+    }
+
+    async function updateSeller(sellerId, action) {
+      try {
+        var response = await adminApi('/sellers/' + sellerId, { method: 'POST', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || ''), 'Content-Type': 'application/json' }, body: JSON.stringify({ action: action }) });
+        var result = await response.json();
+        if (result.success) loadSellers();
+        else alert('Failed to update seller: ' + (result.message || 'Unknown error'));
+      } catch (e) { console.error('Error updating seller:', e); alert('Error updating seller. Please try again.'); }
     }
 
     async function deleteSeller(sellerId, sellerName) {
-      if (!confirm('Are you sure you want to delete seller "' + sellerName + '"?\n\nThis action cannot be undone. All associated data will be permanently removed.')) {
-        return;
-      }
-      
+      if (!confirm('Are you sure you want to delete seller "' + sellerName + '"?\n\nThis action cannot be undone. All associated data will be permanently removed.')) return;
       try {
-        // Try API first
-        var response = await fetch('/api/admin/sellers/' + sellerId, {
-          method: 'DELETE',
-          headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') }
-        });
-        
-        if (response.ok) {
-          loadSellers();
-          alert('Seller deleted successfully');
-          return;
+        var response = await adminApi('/sellers/' + sellerId, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + (window.currentAdminToken || '') } });
+        if (response.ok) { loadSellers(); alert('Seller deleted successfully'); return; }
+        const svc = window.crossPlatformService;
+        if (svc && svc.isReady()) {
+          try {
+            var productsList = await svc.list('products', { where: [['restaurantId', '==', sellerId]] });
+            for (var p of (productsList || [])) { await svc.update('products', p.id, { deleted: true }); }
+            await svc.update('restaurants', sellerId, { deleted: true });
+            loadSellers(); alert('Seller "' + sellerName + '" and all associated products have been deleted'); return;
+          } catch(e) { /* fall through to Firestore */ }
         }
-        
-        // Fallback to Firestore
         const db = window.db;
-        if (!db) {
-          alert('Database not available');
-          return;
-        }
-        
+        if (!db) { alert('Database not available'); return; }
         const { doc, deleteDoc, collection, getDocs, query, where, writeBatch } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-        
-        // Delete seller from restaurants collection
         await deleteDoc(doc(db, 'restaurants', sellerId));
-        
-        // Delete associated products
         const productsQuery = query(collection(db, 'products'), where('restaurantId', '==', sellerId));
         const productsSnap = await getDocs(productsQuery);
-        
         const batch = writeBatch(db);
-        productsSnap.forEach((productDoc) => {
-          batch.delete(productDoc.ref);
-        });
+        productsSnap.forEach((productDoc) => batch.delete(productDoc.ref));
         await batch.commit();
-        
-        loadSellers();
-        alert('Seller "' + sellerName + '" and all associated products have been deleted');
-        
-      } catch (e) {
-        console.error('Error deleting seller:', e);
-        alert('Error deleting seller: ' + e.message);
-      }
+        loadSellers(); alert('Seller "' + sellerName + '" and all associated products have been deleted');
+      } catch (e) { console.error('Error deleting seller:', e); alert('Error deleting seller: ' + e.message); }
     }
 
     window.escapeHtml = esc;
@@ -1256,8 +1537,33 @@
     window.assignDriver = assignDriver;
     window.cancelOrder = cancelOrder;
     window.updateOrderStatus = updateOrderStatus;
+    window.loadRiskScoring = loadRiskScoring;
+    window.resolveRiskItem = resolveRiskItem;
+    window.dismissRiskItem = dismissRiskItem;
+    window.loadPayouts = loadPayouts;
+    window.processPayout = processPayout;
+    window.showCreatePayoutModal = showCreatePayoutModal;
+    window.loadRBAC = loadRBAC;
+    window.showCreateRoleModal = showCreateRoleModal;
+    window.showAssignRoleModal = showAssignRoleModal;
+    window.revokeRole = revokeRole;
+    window.loadWebhooks = loadWebhooks;
+    window.showCreateWebhookModal = showCreateWebhookModal;
+    window.toggleWebhook = toggleWebhook;
+    window.deleteWebhook = deleteWebhook;
+    window.loadApiKeys = loadApiKeys;
+    window.showCreateApiKeyModal = showCreateApiKeyModal;
+    window.toggleApiKey = toggleApiKey;
+    window.deleteApiKey = deleteApiKey;
+    window.loadNotifications = loadNotifications;
+    window.showSendNotificationModal = showSendNotificationModal;
+    window.deleteNotification = deleteNotification;
+    window.loadPlatformSettings = loadPlatformSettings;
+    window.editSetting = editSetting;
+    window.loadAuditLogs = loadAuditLogs;
 
     checkAuth();
+    if (window.SmartNav) SmartNav.initPageTransition();
   </script>
 </body>
 </html>

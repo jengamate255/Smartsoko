@@ -1,0 +1,20 @@
+{
+  "dashboard": {
+    "title": "SmartSoko - Merchant Dashboard",
+    "uid": "smartsoko-merchant",
+    "tags": ["smartsoko", "merchant"],
+    "timezone": "browser",
+    "refresh": "10s",
+    "time": {"from": "now-1h", "to": "now"},
+    "panels": [
+      {"id": 1, "title": "Merchant Login Latency (p95)", "type": "graph", "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(merchant_login_latency_seconds_bucket[1m]))", "legendFormat": "login p95"}]},
+      {"id": 2, "title": "Product Create Latency (p95)", "type": "graph", "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(product_create_latency_seconds_bucket[1m]))", "legendFormat": "create p95"}]},
+      {"id": 3, "title": "Product Update Latency (p95)", "type": "graph", "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(product_update_latency_seconds_bucket[1m]))", "legendFormat": "update p95"}]},
+      {"id": 4, "title": "Stock Update Latency (p95)", "type": "graph", "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(stock_update_latency_seconds_bucket[1m]))", "legendFormat": "stock p95"}]},
+      {"id": 5, "title": "Analytics Latency (p95)", "type": "graph", "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(analytics_latency_seconds_bucket[1m]))", "legendFormat": "analytics p95"}]},
+      {"id": 6, "title": "Order View Latency (p95)", "type": "graph", "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8}, "targets": [{"expr": "histogram_quantile(0.95, rate(order_view_latency_seconds_bucket[1m]))", "legendFormat": "orders p95"}]},
+      {"id": 7, "title": "Merchant Error Rate", "type": "graph", "gridPos": {"x": 0, "y": 24, "w": 18, "h": 8}, "targets": [{"expr": "rate(merchant_error_total[1m])", "legendFormat": "error rate"}]}
+    ]
+  },
+  "overwrite": true
+}

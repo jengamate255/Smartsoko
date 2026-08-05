@@ -1,5 +1,6 @@
 package com.fooddelivery.driver.ui.state
 
+import android.content.Context
 import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,14 +10,14 @@ import com.fooddelivery.driver.data.AuthRepository
 import com.fooddelivery.driver.data.LocalDatabase
 import com.fooddelivery.driver.data.model.Order
 import com.fooddelivery.driver.data.model.User
-import com.fooddelivery.driver.data.model.ChatMessage
-import com.fooddelivery.driver.repository.OrderRepository
+import com.fooddelivery.driver.location.DriverLocationService
+import com.fooddelivery.driver.location.LocationState
 import com.fooddelivery.driver.realtime.SocketManager
-import com.fooddelivery.driver.util.AppConfig
+import com.fooddelivery.driver.repository.OrderRepository
 import com.fooddelivery.driver.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,7 +31,9 @@ class AppViewModel @Inject constructor(
     private val localDatabase: LocalDatabase,
     private val orderRepository: OrderRepository,
     private val socketManager: SocketManager,
-    private val sharedPreferences: SharedPreferences
+    private val sharedPreferences: SharedPreferences,
+    @ApplicationContext private val context: Context,
+    private val locationState: LocationState
 ) : ViewModel() {
 
     // UI State
@@ -42,6 +45,9 @@ class AppViewModel @Inject constructor(
 
     private val _orders = MutableLiveData<List<Order>>(emptyList())
     val orders: LiveData<List<Order>> = _orders
+
+    private val _pastOrders = MutableLiveData<List<Order>>(emptyList())
+    val pastOrders: LiveData<List<Order>> = _pastOrders
 
     private val _activeOrder = MutableLiveData<Order?>(null)
     val activeOrder: LiveData<Order?> = _activeOrder
@@ -55,15 +61,91 @@ class AppViewModel @Inject constructor(
     private val _error = MutableLiveData<String?>(null)
     val error: LiveData<String?> = _error
 
+    private val _earnings = MutableLiveData<Double>(0.0)
+    val earnings: LiveData<Double> = _earnings
+
     // Chat state
-    private val _messages = MutableLiveData<List<ChatMessage>>(emptyList())
-    val messages: LiveData<List<ChatMessage>> = _messages
+    private val _messages = MutableLiveData<List<SocketManager.ChatMessage>>(emptyList())
+    val messages: LiveData<List<SocketManager.ChatMessage>> = _messages
+
+    // Observer references for cleanup
+    private val orderUpdateObserver: (SocketManager.OrderUpdate) -> Unit = { update ->
+        viewModelScope.launch {
+            val currentOrders = _orders.value ?: emptyList()
+            val existingIndex = currentOrders.indexOfFirst { it.id == update.orderId }
+
+            if (existingIndex >= 0) {
+                val updatedOrders = currentOrders.toMutableList()
+                updatedOrders[existingIndex] = currentOrders[existingIndex].copy(
+                    status = update.status
+                )
+                _orders.value = updatedOrders
+            } else {
+                val restaurantLocation = update.data.optJSONObject("restaurantLocation")
+                val customerLocation = update.data.optJSONObject("customerLocation")
+                val newOrder = Order(
+                    id = update.orderId,
+                    restaurantName = update.data.optString("restaurantName", "Unknown"),
+                    restaurantAddress = update.data.optString("restaurantAddress", ""),
+                    restaurantLocation = com.fooddelivery.driver.data.model.LocationData(
+                        restaurantLocation?.optDouble("lat", 0.0) ?: update.data.optDouble("restaurantLat", 0.0),
+                        restaurantLocation?.optDouble("lng", 0.0) ?: update.data.optDouble("restaurantLng", 0.0)
+                    ),
+                    customerName = update.data.optString("customerName", ""),
+                    customerAddress = update.data.optString("customerAddress", ""),
+                    customerLocation = com.fooddelivery.driver.data.model.LocationData(
+                        customerLocation?.optDouble("lat", 0.0) ?: update.data.optDouble("customerLat", 0.0),
+                        customerLocation?.optDouble("lng", 0.0) ?: update.data.optDouble("customerLng", 0.0)
+                    ),
+                    items = parseItemsFromJson(update.data.optJSONArray("items")),
+                    totalAmount = update.data.optDouble("totalAmount", 0.0),
+                    status = update.status,
+                    createdAt = update.data.optString("createdAt", ""),
+                    updatedAt = update.data.optString("updatedAt", "")
+                )
+                _orders.value = currentOrders + newOrder
+            }
+        }
+    }
+
+    private val locationUpdateObserver: (SocketManager.LocationUpdate) -> Unit = { locationUpdate ->
+        val location = android.location.Location("").apply {
+            latitude = locationUpdate.latitude
+            longitude = locationUpdate.longitude
+        }
+        _driverLocation.value = location
+    }
+
+    private val chatMessageObserver: (SocketManager.ChatMessage) -> Unit = { message ->
+        viewModelScope.launch {
+            val currentMessages = _messages.value ?: emptyList()
+            _messages.value = currentMessages + message
+        }
+    }
 
     // Flags to prevent duplicate initialization
     private var socketInitialized = false
-    private var locationInitialized = false
+    private var lastTokenRefreshAt = 0L
 
     init {
+        // When the server rejects our token, refresh it via Firebase and reconnect
+        socketManager.onUnauthorized = {
+            viewModelScope.launch { refreshFirebaseToken() }
+        }
+
+        // Single source of location truth: the foreground DriverLocationService
+        // (running while online) feeds LocationState, which we forward to UI + server.
+        viewModelScope.launch {
+            locationState.location.collectLatest { location ->
+                if (location != null) {
+                    _driverLocation.value = location
+                    if (socketManager.isConnected()) {
+                        socketManager.emitLocationUpdate(location.latitude, location.longitude)
+                    }
+                }
+            }
+        }
+
         // Initialize components
         initializeApp()
     }
@@ -71,9 +153,33 @@ class AppViewModel @Inject constructor(
     private fun initializeApp() {
         // Load saved session
         loadSavedSession()
+    }
 
-        // Start location tracking
-        startLocationTracking()
+    private suspend fun refreshFirebaseToken() {
+        // Guard against refresh loops when the token is genuinely rejected
+        val now = System.currentTimeMillis()
+        if (now - lastTokenRefreshAt < 30_000) {
+            _error.value = "Session expired. Please sign in again."
+            return
+        }
+        lastTokenRefreshAt = now
+        try {
+            val freshToken = authRepository.getFirebaseToken()
+            sharedPreferences.edit()
+                .putString("firebase_auth_token", freshToken)
+                .apply()
+            socketManager.updateAuthToken(freshToken)
+        } catch (e: Exception) {
+            _error.value = "Session expired. Please sign in again."
+        }
+    }
+
+    private fun startDriverLocationService() {
+        try {
+            DriverLocationService.start(context)
+        } catch (e: Exception) {
+            _error.value = "Failed to start location tracking: ${e.message}"
+        }
     }
 
     private fun loadSavedSession() {
@@ -96,10 +202,34 @@ class AppViewModel @Inject constructor(
                 )
                 _user.value = restoredUser
 
-                // Update socket auth and reconnect
-                socketManager.disconnect()
+                // Use a fresh Firebase ID token when available (saved tokens expire after ~1 hour)
+                val freshToken = try {
+                    authRepository.getFirebaseToken()
+                } catch (e: Exception) {
+                    savedToken
+                }
+
+                if (freshToken != savedToken) {
+                    sharedPreferences.edit()
+                        .putString("firebase_auth_token", freshToken)
+                        .apply()
+                }
+
+                // Update socket auth with real token and reconnect
+                socketManager.updateAuthToken(freshToken)
                 _isLoading.value = false
                 initializeSocket()
+
+                // Restore the online/offline status so the driver stays reachable
+                if (sharedPreferences.getBoolean("driver_online", false)) {
+                    _isOnline.value = true
+                    startDriverLocationService()
+                    socketManager.emitStatusUpdate("online")
+                }
+
+                // Load past orders and earnings
+                loadPastOrders()
+                loadEarnings()
             } else {
                 // No saved session, show login screen
                 _isLoading.value = false
@@ -110,64 +240,25 @@ class AppViewModel @Inject constructor(
     private fun initializeSocket() {
         if (socketInitialized) return
 
-        // Listen to order updates from socket
-        socketManager.orderUpdatesLiveData.observeForever { update ->
-            viewModelScope.launch {
-                val currentOrders = _orders.value ?: emptyList()
-                val existingIndex = currentOrders.indexOfFirst { it.id == update.orderId }
-
-                if (existingIndex >= 0) {
-                    // Update existing order
-                    val updatedOrders = currentOrders.toMutableList()
-                    updatedOrders[existingIndex] = currentOrders[existingIndex].copy(
-                        status = update.status
-                    )
-                    _orders.value = updatedOrders
-                } else {
-                    // Add new order from update
-                    val newOrder = Order(
-                        id = update.orderId,
-                        restaurantName = update.data.optString("restaurantName", "Unknown"),
-                        restaurantAddress = update.data.optString("restaurantAddress", ""),
-                        restaurantLocation = com.fooddelivery.driver.data.model.LocationData(
-                            update.data.optJSONObject("restaurantLocation")?.optDouble("lat", 0.0) ?: 0.0,
-                            update.data.optJSONObject("restaurantLocation")?.optDouble("lng", 0.0) ?: 0.0
-                        ),
-                        customerName = update.data.optString("customerName", ""),
-                        customerAddress = update.data.optString("customerAddress", ""),
-                        customerLocation = com.fooddelivery.driver.data.model.LocationData(
-                            update.data.optJSONObject("customerLocation")?.optDouble("lat", 0.0) ?: 0.0,
-                            update.data.optJSONObject("customerLocation")?.optDouble("lng", 0.0) ?: 0.0
-                        ),
-                        items = parseItemsFromJson(update.data.optJSONArray("items")),
-                        totalAmount = update.data.optDouble("totalAmount", 0.0),
-                        status = update.status,
-                        createdAt = update.data.optString("createdAt", ""),
-                        updatedAt = update.data.optString("updatedAt", "")
-                    )
-                    _orders.value = currentOrders + newOrder
-                }
-            }
-        }
-
-        // Listen to location updates
-        socketManager.locationUpdatesLiveData.observeForever { locationUpdate ->
-            val location = android.location.Location("").apply {
-                latitude = locationUpdate.latitude
-                longitude = locationUpdate.longitude
-            }
-            _driverLocation.value = location
-        }
-
-        // Listen to chat messages
-        socketManager.chatMessagesLiveData.observeForever { message ->
-            viewModelScope.launch {
-                val currentMessages = _messages.value ?: emptyList()
-                _messages.value = currentMessages + message
-            }
-        }
+        socketManager.orderUpdatesLiveData.observeForever(orderUpdateObserver)
+        socketManager.locationUpdatesLiveData.observeForever(locationUpdateObserver)
+        socketManager.chatMessagesLiveData.observeForever(chatMessageObserver)
 
         socketInitialized = true
+    }
+
+    private fun loadPastOrders() {
+        viewModelScope.launch {
+            val pastOrders = orderRepository.getPastOrders()
+            _pastOrders.value = pastOrders.map { it.toOrder() }
+        }
+    }
+
+    private fun loadEarnings() {
+        viewModelScope.launch {
+            val earnings = orderRepository.getEarnings()
+            _earnings.value = earnings
+        }
     }
 
     private fun parseItemsFromJson(itemsArray: org.json.JSONArray?): List<com.fooddelivery.driver.data.model.OrderItem> {
@@ -180,58 +271,63 @@ class AppViewModel @Inject constructor(
                     name = item.optString("name", ""),
                     quantity = item.optInt("quantity", 1),
                     price = item.optDouble("price", 0.0),
-                    specialInstructions = item.optString("specialInstructions", null)
+                    notes = item.optString("notes").ifEmpty { item.optString("specialInstructions") }
                 )
             )
         }
         return items
     }
 
-    private fun startLocationTracking() {
-        if (locationInitialized) return
-        // TODO: Implement actual location tracking using FusedLocationProviderClient
-        viewModelScope.launch {
-            while (true) {
-                delay(5000)
-                val location = android.location.Location("gps").apply {
-                    latitude = -1.2921 + (Math.random() * 0.01) // Nairobi area (replace with actual GPS)
-                    longitude = 36.8219 + (Math.random() * 0.01)
-                }
-                _driverLocation.value = location
-
-                // Also emit location to server if connected
-                if (socketManager.isConnected()) {
-                    socketManager.emitLocationUpdate(location.latitude, location.longitude)
-                }
-            }
-        }
-        locationInitialized = true
-    }
-
     fun signIn(email: String, password: String) {
         viewModelScope.launch {
             _isLoading.value = true
             val result = authRepository.signIn(email, password)
-            when (result) {
-                is Result.Success -> {
-                    val user = result.getOrNull() ?: return@launch
+            result.fold(
+                onSuccess = { user ->
                     _user.value = user
+
+                    // Get real Firebase ID token
+                    val firebaseToken = authRepository.getFirebaseToken()
 
                     // Save session to SharedPreferences
                     sharedPreferences.edit()
-                        .putString("firebase_auth_token", result.tokenOrNull())
+                        .putString("firebase_auth_token", firebaseToken)
                         .putString("user_email", email)
                         .putString("user_name", user.fullName)
                         .apply()
 
-                    // Reconnect socket with new auth token
-                    socketManager.disconnect()
-                    initializeSocket()
+                    // Update socket with new auth token
+                    socketManager.updateAuthToken(firebaseToken)
+                },
+                onFailure = { exception ->
+                    _error.value = exception.message
                 }
-                is Result.Error -> {
-                    _error.value = result.exceptionOrNull()?.message
+            )
+            _isLoading.value = false
+        }
+    }
+
+    fun signUp(email: String, password: String, name: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = authRepository.signUp(email, password, name)
+            result.fold(
+                onSuccess = { user ->
+                    _user.value = user
+
+                    val firebaseToken = authRepository.getFirebaseToken()
+                    sharedPreferences.edit()
+                        .putString("firebase_auth_token", firebaseToken)
+                        .putString("user_email", email)
+                        .putString("user_name", user.fullName)
+                        .apply()
+
+                    socketManager.updateAuthToken(firebaseToken)
+                },
+                onFailure = { exception ->
+                    _error.value = exception.message
                 }
-            }
+            )
             _isLoading.value = false
         }
     }
@@ -239,13 +335,16 @@ class AppViewModel @Inject constructor(
     fun signOut() {
         _user.value = null
         _orders.value = emptyList()
+        _pastOrders.value = emptyList()
         _activeOrder.value = null
         _messages.value = emptyList()
+        _isOnline.value = false
 
         // Clear session from SharedPreferences
         sharedPreferences.edit().clear().apply()
 
-        // Disconnect socket
+        // Stop location tracking and disconnect socket
+        DriverLocationService.stop(context)
         socketManager.disconnect()
         socketInitialized = false
     }
@@ -258,13 +357,14 @@ class AppViewModel @Inject constructor(
                 val response = orderRepository.acceptOrder(authToken, orderId)
 
                 when (response) {
-                    is Result.Success -> {
-                        val orderResponse = response.getOrNull()
+                    is com.fooddelivery.driver.util.Resource.Success -> {
+                        val orderResponse = response.data
                         if (orderResponse?.success == true) {
+                            val serverStatus = orderResponse.order?.status ?: "assigned"
                             val currentOrders = _orders.value ?: emptyList()
                             val updatedOrders = currentOrders.map { order ->
                                 if (order.id == orderId) {
-                                    order.copy(status = "accepted")
+                                    order.copy(status = serverStatus)
                                 } else {
                                     order
                                 }
@@ -274,15 +374,20 @@ class AppViewModel @Inject constructor(
                             val acceptedOrder = updatedOrders.firstOrNull { it.id == orderId }
                             _activeOrder.value = acceptedOrder
 
+                            if (acceptedOrder != null) {
+                                orderRepository.saveOrderLocally(acceptedOrder)
+                            }
+
                             // Emit acceptance via WebSocket
                             socketManager.emitOrderAccepted(orderId)
                         } else {
                             _error.value = orderResponse?.message ?: "Failed to accept order"
                         }
                     }
-                    is Result.Error -> {
-                        _error.value = response.exceptionOrNull()?.message ?: "Network error"
+                    is com.fooddelivery.driver.util.Resource.Error -> {
+                        _error.value = response.message ?: "Network error"
                     }
+                    else -> {}
                 }
             } catch (e: Exception) {
                 _error.value = "Error accepting order: ${e.message}"
@@ -297,28 +402,132 @@ class AppViewModel @Inject constructor(
             _isLoading.value = true
             try {
                 val authToken = sharedPreferences.getString("firebase_auth_token", "") ?: ""
-                // TODO: Call API to update status on server
-                // For now: local-only update
+                val response = orderRepository.updateOrderStatus(authToken, orderId, newStatus)
+                when (response) {
+                    is Resource.Success -> {
+                        val currentOrders = _orders.value ?: emptyList()
+                        val updatedOrders = currentOrders.map { order ->
+                            if (order.id == orderId) order.copy(
+                                status = newStatus,
+                                updatedAt = java.time.Instant.now().toString()
+                            ) else order
+                        }
+                        _orders.value = updatedOrders
 
-                val currentOrders = _orders.value ?: emptyList()
-                val updatedOrders = currentOrders.map { order ->
-                    if (order.id == orderId) order.copy(
-                        status = newStatus,
-                        updatedAt = java.time.Instant.now().toString()
-                    ) else order
-                }
-                _orders.value = updatedOrders
+                        if (_activeOrder.value?.id == orderId) {
+                            _activeOrder.value = _activeOrder.value?.copy(
+                                status = newStatus,
+                                updatedAt = java.time.Instant.now().toString()
+                            )
+                        }
 
-                if (_activeOrder.value?.id == orderId) {
-                    _activeOrder.value = _activeOrder.value?.copy(
-                        status = newStatus,
-                        updatedAt = java.time.Instant.now().toString()
-                    )
+                        val updatedOrder = updatedOrders.firstOrNull { it.id == orderId }
+                            ?: _activeOrder.value?.takeIf { it.id == orderId }
+                        if (updatedOrder != null) {
+                            orderRepository.saveOrderLocally(updatedOrder)
+                            if (newStatus in listOf("delivered", "completed", "cancelled")) {
+                                loadPastOrders()
+                                loadEarnings()
+                            }
+                        }
+                    }
+                    is Resource.Error -> _error.value = response.message ?: "Failed to update status"
+                    else -> {}
                 }
+            } catch (e: Exception) {
+                _error.value = "Error updating status: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
         }
+    }
+
+    /**
+     * Fetches available orders from the backend and merges them into the order list.
+     */
+    fun loadAvailableOrders() {
+        viewModelScope.launch {
+            val authToken = sharedPreferences.getString("firebase_auth_token", "") ?: ""
+            if (authToken.isEmpty()) return@launch
+            val response = orderRepository.getAvailableOrders(authToken)
+            when (response) {
+                is Resource.Success -> {
+                    val fetched = response.data
+                    val currentOrders = _orders.value ?: emptyList()
+                    val knownIds = currentOrders.map { it.id }.toSet()
+                    val newOrders = fetched.mapNotNull { netOrder ->
+                        if (knownIds.contains(netOrder.id)) return@mapNotNull null
+                        networkOrderToModel(netOrder)
+                    }
+                    if (newOrders.isNotEmpty()) {
+                        _orders.value = currentOrders + newOrders
+                    }
+                }
+                is Resource.Error -> _error.value = response.message ?: "Failed to load orders"
+                else -> {}
+            }
+        }
+    }
+
+    /**
+     * Fetches a single order by ID (deep links / order detail) into activeOrder.
+     */
+    fun fetchOrderById(orderId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val authToken = sharedPreferences.getString("firebase_auth_token", "") ?: ""
+                if (authToken.isEmpty()) return@launch
+                val response = orderRepository.getOrderById(authToken, orderId)
+                when (response) {
+                    is Resource.Success -> {
+                        val model = networkOrderToModel(response.data)
+                        _activeOrder.value = model
+                        val currentOrders = _orders.value ?: emptyList()
+                        _orders.value = currentOrders.map { order ->
+                            if (order.id == orderId) model else order
+                        }
+                    }
+                    is Resource.Error -> _error.value = response.message ?: "Failed to load order"
+                    else -> {}
+                }
+            } catch (e: Exception) {
+                _error.value = "Error loading order: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    private fun networkOrderToModel(netOrder: com.fooddelivery.driver.network.Order): Order {
+        return Order(
+            id = netOrder.id,
+            restaurantName = netOrder.restaurantName,
+            restaurantAddress = netOrder.restaurantAddress,
+            restaurantLocation = com.fooddelivery.driver.data.model.LocationData(
+                netOrder.restaurantLat ?: 0.0,
+                netOrder.restaurantLng ?: 0.0
+            ),
+            customerName = netOrder.customerName,
+            customerAddress = netOrder.customerAddress,
+            customerLocation = com.fooddelivery.driver.data.model.LocationData(
+                netOrder.customerLat,
+                netOrder.customerLng
+            ),
+            items = netOrder.items.map {
+                com.fooddelivery.driver.data.model.OrderItem(
+                    name = it.name,
+                    quantity = it.quantity,
+                    price = it.price,
+                    notes = it.notes
+                )
+            },
+            totalAmount = netOrder.totalAmount,
+            status = netOrder.status,
+            createdAt = netOrder.createdAt,
+            updatedAt = netOrder.updatedAt,
+            deliveryInstructions = netOrder.deliveryInstructions
+        )
     }
 
     fun sendChatMessage(orderId: String, message: String) {
@@ -330,7 +539,7 @@ class AppViewModel @Inject constructor(
                 // Add locally immediately (optimistic)
                 val currentMessages = _messages.value ?: emptyList()
                 val driverName = _user.value?.fullName ?: "Driver"
-                val newMessage = ChatMessage(
+                val newMessage = SocketManager.ChatMessage(
                     orderId = orderId,
                     senderId = _user.value?.id ?: "unknown",
                     senderName = driverName,
@@ -346,322 +555,35 @@ class AppViewModel @Inject constructor(
         }
     }
 
-    fun getPastOrders(): List<Order> {
-        // TODO: Get past orders from local database
-        return emptyList()
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        socketManager.orderUpdatesLiveData.removeObservers { }
-        socketManager.locationUpdatesLiveData.removeObservers { }
-    }
-
-    // Helper to extract token from Result if possible
-    private fun Result<*>.tokenOrNull(): String? {
-        return try {
-            val r = this as? Result.Success<*>
-            // SupabaseClient.signIn returns a Map with "token" key
-            if (r != null) {
-                @Suppress("UNCHECKED_CAST")
-                (r.getOrNull() as? Map<String, String>)?.get("token")
-            } else null
-        } catch (_: Exception) {
-            null
-        }
-    }
-}
-
-    private fun initializeApp() {
-        // Check if we have a saved session
-        loadSavedSession()
-        
-        // Start location updates
-        startLocationTracking()
-        
-        // Initialize socket connection if we have auth
-        if (_user.value != null) {
-            initializeSocket()
-        }
-    }
-
-    private fun loadSavedSession() {
-        viewModelScope.launch {
-            // TODO: Load saved session from DataStore or SharedPreferences
-            // For now, we'll simulate a login
-            // In a real app, you would retrieve the saved user token and refresh if needed
-            _isLoading.value = true
-            
-            // Simulate loading user data
-            // Replace this with actual session restoration
-            val testUser = User(
-                id = "driver_123",
-                email = "driver@example.com",
-                fullName = "John Driver",
-                role = "driver",
-                phone = "+1234567890"
-            )
-            _user.value = testUser
-            
-            // Initialize socket with auth token
-            initializeSocket()
-            
-            _isLoading.value = false
-        }
-    }
-
-    private fun initializeSocket() {
-        if (socketInitialized) return
-        
-        // Use configuration values
-        val socketUrl = AppConfig.WEBSOCKET_URL
-        val authToken = "firebase-test-token" // Replace with actual auth token from Firebase
-        
-        // Update the socket manager with new URL and token
-        // In a real implementation, you would recreate the SocketManager
-        // For now, we assume it's already configured
-        
-        // Listen to order updates from socket
-        socketManager.orderUpdatesLiveData.observeForever { update ->
-            // When we receive an order update, we add it to our list
-            // For simplicity, we're just adding new orders
-            // In a real app, you would update existing orders or handle different update types
-            viewModelScope.launch {
-                val currentOrders = _orders.value ?: emptyList()
-                // Check if we already have this order
-                val orderExists = currentOrders.any { it.id == update.orderId }
-                if (!orderExists) {
-                    // Create a basic order from the update data
-                    // In a real app, you would parse the update data more thoroughly
-                    val newOrder = Order(
-                        id = update.orderId,
-                        restaurantName = "Restaurant from update",
-                        restaurantAddress = "123 Restaurant St",
-                        restaurantLocation = com.fooddelivery.driver.data.model.LocationData(0.0, 0.0),
-                        customerName = "Customer",
-                        customerAddress = "456 Customer Ave",
-                        customerLocation = com.fooddelivery.driver.data.model.LocationData(0.0, 0.0),
-                        items = emptyList(),
-                        totalAmount = 0.0,
-                        status = update.status,
-                        createdAt = "",
-                        updatedAt = ""
-                    )
-                    _orders.value = currentOrders + newOrder
-                }
-            }
-        }
-        
-        // Listen to location updates (for tracking our own location)
-        socketManager.locationUpdatesLiveData.observeForever { locationUpdate ->
-            // Update our driver location
-            val location = android.location.Location("").apply {
-                latitude = locationUpdate.latitude
-                longitude = locationUpdate.longitude
-            }
-            _driverLocation.value = location
-        }
-        
-        // Listen to chat messages from socket
-        socketManager.chatMessagesLiveData.observeForever { message ->
-            // When we receive a chat message, we add it to our list
-            viewModelScope.launch {
-                val currentMessages = _messages.value ?: emptyList()
-                _messages.value = currentMessages + message
-                // Scroll to bottom would be handled in the UI
-            }
-        }
-        
-        socketInitialized = true
-    }
-
-    private fun startLocationTracking() {
-        if (locationInitialized) return
-        // TODO: Implement actual location tracking using FusedLocationProviderClient
-        // For now, we'll simulate location updates
-        viewModelScope.launch {
-            while (true) {
-                delay(5000) // Update every 5 seconds
-                // Simulate location update
-                val location = android.location.Location("gps").apply {
-                    latitude = -1.2921 + (Math.random() * 0.01) // Nairobi area
-                    longitude = 36.8219 + (Math.random() * 0.01)
-                }
-                _driverLocation.value = location
-            }
-        }
-        locationInitialized = true
-    }
-
-    fun signIn(email: String, password: String) {
+    fun toggleOnlineStatus(isOnline: Boolean) {
         viewModelScope.launch {
             _isLoading.value = true
-            val result = authRepository.signIn(email, password)
-            when (result) {
-                is Result.Success -> {
-                    val user = result.getOrNull() ?: return@launch
-                    _user.value = user
-                    // Save session
-                    // TODO: Save session to DataStore
-                    // Initialize socket with new auth token
-                    initializeSocket()
-                }
-                is Result.Error -> {
-                    _error.value = result.exceptionOrNull()?.message
-                }
-            }
-            _isLoading.value = false
-        }
-    }
-
-    fun signOut() {
-        _user.value = null
-        _orders.value = emptyList()
-        _activeOrder.value = null
-        // Clear session
-        // TODO: Clear saved session
-        // Disconnect socket
-        socketManager.orderUpdatesLiveData.removeObservers { }
-        socketManager.locationUpdatesLiveData.removeObservers { }
-    }
-
-    fun acceptOrder(orderId: String) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            // Implement actual order acceptance via API
             try {
-                // Get auth token from saved session or Firebase
-                val authToken = "firebase-test-token" // In real app, get from secure storage
-                
-                // Call API to accept order
-                val response = orderRepository.acceptOrder(authToken, orderId)
-                
-                when (response) {
-                    is Result.Success -> {
-                        val orderResponse = response.getOrNull()
-                        if (orderResponse?.success == true) {
-                            // Update the order status locally
-                            val currentOrders = _orders.value ?: emptyList()
-                            val updatedOrders = currentOrders.map { order ->
-                                if (order.id == orderId) {
-                                    Order(
-                                        id = order.id,
-                                        restaurantName = order.restaurantName,
-                                        restaurantAddress = order.restaurantAddress,
-                                        restaurantLocation = order.restaurantLocation,
-                                        customerName = order.customerName,
-                                        customerAddress = order.customerAddress,
-                                        customerLocation = order.customerLocation,
-                                        items = order.items,
-                                        totalAmount = order.totalAmount,
-                                        status = "accepted",
-                                        createdAt = order.createdAt,
-                                        updatedAt = java.time.Instant.now().toString()
-                                    )
-                                } else {
-                                    order
-                                }
-                            }
-                            _orders.value = updatedOrders
-                            
-                            // Set as active order
-                            val acceptedOrder = updatedOrders.firstOrNull { it.id == orderId }
-                            _activeOrder.value = acceptedOrder
-                            
-                            // Emit acceptance via WebSocket (if needed for real-time updates to others)
-                            socketManager.emitOrderAccepted(orderId)
-                        } else {
-                            _error.value = orderResponse?.message ?: "Failed to accept order"
-                        }
-                    }
-                    is Result.Error -> {
-                        _error.value = response.exceptionOrNull()?.message ?: "Network error"
-                    }
+                _isOnline.value = isOnline
+                // Persist so the status survives app restarts
+                sharedPreferences.edit()
+                    .putBoolean("driver_online", isOnline)
+                    .apply()
+
+                // Foreground location tracking only while online (saves battery when offline)
+                if (isOnline) {
+                    startDriverLocationService()
+                } else {
+                    DriverLocationService.stop(context)
                 }
+
+                // Emit status via WebSocket
+                socketManager.emitStatusUpdate(if (isOnline) "online" else "offline")
             } catch (e: Exception) {
-                _error.value = "Error accepting order: ${e.message}"
+                _error.value = "Failed to update online status: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
         }
     }
 
-    fun updateOrderStatus(orderId: String, newStatus: String) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            // TODO: Implement actual status update via API or WebSocket
-            delay(1000)
-            
-            // Update the order status locally
-            val currentOrders = _orders.value ?: emptyList()
-            val updatedOrders = currentOrders.map { order ->
-                if (order.id == orderId) {
-                    Order(
-                        id = order.id,
-                        restaurantName = order.restaurantName,
-                        restaurantAddress = order.restaurantAddress,
-                        restaurantLocation = order.restaurantLocation,
-                        customerName = order.customerName,
-                        customerAddress = order.customerAddress,
-                        customerLocation = order.customerLocation,
-                        items = order.items,
-                        totalAmount = order.totalAmount,
-                        status = newStatus,
-                        createdAt = order.createdAt,
-                        updatedAt = java.time.Instant.now().toString()
-                    )
-                } else {
-                    order
-                }
-            }
-            _orders.value = updatedOrders
-            
-            // If this was the active order, update it too
-            if (_activeOrder.value?.id == orderId) {
-                _activeOrder.value = _activeOrder.value?.copy(
-                    status = newStatus,
-                    updatedAt = java.time.Instant.now().toString()
-                )
-            }
-            
-            _isLoading.value = false
-        }
-    }
-
-    fun sendChatMessage(orderId: String, message: String) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            // TODO: Implement actual chat message sending via WebSocket
-            delay(500)
-            
-            // Emit the chat message via socket
-            // socketManager.emitChatMessage(orderId, message)
-            
-            // For now, we'll simulate by adding the message to our local list
-            val currentMessages = _messages.value ?: emptyList()
-            val newMessage = ChatMessage(
-                orderId = orderId,
-                senderId = "driver_123", // In real app, get from current user
-                senderName = "Driver",
-                message = message,
-                timestamp = java.time.Instant.now().toString()
-            )
-            _messages.value = currentMessages + newMessage
-            
-            _isLoading.value = false
-        }
-    }
-
-    fun getPastOrders(): List<Order> {
-        // TODO: Get past orders from local database
-        // For now, return empty list
-        return emptyList()
-    }
-
     override fun onCleared() {
         super.onCleared()
-        // Clean up resources
-        socketManager.orderUpdatesLiveData.removeObservers { }
-        socketManager.locationUpdatesLiveData.removeObservers { }
     }
+
 }

@@ -1,13 +1,21 @@
 package com.fooddelivery.driver.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsStateWithLifecycle
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.fooddelivery.driver.R
@@ -16,16 +24,17 @@ import com.fooddelivery.driver.ui.state.AppViewModel
 import com.fooddelivery.driver.ui.theme.SmartSokoDriverTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     viewModel: AppViewModel = viewModel()
 ) {
     SmartSokoDriverTheme {
         // Collect state from ViewModel
-        val pastOrders by viewModel.pastOrders.collectAsStateWithLifecycle(emptyList())
-        val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-        val error by viewModel.error.collectAsStateWithLifecycle()
-        val user by viewModel.user.collectAsStateWithLifecycle()
+        val pastOrders by viewModel.pastOrders.observeAsState(emptyList())
+        val isLoading by viewModel.isLoading.observeAsState(false)
+        val error by viewModel.error.observeAsState()
+        val user by viewModel.user.observeAsState()
 
         Column(modifier = Modifier.fillMaxSize()) {
             // App Bar
@@ -36,7 +45,9 @@ fun HistoryScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                 },
-                backgroundColor = MaterialTheme.colorScheme.primary
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
             )
 
             // Show error if any
@@ -44,13 +55,11 @@ fun HistoryScreen(
                 Snackbar(
                     modifier = Modifier.fillMaxWidth(),
                     action = {
-                        TextButton(onClick = { /* TODO: Dismiss snackbar */ }) {
+                        TextButton(onClick = { }) {
                             Text("Dismiss")
                         }
                     },
-                    label = { Text(text = errorMessage) },
-                    backgroundColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError
+                    content = { Text(text = errorMessage) }
                 )
             }
 
@@ -71,7 +80,8 @@ fun HistoryScreen(
                 }
                 user == null -> {
                     // Show login screen
-                    LoginScreen(
+                    AuthScreen(
+                        viewModel = viewModel,
                         onLoginSuccess = { email, password ->
                             viewModel.signIn(email, password)
                         }
@@ -86,7 +96,7 @@ fun HistoryScreen(
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalArrangement = Arrangement.Center
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.ic_history),
@@ -148,7 +158,6 @@ private fun OrderHistoryItem(
         ) {
             // Order icon/status
             Column(
-                verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
@@ -196,105 +205,8 @@ private fun OrderHistoryItem(
     }
 }
 
-@Composable
-private fun LoginScreen(
-    onLoginSuccess: (String, String) -> Unit
-) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var loading by remember { mutableStateOf(false) }
-
-    SmartSokoDriverTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp)
-        ) {
-            Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_logo),
-                    contentDescription = "SmartSoko Driver",
-                    modifier = Modifier.size(80.dp)
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = "Welcome to SmartSoko Driver",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                TextField(
-                    label = { Text("Email") },
-                    value = email,
-                    onValueChange = { email = it },
-                    isError = email.isEmpty(),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Email,
-                            contentDescription = "Email",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                OutlinedTextField(
-                    label = { Text("Password") },
-                    value = password,
-                    onValueChange = { password = it },
-                    isError = password.isEmpty(),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = "Password",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    },
-                    isPassword = true
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(
-                    onClick = {
-                        if (email.isNotEmpty() && password.isNotEmpty()) {
-                            loading = true
-                            onLoginSuccess(email, password)
-                            loading = false
-                        }
-                    },
-                    enabled = !loading,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    if (loading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Text(
-                            text = "Sign In",
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Don't have an account? Contact support to create one.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
-
 private fun getOrderIcon(status: String): androidx.compose.ui.graphics.vector.ImageVector {
-    return when (status.toLowerCase()) {
+    return when (status.lowercase()) {
         "completed" -> Icons.Default.CheckCircle
         "cancelled" -> Icons.Default.Cancel
         "delivered" -> Icons.Default.LocalShipping
@@ -302,12 +214,13 @@ private fun getOrderIcon(status: String): androidx.compose.ui.graphics.vector.Im
     }
 }
 
-private fun getOrderColor(status: String): androidx.compose.ui.graphics.Color {
-    return when (status.toLowerCase()) {
-        "completed" -> MaterialTheme.colorScheme.success
+@Composable
+private fun getOrderColor(status: String): Color {
+    return when (status.lowercase()) {
+        "completed" -> MaterialTheme.colorScheme.primary
         "cancelled" -> MaterialTheme.colorScheme.error
         "delivered" -> MaterialTheme.colorScheme.secondary
-        else -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 }
 
@@ -316,10 +229,12 @@ private fun formatTimestamp(timestampString: String): String {
     try {
         // Assuming ISO timestamp format
         val time = java.time.Instant.parse(timestampString)
-        val dayOfWeek = time.atZone(java.time.ZoneId.systemDefault()).dayOfWeek.displayName(java.time.format.TextStyle.SHORT, java.util.Locale.getDefault())
-        val month = time.atZone(java.time.ZoneId.systemDefault()).monthValue
-        val dayOfMonth = time.atZone(java.time.ZoneId.systemDefault()).dayOfMonth
-        return "$dayOfWeek, $month/$dayOfMonth"
+        val zdt = time.atZone(java.time.ZoneId.systemDefault())
+        val month = zdt.monthValue
+        val dayOfMonth = zdt.dayOfMonth
+        val hour = zdt.hour
+        val minute = zdt.minute
+        return "$month/$dayOfMonth $hour:$minute"
     } catch (e: Exception) {
         return timestampString.take(10) // Fallback to first 10 chars
     }

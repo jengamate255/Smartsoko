@@ -107,9 +107,9 @@ class AuthWrapper extends StatelessWidget {
           );
         }
         
-        if (snapshot.hasData) {
+        if (snapshot.hasData && snapshot.data != null) {
           // Set Crashlytics user ID and role for crash reporting
-          final user = snapshot.data;
+          final user = snapshot.data!;
           FirebaseCrashlytics.instance.setUserIdentifier(user.id);
           FirebaseCrashlytics.instance.setCustomKey('role', user.role.name);
           FirebaseCrashlytics.instance.setCustomKey('app_type', 'customer');

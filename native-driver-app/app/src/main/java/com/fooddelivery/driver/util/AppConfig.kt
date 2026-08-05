@@ -1,5 +1,7 @@
 package com.fooddelivery.driver.util
 
+import com.fooddelivery.driver.BuildConfig
+
 /**
  * App Configuration - Replace these placeholder values with your actual credentials
  */
@@ -15,9 +17,8 @@ object AppConfig {
     // ====================
     // MAPBOX CONFIG
     // ====================
-    // Get your token from: https://account.mapbox.com/access-tokens/
-    // Set via local.properties or environment variable
-    const val MAPBOX_ACCESS_TOKEN = System.getenv("MAPBOX_ACCESS_TOKEN") ?: "YOUR_MAPBOX_PUBLIC_TOKEN_HERE"
+    // Injected via buildConfigField in app/build.gradle.kts (see MAPBOX_ACCESS_TOKEN)
+    val MAPBOX_ACCESS_TOKEN = BuildConfig.MAPBOX_ACCESS_TOKEN
     
     // ====================
     // SUPABASE CONFIG
@@ -29,18 +30,17 @@ object AppConfig {
     // ====================
     // BACKEND API CONFIG
     // ====================
-    // Your Node.js/Express backend URL
-    // Dev: http://10.0.2.2:3000/api (Android emulator -> localhost)
-    // Production: https://your-domain.com/api
-    const val API_BASE_URL = "http://10.0.2.2:3000/api"
+    // Injected via buildConfigField in app/build.gradle.kts (per build type)
+    // Debug (adb reverse tcp:3000 tcp:3000): http://localhost:3000/
+    // Emulator: use adb reverse, or switch to http://10.0.2.2:3000/
+    // Production: https://your-domain.com/ (set in release buildType)
+    val API_BASE_URL = BuildConfig.API_BASE_URL
     
     // ====================
     // WEBSOCKET CONFIG
     // ====================
-    // Your WebSocket server URL
-    // Dev: http://10.0.2.2:3000 (Android emulator -> localhost, Socket.IO path)
-    // Production: https://your-domain.com
-    const val WEBSOCKET_URL = "http://10.0.2.2:3000"
+    // Injected via buildConfigField in app/build.gradle.kts (per build type)
+    val WEBSOCKET_URL = BuildConfig.WEBSOCKET_URL
     
     // ====================
     // APP SETTINGS
@@ -55,6 +55,6 @@ object AppConfig {
     // Order sync settings
     const val ORDER_SYNC_INTERVAL_MS = 30000L // 30 seconds
     
-    // Debug mode
-    const val DEBUG_MODE = true
+    // Debug mode - derived from build type so logging is stripped from release builds
+    val DEBUG_MODE = BuildConfig.DEBUG
 }

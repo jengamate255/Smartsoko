@@ -1,0 +1,47 @@
+{
+  "dashboard": {
+    "title": "SmartSoko - Product Browsing Performance",
+    "tags": ["smartsoko", "product", "browse"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1, "title": "Product List Latency (p95)", "type": "graph",
+        "targets": [{"expr": "histogram_quantile(0.95, rate(product_list_latency_bucket[5m]))", "legendFormat": "p95"}],
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8}
+      },
+      {
+        "id": 2, "title": "Product Detail Latency (p95)", "type": "graph",
+        "targets": [{"expr": "histogram_quantile(0.95, rate(product_detail_latency_bucket[5m]))", "legendFormat": "p95"}],
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8}
+      },
+      {
+        "id": 3, "title": "Category Latency (p95)", "type": "graph",
+        "targets": [{"expr": "histogram_quantile(0.95, rate(category_latency_bucket[5m]))", "legendFormat": "p95"}],
+        "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8}
+      },
+      {
+        "id": 4, "title": "Search Latency (p95)", "type": "graph",
+        "targets": [{"expr": "histogram_quantile(0.95, rate(search_latency_bucket[5m]))", "legendFormat": "p95"}],
+        "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8}
+      },
+      {
+        "id": 5, "title": "Image Load Success Rate", "type": "singlestat",
+        "targets": [{"expr": "rate(image_load_success[5m]) / rate(image_load_total[5m]) * 100", "legendFormat": "%"}],
+        "gridPos": {"x": 0, "y": 16, "w": 6, "h": 4}
+      },
+      {
+        "id": 6, "title": "Pagination Success Rate", "type": "singlestat",
+        "targets": [{"expr": "rate(pagination_success[5m]) / rate(pagination_total[5m]) * 100", "legendFormat": "%"}],
+        "gridPos": {"x": 6, "y": 16, "w": 6, "h": 4}
+      },
+      {
+        "id": 7, "title": "Requests per Second", "type": "graph",
+        "targets": [{"expr": "sum(rate(http_requests_total{job=~\"k6.*\"}[5m])) by (operation)", "legendFormat": "{{operation}}"}],
+        "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8}
+      }
+    ],
+    "time": {"from": "now-1h", "to": "now"},
+    "refresh": "10s"
+  },
+  "overwrite": true
+}

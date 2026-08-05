@@ -52,7 +52,7 @@ class _MerchantLoginScreenState extends State<MerchantLoginScreen> {
       if (shop != null) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => MerchantMainScreen(initialShop: shop),
+            builder: (context) => const MerchantMainScreen(),
           ),
         );
       } else {
@@ -67,7 +67,7 @@ class _MerchantLoginScreenState extends State<MerchantLoginScreen> {
           if (newShop != null && mounted) {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (context) => MerchantMainScreen(initialShop: newShop),
+                builder: (context) => const MerchantMainScreen(),
               ),
             );
           }

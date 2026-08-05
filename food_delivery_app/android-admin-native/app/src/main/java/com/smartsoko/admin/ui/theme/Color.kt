@@ -1,0 +1,26 @@
+package com.smartsoko.admin.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+val Green700 = Color(0xFF15803D)
+val Green600 = Color(0xFF16A34A)
+val Green500 = Color(0xFF22C55E)
+val Green100 = Color(0xFFDCFCE7)
+val Green50 = Color(0xFFF0FDF4)
+val Gray900 = Color(0xFF111827)
+val Gray700 = Color(0xFF374151)
+val Gray500 = Color(0xFF6B7280)
+val Gray400 = Color(0xFF9CA3AF)
+val Gray200 = Color(0xFFE5E7EB)
+val Gray100 = Color(0xFFF3F4F6)
+val Gray50 = Color(0xFFF9FAFB)
+val White = Color(0xFFFFFFFF)
+val Amber500 = Color(0xFFF59E0B)
+val Amber100 = Color(0xFFFEF3C7)
+val Red500 = Color(0xFFDC2626)
+val Red100 = Color(0xFFFEE2E2)
+val Blue500 = Color(0xFF2563EB)
+val Blue100 = Color(0xFFDBEAFE)
+val Purple500 = Color(0xFF7C3AED)
+val Purple100 = Color(0xFFEDE9FE)
+val Teal500 = Color(0xFF14B8A6)

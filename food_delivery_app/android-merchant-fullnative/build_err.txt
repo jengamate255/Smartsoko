@@ -1,0 +1,15 @@
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:packageDebug'.
+> A failure occurred while executing com.android.build.gradle.tasks.PackageAndroidArtifact$IncrementalSplitterRunnable
+   > !intermediateDir.isDirectory(): E:\Project\notsmartsoko\Smartsoko\food_delivery_app\android-merchant-fullnative\app\build\intermediates\incremental\packageDebug\tmp\debug
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 3m 14s

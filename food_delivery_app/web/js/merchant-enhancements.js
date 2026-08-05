@@ -333,3 +333,15 @@ async function updateMerchantProfile(profileData) {
     throw error;
   }
 }
+
+export {
+  loadOrdersRealtime,
+  updateOrderStatus,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+  loadMerchantProducts,
+  getSalesAnalytics,
+  sendCustomerNotification,
+  updateMerchantProfile
+};

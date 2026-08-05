@@ -5,11 +5,13 @@ import '../config/app_config.dart';
 import '../utils/role_validator.dart';
 import '../utils/logger.dart';
 import 'dart:math';
+import 'supabase_service.dart';
+import '../utils/rate_limiter.dart';
 
 class AuthService {
   final firebase_auth.FirebaseAuth _auth = firebase_auth.FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final SupabaseService _supabaseService = SupabaseService();
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final SupabaseService supabaseService = SupabaseService();
   
   models.User? user;
 
@@ -22,14 +24,14 @@ class AuthService {
 
   Future<models.User?> getUser(String uid) async {
     try {
-      final doc = await _firestore.collection(AppConfig.usersCollection).doc(uid).get();
+      final doc = await firestore.collection(AppConfig.usersCollection).doc(uid).get();
       if (doc.exists) return models.User.fromFirestore(doc);
     } catch (e) {
       AppLogger.warning('Firebase getUser failed, trying Supabase: $e');
     }
 
     try {
-      final supabaseData = await _supabaseService.client
+      final supabaseData = await supabaseService.client
           .from('profiles')
           .select()
           .eq('id', uid)
@@ -45,7 +47,7 @@ class AuthService {
   }
 
    Future<models.User> signInWithPhone(String phone) async {
-     final normalizedPhone = _normalizePhone(phone);
+      final normalizedPhone = normalizePhone(phone);
      
      // Check rate limit
      final isLockedOut = await RateLimiter.isLockedOut(normalizedPhone);
@@ -60,7 +62,7 @@ class AuthService {
      AppLogger.info('Authentication attempt for phone: $normalizedPhone');
      
      try {
-       final doc = await _firestore.collection(AppConfig.usersCollection)
+       final doc = await firestore.collection(AppConfig.usersCollection)
            .where('phone', isEqualTo: normalizedPhone)
            .limit(1)
            .get();
@@ -72,7 +74,7 @@ class AuthService {
          }
        } else {
          // Try Supabase before creating new
-         final supabaseData = await _supabaseService.client
+         final supabaseData = await supabaseService.client
              .from('profiles')
              .select()
              .eq('phone', normalizedPhone)
@@ -91,7 +93,7 @@ class AuthService {
              createdAt: DateTime.now(),
            );
            
-           final ref = await _firestore.collection(AppConfig.usersCollection).add(newUser.toFirestore());
+           final ref = await firestore.collection(AppConfig.usersCollection).add(newUser.toFirestore());
            
            user = models.User(
              id: ref.id,
@@ -102,7 +104,7 @@ class AuthService {
            
            // Also create in Supabase for sync
            try {
-             await _supabaseService.client.from('profiles').insert({
+             await supabaseService.client.from('profiles').insert({
                'id': user!.id,
                'phone': normalizedPhone,
                'role': 'customer',
@@ -116,7 +118,7 @@ class AuthService {
        }
      } catch (e) {
        AppLogger.warning('Firebase signInWithPhone failed, trying Supabase: $e');
-       final supabaseData = await _supabaseService.client
+       final supabaseData = await supabaseService.client
            .from('profiles')
            .select()
            .eq('phone', normalizedPhone)
@@ -154,7 +156,7 @@ class AuthService {
    }
 
   Future<void> updateUserRole(String uid, models.UserRole role) async {
-    await _firestore.collection(AppConfig.usersCollection).doc(uid).update({
+    await firestore.collection(AppConfig.usersCollection).doc(uid).update({
       'role': role.name,
     });
   }
@@ -168,11 +170,11 @@ class AuthService {
     if (lng != null) updates['lng'] = lng;
     
     if (updates.isNotEmpty) {
-      await _firestore.collection(AppConfig.usersCollection).doc(uid).update(updates);
+      await firestore.collection(AppConfig.usersCollection).doc(uid).update(updates);
     }
   }
 
-  String _normalizePhone(String phone) {
+  String normalizePhone(String phone) {
     String normalized = phone.replaceAll(RegExp(r'[^\d]'), '');
     if (normalized.startsWith('0')) {
       normalized = '255${normalized.substring(1)}';
