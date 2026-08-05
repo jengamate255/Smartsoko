@@ -2,7 +2,6 @@
   "version": 2,
   "buildCommand": "npm run optimize",
   "outputDirectory": "web",
-  "framework": "other",
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
