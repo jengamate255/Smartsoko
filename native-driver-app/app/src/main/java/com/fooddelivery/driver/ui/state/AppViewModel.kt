@@ -10,8 +10,8 @@ import com.fooddelivery.driver.data.AuthRepository
 import com.fooddelivery.driver.data.LocalDatabase
 import com.fooddelivery.driver.data.model.Order
 import com.fooddelivery.driver.data.model.User
-import com.fooddelivery.driver.location.DriverLocationService
-import com.fooddelivery.driver.location.LocationState
+import com.smartsoko.driver.service.DriverLocationService
+import com.smartsoko.driver.service.LocationState
 import com.fooddelivery.driver.realtime.SocketManager
 import com.fooddelivery.driver.repository.OrderRepository
 import com.fooddelivery.driver.util.Resource
@@ -332,8 +332,11 @@ class AppViewModel @Inject constructor(
         }
     }
 
-    fun signOut() {
-        _user.value = null
+    fun clearError() {
+        _error.value = null
+    }
+
+    fun signOut() {        _user.value = null
         _orders.value = emptyList()
         _pastOrders.value = emptyList()
         _activeOrder.value = null

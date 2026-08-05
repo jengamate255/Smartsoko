@@ -91,7 +91,7 @@ fun ChatScreen(
                 Snackbar(
                     modifier = Modifier.fillMaxWidth(),
                     action = {
-                        TextButton(onClick = { }) {
+                        TextButton(onClick = { viewModel.clearError() }) {
                             Text("Dismiss")
                         }
                     },

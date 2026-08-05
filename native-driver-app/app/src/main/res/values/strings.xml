@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SmartSoko Driver</string>
-    <string name="mapbox_access_token"><![CDATA[YOUR_MAPBOX_ACCESS_TOKEN]]></string>
     <string name="nav_home">Home</string>
     <string name="nav_earnings">Earnings</string>
     <string name="nav_history">History</string>
@@ -62,7 +61,6 @@
     <string name="total">Total:</string>
     <string name="reject">Reject</string>
     <string name="accept">Accept</string>
-    <string name="reject">Reject</string>
     <string name="pick_up">Pick Up</string>
     <string name="delivered">Delivered</string>
     <string name="arrived">Arrived at Pickup</string>
@@ -70,7 +68,6 @@
     <string name="on_the_way">On the Way</string>
     <string name="call">Call</string>
     <string name="message">Message</string>
-    <string name="logout">Logout</string>
     <string name="login">Login</string>
     <string name="verify_otp">Verify OTP</string>
     <string name="enter_phone">Enter phone number</string>

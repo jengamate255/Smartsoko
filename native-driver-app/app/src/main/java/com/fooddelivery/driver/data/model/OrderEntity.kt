@@ -3,6 +3,7 @@ package com.fooddelivery.driver.data.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.fooddelivery.driver.data.OrderEntityConverters
+import com.fooddelivery.driver.network.Order as NetworkOrder
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -28,7 +29,7 @@ data class OrderEntity(
     val deliveryInstructions: String? = null,
     val isSynced: Boolean = false // Flag to indicate if this order has been synced with the server
 ) {
-    fun toOrder(): Order {
+    fun toOrder(): NetworkOrder {
         val itemsList = mutableListOf<OrderItem>()
         try {
             val jsonArray = JSONArray(items)
@@ -43,14 +44,16 @@ data class OrderEntity(
             }
         } catch (_: Exception) { }
         
-        return Order(
+        return NetworkOrder(
             id = id,
             restaurantName = restaurantName,
             restaurantAddress = restaurantAddress,
-            restaurantLocation = LocationData(restaurantLat, restaurantLng),
+            restaurantLat = restaurantLat,
+            restaurantLng = restaurantLng,
             customerName = customerName,
             customerAddress = customerAddress,
-            customerLocation = LocationData(customerLat, customerLng),
+            customerLat = customerLat,
+            customerLng = customerLng,
             items = itemsList,
             totalAmount = totalAmount,
             status = status,
@@ -61,7 +64,7 @@ data class OrderEntity(
     }
 
     companion object {
-        fun from(order: Order, isSynced: Boolean = true): OrderEntity {
+        fun from(order: NetworkOrder, isSynced: Boolean = true): OrderEntity {
             val itemsJson = JSONArray().apply {
                 order.items.forEach { item ->
                     put(JSONObject().apply {
@@ -76,12 +79,12 @@ data class OrderEntity(
                 id = order.id,
                 restaurantName = order.restaurantName,
                 restaurantAddress = order.restaurantAddress,
-                restaurantLat = order.restaurantLocation.lat,
-                restaurantLng = order.restaurantLocation.lng,
+                restaurantLat = order.restaurantLat ?: 0.0,
+                restaurantLng = order.restaurantLng ?: 0.0,
                 customerName = order.customerName,
                 customerAddress = order.customerAddress,
-                customerLat = order.customerLocation.lat,
-                customerLng = order.customerLocation.lng,
+                customerLat = order.customerLat,
+                customerLng = order.customerLng,
                 items = itemsJson,
                 totalAmount = order.totalAmount,
                 status = order.status,

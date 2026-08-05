@@ -27,7 +27,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
-    viewModel: AppViewModel = viewModel()
+    viewModel: AppViewModel = viewModel(),
+    navController: androidx.navigation.NavHostController? = null
 ) {
     SmartSokoDriverTheme {
         // Collect state from ViewModel
@@ -55,7 +56,7 @@ fun HistoryScreen(
                 Snackbar(
                     modifier = Modifier.fillMaxWidth(),
                     action = {
-                        TextButton(onClick = { }) {
+                        TextButton(onClick = { viewModel.clearError() }) {
                             Text("Dismiss")
                         }
                     },
@@ -128,7 +129,9 @@ fun HistoryScreen(
                         items(pastOrders) { order ->
                             OrderHistoryItem(
                                 order = order,
-                                onOrderClick = { /* TODO: Navigate to order detail */ }
+                                onOrderClick = {
+                                    navController?.navigate("order-detail/${order.id}")
+                                }
                             )
                         }
                     }
@@ -188,7 +191,7 @@ private fun OrderHistoryItem(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "₦${order.totalAmount}",
+                        text = "₦${"%,.2f".format(order.totalAmount)}",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary
                     )

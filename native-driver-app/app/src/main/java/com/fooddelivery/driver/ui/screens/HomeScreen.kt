@@ -73,7 +73,7 @@ fun HomeScreen(
                 Snackbar(
                     modifier = Modifier.fillMaxWidth(),
                     action = { 
-                        TextButton(onClick = { /* TODO: Dismiss snackbar */ }) {
+                        TextButton(onClick = { viewModel.clearError() }) {
                             Text("Dismiss")
                         }
                     },

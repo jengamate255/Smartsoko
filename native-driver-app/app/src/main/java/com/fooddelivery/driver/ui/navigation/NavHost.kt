@@ -137,7 +137,7 @@ fun SmartSokoDriverNavHost(
                 ChatScreen(viewModel = viewModel, orderId = orderId)
             }
             composable("history") {
-                HistoryScreen(viewModel = viewModel)
+                HistoryScreen(viewModel = viewModel, navController = navController)
             }
             composable("profile") {
                 ProfileScreen(viewModel = viewModel)
