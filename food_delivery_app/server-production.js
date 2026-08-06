@@ -198,7 +198,7 @@ app.use((req, res, next) => {
 
 // Handle /favicon.ico requests (serve SVG directly, avoid redirect that Chrome retries as HTTPS)
 app.get('/favicon.ico', (req, res) => {
-  res.sendFile(path.join(__dirname, 'web', 'favicon.svg'));
+  res.sendFile(path.join(__dirname, 'public', 'favicon.svg'));
 });
 
 // Root redirects to login (before static middleware so index.html isn't served)
@@ -206,8 +206,8 @@ app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
-// Static file serving with caching
-app.use(express.static(path.join(__dirname, 'web'), {
+// Static file serving with caching (public/ is the real site root — matches Firebase/Netlify/Vercel)
+app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: NODE_ENV === 'production' ? '7d' : 0,
   etag: true,
   lastModified: true,
@@ -222,6 +222,9 @@ app.use(express.static(path.join(__dirname, 'web'), {
     }
   }
 }));
+
+// Legacy fallback for any asset still only present in web/
+app.use(express.static(path.join(__dirname, 'web')));
 
 function sendHealthPayload(res) {
   res.status(200).json({
