@@ -461,7 +461,7 @@
   </nav>
 
   <!-- Desktop FAB -->
-  <button class="hidden md:flex fixed bottom-8 right-8 bg-green-700 text-white shadow-2xl px-5 py-3 rounded-full items-center gap-2 hover:scale-105 active:scale-95 transition-all z-40 font-semibold text-sm">
+  <button onclick="window.location.href='/chat'" class="hidden md:flex fixed bottom-8 right-8 bg-green-700 text-white shadow-2xl px-5 py-3 rounded-full items-center gap-2 hover:scale-105 active:scale-95 transition-all z-40 font-semibold text-sm">
     <span class="material-symbols-outlined">message</span> Chat with Sellers
   </button>
 
@@ -473,6 +473,18 @@
       document.getElementById('searchInputMobile').value = val;
       if (document.getElementById('searchInputDesktop')) document.getElementById('searchInputDesktop').value = val;
     }
+
+    function goToSearch() {
+      const query = (document.getElementById('searchInputMobile').value || '').trim();
+      if (!query) return;
+      window.location.href = '/discovery?search=' + encodeURIComponent(query);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      ['searchInputMobile', 'searchInputDesktop'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); goToSearch(); } });
+      });
+    });
 
     // Hero Carousel
     let currentSlide = 0;
@@ -798,7 +810,7 @@
         </div>
       </div>
       <div class="border-t border-outline-variant pt-6 text-center text-body-sm text-on-surface-variant">
-        <p>&copy; 2024 SmartSoko. All rights reserved.</p>
+        <p>&copy; 2026 SmartSoko. All rights reserved.</p>
       </div>
     </div>
   </footer>

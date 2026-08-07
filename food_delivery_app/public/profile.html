@@ -104,6 +104,18 @@
       </a>
     </div>
 
+    <!-- Delivery Address -->
+    <div id="addressCard" class="profile-card mb-6 overflow-hidden">
+      <div class="px-5 py-4 flex items-center gap-4">
+        <span class="material-symbols-outlined text-green-700">location_on</span>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs text-gray-500">Delivery Address</p>
+          <p id="savedAddress" class="font-semibold text-gray-900 text-sm">Not set yet</p>
+        </div>
+        <a href="/checkout" class="text-green-700 text-sm font-semibold hover:underline whitespace-nowrap">Set at checkout</a>
+      </div>
+    </div>
+
     <!-- Sign Out -->
     <button id="signOutBtn" onclick="signOut()"
       class="w-full py-4 rounded-full border-2 border-red-300 text-red-600 font-bold text-sm hover:bg-red-50 active:scale-95 transition-all flex items-center justify-center gap-2">
@@ -232,6 +244,21 @@
       document.addEventListener('firebase-initialized', initProfile);
       setTimeout(initProfile, 3000);
     }
+
+    // Delivery address + ?tab=addresses support
+    (function initAddress() {
+      const addr = localStorage.getItem('smartsoko_address') || localStorage.getItem('smartsoko_user_address') || '';
+      const addrEl = document.getElementById('savedAddress');
+      if (addrEl) addrEl.textContent = addr || 'Not set yet';
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('tab') === 'addresses') {
+        const card = document.getElementById('addressCard');
+        if (card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          card.classList.add('ring-2', 'ring-green-200');
+        }
+      }
+    })();
   </script>
 </body>
 </html>

@@ -70,6 +70,15 @@ const logger = winston.createLogger({
   ]
 });
 
+// Keep the server alive when background services (Firestore, Supabase, payment webhooks)
+// fail asynchronously — log instead of crashing the process.
+process.on('unhandledRejection', (reason) => {
+  logger.error('Unhandled promise rejection (recovered):', { error: reason && reason.stack ? reason.stack : String(reason) });
+});
+process.on('uncaughtException', (err) => {
+  logger.error('Uncaught exception (recovered):', { error: err && err.stack ? err.stack : String(err) });
+});
+
 // Initialize Firebase Admin with service account
 let db;
 try {

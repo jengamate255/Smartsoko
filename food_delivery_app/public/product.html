@@ -1262,12 +1262,6 @@
       container.innerHTML = html;
     }
 
-    function updateAddToCartText() {
-      if (!currentProduct) return;
-      const total = currentProduct.price * quantity;
-      document.getElementById('addToCartText').textContent = `Add to Cart - TSh ${total.toLocaleString()}`;
-    }
-
     function addToCart() {
       if (!currentProduct) return;
       if (currentProduct.isAvailable === false) {
@@ -1683,7 +1677,7 @@
         </div>
       </div>
       <div class="border-t border-white/10 mt-8 pt-6 text-center text-body-sm text-white/40">
-        <p>&copy; 2024 SmartSoko. All rights reserved.</p>
+        <p>&copy; 2026 SmartSoko. All rights reserved.</p>
       </div>
     </div>
   </footer>
