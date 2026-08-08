@@ -1,0 +1,18 @@
+workflows:
+  iOS-release-unsigned:
+    name: iOS Release (unsigned IPA)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    working_directory: food_delivery_app
+    environment:
+      flutter: stable
+      xcode: latest
+    scripts:
+      - name: Get Flutter dependencies
+        script: |
+          flutter pub get
+      - name: Build unsigned release IPA
+        script: |
+          flutter build ipa --release --no-codesign
+    artifacts:
+      - build/ios/ipa/*.ipa
