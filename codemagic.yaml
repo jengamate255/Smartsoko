@@ -11,8 +11,11 @@ workflows:
       - name: Get Flutter dependencies
         script: |
           flutter pub get
-      - name: Build unsigned release IPA
+      - name: Build unsigned app and package IPA
         script: |
-          flutter build ipa --release --no-codesign
+          flutter build ios --release --no-codesign
+          mkdir -p Payload
+          cp -r build/ios/iphoneos/Runner.app Payload/
+          zip -r -y smartsoko-unsigned.ipa Payload
     artifacts:
-      - build/ios/ipa/*.ipa
+      - smartsoko-unsigned.ipa
