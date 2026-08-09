@@ -11,9 +11,25 @@ workflows:
       - name: Get Flutter dependencies
         script: |
           flutter pub get
-      - name: Build unsigned app and package IPA
+      - name: Build unsigned .app with xcodebuild (bypasses Flutter's no-codesign block)
         script: |
-          flutter build ios --release --no-codesign
+          flutter build ios --release --no-codesign --target-arch=arm64 2>&1 || true
+          # If Flutter's build ios still fails, force it with xcodebuild directly
+          if [ ! -d "build/ios/iphoneos/Runner.app" ]; then
+            echo "Flutter build failed, using xcodebuild directly..."
+            xcodebuild -workspace ios/Runner.xcworkspace \
+              -scheme Runner \
+              -configuration Release \
+              -sdk iphoneos \
+              -arch arm64 \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGN_IDENTITY="" \
+              PROVISIONING_PROFILE="" \
+              -derivedDataPath build/ios \
+              -quiet
+          fi
+      - name: Package unsigned IPA
+        script: |
           mkdir -p Payload
           cp -r build/ios/iphoneos/Runner.app Payload/
           zip -r -y smartsoko-unsigned.ipa Payload
