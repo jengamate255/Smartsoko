@@ -29,6 +29,16 @@
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .cart-item { transition: box-shadow 0.2s, transform 0.2s; }
     .cart-item:hover { box-shadow: 0 8px 24px rgba(44,62,80,0.08); transform: translateY(-2px); }
+    .hidden { display: none !important; }
+    @media (min-width: 640px) {
+      .sm\:block { display: block; }
+    }
+    @media (min-width: 768px) {
+      .md\:flex { display: flex; }
+      .md\:hidden { display: none !important; }
+      .md\:px-12 { padding-left: 3rem; padding-right: 3rem; }
+      .md\:pb-0 { padding-bottom: 0; }
+    }
   </style>
 </head>
 <body class="bg-[#F8FAF6] text-on-background min-h-screen pb-24 md:pb-0">
@@ -157,7 +167,7 @@
 
     function escapeHtml(str) {
       if (!str) return '';
-      return String(str).replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"').replace(/'/g, '&#039;');
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
 
     function loadCartData() {

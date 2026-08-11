@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="light" lang="en">
 <head>
   <meta charset="utf-8"/>
@@ -32,14 +32,15 @@
     .top-header { background: linear-gradient(135deg, #064e3b, #065f46); position: sticky; top: 0; z-index: 40; }
 
     /* Hero Carousel */
-    .hero-carousel { position: relative; height: 360px; overflow: hidden; border-radius: 0 0 24px 24px; }
+    .hero-carousel { position: relative; height: 360px; overflow: hidden; border-radius: 0 0 24px 24px; background: linear-gradient(135deg, #F1E6CC 0%, #FBE7C6 55%, #FBF5E9 100%); }
     @media (min-width: 768px) { .hero-carousel { height: 420px; } }
-    .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s ease; background-size: cover; background-position: center; }
+    .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s ease; background-size: cover; background-position: center; background-color: #F1E6CC; }
     .hero-slide.active { opacity: 1; }
-    .hero-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 40px 24px 32px; box-sizing: border-box; background: linear-gradient(transparent, rgba(0,0,0,0.75)); color: white; max-width: 560px; }
+    .hero-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 40px 24px 32px; box-sizing: border-box; background: linear-gradient(transparent, rgba(251,245,233,0.85)); color: #1E2A22; max-width: 560px; }
+    .hero-slide p { color: #5B6B5E; }
     .carousel-dots { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.3s; }
-    .dot.active { background: white; width: 28px; border-radius: 5px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(30,42,34,0.3); cursor: pointer; transition: all 0.3s; }
+    .dot.active { background: #137A69; width: 28px; border-radius: 5px; }
 
     /* Category Scroll */
     .cat-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; }
@@ -95,14 +96,29 @@
       display: flex; justify-content: space-around; align-items: center;
       height: 68px; padding-bottom: env(safe-area-inset-bottom, 0);
     }
-    @media (min-width: 768px) { .bottom-nav { display: none; } }
+    @media (min-width: 720px) { .bottom-nav { display: none; } }
     .nav-item {
       display: flex; flex-direction: column; align-items: center; gap: 2px;
-      padding: 6px 12px; color: #64748B; font-size: 11px; font-weight: 600;
+      padding: 8px 14px; color: #64748B; font-size: 11px; font-weight: 600;
       cursor: pointer; transition: all 0.2s; border-radius: 12px;
+      min-height: 44px; min-width: 44px; justify-content: center;
     }
     .nav-item.active { color: #064e3b; background: #064e3b15; }
     .nav-item .material-symbols-outlined { font-size: 22px; }
+
+    /* Touch targets: minimum 44x44 for all interactive elements on mobile + tablet */
+    @media (max-width: 1024px) {
+      a, button { min-height: 44px; }
+      header a, header button { padding: 10px; }
+      .cat-pill { min-height: 44px; padding: 10px 10px; }
+      footer a { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 10px; }
+    }
+    /* Footer: always large enough for readability + tap */
+    footer a { padding: 10px 12px; line-height: 1.6; }
+    /* "View all" / "See all" links: larger tap target */
+    .text-green-700.font-semibold { padding: 8px 6px; min-height: 40px; display: inline-flex; align-items: center; }
+    /* Header icon buttons: ensure 44px touch target */
+    header .p-2 { padding: 10px !important; }
 
     /* Skeleton */
     .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
@@ -116,6 +132,114 @@
     }
     .skeleton-text { height: 12px; width: 80%; border-radius: 4px; }
     .skeleton-text-sm { height: 10px; width: 50%; border-radius: 4px; }
+
+    /* ===== Orientation responsive ===== */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .hero-carousel { height: 50vw; max-height: 280px; min-height: 140px; border-radius: 0; }
+      .hero-content { padding: 16px 20px 12px; }
+      .hero-content h2 { font-size: 1.1rem; }
+      .hero-content p { display: none; }
+      .bottom-nav { display: none; }
+      body { padding-bottom: 0 !important; }
+      .cat-scroll { padding-bottom: 4px; scroll-padding-inline: 16px; }
+      .cat-pill { padding: 8px 8px; min-width: 60px; }
+      .cat-icon { width: 36px; height: 36px; }
+      .cat-pill span:last-child { font-size: 10px; }
+      .flash-deals { padding: 14px; margin: 12px 0; }
+      .product-grid { gap: 8px; }
+      .top-header { height: 48px; }
+      .top-header > div { height: 48px; }
+    }
+    @media (orientation: landscape) and (min-height: 500px) and (max-height: 700px) {
+      .hero-carousel { height: 65vw; max-height: 360px; min-height: 200px; }
+      .bottom-nav { display: none; }
+      body { padding-bottom: 0 !important; }
+    }
+    @media (orientation: portrait) and (max-height: 600px) {
+      .hero-carousel { height: 50vw; max-height: 300px; min-height: 160px; }
+      .hero-content { padding: 24px 20px 20px; }
+      .hero-content h2 { font-size: 1.25rem; }
+    }
+    @media (max-height: 400px) {
+      .bottom-nav { display: none; }
+      body { padding-bottom: 0 !important; }
+      .top-header { height: 44px; }
+      .top-header > div { height: 44px; }
+      .hero-carousel { max-height: 220px; }
+    }
+  </style>
+<style>
+    /* ===== Base utility shims missing from dist/tailwind.css ===== */
+    .left-3\.5 { left: .875rem; }
+    .top-2\.5 { top: .625rem; }
+    .-top-0\.5 { top: -0.125rem; }
+    .-right-0\.5 { right: -0.125rem; }
+    .bottom-2 { bottom: .5rem; }
+    .w-4 { width: 1rem; }
+    .border-0 { border-width: 0; }
+    .opacity-0 { opacity: 0; }
+    .opacity-70 { opacity: .7; }
+    .ml-0\.5 { margin-left: .125rem; }
+    .mt-0\.5 { margin-top: .125rem; }
+    .mt-1\.5 { margin-top: .375rem; }
+    .mt-auto { margin-top: auto; }
+    .mx-8 { margin-left: 2rem; margin-right: 2rem; }
+    .p-1\.5 { padding: .375rem; }
+    .pt-1 { padding-top: .25rem; }
+    .pt-5 { padding-top: 1.25rem; }
+    .px-7 { padding-left: 1.75rem; padding-right: 1.75rem; }
+    .py-3\.5 { padding-top: .875rem; padding-bottom: .875rem; }
+    .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: .375rem; }
+    .space-y-2 > :not([hidden]) ~ :not([hidden]) { margin-top: .5rem; }
+    .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem; }
+    .no-underline { text-decoration: none; }
+    .line-through { text-decoration: line-through; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+    .min-h-\[40px\] { min-height: 40px; }
+    .max-w-\[1280px\] { max-width: 1280px; }
+    .text-\[9px\] { font-size: 9px; }
+    .text-\[10px\] { font-size: 10px; }
+    .text-\[12px\] { font-size: 12px; }
+    .text-primary { color: var(--os-primary); }
+    .hover\:text-primary:hover { color: var(--os-primary); }
+    .font-headline { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .text-on-surface-variant { color: var(--os-text-dim); }
+    .active\:scale-\[0\.98\]:active { transform: scale(.98); }
+    .text-cyan-600 { color: #0891b2; }
+    .text-emerald-600 { color: #059669; }
+    .text-pink-600 { color: #db2777; }
+    .bg-cyan-100 { background-color: #cffafe; }
+    .bg-emerald-100 { background-color: #d1fae5; }
+    .bg-pink-100 { background-color: #fce7f3; }
+    .bg-black\/50 { background-color: rgba(0,0,0,.5); }
+    .bg-white\/15 { background-color: rgba(255,255,255,.15); }
+    .bg-white\/80 { background-color: rgba(255,255,255,.8); }
+    .bg-white\/90 { background-color: rgba(255,255,255,.9); }
+    .text-white\/80 { color: rgba(255,255,255,.8); }
+    .text-white\/90 { color: rgba(255,255,255,.9); }
+    .from-amber-500 { --tw-gradient-from: #f59e0b; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(245,158,11,0)); }
+    .from-black\/70 { --tw-gradient-from: rgba(0,0,0,.7); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(0,0,0,0)); }
+    .via-black\/30 { --tw-gradient-via: rgba(0,0,0,.3); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to, rgba(0,0,0,0)); }
+    .to-amber-600 { --tw-gradient-to: #d97706; }
+    .to-emerald-600 { --tw-gradient-to: #059669; }
+    .to-indigo-600 { --tw-gradient-to: #4f46e5; }
+    .to-violet-600 { --tw-gradient-to: #7c3aed; }
+    .to-yellow-600 { --tw-gradient-to: #ca8a04; }
+    .focus\:border-green-600:focus { border-color: #16a34a; }
+    .focus\:ring-white\/50:focus { --tw-ring-color: rgba(255,255,255,.5); }
+    .focus\:ring-green-500\/20:focus { --tw-ring-color: rgba(34,197,94,.2); }
+    @media (min-width: 640px) {
+      .sm\:block { display: block; }
+    }
+    @media (min-width: 768px) {
+      .md\:pb-0 { padding-bottom: 0; }
+      .md\:px-12 { padding-left: 3rem; padding-right: 3rem; }
+      .md\:text-5xl { font-size: 3rem; line-height: 1; }
+    }
+    @media (min-width: 1024px) {
+      .lg\:block { display: block; }
+      .lg\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    }
   </style>
 </head>
 <body class="bg-[#F8FAF6] text-on-background min-h-screen pb-24 md:pb-0">
@@ -172,8 +296,7 @@
 
     <!-- Hero Carousel -->
     <section class="hero-carousel mb-6">
-      <div class="hero-slide active" style="background-image: url('https://images.unsplash.com/photo-1542838132-92c53300491e?w=1400&q=80');">
-        <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent"></div>
+      <div class="hero-slide active">
         <div class="hero-content relative">
           <span class="inline-block bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold mb-2 tracking-wide">Flash Sale</span>
           <h2 class="text-3xl md:text-5xl font-bold mb-2 leading-tight">Fresh Groceries<br>Delivered Fast</h2>
@@ -181,8 +304,7 @@
           <a href="/discovery" class="inline-block bg-white text-green-800 px-7 py-3 rounded-xl font-bold text-sm hover:bg-gray-100 transition shadow-lg no-underline">Shop Now</a>
         </div>
       </div>
-      <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1400&q=80');">
-        <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent"></div>
+      <div class="hero-slide">
         <div class="hero-content relative">
           <span class="inline-block bg-white text-orange-600 px-3 py-1 rounded-full text-xs font-bold mb-2 tracking-wide">New Arrivals</span>
           <h2 class="text-3xl md:text-5xl font-bold mb-2 leading-tight">Local Restaurants<br>At Your Door</h2>
@@ -190,12 +312,11 @@
           <a href="/discovery?category=food" class="inline-block bg-white text-orange-600 px-7 py-3 rounded-xl font-bold text-sm hover:bg-gray-100 transition shadow-lg no-underline">Explore</a>
         </div>
       </div>
-      <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=1400&q=80');">
-        <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent"></div>
+      <div class="hero-slide">
         <div class="hero-content relative">
           <span class="inline-block bg-white text-green-700 px-3 py-1 rounded-full text-xs font-bold mb-2 tracking-wide">Free Delivery</span>
           <h2 class="text-3xl md:text-5xl font-bold mb-2 leading-tight">Daily Fresh Dairy<br>Products</h2>
-          <p class="text-lg text-white/90 mb-4 max-w-md">Milk, cheese, yogurt — delivered fresh daily</p>
+          <p class="text-lg text-white/90 mb-4 max-w-md">Milk, cheese, yogurt â€” delivered fresh daily</p>
           <a href="/discovery?category=dairy" class="inline-block bg-white text-green-700 px-7 py-3 rounded-xl font-bold text-sm hover:bg-gray-100 transition shadow-lg no-underline">Order Now</a>
         </div>
       </div>
@@ -301,7 +422,7 @@
           <div class="flex-1 min-w-0">
             <h3 class="font-bold text-gray-800 text-sm">Fresh Mart</h3>
             <div class="flex items-center gap-1 text-xs text-gray-500">
-              <span class="text-yellow-500">★</span> 4.8 · 1.2k reviews
+              <span class="text-yellow-500">â˜…</span> 4.8 Â· 1.2k reviews
             </div>
             <p class="text-xs text-green-600 mt-0.5 font-medium">25-35 min</p>
           </div>
@@ -314,7 +435,7 @@
           <div class="flex-1 min-w-0">
             <h3 class="font-bold text-gray-800 text-sm">Tasty Kitchen</h3>
             <div class="flex items-center gap-1 text-xs text-gray-500">
-              <span class="text-yellow-500">★</span> 4.6 · 856 reviews
+              <span class="text-yellow-500">â˜…</span> 4.6 Â· 856 reviews
             </div>
             <p class="text-xs text-orange-600 mt-0.5 font-medium">30-45 min</p>
           </div>
@@ -327,7 +448,7 @@
           <div class="flex-1 min-w-0">
             <h3 class="font-bold text-gray-800 text-sm">Daily Bread</h3>
             <div class="flex items-center gap-1 text-xs text-gray-500">
-              <span class="text-yellow-500">★</span> 4.9 · 2.1k reviews
+              <span class="text-yellow-500">â˜…</span> 4.9 Â· 2.1k reviews
             </div>
             <p class="text-xs text-amber-600 mt-0.5 font-medium">20-30 min</p>
           </div>
@@ -346,10 +467,10 @@
       </div>
       <div id="popularProducts" class="product-grid">
         <!-- Skeleton loaders -->
-        <div class="product-card"><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
-        <div class="product-card"><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
-        <div class="product-card"><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
-        <div class="product-card"><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
       </div>
     </section>
 
@@ -362,10 +483,10 @@
         <a href="/discovery" class="text-green-700 font-semibold text-sm flex items-center gap-1 no-underline">See all <span class="material-symbols-outlined text-sm">chevron_right</span></a>
       </div>
       <div id="recommendedProducts" class="product-grid">
-        <div class="product-card"><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
-        <div class="product-card"><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
-        <div class="product-card"><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
-        <div class="product-card"><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
       </div>
     </section>
 
@@ -459,11 +580,6 @@
       <span>Profile</span>
     </a>
   </nav>
-
-  <!-- Desktop FAB -->
-  <button onclick="window.location.href='/chat'" class="hidden md:flex fixed bottom-8 right-8 bg-green-700 text-white shadow-2xl px-5 py-3 rounded-full items-center gap-2 hover:scale-105 active:scale-95 transition-all z-40 font-semibold text-sm">
-    <span class="material-symbols-outlined">message</span> Chat with Sellers
-  </button>
 
   <script>
     let cart = window.CartService ? CartService.getCart() : (JSON.parse(localStorage.getItem('smartsoko_cart')) || []);
@@ -708,12 +824,12 @@
           const oldPrice = snapshot[p.id];
           const newPrice = parseFloat(p.price) || 0;
           if (oldPrice !== undefined && newPrice > 0 && newPrice < oldPrice) {
-            dropped.push(`${p.name}: TSh ${Number(oldPrice).toLocaleString()} → ${newPrice.toLocaleString()}`);
+            dropped.push(`${p.name}: TSh ${Number(oldPrice).toLocaleString()} â†’ ${newPrice.toLocaleString()}`);
           }
           snapshot[p.id] = newPrice;
         });
         localStorage.setItem('smartsoko_wishlist_prices', JSON.stringify(snapshot));
-        if (dropped.length) showToast('📉 Price drop: ' + dropped.join(' | '));
+        if (dropped.length) showToast('ðŸ“‰ Price drop: ' + dropped.join(' | '));
       } catch (e) { /* ignore */ }
     }
 
@@ -781,7 +897,7 @@
           <ul class="space-y-2 text-body-sm text-on-surface-variant">
             <li><a href="/home" class="hover:text-primary transition-colors">Home</a></li>
             <li><a href="/discovery" class="hover:text-primary transition-colors">Discover</a></li>
-            <li><a href="/cart" class="hover:text-primary transition-colors">Cart</a></li>
+            <li><a href="/cart" class="hover:text-primary transition-colors inline-flex items-center min-h-[40px] px-2">Cart</a></li>
             <li><a href="/customer" class="hover:text-primary transition-colors">My Account</a></li>
           </ul>
         </div>
@@ -816,3 +932,4 @@
   </footer>
 </body>
 </html>
+
