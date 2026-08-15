@@ -1,0 +1,96 @@
+# Deployment artifacts
+.vercel
+.netlify
+.firebase
+.github
+.idea
+.vscode
+.git
+
+# Logs
+*.log
+*_log.txt
+*_output.txt
+build_out.txt
+build_log.txt
+test_log.txt
+
+# Test scripts, simulations, probes (not needed at runtime)
+*-simulation*.js
+*-simulation-*.js
+*-probe.js
+*-audit.js
+test-*.js
+puppeteer-*.js
+ui-*.js
+check-*.js
+verify*.js
+interaction-*.js
+debug-*.js
+shot-*.js
+serve-*.js
+leak-*.js
+dark-probe.js
+font-probe.js
+token-probe.js
+usage-probe.js
+error-probe.js
+class-audit.js
+generate-stitch*.js
+list-tools.js
+run-audit.js
+
+# Screenshots / images at root
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# Puppeteer / playwright reports
+puppeteer-report/
+playwright-report/
+screenshots/
+*.pdf
+
+# Backup / archive
+archived/
+*.backup
+*.dark
+*.bak
+node_modules/.cache
+
+# K6 performance tests (run locally, not deploy)
+performance/
+
+# Misc docs and scripts
+*.md
+!vercel.json
+!README.md
+AGENTS.md
+ERRORS-*.md
+AI_*.md
+*_CONTEXT.md
+*_STANDARDS.md
+*_SCHEMA.md
+*_ROADMAP.md
+*_INTEGRATION.md
+SMARTSOKO_CONTEXT.md
+
+# Env and secrets
+.env*
+firebase-adminsdk*.json
+serviceAccountKey.json
+google-services*.json
+
+# Bat / sh scripts (keep deploy ones handled separately if needed)
+*.bat
+*.sh
+
+# IPA / APK
+*.ipa
+*.apk
+
+# Temp
+nul
+tmp/
+temp/

@@ -1,154 +1,191 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Helper functions
     function isAuthenticated() {
       return request.auth != null;
     }
-
-    // Sellers - public read, seller-only write via ownerId match
-    match /sellers/{sellerId} {
-      allow read: if true;
-      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+    
+    function isSeller(sellerId) {
+      return isAuthenticated() && request.auth.uid == sellerId;
+    }
+    
+    function isDriver(driverId) {
+      return isAuthenticated() && request.auth.uid == driverId;
+    }
+    
+    function isCustomer(customerId) {
+      return isAuthenticated() && request.auth.uid == customerId;
+    }
+    
+    function isOrderParticipant(order) {
+      return isAuthenticated() && (
+        request.auth.uid == order.customerId ||
+        request.auth.uid == order.driverId ||
+        request.auth.uid == order.sellerId
+      );
     }
 
-    // Products - public read, authenticated write
+    // Users - users can read/write their own data
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+      allow read: if isAdmin();
+    }
+    
+    // Orders - users can create their own orders, read their own
+    match /orders/{orderId} {
+      allow create: if isAuthenticated() && 
+        request.auth.uid == request.resource.data.customerId;
+      allow read: if isOrderParticipant(resource.data);
+      allow update: if isAuthenticated() && 
+        (request.auth.uid == resource.data.driverId || 
+         request.auth.uid == resource.data.sellerId ||
+         request.auth.token.admin == true);
+      allow delete: if isAdmin();
+    }
+    
+    // Products - public read, sellers write their own
     match /products/{productId} {
       allow read: if true;
+      allow create, update, delete: if isSeller(resource.data.sellerId);
+    }
+    
+    // Carts - user owns their cart
+    match /carts/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+    
+    // Addresses - user owns their addresses
+    match /addresses/{addressId} {
+      allow read, write: if isAuthenticated() && 
+        (request.auth.uid == resource.data.userId || isOwner(resource.data.userId));
+    }
+    
+    // Payments - user owns their payments
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated() && 
+        (request.auth.uid == resource.data.userId || isAdmin());
       allow create: if isAuthenticated();
-      allow update, delete: if isAuthenticated();
     }
-
-    // Orders - authenticated only
-    match /orders/{orderId} {
-      allow read: if isAuthenticated();
+    
+    // Notifications - user owns their notifications
+    match /notifications/{notificationId} {
+      allow read, write: if isAuthenticated() && 
+        (request.auth.uid == resource.data.userId || isAdmin());
+    }
+    
+    // Referrals - users can read their own referrals
+    match /referrals/{referralId} {
+      allow read: if isAuthenticated() && 
+        (request.auth.uid == resource.data.referrerId || 
+         request.auth.uid == resource.data.refereeId || 
+         isAdmin());
       allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
     }
-
-    // Drivers - public read, driver-only write via ownerId match
-    match /drivers/{driverId} {
-      allow read: if true;
-      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
-    }
-
-    // Customers - public read, customer-only write via ownerId match
-    match /customers/{customerId} {
-      allow read: if true;
-      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
-    }
-
-    // Users - any authenticated user can read (social profiles, messaging,
-    // wishlist owners); users can only write their own profile
-    match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
-      allow update, delete: if isAuthenticated() && request.auth.uid == userId;
-    }
-
-    // Reviews - public read, authenticated write
+    
+    // Reviews - users can read all, create their own
     match /reviews/{reviewId} {
       allow read: if true;
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if isAuthenticated() && 
+        (request.auth.uid == resource.data.userId || isAdmin());
+    }
+    
+    // Sellers - owner can manage, public can read
+    match /sellers/{sellerId} {
+      allow read: if true;
+      allow create, update, delete: if isOwner(sellerId) || isAdmin();
+    }
+    
+    // Riders/Drivers - owner can manage, admins can read all
+    match /riders/{riderId} {
+      allow read: if isAuthenticated() && (isOwner(riderId) || isAdmin());
+      allow create, update: if isOwner(riderId) || isAdmin();
+    }
+    
+    // Wallet - user owns their wallet
+    match /wallets/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+    
+    // Transactions - user owns their transactions
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated() && 
+        (request.auth.uid == resource.data.userId || isAdmin());
       allow create: if isAuthenticated();
-      allow update, delete: if isAuthenticated();
     }
-
-    // Social feed - public read, authors write their own content
-    match /posts/{postId} {
+    
+    // Categories - public read, admin write
+    match /categories/{categoryId} {
       allow read: if true;
-      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+      allow create, update, delete: if isAdmin();
     }
-
-    match /post_comments/{commentId} {
+    
+    // Flash Deals - public read, admin write
+    match /flashDeals/{dealId} {
       allow read: if true;
-      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+      allow create, update, delete: if isAdmin();
     }
-
-    // 24h stories - public read, author writes own stories
-    match /stories/{storyId} {
+    
+    // Deals - public read, merchant/admin write
+    match /deals/{dealId} {
       allow read: if true;
-      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+      allow create, update, delete: if isAdmin() || 
+        (isAuthenticated() && request.resource.data.merchantId == request.auth.uid);
     }
-
-    // Follows - public read, authenticated manage own follow records
-    match /follows/{followId} {
-      allow read: if true;
+    
+    // Gift Cards - buyer can create, recipient can read
+    match /giftCards/{cardId} {
+      allow read: if isAuthenticated() && 
+        (request.auth.uid == resource.data.purchaserId || 
+         request.auth.uid == resource.data.recipientId);
       allow create: if isAuthenticated();
-      allow delete: if isAuthenticated();
-      allow update: if false;
+      allow update: if isAuthenticated() && 
+        (request.auth.uid == resource.data.purchaserId || isAdmin());
     }
-
-    // Wishlists - public read (shared collections), owner writes
-    match /wishlists/{wishlistId} {
-      allow read: if true;
-      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+    
+    // Subscriptions - user owns their subscriptions
+    match /subscriptions/{subscriptionId} {
+      allow read, write: if isAuthenticated() && 
+        (request.auth.uid == resource.data.userId || isAdmin());
     }
-
-    // Conversations - participants only
-    match /conversations/{convId} {
-      allow read, update: if isAuthenticated() && request.auth.uid in resource.data.participants;
-      allow create: if isAuthenticated() && request.auth.uid in request.resource.data.participants;
-      allow delete: if false;
-    }
-
-    match /conversations/{convId}/messages/{msgId} {
-      allow read, create: if isAuthenticated() &&
-        request.auth.uid in get(/databases/$(database)/documents/conversations/$(convId)).data.participants;
-      allow update, delete: if false;
-    }
-
-    // Order chats (customer <-> driver) - authenticated participants
-    match /chats/{chatId} {
-      allow read, update: if isAuthenticated();
+    
+    // Referrals
+    match /referrals/{referralId} {
+      allow read: if isAuthenticated() && 
+        (request.auth.uid == resource.data.referrerId || 
+         request.auth.uid == resource.data.refereeId || 
+         isAdmin());
       allow create: if isAuthenticated();
-      allow delete: if false;
     }
-
-    match /chats/{chatId}/messages/{msgId} {
-      allow read, create: if isAuthenticated();
-      allow update, delete: if false;
+    
+    // Notifications
+    match /notifications/{notificationId} {
+      allow read, write: if isAuthenticated() && 
+        (request.auth.uid == resource.data.userId || isAdmin());
     }
-
-    // Promo codes - public read (checkout validation), authenticated write
-    match /promotions/{promoId} {
-      allow read: if true;
-      allow create, update, delete: if isAuthenticated();
+    
+    // Webhooks - admin only
+    match /webhooks/{webhookId} {
+      allow read, write: if isAdmin();
     }
-
-    // Merchant staff roster
-    match /staff/{staffId} {
-      allow read: if isAuthenticated();
-      allow create, update, delete: if isAuthenticated();
+    
+    // Analytics - admin only
+    match /analytics/{analyticsId} {
+      allow read: if isAdmin();
     }
-
-    // Staff invite codes (signup applies invite)
-    match /staffInvites/{inviteId} {
-      allow read: if isAuthenticated();
-      allow create, update: if isAuthenticated();
-      allow delete: if isAuthenticated();
-    }
-
-    // Merchant payout requests
-    match /payouts/{payoutId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update, delete: if isAuthenticated();
-    }
-
-    // Health check
-    match /_health/{doc} {
-      allow read: if true;
-    }
-
-    // Default deny
+    
+    // Public read for authenticated users (fallback)
     match /{document=**} {
-      allow read, write: if false;
+      allow read: if isAuthenticated();
     }
   }
 }

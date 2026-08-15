@@ -24,27 +24,36 @@ async function getAccessToken() {
     return tokenCache.token;
   }
 
-  const auth = Buffer.from(`${CONSUMER_KEY}:${CONSUMER_SECRET}`).toString('base64');
+  // PesaPal v3 expects consumer_key/consumer_secret in the JSON body —
+  // NOT an HTTP Basic Authorization header (which makes their live API
+  // throw an IIS 500). Token is valid for ~5 minutes (300s).
   const res = await fetch(`${PESAPAL_BASE}/api/Auth/RequestToken`, {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'Authorization': `Basic ${auth}`
-    }
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      consumer_key: CONSUMER_KEY,
+      consumer_secret: CONSUMER_SECRET
+    })
   });
 
   if (!res.ok) {
-    const err = await res.text();
+    const err = (await res.text()).slice(0, 300);
     throw new Error(`PesaPal auth failed: ${res.status} ${err}`);
   }
 
   const data = await res.json();
+  // Response shape: { token, expiryDate, error, status, message }
+  const expiresInMs = data.expiryDate
+    ? Math.max(Date.parse(data.expiryDate) - Date.now() - 60000, 60000)
+    : 4 * 60 * 1000;
   tokenCache = {
-    token: data.access_token,
-    expiresAt: Date.now() + (data.expires_in || 3600) * 1000 - 60000
+    token: data.token,
+    expiresAt: Date.now() + expiresInMs
   };
-  return data.access_token;
+  return data.token;
 }
 
 async function registerIPN() {
@@ -67,7 +76,7 @@ async function registerIPN() {
     });
 
     if (!res.ok) {
-      const err = await res.text();
+      const err = (await res.text()).slice(0, 300);
       throw new Error(`IPN registration failed: ${res.status} ${err}`);
     }
 
@@ -351,8 +360,12 @@ router.get('/callback', (req, res) => {
 
 router.post('/ipn', async (req, res) => {
   try {
-    const notification = req.body;
+    const notification = req.body || {};
     const { OrderNotificationType, OrderTrackingId, MerchantReference } = notification;
+
+    if (!OrderTrackingId) {
+      return res.status(200).send('OK');
+    }
 
     // Update in-memory store
     if (OrderTrackingId && topupOrders.has(OrderTrackingId)) {

@@ -1,10 +1,18 @@
 {
   "version": 2,
-  "buildCommand": "npm run optimize",
+  "buildCommand": "npm run build:css",
   "outputDirectory": "public",
   "cleanUrls": true,
   "trailingSlash": false,
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 30,
+      "memory": 512
+    }
+  },
   "rewrites": [
+    { "source": "/api/test", "destination": "/api/test.js" },
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
     { "source": "/register", "destination": "signup.html" },
     { "source": "/dashboard", "destination": "merchant.html" },
     { "source": "/forgot-password", "destination": "check-user.html" },
@@ -36,7 +44,8 @@
     { "source": "/admin", "destination": "admin.html" },
     { "source": "/admin-panel", "destination": "admin-panel.html" },
     { "source": "/fleet-manager", "destination": "fleet-manager.html" },
-    { "source": "/main", "destination": "main.html" }
+    { "source": "/main", "destination": "main.html" },
+    { "source": "/(.*)", "destination": "/$1.html" }
   ],
   "headers": [
     {
@@ -64,6 +73,21 @@
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=3600" }
       ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,PUT,DELETE,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "X-Requested-With, Content-Type, Authorization" }
+      ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/cleanup",
+      "schedule": "0 2 * * *"
     }
   ]
 }
