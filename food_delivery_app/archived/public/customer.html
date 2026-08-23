@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -104,6 +105,7 @@
     .payment-status.pending { background: #fff3e0; color: #ff9800; }
     .payment-status.success { background: #e8f5e9; color: #4caf50; }
     .payment-status.failed { background: #ffebee; color: #f44336; }
+    .auth-error { margin-top: 10px; padding: 10px; border-radius: 8px; background: #ffebee; color: #f44336; font-size: 14px; text-align: center; }
   </style>
 </head>
 <body>
@@ -111,8 +113,9 @@
     <div class="auth-box">
       <h2>🍔 Food Delivery</h2>
       <p>Enter your phone to continue</p>
-      <input type="tel" id="phoneInput" placeholder="Phone (07XXXXXXXX)">
-      <input type="text" id="nameInput" placeholder="Your Name">
+      <input type="tel" id="phoneInput" placeholder="Phone (07XXXXXXXX)" aria-label="Phone number">
+      <input type="text" id="nameInput" placeholder="Your Name" aria-label="Your name">
+      <div id="authError" class="auth-error" role="alert" hidden></div>
       <button class="btn btn-primary" onclick="login()">Continue</button>
     </div>
   </div>
@@ -125,7 +128,11 @@
 
     <div id="restaurantsScreen" class="main-content">
       <h2 class="section-title">Restaurants</h2>
-      <div class="restaurants-grid" id="restaurantsGrid"></div>
+      <div class="restaurants-grid" id="restaurantsGrid">
+        <div class="skeleton" style="height:180px"></div>
+        <div class="skeleton" style="height:180px"></div>
+        <div class="skeleton" style="height:180px"></div>
+      </div>
     </div>
 
     <div id="menuScreen" class="menu-screen">
@@ -290,7 +297,10 @@
     async function login() {
       const phone = document.getElementById('phoneInput').value.trim();
       const name = document.getElementById('nameInput').value.trim();
-      if (!phone) return alert('Please enter phone number');
+      const errBox = document.getElementById('authError');
+      const showAuthError = (msg) => { errBox.textContent = msg; errBox.hidden = false; };
+      errBox.hidden = true;
+      if (!phone) return showAuthError('Please enter phone number');
       
       const userId = 'user_' + phone.replace(/\D/g, '');
       const userDoc = await db.collection('users').doc(userId).get();
@@ -340,7 +350,7 @@
       try {
         const restaurants = await DataService.getRestaurants();
         document.getElementById('restaurantsGrid').innerHTML = restaurants.map(d => {
-          return `<div class="restaurant-card" onclick="openRestaurant('${d.id}')"><div class="restaurant-image">🍽️</div><div class="restaurant-info"><div class="restaurant-name">${d.name||'Restaurant'}</div><p style="color:#666;font-size:14px;margin-bottom:8px">${d.description||''}</p><div class="restaurant-details"><span>⏱️ ${d.deliveryTimeMinutes||30} min</span><span>🚚 TZS ${d.deliveryFee||0}</span></div></div></div>`;
+          return `<div class="restaurant-card" onclick="openRestaurant('${d.id}')"><div class="restaurant-image">${d.imageUrl ? '<img src="' + d.imageUrl + '" alt="' + (d.name||'Restaurant') + '" style="width:100%;height:100%;object-fit:cover">' : '🍽️'}</div><div class="restaurant-info"><div class="restaurant-name">${d.name||'Restaurant'}</div><p style="color:#666;font-size:14px;margin-bottom:8px">${d.description||''}</p><div class="restaurant-details"><span>⏱️ ${d.deliveryTimeMinutes||30} min</span><span>🚚 TZS ${d.deliveryFee||0}</span></div></div></div>`;
         }).join('') || '<div class="empty-state"><p>No restaurants available</p></div>';
       } catch (e) {
         document.getElementById('restaurantsGrid').innerHTML = `<div class="empty-state"><p>Error loading restaurants: ${e}</p></div>`;
