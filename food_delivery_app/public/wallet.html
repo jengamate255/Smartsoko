@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartSoko - My Wallet</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <meta name="theme-color" content="#064e3b">
+  <link rel="preload" href="dist/tailwind.css" as="style">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link rel="stylesheet" href="design-system.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', 'Montserrat', sans-serif; background: #F8FAF6; min-height: 100vh; }
+    h1,h2,h3 { font-family: 'Montserrat', sans-serif; }
+    .ntzs-card { border-left: 4px solid #7c3aed; }
+    .status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; }
+    .status-pending { background: #FEF3C7; color: #92400E; }
+    .status-completed { background: #D1FAE5; color: #065F46; }
+    .status-failed { background: #FEE2E2; color: #991B1B; }
+    .spin { animation: nspin 1s linear infinite; }
+    @keyframes nspin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <header class="sticky top-0 z-40 bg-[#064e3b] text-white">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center gap-4">
+      <a href="home.html" class="flex items-center gap-2 hover:opacity-90" aria-label="Back to home">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <div class="flex-1">
+        <h1 class="font-bold text-lg leading-tight">My Wallet</h1>
+        <p class="text-xs text-white/70">Balance, payments and withdrawals</p>
+      </div>
+      <a href="profile.html" class="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors" aria-label="Profile">
+        <span class="material-symbols-outlined">person</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-6">
+    <!-- nTZS deposit status banner (shown after checkout redirects here) -->
+    <div id="ntzsBanner" class="hidden mb-4"></div>
+
+    <div id="demoBanner" class="hidden mb-4 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-800">
+      Demo mode: live backend not connected — showing sample data.
+    </div>
+
+    <div id="walletStats"></div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+        <h2 class="font-bold text-gray-900">Recent Transactions</h2>
+        <button onclick="window.WalletManager.showWithdrawModal()"
+          class="flex items-center gap-2 px-4 py-2 bg-[#064e3b] text-white rounded-lg text-sm font-bold hover:opacity-90 transition-opacity">
+          <span class="material-symbols-outlined text-base">payments</span>
+          Withdraw
+        </button>
+      </div>
+      <div id="walletTx"></div>
+    </div>
+  </main>
+
+  <nav class="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200">
+    <div class="max-w-5xl mx-auto grid grid-cols-4">
+      <a href="home.html" class="flex flex-col items-center py-2.5 text-xs text-gray-500 hover:text-[#064e3b]">
+        <span class="material-symbols-outlined">home</span> Home
+      </a>
+      <a href="store.html" class="flex flex-col items-center py-2.5 text-xs text-gray-500 hover:text-[#064e3b]">
+        <span class="material-symbols-outlined">storefront</span> Shop
+      </a>
+      <a href="cart.html" class="flex flex-col items-center py-2.5 text-xs text-gray-500 hover:text-[#064e3b]">
+        <span class="material-symbols-outlined">shopping_cart</span> Cart
+      </a>
+      <a href="profile.html" class="flex flex-col items-center py-2.5 text-xs text-[#064e3b] font-semibold">
+        <span class="material-symbols-outlined">account_balance_wallet</span> Wallet
+      </a>
+    </div>
+  </nav>
+
+  <script src="js/wallet-manager.js"></script>
+  <script>
+    // ─── nTZS deposit status (from ?ntzs=deposit&depositId=…&orderId=…) ───
+    function ntzsStatusPill(status) {
+      const s = (status || '').toLowerCase();
+      const cls = ['minted', 'completed', 'settled'].includes(s) ? 'status-completed'
+        : ['failed', 'rejected', 'cancelled', 'expired'].includes(s) ? 'status-failed'
+        : 'status-pending';
+      const icon = cls === 'status-completed' ? 'check_circle' : cls === 'status-failed' ? 'error' : 'hourglass_top';
+      return `<span class="status-pill ${cls}"><span class="material-symbols-outlined" style="font-size:14px;">${icon}</span>${s || 'pending'}</span>`;
+    }
+
+    function renderNtzsBanner(state, depositId, orderId, detail) {
+      const el = document.getElementById('ntzsBanner');
+      let html = '';
+      if (state === 'loading') {
+        html = `
+          <div class="ntzs-card bg-white rounded-xl shadow-sm p-4 flex items-center gap-3">
+            <span class="material-symbols-outlined spin text-purple-600">progress_activity</span>
+            <div class="flex-1">
+              <p class="font-bold text-sm text-gray-900">nTZS deposit in progress</p>
+              <p class="text-xs text-gray-500">Deposit <code>${depositId}</code>${orderId ? ` · order <code>${orderId}</code>` : ''} — complete the mobile-money prompt if you haven't yet.</p>
+            </div>
+            ${ntzsStatusPill(detail || 'pending')}
+          </div>`;
+      } else if (state === 'completed') {
+        html = `
+          <div class="ntzs-card bg-white rounded-xl shadow-sm p-4 flex items-center gap-3">
+            <span class="material-symbols-outlined text-green-600">check_circle</span>
+            <div class="flex-1">
+              <p class="font-bold text-sm text-gray-900">nTZS deposit completed 🎉</p>
+              <p class="text-xs text-gray-500">Your payment settled${orderId ? ` and order <code>${orderId}</code> is being processed` : ''}.</p>
+            </div>
+            ${ntzsStatusPill(detail || 'completed')}
+          </div>`;
+      } else if (state === 'failed') {
+        html = `
+          <div class="bg-white rounded-xl shadow-sm p-4 flex items-start gap-3" style="border-left:4px solid #dc2626;">
+            <span class="material-symbols-outlined text-red-600">error</span>
+            <div class="flex-1">
+              <p class="font-bold text-sm text-gray-900">nTZS deposit failed</p>
+              <p class="text-xs text-gray-500">${detail || 'The deposit could not be completed. You can retry checkout or contact support.'}</p>
+              <button onclick="location.href='/checkout'" class="mt-2 px-4 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 transition-colors">Retry Checkout</button>
+            </div>
+            ${ntzsStatusPill(detail || 'failed')}
+          </div>`;
+      }
+      el.innerHTML = html;
+      el.classList.remove('hidden');
+      try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+    }
+
+    async function pollNtzsDeposit(depositId, orderId) {
+      renderNtzsBanner('loading', depositId, orderId);
+      let attempts = 0;
+      const maxAttempts = 60; // ~3 min at 3s intervals
+      while (attempts < maxAttempts) {
+        attempts++;
+        try {
+          const res = await fetch(`/api/payments/ntzs/deposit/${encodeURIComponent(depositId)}`);
+          const json = await res.json();
+          const st = (json.data && json.data.status) || '';
+          const s = st.toLowerCase();
+          if (['minted', 'completed', 'settled'].includes(s)) {
+            renderNtzsBanner('completed', depositId, orderId, st);
+            return;
+          }
+          if (['failed', 'rejected', 'cancelled', 'expired'].includes(s)) {
+            renderNtzsBanner('failed', depositId, orderId, st);
+            return;
+          }
+          renderNtzsBanner('loading', depositId, orderId, st || 'pending');
+        } catch (e) {
+          console.warn('nTZS status poll failed:', e.message);
+        }
+        await new Promise(r => setTimeout(r, 3000));
+      }
+      // Timed out polling — leave the pending card up with a hint
+      const el = document.getElementById('ntzsBanner');
+      el.insertAdjacentHTML('beforeend',
+        '<p class="text-xs text-gray-400 mt-2 ml-1">Still pending after a few minutes — refresh this page to check again.</p>');
+    }
+
+    // ─── Wallet data ───
+    (async function () {
+      // nTZS params take priority
+      const params = new URLSearchParams(location.search);
+      if (params.get('ntzs') === 'deposit' && params.get('depositId')) {
+        pollNtzsDeposit(params.get('depositId'), params.get('orderId'));
+      }
+
+      let data = null;
+      let tx = [];
+      try {
+        data = await window.WalletManager.getWallet();
+        tx = (await window.WalletManager.getTransactions()).transactions || [];
+      } catch (e) {
+        data = { wallet: { balance: 45200, pending: 8600, totalEarned: 184500, totalWithdrawn: 138900 } };
+        tx = [
+          { id: 't3', type: 'bonus', amount: 5000, description: 'New user welcome bonus', status: 'completed', createdAt: new Date(Date.now() - 2 * 86400000).toISOString() },
+          { id: 't2', type: 'order_payment', amount: 12500, description: 'Order #SMK-1028 payment', status: 'completed', createdAt: new Date(Date.now() - 5 * 86400000).toISOString() },
+          { id: 't1', type: 'withdrawal', amount: 30000, description: 'Withdrawal to M-Pesa 0712 345 678', status: 'completed', createdAt: new Date(Date.now() - 9 * 86400000).toISOString() }
+        ];
+        document.getElementById('demoBanner').classList.remove('hidden');
+      }
+      window.WalletManager.renderWallet('walletStats', data);
+      window.WalletManager.renderTransactions('walletTx', tx);
+    })();
+  </script>
+</body>
+</html>
