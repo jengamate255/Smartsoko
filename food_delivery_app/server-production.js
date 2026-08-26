@@ -209,7 +209,9 @@ app.use(function(req, res, next) {
 mountRateLimiters(app);
 
 // Parse JSON bodies
-app.use(express.json({ limit: '1mb' }));
+// Capture the raw request body so webhook signature verification (HMAC over exact bytes)
+// works — express.json() would otherwise leave req.rawBody undefined. See api/ntzs.js verifyWebhookSignature().
+app.use(express.json({ limit: '1mb', verify: (req, res, buf) => { req.rawBody = buf; } }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // Request logging via Winston
@@ -439,6 +441,16 @@ authMiddleware.setAdmin(admin);
 // ════════════════════════════════════════════════════════════════
 // CUSTOM FEATURES - MOUNTED DIRECTLY ON APP
 // ════════════════════════════════════════════════════════════════
+
+// ─── Merchant OS API (Graph Engineering build, 2026-08) ────────────────
+// Capability-gated, tenant-isolated merchant dashboard backend.
+try {
+  const { mountMerchantOs } = require('./server/src/routes/merchant');
+  mountMerchantOs(app);
+  logger.info('Merchant OS API mounted at /api/merchant');
+} catch (e) {
+  logger.error('Merchant OS API failed to load: ' + e.message);
+}
 
 // ─── SmartMove Ride-Hailing Module ─────────────────────────────────────
 let smartMoveRoutes;
@@ -816,6 +828,14 @@ app.use((err, req, res, next) => {
 // 404 handler for API routes
 app.use('/api/*', (req, res) => {
   res.status(404).json({ error: 'API endpoint not found', path: req.path });
+});
+
+// Catch-all: any unmatched non-API GET renders the branded 404 page
+app.use((req, res) => {
+  if (req.method !== 'GET' || req.path.startsWith('/api/') || req.path.startsWith('/ws')) {
+    return res.status(404).send('Not found');
+  }
+  res.status(404).sendFile(path.join(PUBLIC_DIR, '404.html'));
 });
 
 // ════════════════════════════════════════════════════════════════

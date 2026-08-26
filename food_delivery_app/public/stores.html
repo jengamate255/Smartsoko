@@ -1,9 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Discover Stores - Food Delivery</title>
+  <title>SmartSoko - Discover Local Stores</title>
+  <meta name="description" content="Browse verified local stores on SmartSoko — fresh groceries, meals and daily essentials near you.">
+  <meta property="og:title" content="Discover Local Stores — SmartSoko">
+  <meta name="theme-color" content="#064e3b">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -211,7 +215,7 @@
   
   <div class="container">
     <div class="categories-section">
-      <h2 class="section-title">�_categories</h2>
+      <h2 class="section-title">ï¿½_categories</h2>
       <div class="categories-grid" id="categoriesGrid"></div>
     </div>
     
@@ -224,7 +228,7 @@
     
     <div class="featured-section">
       <div id="featuredSection" style="display:none;">
-        <span class="featured-badge">⭐ Featured</span>
+        <span class="featured-badge">â­ Featured</span>
         <div class="stores-grid" id="featuredGrid"></div>
       </div>
       
@@ -249,14 +253,14 @@
     const db = firebase.firestore();
 
     const categories = [
-      { icon: '🍔', name: 'All' },
-      { icon: '🍕', name: 'Fast Food' },
-      { icon: '🥗', name: 'Healthy' },
-      { icon: '🍜', name: 'Local' },
-      { icon: '🛒', name: 'Supermarket' },
-      { icon: '☕', name: 'Coffee' },
-      { icon: '🍰', name: 'Desserts' },
-      { icon: '🥤', name: 'Drinks' }
+      { icon: 'ðŸ”', name: 'All' },
+      { icon: 'ðŸ•', name: 'Fast Food' },
+      { icon: 'ðŸ¥—', name: 'Healthy' },
+      { icon: 'ðŸœ', name: 'Local' },
+      { icon: 'ðŸ›’', name: 'Supermarket' },
+      { icon: 'â˜•', name: 'Coffee' },
+      { icon: 'ðŸ°', name: 'Desserts' },
+      { icon: 'ðŸ¥¤', name: 'Drinks' }
     ];
 
     let allStores = [];
@@ -322,16 +326,16 @@
         });
         filterAndRenderStores();
       } catch (error) {
-        document.getElementById('storesGrid').innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>Unable to load stores</p></div>';
+        document.getElementById('storesGrid').innerHTML = '<div class="empty-state"><div class="icon">ðŸ“¦</div><p>Unable to load stores</p></div>';
       }
     }
 
     function getCategoryEmoji(category) {
       const emojis = {
-        'Fast Food': '🍔', 'Healthy': '🥗', 'Local': '🍜', 'Supermarket': '🛒',
-        'Coffee': '☕', 'Desserts': '🍰', 'Drinks': '🥤', 'Pizza': '🍕'
+        'Fast Food': 'ðŸ”', 'Healthy': 'ðŸ¥—', 'Local': 'ðŸœ', 'Supermarket': 'ðŸ›’',
+        'Coffee': 'â˜•', 'Desserts': 'ðŸ°', 'Drinks': 'ðŸ¥¤', 'Pizza': 'ðŸ•'
       };
-      return emojis[category] || '🍽️';
+      return emojis[category] || 'ðŸ½ï¸';
     }
 
     function filterAndRenderStores() {
@@ -364,7 +368,7 @@
       document.getElementById('storesTitle').textContent = currentCategory === 'All' ? 'All Stores' : currentCategory;
       document.getElementById('storesGrid').innerHTML = stores.length > 0 
         ? stores.map(store => renderStoreCard(store)).join('')
-        : '<div class="empty-state"><div class="icon">🔍</div><p>No stores found</p></div>';
+        : '<div class="empty-state"><div class="icon">ðŸ”</div><p>No stores found</p></div>';
     }
 
     function renderStoreCard(store, isFeatured = false) {
@@ -373,7 +377,7 @@
           <div class="store-image">
             ${store.imageEmoji}
             <div class="store-badge ${store.isOpen ? 'open' : 'closed'}">
-              ${store.isOpen ? '✓ Open' : '✕ Closed'}
+              ${store.isOpen ? 'âœ“ Open' : 'âœ• Closed'}
             </div>
           </div>
           <div class="store-info">
@@ -382,18 +386,18 @@
             <div class="store-meta">
               <div class="store-meta-left">
                 <div class="rating">
-                  <span class="rating-star">★</span>
+                  <span class="rating-star">â˜…</span>
                   <span>${store.rating > 0 ? store.rating.toFixed(1) : 'New'}</span>
                   <span class="rating-count">${store.totalRatings ? `(${store.totalRatings})` : ''}</span>
                 </div>
               </div>
               <div class="delivery-info">
-                <span>🚚</span>
+                <span>ðŸšš</span>
                 <span class="fee">TZS ${store.deliveryFee.toLocaleString()}</span>
               </div>
             </div>
             <div style="margin-top: 8px; font-size: 13px; color: var(--gray);">
-              ⏱️ ${store.deliveryTimeMinutes} min
+              â±ï¸ ${store.deliveryTimeMinutes} min
             </div>
           </div>
         </div>

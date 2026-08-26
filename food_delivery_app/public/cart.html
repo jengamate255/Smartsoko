@@ -4,6 +4,8 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>SmartSoko - Cart</title>
+  <meta name="description" content="Review your SmartSoko cart and check out — fresh groceries and meals delivered fast.">
+  <meta property="og:title" content="Your SmartSoko Cart">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://www.gstatic.com">
@@ -20,7 +22,13 @@
     .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display: inline-block; line-height: 1; vertical-align: middle; }
     .filled-icon { font-variation-settings: 'FILL' 1; }
     * { box-sizing: border-box; }
-    body { font-family: 'Be Vietnam Pro','Plus Jakarta Sans',sans-serif; min-height: 100vh; }
+    body { font-family: 'Be Vietnam Pro','Plus Jakarta Sans',sans-serif; min-height: 100vh; font-size: 14px; }
+    /* Minimum font size for accessibility */
+    p, span, a, li, td, th, label, div, button, input, select, textarea { min-font-size: 12px; }
+    @media (max-width: 768px) {
+      html { font-size: 14px; }
+      p, span, a, li, td, th, label, div, button, input, select, textarea { font-size: max(12px, 1rem); }
+    }
     h1,h2,h3,h4 { font-family: 'Plus Jakarta Sans',sans-serif; }
     .gradient-bg { background: #064e3b; }
     .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
@@ -40,6 +48,7 @@
       .md\:pb-0 { padding-bottom: 0; }
     }
   </style>
+  <script src="js/toast.js?v=1" defer></script>
 </head>
 <body class="bg-[#F8FAF6] text-on-background min-h-screen pb-24 md:pb-0">
 
@@ -56,7 +65,7 @@
     <div class="flex items-center gap-3">
       <a href="/cart" class="relative p-2 text-green-700/80 hover:text-green-700 rounded-full">
         <span class="material-symbols-outlined">shopping_cart</span>
-        <span id="headerCartBadge" class="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+        <span id="headerCartBadge" class="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[12px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
       </a>
     </div>
   </header>
@@ -128,7 +137,7 @@
           <span class="text-lg font-bold text-gray-900">Grand Total</span>
           <span id="grandTotal" class="text-2xl font-extrabold text-green-800">TSh 0</span>
         </div>
-        <button onclick="checkout()" class="hidden md:flex w-full gradient-bg text-white py-4 rounded-full font-bold text-lg shadow-lg items-center justify-center gap-3 transition-all active:scale-95 mt-4">
+        <button onclick="checkout()" class="flex w-full gradient-bg text-white py-4 rounded-full font-bold text-lg shadow-lg items-center justify-center gap-3 transition-all active:scale-95 mt-4">
           Place Order
           <span class="material-symbols-outlined">arrow_forward</span>
         </button>
@@ -145,19 +154,19 @@
     <div class="flex justify-around items-center px-4 mt-4">
       <a href="/home" class="flex flex-col items-center justify-center text-gray-500 px-5 py-2 hover:bg-gray-100 rounded-full transition-all">
         <span class="material-symbols-outlined">home</span>
-        <span class="text-[10px] font-semibold tracking-wide">Home</span>
+        <span class="text-sm font-semibold tracking-wide">Home</span>
       </a>
       <a href="/discovery" class="flex flex-col items-center justify-center text-gray-500 px-5 py-2 hover:bg-gray-100 rounded-full transition-all">
         <span class="material-symbols-outlined">search</span>
-        <span class="text-[10px] font-semibold tracking-wide">Search</span>
+        <span class="text-sm font-semibold tracking-wide">Search</span>
       </a>
       <a href="/cart" class="flex flex-col items-center justify-center bg-green-100 text-green-700 rounded-full px-5 py-2">
         <span class="material-symbols-outlined filled-icon">shopping_cart</span>
-        <span class="text-[10px] font-semibold tracking-wide">Cart</span>
+        <span class="text-sm font-semibold tracking-wide">Cart</span>
       </a>
       <a href="/profile" class="flex flex-col items-center justify-center text-gray-500 px-5 py-2 hover:bg-gray-100 rounded-full transition-all">
         <span class="material-symbols-outlined">person</span>
-        <span class="text-[10px] font-semibold tracking-wide">Profile</span>
+        <span class="text-sm font-semibold tracking-wide">Profile</span>
       </a>
     </div>
   </footer>
@@ -376,8 +385,8 @@
 
     function checkout() {
       if (cart.length === 0) {
-        if (typeof SmartNav !== 'undefined' && SmartNav.showToast) SmartNav.showToast('Your cart is empty', 'error');
-        else alert('Your cart is empty');
+        if (window.skToast) window.skToast.error('Your cart is empty — add some items first');
+        else if (typeof SmartNav !== 'undefined' && SmartNav.showToast) SmartNav.showToast('Your cart is empty', 'error');
         return;
       }
       window.location.href = 'checkout.html';

@@ -4,6 +4,8 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>SmartSoko - Track Order</title>
+  <meta name="description" content="Track your SmartSoko order live — from kitchen to doorstep.">
+  <meta property="og:title" content="Track Your Order — SmartSoko">
   <meta name="theme-color" content="#064e3b">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -534,7 +536,7 @@
       }
       const customerPhone = orderData.customerPhone || orderData.contactPhone || 'N/A';
       const customerName = orderData.customerName || 'Customer';
-      document.getElementById('customerContact').textContent = `${customerName} â€¢ ${customerPhone}`;
+      document.getElementById('customerContact').textContent = ` ${customerName} • ${customerPhone}`;
 
       // Payment method display
       const paymentLine = document.getElementById('paymentMethodDisplay');

@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Shop fresh food and groceries from local SmartSoko sellers — delivered fast.">
+  <meta name="theme-color" content="#064e3b">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <title>Food Delivery - Customer</title>
+  <title>SmartSoko - Shop</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -107,6 +110,7 @@
     .payment-status.failed { background: #ffebee; color: #f44336; }
     .auth-error { margin-top: 10px; padding: 10px; border-radius: 8px; background: #ffebee; color: #f44336; font-size: 14px; text-align: center; }
   </style>
+  <script src="js/toast.js?v=1" defer></script>
 </head>
 <body>
   <div id="authScreen" class="auth-screen">
@@ -437,8 +441,8 @@
 
     async function placeOrder() {
       const address = document.getElementById('addressInput').value.trim();
-      if (!address && addresses.length === 0) return alert('Please enter delivery address');
-      if (Object.keys(cart).length === 0) return alert('Cart is empty');
+      if (!address && addresses.length === 0) return skToast.error('Please enter a delivery address first');
+      if (Object.keys(cart).length === 0) return skToast.error('Your cart is empty — add some items first');
       
       const deliveryAddress = address || addresses[0];
       const items = Object.entries(cart).map(([id, item]) => ({ id, name: item.name, price: item.price, quantity: item.qty }));
@@ -452,7 +456,7 @@
       });
 
       cart = {}; updateCartBadge();
-      alert('Order placed! Pay TZS ' + total.toLocaleString() + ' via M-Pesa to complete.');
+      skToast.success('Order placed! Pay TZS ' + total.toLocaleString() + ' via M-Pesa to complete.', { duration: 5000 });
       showScreen('orders'); loadOrders();
     }
 
@@ -488,7 +492,7 @@
     async function updateProfile() {
       const name = document.getElementById('profileName').value;
       await db.collection('users').doc(currentUser.id).update({ name });
-      alert('Profile updated!');
+      skToast.success('Profile updated!');
     }
   </script>
 </body>

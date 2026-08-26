@@ -78,3 +78,78 @@ body {
 .text-headline-md { font-size: 20px; }
 .font-headline-md { font-family: 'Plus Jakarta Sans', sans-serif; }
 .hover\:bg-primary-dark:hover { background-color: #043020; }
+
+/* Accessibility: visible keyboard focus (shared across pages) */
+*:focus-visible {
+  outline: 2px solid #064E3B;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Prevent horizontal scroll from off-canvas panels (cart drawer etc) */
+html, body {
+  overflow-x: hidden;
+}
+
+/* Tailwind dist is stale: md:hidden missing -> mobile search bar leaks onto desktop */
+@media (min-width: 768px) {
+  .md\:hidden {
+    display: none !important;
+  }
+}
+
+/* ─── Material-3-style utility shims (wallet.html / js/wallet-manager.js) ───
+   The compiled dist/tailwind.css predates these tokens; define them here so
+   wallet cards, chips and the withdraw modal render as designed. */
+.bg-surface-container-low\/50:hover { background-color: rgba(247, 250, 246, 0.5); }
+.border-surface-container { border-color: #E8ECE9; }
+.border-surface-variant { border-color: #E2E8F0; }
+.divide-surface-container > :not([hidden]) ~ :not([hidden]) { border-color: #EEF1EE; }
+.hover\:bg-surface-container:hover { background-color: #F0F4F1; }
+.hover\:text-on-surface:hover { color: #022D1D; }
+.focus\:ring-primary:focus { --tw-ring-color: #064E3B; }
+.text-tertiary { color: #B45309; }
+.text-on-primary-container { color: #FFFFFF; }
+.bg-primary-container\/30 { background-color: rgba(6, 78, 59, 0.12); }
+.bg-secondary-container\/30 { background-color: rgba(180, 83, 9, 0.14); }
+.bg-tertiary-container\/30 { background-color: rgba(180, 83, 9, 0.10); }
+.bg-error-container\/30 { background-color: rgba(185, 28, 28, 0.10); }
+.font-headline-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 16px; line-height: 24px; }
+.card-shadow { box-shadow: 0 2px 12px rgba(6, 78, 59, 0.06); }
+
+/* Toast notifications (inline, non-blocking — replaces native alert()) */
+#sk-toast-root {
+  position: fixed;
+  bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: min(92vw, 420px);
+  pointer-events: none;
+}
+.sk-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #1E2A22;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 8px 28px rgba(2, 45, 29, 0.25);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.sk-toast.sk-toast-in { opacity: 1; transform: translateY(0); }
+.sk-toast .material-symbols-outlined { font-size: 20px; flex-shrink: 0; }
+.sk-toast-success .material-symbols-outlined { color: #34D399; }
+.sk-toast-error .material-symbols-outlined { color: #FCA5A5; }
+.sk-toast-info .material-symbols-outlined { color: #93C5FD; }

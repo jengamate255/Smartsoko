@@ -20,6 +20,7 @@
   <script type="module" src="config/firebase-config.js"></script>
   <script type="module" src="config/cross-platform-service.js?v=4"></script>
   <style> body {font-family: 'Plus Jakarta Sans',sans-serif} .gradient-bg {background: #012d1d} </style>
+  <script src="js/toast.js?v=1" defer></script>
 </head>
 <body class="bg-gray-50 min-h-screen">
   <!-- Navigation handled by SmartNav -->
@@ -294,7 +295,7 @@
         
       } catch (error) {
         console.error('Registration error:', error);
-        alert('Registration failed. Please try again.');
+        if (window.skToast) window.skToast.error('Registration failed. Please try again.'); else alert('Registration failed. Please try again.');
         submitBtn.innerHTML = '<i class="fas fa-store mr-2"></i>Register as Seller';
         submitBtn.disabled = false;
       }

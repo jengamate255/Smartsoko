@@ -84,6 +84,7 @@
     .order-id { font-size: 12px; color: var(--stitch-outline); font-family: 'Inter', sans-serif; }
     .order-amount { font-weight: 700; font-size: 14px; color: var(--stitch-on-surface); }
   </style>
+  <meta name="theme-color" content="#1B4332">
 </head>
 <body class="font-body-md text-on-background bg-[#F8FAF6] min-h-screen">
 
@@ -138,9 +139,7 @@
         <div class="flex-1 min-w-[200px]">
           <div class="relative">
             <span class="material-symbols-outlined text-gray-400 absolute left-3 top-1/2 -translate-y-1/2">search</span>
-            <input type="text" id="searchInput" placeholder="Search by order ID, customer..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-700/20 focus:border-green-700 outline-none transition-all"
-              onkeyup="filterOrders()">
+            <input type="text" id="searchInput" placeholder="Search by order ID, customer..." aria-label="Search orders" class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-700/20 focus:border-green-700 outline-none transition-all" onkeyup="filterOrders()">
           </div>
         </div>
         <select id="statusFilter" class="border border-gray-200 rounded-lg px-4 py-2" onchange="filterOrders()">

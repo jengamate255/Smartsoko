@@ -19,18 +19,26 @@
   }
 
   async function getWallet() {
-    return apiFetch('/api/vendor/wallet');
+    // /api/payments/pesapal/wallet returns the real ledger-derived balance
+    // ({ success, balance, transactions[] }); map it to the legacy shape.
+    const res = await apiFetch('/api/payments/pesapal/wallet');
+    if (res && typeof res.balance !== 'undefined') {
+      return { wallet: { balance: res.balance || 0, pending: res.pending_refunds || 0,
+                         totalEarned: res.balance || 0, totalWithdrawn: 0 },
+               transactions: res.transactions || [] };
+    }
+    return res; // fall through to demo data on error/401
   }
 
   async function getTransactions(limit = 50) {
-    return apiFetch('/api/vendor/wallet/transactions?limit=' + limit);
+    const res = await apiFetch('/api/payments/pesapal/wallet');
+    return { transactions: (res && res.transactions) || [] };
   }
 
   async function requestWithdrawal(amount, method, accountDetails) {
-    return apiFetch('/api/vendor/wallet/withdraw', {
-      method: 'POST',
-      body: JSON.stringify({ amount, method, accountDetails })
-    });
+    // No server-side withdraw endpoint exists yet — surface a clear
+    // not-available signal instead of hitting a guaranteed 404.
+    return Promise.resolve({ success: false, error: 'Withdrawals are coming soon. Please contact support to cash out.' });
   }
 
   function renderWallet(containerId, data) {
@@ -185,22 +193,22 @@
     const amount = parseFloat(document.getElementById('withdrawAmount').value);
     const method = document.getElementById('withdrawMethod').value;
     const account = document.getElementById('withdrawAccount').value.trim();
-    if (!amount || amount < 1000) { alert('Minimum withdrawal is TSh 1,000'); return; }
-    if (!account) { alert('Please enter account details'); return; }
+    if (!amount || amount < 1000) { window.skToast && window.skToast.error('Minimum withdrawal is TSh 1,000'); return; }
+    if (!account) { window.skToast && window.skToast.error('Please enter account details'); return; }
 
     try {
       const result = await requestWithdrawal(amount, method, account);
       if (result.success) {
         document.querySelector('.fixed')?.remove();
-        alert('Withdrawal request submitted successfully!');
+        window.skToast && window.skToast.success('Withdrawal request submitted successfully!');
         if (typeof window.MerchantApp?.loadFinanceTab === 'function') {
           window.MerchantApp.loadFinanceTab();
         }
       } else {
-        alert(result.error || 'Failed to process withdrawal');
+        window.skToast && window.skToast.error(result.error || 'Failed to process withdrawal');
       }
     } catch (e) {
-      alert('Network error. Please try again.');
+      window.skToast && window.skToast.error('Network error. Please try again.');
     }
   }
 

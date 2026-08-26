@@ -4,6 +4,9 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SmartSoko - My Wallet</title>
+  <meta name="description" content="Your SmartSoko wallet: balance, nTZS and M-Pesa payments, deposits, and withdrawal status in one place.">
+  <meta property="og:title" content="SmartSoko Wallet">
+  <meta property="og:description" content="Balance, payments and withdrawals — all in one place.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="theme-color" content="#064e3b">
   <link rel="preload" href="dist/tailwind.css" as="style">
@@ -79,9 +82,19 @@
     </div>
   </nav>
 
+  <script type="module" src="config/firebase-config.js?v=5"></script>
+  <script src="js/toast.js?v=1"></script>
   <script src="js/wallet-manager.js"></script>
   <script>
     // ─── nTZS deposit status (from ?ntzs=deposit&depositId=…&orderId=…) ───
+    // Money routes are auth-gated server-side — attach the Firebase ID token.
+    async function ntzsAuthHeaders() {
+      try {
+        const token = window.auth?.currentUser ? await window.auth.currentUser.getIdToken() : null;
+        return token ? { 'Authorization': 'Bearer ' + token } : {};
+      } catch (e) { return {}; }
+    }
+
     function ntzsStatusPill(status) {
       const s = (status || '').toLowerCase();
       const cls = ['minted', 'completed', 'settled'].includes(s) ? 'status-completed'
@@ -138,7 +151,13 @@
       while (attempts < maxAttempts) {
         attempts++;
         try {
-          const res = await fetch(`/api/payments/ntzs/deposit/${encodeURIComponent(depositId)}`);
+          const res = await fetch(`/api/payments/ntzs/deposit/${encodeURIComponent(depositId)}`, {
+            headers: await ntzsAuthHeaders()
+          });
+          if (res.status === 401 || res.status === 403) {
+            renderNtzsBanner('failed', depositId, orderId, res.status === 401 ? 'sign in required' : 'forbidden');
+            return;
+          }
           const json = await res.json();
           const st = (json.data && json.data.status) || '';
           const s = st.toLowerCase();
