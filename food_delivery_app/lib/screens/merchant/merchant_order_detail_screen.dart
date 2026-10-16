@@ -203,7 +203,7 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
                       ],
                     ),
                   ),
-                  Text('KSh ${(item.price * item.quantity).toStringAsFixed(0)}'),
+                  Text('TSh ${(item.price * item.quantity).toStringAsFixed(0)}'),
                 ],
               ),
             )),
@@ -214,7 +214,7 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Subtotal', style: TextStyle(color: Color(0xFF6B7280))),
-                Text('KSh ${widget.order.subtotal.toStringAsFixed(0)}'),
+                Text('TSh ${widget.order.subtotal.toStringAsFixed(0)}'),
               ],
             ),
             const SizedBox(height: 12),
@@ -222,7 +222,7 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Delivery Fee', style: TextStyle(color: Color(0xFF6B7280))),
-                Text('KSh ${widget.order.deliveryFee.toStringAsFixed(0)}'),
+                Text('TSh ${widget.order.deliveryFee.toStringAsFixed(0)}'),
               ],
             ),
             const SizedBox(height: 16),
@@ -234,7 +234,7 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF064E3B)),
                 ),
                 Text(
-                  'KSh ${widget.order.total.toStringAsFixed(0)}',
+                  'TSh ${widget.order.total.toStringAsFixed(0)}',
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF064E3B)),
                 ),
               ],
@@ -263,6 +263,29 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
                           _getNextStatusAction(),
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
+                ),
+              ),
+
+            // Cancel — allowed until the order ships (state machine: pre picked_up)
+            if (widget.order.status == OrderStatus.pending ||
+                widget.order.status == OrderStatus.confirmed ||
+                widget.order.status == OrderStatus.preparing)
+              const SizedBox(height: 12),
+            if (widget.order.status == OrderStatus.pending ||
+                widget.order.status == OrderStatus.confirmed ||
+                widget.order.status == OrderStatus.preparing)
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _isUpdatingStatus ? null : _handleCancelOrder,
+                  icon: const Icon(Icons.cancel_outlined),
+                  label: const Text('Cancel Order'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
                 ),
               ),
           ],
@@ -320,6 +343,49 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error updating status: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isUpdatingStatus = false);
+    }
+  }
+
+  Future<void> _handleCancelOrder() async {
+    // Confirm before cancelling — this notifies the customer.
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cancel this order?'),
+        content: const Text(
+            'The customer will be notified and the order cannot be restored.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Keep order'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Cancel order'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    setState(() => _isUpdatingStatus = true);
+    try {
+      await _orderService.updateOrderStatus(widget.order.id, OrderStatus.cancelled);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Order cancelled — customer notified')),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error cancelling: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {

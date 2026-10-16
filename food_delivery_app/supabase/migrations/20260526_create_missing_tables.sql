@@ -58,6 +58,34 @@ CREATE TABLE IF NOT EXISTS products (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Product drafts table (for pending merchant approval)
+CREATE TABLE IF NOT EXISTS product_drafts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  merchant_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  brand TEXT,
+  model TEXT,
+  category TEXT,
+  subcategory TEXT,
+  description TEXT,
+  sku TEXT,
+  barcode TEXT,
+  size TEXT,
+  weight TEXT,
+  unit TEXT,
+  color TEXT,
+  attributes JSONB,
+  search_keywords TEXT[],
+  selling_price INTEGER,
+  purchase_price INTEGER,
+  currency TEXT,
+  stock_quantity INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'pending_approval',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  duplicate_of UUID REFERENCES products(id)
+);
+
 -- Chats table for messaging between customers, vendors, and drivers
 CREATE TABLE IF NOT EXISTS chats (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -109,6 +137,7 @@ CREATE INDEX IF NOT EXISTS idx_chat_messages_created ON chat_messages(created_at
 -- Enable RLS
 ALTER TABLE sellers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE product_drafts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE chats ENABLE ROW LEVEL SECURITY;
 ALTER TABLE chat_messages ENABLE ROW LEVEL SECURITY;
 
@@ -146,6 +175,12 @@ CREATE POLICY "Participants can send messages" ON chat_messages FOR INSERT WITH 
   chat_id IN (SELECT id FROM chats WHERE participant_1_id = auth.uid() OR participant_2_id = auth.uid())
 );
 
+-- RLS policies for product_drafts
+DROP POLICY IF EXISTS "Merchants can manage their drafts" ON product_drafts;
+CREATE POLICY "Merchants can manage their drafts" ON product_drafts FOR ALL USING (
+  merchant_id IN (SELECT id FROM profiles WHERE auth.uid() = owner_id)
+);
+
 -- Triggers for updated_at
 CREATE OR REPLACE FUNCTION update_sellers_updated_at()
 RETURNS TRIGGER AS $$ BEGIN NEW.updated_at = NOW(); RETURN NEW; END; $$ language 'plpgsql';
@@ -161,3 +196,5 @@ CREATE OR REPLACE FUNCTION update_chats_updated_at()
 RETURNS TRIGGER AS $$ BEGIN NEW.updated_at = NOW(); RETURN NEW; END; $$ language 'plpgsql';
 DROP TRIGGER IF EXISTS update_chats_updated_at_trigger ON chats;
 CREATE TRIGGER update_chats_updated_at_trigger BEFORE UPDATE ON chats FOR EACH ROW EXECUTE FUNCTION update_chats_updated_at();
+ 
+ 

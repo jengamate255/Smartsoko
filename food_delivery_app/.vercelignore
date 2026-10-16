@@ -7,6 +7,34 @@
 .vscode
 .git
 
+# Large build directories (not needed for Vercel deployment)
+build/
+build/**/*
+node_modules/
+dogfood-output/
+android-merchant-fullnative/
+android-admin-native/
+android-customer/
+android-driver/
+android-merchant/
+android-merchant-native/
+android-wrapper/
+android/
+.dart_tool/
+APK-Builds/
+apks_temp/
+logs/
+screenshots/
+docs/
+functions/
+# server/ — kept for api/index.js imports (server/server-production.js)
+server-dev.js
+lib/
+linux/
+macos/
+middleware/
+archived/
+
 # Logs
 *.log
 *_log.txt

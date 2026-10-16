@@ -32,7 +32,7 @@ const updateAlert = {
   // Render a single alert
   renderAlert(alert) {
     const alertElement = document.createElement("div");
-    alertElement.className = "bg-white dark:bg-gray-800 border rounded-lg shadow-lg p-4 mb-2 transform: translateX(100%) opacity:0 transition-all duration-300 border-l-4 border-l-solid";
+    alertElement.className = "bg-white dark:bg-gray-800 border rounded-lg shadow-lg p-4 mb-2 transform translate-x-full opacity-0 transition-all duration-300 border-l-4 border-l-solid";
 
     // Set border color based on type
     if (alert.type === "success") {
@@ -55,7 +55,7 @@ const updateAlert = {
     alertElement.innerHTML = `
       <div class="flex items-start gap-3">
         <div class="flex-shrink-0 mt-0.5">
-          <span class="material-symbols-outlined text-lg ${icon}"></span>
+          <span class="material-symbols-outlined text-lg">${icon}</span>
         </div>
         <div class="flex-1">
           ${alert.title ? `<div class="font-semibold text-sm mb-1">${alert.title}</div>` : ''}
@@ -86,7 +86,9 @@ const updateAlert = {
   // Remove an alert
   removeAlert(id) {
     if (this.container) {
-      const element = this.container.querySelector('.border-l-4:not([style*=\"display: none\"])')
+      const alerts = this.container.querySelectorAll('.border-l-4');
+      const alertToRemove = Array.from(alerts).find(el => el.dataset.alertId == id);
+      const element = alertToRemove || alerts[alerts.length - 1];
       if (element) {
         element.style.transform = 'translateX(100%)'
         element.style.opacity = '0'

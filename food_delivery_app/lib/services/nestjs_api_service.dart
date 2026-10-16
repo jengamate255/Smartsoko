@@ -4,7 +4,7 @@ import '../services/auth_service.dart';
 import '../utils/logger.dart';
 
 class NestJSApiService {
-  static const String _baseUrl = 'http://localhost:3000/api';
+  static const String _baseUrl = 'http://10.0.2.2:3000/api';
 
   final AuthService _authService;
 
@@ -17,11 +17,9 @@ class NestJSApiService {
   }
 
   Future<void> _ensureToken() async {
-    if (_authToken == null) {
-      final firebaseUser = _authService.currentUser;
-      if (firebaseUser != null) {
-        _authToken = await firebaseUser.getIdToken();
-      }
+    final firebaseUser = _authService.currentUser;
+    if (firebaseUser != null) {
+      _authToken = await firebaseUser.getIdToken(true);
     }
   }
 

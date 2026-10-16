@@ -6,11 +6,20 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.fooddelivery.driver.R
 import com.fooddelivery.driver.ui.MainActivity
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.parse
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import org.json.JSONObject
+import kotlinx.coroutines.tasks.await
 
 /**
  * Firebase Messaging Service to handle incoming push notifications.
@@ -224,11 +233,81 @@ class DriverMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        // TODO: Send this token to your backend for notification delivery
-        println("DriverMessagingService: Driver FCM token generated: $token")
+        // Send this token to the backend for notification delivery
+        sendToken(token)
     }
 
     override fun onDestroy() {
         super.onDestroy()
+    }
+
+    companion object {
+        /**
+         * Fetch the current FCM token (if any) and register it with the backend.
+         * Called at app startup so an existing token (whose onNewToken already fired
+         * on a previous install) still gets registered.
+         */
+        fun registerExistingToken() {
+            com.google.firebase.messaging.FirebaseMessaging.getInstance().token
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val token = task.result
+                        if (token != null) {
+                            // Reuse the send logic via a static context-free helper
+                            sendToken(token)
+                        }
+                    }
+                }
+        }
+
+        private fun sendToken(token: String) {
+            // Use a background thread to avoid blocking the main thread
+            Thread {
+                try {
+                    val url = "https://vonkqyiczeqhuqhahsxm.supabase.co/functions/v1/api/driver/fcm-token"
+                    val jsonBody = JSONObject().put("token", token).toString()
+
+                    // Get the Firebase ID token for authentication
+                    val firebaseAuth = FirebaseAuth.getInstance()
+                    val currentUser = firebaseAuth.currentUser
+                    if (currentUser == null) return@Thread
+
+                    // Use getIdToken(true) which blocks until token is available
+                    val idTokenTask = currentUser.getIdToken(true)
+                    // Wait for the task to complete (blocking is OK on background thread)
+                    while (!idTokenTask.isComplete) {
+                        Thread.sleep(100)
+                    }
+                    if (!idTokenTask.isSuccessful) {
+                        android.util.Log.e("DriverMessagingService", "Failed to get ID token: ${idTokenTask.exception}")
+                        return@Thread
+                    }
+                    val idToken = idTokenTask.result?.token
+                    if (idToken == null) return@Thread
+
+                    val mediaType = "application/json; charset=utf-8".toMediaType()!!
+                    val request = okhttp3.Request.Builder()
+                        .url(url)
+                        .addHeader("apikey", com.fooddelivery.driver.util.AppConfig.SUPABASE_ANON_KEY)
+                        // Supabase gateway rejects non-Supabase JWTs in Authorization;
+                        // the Firebase ID token travels as x-firebase-token instead.
+                        .addHeader("x-firebase-token", idToken)
+                        .addHeader("Authorization", "Bearer ${com.fooddelivery.driver.util.AppConfig.SUPABASE_ANON_KEY}")
+                        .addHeader("Content-Type", "application/json")
+                        .post(okhttp3.RequestBody.Companion.create(mediaType, jsonBody))
+                        .build()
+
+                    val client = OkHttpClient()
+                    val response = client.newCall(request).execute()
+                    if (response.isSuccessful) {
+                        android.util.Log.d("DriverMessagingService", "FCM token sent to backend successfully")
+                    } else {
+                        android.util.Log.e("DriverMessagingService", "Failed to send FCM token: ${response.code} ${response.body?.string()}")
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("DriverMessagingService", "Error sending FCM token", e)
+                }
+            }.start()
+        }
     }
 }

@@ -142,10 +142,26 @@
   </nav>
 
   <script type="module">
-    const ROLE_ICONS = { admin: 'admin_panel_settings', merchant: 'store', driver: 'electric_bike', customer: 'person' };
+    // Immediate sign-out handler — overrides the stub below once firebase-auth loads.
+    window.signOut = async () => {
+      try {
+        const auth = window.auth;
+        if (auth) {
+          const { signOut: fbSignOut } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+          await fbSignOut(auth);
+        }
+        window.location.href = '/login';
+      } catch (error) {
+        console.error('Sign out error:', error);
+        window.location.href = '/login';
+      }
+    };
+
+    const ROLE_ICONS = { admin: 'admin_panel_settings', merchant: 'store', seller: 'store', driver: 'electric_bike', customer: 'person' };
     const ROLE_LINKS = {
       admin:    [{ href: '/admin',    icon: 'admin_panel_settings', label: 'Admin Panel' }],
-      merchant: [{ href: '/merchant', icon: 'store',                label: 'Seller Dashboard' }],
+      merchant: [{ href: '/merchant', icon: 'store',                label: 'Merchant Dashboard' }],
+      seller:   [{ href: '/merchant', icon: 'store',                label: 'Merchant Dashboard' }],
       driver:   [{ href: '/driver',   icon: 'electric_bike',        label: 'Driver Dashboard' }],
       customer: [],
     };
@@ -167,15 +183,10 @@
         import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js'),
         import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js')
       ]).then(([authMod, fsMod]) => {
-        const { onAuthStateChanged, signOut: firebaseSignOut } = authMod;
+        const { onAuthStateChanged } = authMod;
         const { doc, getDoc } = fsMod;
 
-        window.signOut = async () => {
-          try {
-            await firebaseSignOut(auth);
-            window.location.href = '/login';
-          } catch (error) { console.error('Sign out error:', error); }
-        };
+        // signOut is handled by the global window.signOut defined at the top of this module.
 
         onAuthStateChanged(auth, async user => {
           if (!user) {
@@ -193,25 +204,29 @@
 
           let userData = null;
           try {
-            const svc = window.crossPlatformService;
-            if (svc && svc.isReady()) {
-              try { userData = await svc.get('users', user.uid); } catch (e) { /* silent */ }
+            // 1. Server /api/auth/verify FIRST — it reads the authoritative
+            //    profiles table (same role source the page guards use).
+            try {
+              const token = await user.getIdToken();
+              const res = await fetch('/api/auth/verify', { headers: { 'Authorization': 'Bearer ' + token } });
+              if (res.ok) {
+                const d = await res.json();
+                if (d.success) userData = { role: d.user.role, createdAt: undefined };
+              }
+            } catch (e) { /* API lookup failed */ }
+
+            // 2. Legacy fallbacks (client-side copies of the profile)
+            if (!userData) {
+              const svc = window.crossPlatformService;
+              if (svc && svc.isReady()) {
+                try { userData = await svc.get('users', user.uid); } catch (e) { /* silent */ }
+              }
             }
             if (!userData && db) {
               try {
                 const userDoc = await getDoc(doc(db, 'users', user.uid));
                 if (userDoc.exists()) userData = userDoc.data();
               } catch (e) { /* Firestore permission denied, use defaults */ }
-            }
-            if (!userData) {
-              try {
-                const token = await user.getIdToken();
-                const res = await fetch('/api/auth/verify', { headers: { 'Authorization': 'Bearer ' + token } });
-                if (res.ok) {
-                  const d = await res.json();
-                  if (d.success) userData = { role: d.user.role };
-                }
-              } catch (e) { /* API fallback failed */ }
             }
           } catch (e) { /* all data sources failed */ }
           const data = userData || {};

@@ -19,8 +19,15 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "API_BASE_URL", "\"http://localhost:3000/api/\"")
-        buildConfigField("String", "WEBSOCKET_URL", "\"http://localhost:3000\"")
+        // API host: override per-build via -PapiHost=... (or gradle.properties).
+        //   debug default 10.0.2.2 = Android emulator loopback to the dev PC
+        //   (localhost:3000 inside the app is the phone itself — never works).
+        //   release default = production host (set apiHost in gradle.properties
+        //   for real devices, e.g. your PC's LAN IP: 192.168.x.x).
+        buildConfigField("String", "API_HOST", "\"${project.findProperty("apiHost") ?: "10.0.2.2"}\"")
+        buildConfigField("String", "API_PORT", "\"${project.findProperty("apiPort") ?: "3000"}\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://vonkqyiczeqhuqhahsxm.supabase.co/functions/v1/api/\"")
+        buildConfigField("String", "WEBSOCKET_URL", "\"ws://${project.findProperty("apiHost") ?: "10.0.2.2"}:${project.findProperty("apiPort") ?: "3000"}\"")
         buildConfigField("String", "MAPBOX_TOKEN", "\"${project.findProperty("MAPBOX_ACCESS_TOKEN") ?: "pk.placeholder"}\"")
         buildConfigField("String", "SUPABASE_URL", "\"https://vonkqyiczeqhuqhahsxm.supabase.co\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvbmtxeWljemVxaHVxaGFoc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjIzNDksImV4cCI6MjA5MDM5ODM0OX0.UKAT3re6P_oAB3E1svwCFdqTQWZL6yulJ1ZX4nAgJJ8\"")

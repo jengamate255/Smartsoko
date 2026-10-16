@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../models/shop.dart';
 import '../../services/shop_service.dart';
 import '../../services/image_upload_service.dart';
+import '../../services/ai_product_service.dart';
 import '../../utils/validators.dart';
 
 class ProductFormScreen extends StatefulWidget {
@@ -31,10 +32,12 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
   final ShopService _shopService = ShopService();
   final ImageUploadService _imageUploadService = ImageUploadService();
+  final AIProductService _aiProductService = AIProductService();
 
   File? _selectedImage;
   String? _existingImageUrl;
   bool _isSubmitting = false;
+  bool _isExtracting = false;
 
   final List<String> _defaultCategories = [
     'Fresh Produce',
@@ -123,6 +126,53 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           SnackBar(content: Text('Error picking image: $e')),
         );
       }
+    }
+  }
+
+  Future<void> _extractProductFromImage() async {
+    if (_selectedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an image first')),
+      );
+      return;
+    }
+
+    setState(() => _isExtracting = true);
+
+    try {
+      final result = await AIProductService.extractProductFromImage(_selectedImage!);
+
+      if (result.success) {
+        setState(() {
+          if (result.name.isNotEmpty) _nameController.text = result.name;
+          if (result.description.isNotEmpty) _descriptionController.text = result.description;
+          if (result.price > 0) _priceController.text = result.price.toStringAsFixed(0);
+          if (result.category.isNotEmpty) _categoryController.text = result.category;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Product extracted! Confidence: ${(result.confidence * 100).toStringAsFixed(0)}%'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result.error ?? 'Failed to extract product'), backgroundColor: Colors.red),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Extraction error: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isExtracting = false);
     }
   }
 
@@ -228,9 +278,30 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                                   Text('Tap to add product image', style: TextStyle(color: Colors.grey[500])),
                                 ],
                               ),
-                            ),
-                ),
+),
               ),
+              if (_selectedImage != null && !_isExtracting) ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _extractProductFromImage,
+                    icon: const Icon(Icons.auto_awesome),
+                    label: const Text('AI Extract Product Info'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
+              if (_isExtracting) ...[
+                const SizedBox(height: 12),
+                const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ],
               const SizedBox(height: 24),
 
               TextFormField(

@@ -8,12 +8,13 @@ const CartService = (() => {
 
   // Standard cart item structure
   const createItem = (data) => ({
-    id: data.id || data.productId || `${data.sellerId}-${data.name}`,
+    id: data.id || data.productId || `${data.sellerId || data.merchantId}-${data.name}`,
     name: data.name,
     price: parseFloat(data.price) || 0,
     quantity: parseInt(data.quantity || data.qty) || 1,
     imageUrl: data.imageUrl || data.image || null,
-    sellerId: data.sellerId || null,
+    sellerId: data.sellerId || data.merchantId || null,
+    merchantId: data.merchantId || data.sellerId || null,
     sellerName: data.sellerName || null,
     sellerLat: data.sellerLat ?? null,
     sellerLng: data.sellerLng ?? null

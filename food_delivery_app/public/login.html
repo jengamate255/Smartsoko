@@ -24,7 +24,7 @@
   <script src="config/api-config.js?v=6" defer></script>
   <!-- Pre-load Firebase auth/firestore functions needed by googleLogin (synchronous, preserves click gesture) -->
   <script type="module">
-    import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+    import { GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
     import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
     window.__gauth = { GoogleAuthProvider, signInWithPopup };
     window.__gfire = { doc, getDoc, setDoc, serverTimestamp };
@@ -543,16 +543,50 @@
 
     // ── Bootstrap logging ────────────────────────────────────────────
     LOG.info('auth', 'Checking Firebase auth state…', null);
+    // Capture the redirect reason BEFORE showReasonBanner() strips it from
+    // the URL. A signed-in user bounced for `unauthorized` must NOT be
+    // auto-sent back to the page that just denied them — that re-triggers
+    // the guard and loops forever (login ↔ merchant ping-pong).
+    const __redirectReason = new URLSearchParams(window.location.search).get('reason');
+    // Where should an already-signed-in user go? Role tab intent wins for
+    // merchants/admins/drivers; remembered destination only for unknown roles.
+    function alreadySignedInDestination() {
+      // Just denied access: stay on login so the "Access denied" banner shows
+      // and the user can sign in with an authorized account instead of
+      // bouncing back to the page that rejected them.
+      if (__redirectReason === 'unauthorized') return null;
+      const roleParam = new URLSearchParams(window.location.search).get('role');
+      if (roleParam === 'merchant' || roleParam === 'seller') return '/merchant';
+      if (roleParam === 'admin') return '/admin';
+      if (roleParam === 'driver') return '/driver';
+      try {
+        const saved = sessionStorage.getItem('smartsoko_auth_redirect');
+        if (saved && saved !== '/login' && !saved.includes('login.html')) {
+          sessionStorage.removeItem('smartsoko_auth_redirect');
+          return saved;
+        }
+      } catch (_) { /* storage unavailable */ }
+      return '/home';
+    }
     if (window.auth) {
       LOG.info('auth', 'window.auth found', { hasCurrentUser: !!window.auth.currentUser });
       if (window.auth.currentUser) {
-        LOG.info('auth', 'Already signed in, redirecting to home', { uid: window.auth.currentUser.uid });
-        window.location.href = '/home';
+        const dest = alreadySignedInDestination();
+        if (dest) {
+          LOG.info('auth', 'Already signed in, redirecting', { uid: window.auth.currentUser.uid, dest });
+          window.location.href = dest;
+        } else {
+          LOG.warn('auth', 'Signed in but not authorized for the requested page — staying on login', null);
+        }
       } else {
         window.auth.onAuthStateChanged(function(user) {
           if (user) {
-            LOG.info('auth', 'User signed in', { uid: user.uid, email: user.email, provider: (user.providerData || [])[0]?.providerId });
-            window.location.href = '/home';
+            // A fresh sign-in is handled by the form submit flow (role-aware);
+            // this listener only catches sessions restored from storage.
+            if (document.getElementById('loginForm') && document.getElementById('loginForm').dataset.submitting === 'true') return;
+            LOG.info('auth', 'User signed in (restored session)', { uid: user.uid, email: user.email, provider: (user.providerData || [])[0]?.providerId });
+            const dest = alreadySignedInDestination();
+            if (dest) window.location.href = dest;
           } else {
             LOG.info('auth', 'User signed out / no session', null);
           }
@@ -565,7 +599,8 @@
         if (window.auth) {
           LOG.info('auth', 'window.auth became available (retry)', null);
           if (window.auth.currentUser) {
-            window.location.href = '/home';
+            const dest = alreadySignedInDestination();
+            if (dest) window.location.href = dest;
           }
         } else {
           LOG.error('auth', 'window.auth still missing after 3s', null);
@@ -602,21 +637,33 @@
       const customerTab = document.getElementById('customer-tab');
       const merchantTab = document.getElementById('merchant-tab');
       const socialLogins = document.getElementById('socialLogins');
-      
+
+      // Animate the visual state of both tabs instantly
       if (role === 'customer') {
         customerTab.classList.add('active');
         customerTab.setAttribute('aria-selected', 'true');
         merchantTab.classList.remove('active');
         merchantTab.setAttribute('aria-selected', 'false');
-        socialLogins.style.display = 'block';
+        if (socialLogins) socialLogins.style.display = 'block';
       } else {
         merchantTab.classList.add('active');
         merchantTab.setAttribute('aria-selected', 'true');
         customerTab.classList.remove('active');
         customerTab.setAttribute('aria-selected', 'false');
-        socialLogins.style.display = 'none';
+        if (socialLogins) socialLogins.style.display = 'none';
       }
     }
+
+    // Preselect role from URL (?role=merchant) or from a saved intent flag
+    function initRoleFromUrl() {
+      const urlRole = new URLSearchParams(window.location.search).get('role');
+      const savedRole = localStorage.getItem('smartsoko_intended_role');
+      const role = (urlRole || savedRole || 'customer').toLowerCase();
+      if (urlRole) localStorage.setItem('smartsoko_intended_role', urlRole);
+      if (role === 'merchant' || role === 'seller') switchRole('merchant');
+      return role;
+    }
+    initRoleFromUrl();
 
     // Show a friendly banner explaining why the user was redirected to login
     function showReasonBanner() {
@@ -646,6 +693,13 @@
         }
       };
       const cfg = map[reason] || map.auth_required;
+      const roleParam = new URLSearchParams(window.location.search).get('role');
+      if ((roleParam === 'merchant' || roleParam === 'seller') && (reason === 'auth_required' || !reason)) {
+        cfg.tone = 'tone-info';
+        cfg.icon = 'storefront';
+        cfg.title = 'Seller sign in';
+        cfg.msg = 'Sign in with your seller account to open your SmartSoko Seller Dashboard.';
+      }
       LOG.info('redirect', 'Banner config', { reason, tone: cfg.tone, title: cfg.title });
       const banner = document.getElementById('reasonBanner');
       banner.className = 'reason-banner show ' + cfg.tone;
@@ -653,7 +707,9 @@
       document.getElementById('rbTitle').textContent = cfg.title;
       document.getElementById('rbMsg').textContent = cfg.msg;
       // Clean the param from the URL so a refresh won't keep showing the banner
-      if (history.replaceState) history.replaceState(null, '', window.location.pathname);
+      // (but keep ?role= so the correct role tab stays selected)
+      const keptRole = new URLSearchParams(window.location.search).get('role');
+      if (history.replaceState) history.replaceState(null, '', window.location.pathname + (keptRole ? '?role=' + keptRole : ''));
     }
     showReasonBanner();
 
@@ -781,17 +837,20 @@
           if (userExists) userData = userSnap.data();
         }
 
+        const intendedRole = localStorage.getItem('smartsoko_intended_role');
+
         if (!userExists) {
-          LOG.info('google', 'No existing profile, creating new one', { role: 'customer', onboardingComplete: true });
+          LOG.info('google', 'No existing profile, creating new one', { role: intendedRole || 'customer', onboardingComplete: false });
           userData = {
             fullName: user.displayName || '',
             email: user.email,
             phone: user.phoneNumber || '',
-            role: 'customer',
+            role: intendedRole || 'customer',
             createdAt: new Date().toISOString(),
             emailVerified: user.emailVerified,
             photoURL: user.photoURL || null,
-            onboardingComplete: true
+            onboardingComplete: false,
+            onboardingVersion: window.SmartSokoOnboarding ? window.SmartSokoOnboarding.ONBOARDING_VERSION : 1
           };
 
           if (svc && svc.isReady()) {
@@ -812,7 +871,7 @@
         if (window.SmartSokoOnboarding && window.SmartSokoOnboarding.redirectAfterAuth) {
           window.SmartSokoOnboarding.redirectAfterAuth(userData, role);
         } else {
-          window.location.href = '/';
+          window.location.href = resolvePostAuthDestination(userData, role);
         }
       } catch (err) {
         const elapsed = Date.now() - _gs;
@@ -837,6 +896,30 @@
       }
     }
 
+    // Resolve where the user should land after a successful login
+    function resolvePostAuthDestination(userData, role) {
+      role = role || (userData && (userData.role || ''));
+      // 1. Explicit ?redirect= param
+      const redirect = new URLSearchParams(window.location.search).get('redirect');
+      if (redirect) return redirect.startsWith('/') ? redirect : '/' + redirect;
+      // 2. Role-based landing FIRST when the role is known — a merchant must
+      //    always land on /merchant. (The remembered-bounce destination is
+      //    only used when the role is unknown.)
+      if (role === 'merchant' || role === 'seller') return '/merchant';
+      if (role === 'admin') return '/admin';
+      if (role === 'driver') return '/driver';
+      // 3. Destination remembered by auth-check when it bounced the user here
+      try {
+        const saved = sessionStorage.getItem('smartsoko_auth_redirect');
+        if (saved && saved !== '/login' && !saved.includes('login.html')) {
+          sessionStorage.removeItem('smartsoko_auth_redirect');
+          return saved;
+        }
+      } catch (_) { /* storage unavailable */ }
+      // 4. Unknown role → home
+      return '/home';
+    }
+
     // Form submission — real Firebase Auth
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -859,6 +942,9 @@
 
       btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Signing in...</span>';
       btn.disabled = true;
+      // Flag the form submission so the bootstrap onAuthStateChanged listener
+      // doesn't race this handler's own role-aware redirect.
+      this.dataset.submitting = 'true';
 
       try {
         LOG.info('login', 'Importing Firebase auth modules', null);
@@ -867,44 +953,70 @@
         LOG.info('login', 'Calling signInWithEmailAndPassword', { identity });
 
         await signInWithEmailAndPassword(auth, identity, password);
-        LOG.info('login', 'Sign-in succeeded, checking user profile for role-based redirect', null);
+        LOG.info('login', 'Sign-in succeeded, resolving role for redirect', null);
 
-        // Fetch user profile from Firestore to determine role and redirect
+        // Resolve the user's platform role. Order:
+        //   1. Server /api/auth/verify — reads the authoritative profiles
+        //      table (same source the merchant/admin guards use).
+        //   2. Firestore users/<uid> doc (legacy client path).
+        //   3. The role tab the user selected on this page (self-declared
+        //      intent — a merchant tapping "Merchant" lands on /merchant).
+        let userData = null;
+        let role = null;
+
         try {
-          const svc = window.crossPlatformService;
-          const user = auth.currentUser;
-          if (user) {
-            let userData = null;
-            if (svc && svc.isReady()) {
-              try { userData = await svc.get('users', user.uid); } catch (e) { /* silent */ }
-            }
-            if (!userData) {
-              const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-              const db = window.db;
-              if (db) {
-                const userRef = doc(db, 'users', user.uid);
-                const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) userData = userSnap.data();
-              }
-            }
-            if (userData) {
-              const role = userData.role || 'customer';
-              LOG.info('login', 'User profile found, redirecting by role', { role, uid: user.uid });
-              if (window.SmartSokoOnboarding && window.SmartSokoOnboarding.redirectAfterAuth) {
-                window.SmartSokoOnboarding.redirectAfterAuth(userData, role);
-              } else {
-                window.location.href = '/home';
-              }
-              return;
-            }
+          const idToken = await auth.currentUser.getIdToken();
+          const res = await fetch('/api/auth/verify', { headers: { 'Authorization': 'Bearer ' + idToken } });
+          const data = await res.json();
+          if (data.success && data.user) {
+            role = data.user.role;
+            userData = { uid: data.user.uid, email: data.user.email, name: data.user.name, role };
+            LOG.info('login', 'Role resolved via server profiles', { role });
           }
-        } catch (profileErr) {
-          LOG.warn('login', 'Could not fetch user profile, falling back to home', { err: profileErr.message });
+        } catch (verifyErr) {
+          LOG.warn('login', 'Server role lookup failed, trying Firestore profile', { err: verifyErr.message });
         }
 
-        // Fallback redirect
-        LOG.info('login', 'Sign-in succeeded, redirecting to home', null);
-        window.location.href = '/home';
+        if (!role) {
+          try {
+            const svc = window.crossPlatformService;
+            const user = auth.currentUser;
+            if (user) {
+              if (svc && svc.isReady()) {
+                try { userData = await svc.get('users', user.uid); } catch (e) { /* silent */ }
+              }
+              if (!userData) {
+                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+                const db = window.db;
+                if (db) {
+                  const userRef = doc(db, 'users', user.uid);
+                  const userSnap = await getDoc(userRef);
+                  if (userSnap.exists()) userData = userSnap.data();
+                }
+              }
+              if (userData && userData.role) {
+                role = userData.role;
+                LOG.info('login', 'Role resolved via Firestore users doc', { role });
+              }
+            }
+          } catch (profileErr) {
+            LOG.warn('login', 'Could not fetch user profile', { err: profileErr.message });
+          }
+        }
+
+        if (role) {
+          LOG.info('login', 'Redirecting by role', { role });
+          if (window.SmartSokoOnboarding && window.SmartSokoOnboarding.redirectAfterAuth) {
+            window.SmartSokoOnboarding.redirectAfterAuth(userData, role);
+          } else {
+            window.location.href = resolvePostAuthDestination(userData, role);
+          }
+          return;
+        }
+
+        // No role found anywhere — use the selected role tab as intent.
+        LOG.info('login', 'No role found, redirecting by selected tab', { selectedRole });
+        window.location.href = resolvePostAuthDestination({ role: selectedRole }, selectedRole);
       } catch (err) {
         LOG.error('login', 'Sign-in failed', { code: err.code, message: err.message });
         const errorMessages = {
@@ -919,6 +1031,8 @@
         showLoginError(errorMessages[err.code] || err.message || 'Login failed. Please try again.');
         btn.innerHTML = originalHTML;
         btn.disabled = false;
+        const form = document.getElementById('loginForm');
+        if (form) delete form.dataset.submitting;
       }
     });
     
@@ -935,7 +1049,7 @@
           window.OTPAuth.clearCountdown();
           window.OTPAuth.currentPhone = null;
         }
-        document.getElementById('otpVerificationSection').style.display = 'none';
+        document.getElementById('otp-container').style.display = 'none';
         document.getElementById('phoneLoginForm').style.display = 'block';
         document.getElementById('phone-number').value = '';
       }

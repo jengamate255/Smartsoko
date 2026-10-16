@@ -10,17 +10,12 @@ import com.smartsoko.driver.data.local.dao.DriverPrefsDao
 import com.smartsoko.driver.data.local.dao.LocationQueueDao
 import com.smartsoko.driver.data.local.dao.OrderDao
 import com.smartsoko.driver.data.remote.ApiService
-import com.smartsoko.driver.data.remote.WebSocketManager
 import com.smartsoko.driver.util.AppConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -32,36 +27,7 @@ object AppModule {
     @Singleton
     fun provideGson(): Gson = GsonBuilder().create()
 
-    @Provides
-    @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
-        val logging = HttpLoggingInterceptor().apply {
-            level = if (AppConfig.DEBUG_MODE) HttpLoggingInterceptor.Level.BODY
-            else HttpLoggingInterceptor.Level.NONE
-        }
-        return OkHttpClient.Builder()
-            .addInterceptor(logging)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideRetrofit(client: OkHttpClient): Retrofit {
-        return Retrofit.Builder()
-            .baseUrl(AppConfig.API_BASE_URL)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideApiService(retrofit: Retrofit): ApiService {
-        return retrofit.create(ApiService::class.java)
-    }
+    // OkHttpClient, Retrofit, FusedLocationProviderClient provided by com.fooddelivery.driver.di.AppModule
 
     @Provides
     @Singleton
@@ -80,7 +46,10 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideFusedLocationClient(@ApplicationContext context: Context): FusedLocationProviderClient {
-        return LocationServices.getFusedLocationProviderClient(context)
+    fun provideApiService(): ApiService {
+        // This will use the Retrofit from the main module
+        return com.fooddelivery.driver.di.AppModule.provideRetrofit(
+            com.fooddelivery.driver.di.AppModule.provideOkHttpClient()
+        ).create(ApiService::class.java)
     }
 }

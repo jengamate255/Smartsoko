@@ -364,7 +364,7 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
                 const SizedBox(width: 12),
                 Text(item.name),
                 const Spacer(),
-                Text('KSh ${(item.price * item.quantity).toStringAsFixed(0)}'),
+                Text('TSh ${(item.price * item.quantity).toStringAsFixed(0)}'),
               ],
             ),
           )),
@@ -373,7 +373,7 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Total to collect', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('KSh ${widget.order.total.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF064E3B))),
+              Text('TSh ${widget.order.total.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF064E3B))),
             ],
           ),
         ],

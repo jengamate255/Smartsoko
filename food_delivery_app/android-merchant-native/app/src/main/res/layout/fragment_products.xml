@@ -37,6 +37,78 @@
 
             </LinearLayout>
 
+            <!-- AI Product Entry Form -->
+            <LinearLayout
+                android:id="@+id/ai_product_entry"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="gone"
+                android:background="@color/secondary">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="AI Product Detection"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary" />
+
+                <ImageView
+                    android:id="@+id/iv_product_image"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_gravity="center_horizontal"
+                    android:src="@drawable/ic_products"
+                    android:contentDescription="@string/product_image" />
+
+                <EditText
+                    android:id="@+id/et_product_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/product_name"
+                    android:textColorHint="@color/text_secondary"
+                    android:layout_marginTop="8dp" />
+
+                <EditText
+                    android:id="@+id/et_product_price"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/product_price"
+                    android:inputType="numberDecimal"
+                    android:textColorHint="@color/text_secondary"
+                    android:layout_marginTop="8dp" />
+
+                <EditText
+                    android:id="@+id/et_product_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_height="120dp"
+                    android:hint="@string/product_description"
+                    android:gravity="top"
+                    android:textColorHint="@color/text_secondary"
+                    android:layout_marginTop="8dp" />
+
+                <Button
+                    android:id="@+id/btn_use_ai"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Extract Product Details"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/tv_ai_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textSize="12sp"
+                    android:textColor="@color/text_hint"
+                    android:layout_marginTop="4dp" />
+
+            </LinearLayout>
+
         </FrameLayout>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

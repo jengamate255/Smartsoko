@@ -50,8 +50,8 @@ interface SmartsokoApiService {
     suspend fun clearCart(): Response<ApiResponse<Unit>>
     
     // Order endpoints
-    @POST("orders")
-    suspend fun createOrder(@Body request: CreateOrderRequestDto): Response<ApiResponse<OrderDto>>
+    @POST("orders/mobile")
+    suspend fun createOrder(@Body request: CreateOrderRequestDto): Response<MobileOrderResponse>
     
     @GET("orders")
     suspend fun getOrders(
@@ -118,6 +118,17 @@ data class CreateOrderRequestDto(
     val addressId: String,
     val paymentMethodId: String? = null,
     val notes: String? = null
+)
+
+// POST /orders/mobile response — mirrors the web checkout flow:
+// data = created order, paymentUrl = PesaPal hosted checkout when the
+// selected method is "Pay Online (PesaPal)" (null for cash on delivery).
+data class MobileOrderResponse(
+    val success: Boolean,
+    val data: OrderDto? = null,
+    val paymentUrl: String? = null,
+    val message: String? = null,
+    val error: String? = null
 )
 
 data class CreateAddressRequestDto(

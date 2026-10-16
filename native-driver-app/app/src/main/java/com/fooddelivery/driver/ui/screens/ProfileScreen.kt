@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.fooddelivery.driver.R
 import com.fooddelivery.driver.ui.state.AppViewModel
 import com.fooddelivery.driver.ui.theme.SmartSokoDriverTheme
+import com.fooddelivery.driver.util.AppConfig
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 
@@ -168,7 +169,7 @@ fun ProfileScreen(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = "₦${"%.2f".format(earnings)}",
+                                    text = "${AppConfig.CURRENCY_SYMBOL}${"%.2f".format(earnings)}",
                                     style = MaterialTheme.typography.displaySmall,
                                     color = MaterialTheme.colorScheme.primary
                                 )

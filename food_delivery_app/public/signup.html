@@ -50,6 +50,7 @@
     @keyframes shake { 0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)} }
     .shake { animation: shake .4s ease-in-out; }
   </style>
+  <meta name="theme-color" content="#1B4332">
 </head>
 <body class="bg-[#F8FAF6] text-gray-900 flex items-start sm:items-center justify-center min-h-screen py-10 sm:py-4 px-4 relative overflow-y-auto">
 
@@ -331,7 +332,7 @@
           role: accountType,
           emailVerified: false,
           onboardingComplete: false,
-          onboardingVersion: window.SmartSokoOnboarding.ONBOARDING_VERSION
+          onboardingVersion: window.SmartSokoOnboarding ? window.SmartSokoOnboarding.ONBOARDING_VERSION : 1
         };
         const referredBy = localStorage.getItem('smartsoko_referrer');
         if (referredBy) userData.referredBy = referredBy;
@@ -523,7 +524,11 @@
             }
             if (d) {
               const role = d.role || 'customer';
-              window.SmartSokoOnboarding.redirectAfterAuth(d, role);
+              if (window.SmartSokoOnboarding && window.SmartSokoOnboarding.redirectAfterAuth) {
+                window.SmartSokoOnboarding.redirectAfterAuth(d, role);
+              } else {
+                window.location.href = role === 'merchant' ? '/merchant' : '/home';
+              }
             }
           })();
         }

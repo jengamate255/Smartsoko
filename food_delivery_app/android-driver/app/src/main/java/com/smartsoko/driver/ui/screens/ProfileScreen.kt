@@ -1,9 +1,12 @@
 package com.smartsoko.driver.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.Star
@@ -19,10 +22,13 @@ import com.smartsoko.driver.ui.components.*
 @Composable
 fun ProfileScreen(
     driver: Driver?,
+    isLoading: Boolean = false,
     onToggleOnline: (Boolean) -> Unit,
+    onUpdateProfile: (String, String, String, String, (Boolean) -> Unit) -> Unit,
     onSignOut: () -> Unit
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
 
     if (showLogoutDialog) {
         AlertDialog(
@@ -45,9 +51,22 @@ fun ProfileScreen(
         )
     }
 
+    if (showEditDialog && driver != null) {
+        EditProfileDialog(
+            driver = driver,
+            isLoading = isLoading,
+            onDismiss = { showEditDialog = false },
+            onSave = { name, phone, vehicleType, vehiclePlate, onDone ->
+                onUpdateProfile(name, phone, vehicleType, vehiclePlate, onDone)
+                showEditDialog = false
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
         Text(
@@ -118,27 +137,40 @@ fun ProfileScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         SmartCard {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Surface(
-                    modifier = Modifier.size(36.dp),
-                    shape = SmartRadiusSmall,
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Default.AccountCircle,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        modifier = Modifier.size(36.dp),
+                        shape = SmartRadiusSmall,
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Default.AccountCircle,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        "Driver Information",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    "Driver Information",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
+                IconButton(onClick = { showEditDialog = true }, enabled = driver != null) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Edit profile",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
 
             Spacer(Modifier.height(12.dp))
@@ -182,6 +214,79 @@ fun ProfileScreen(
             )
         }
     }
+}
+
+@Composable
+private fun EditProfileDialog(
+    driver: Driver,
+    isLoading: Boolean,
+    onDismiss: () -> Unit,
+    onSave: (String, String, String, String, (Boolean) -> Unit) -> Unit
+) {
+    var name by remember { mutableStateOf(driver.name) }
+    var phone by remember { mutableStateOf(driver.phone) }
+    var vehicleType by remember { mutableStateOf(driver.vehicleType) }
+    var vehiclePlate by remember { mutableStateOf(driver.vehiclePlate) }
+    var nameError by remember { mutableStateOf<String?>(null) }
+
+    AlertDialog(
+        onDismissRequest = { if (!isLoading) onDismiss() },
+        title = { Text("Edit Profile") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = {
+                        name = it
+                        nameError = if (it.isBlank()) "Name is required" else null
+                    },
+                    label = { Text("Name") },
+                    isError = nameError != null,
+                    supportingText = nameError?.let { { Text(it) } },
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = phone,
+                    onValueChange = { phone = it },
+                    label = { Text("Phone") },
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = vehicleType,
+                    onValueChange = { vehicleType = it },
+                    label = { Text("Vehicle Type (e.g. Motorcycle)") },
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = vehiclePlate,
+                    onValueChange = { vehiclePlate = it },
+                    label = { Text("Vehicle Plate") },
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (name.isBlank()) {
+                        nameError = "Name is required"
+                    } else {
+                        onSave(name.trim(), phone.trim(), vehicleType.trim(), vehiclePlate.trim()) { }
+                    }
+                },
+                enabled = !isLoading && name.isNotBlank()
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = !isLoading) { Text("Cancel") }
+        }
+    )
 }
 
 @Composable

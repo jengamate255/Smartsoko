@@ -2,6 +2,7 @@ package com.fooddelivery.driver.ui.state
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.location.Location as AndroidLocation
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,11 +11,12 @@ import com.fooddelivery.driver.data.AuthRepository
 import com.fooddelivery.driver.data.LocalDatabase
 import com.fooddelivery.driver.data.model.Order
 import com.fooddelivery.driver.data.model.User
-import com.smartsoko.driver.service.DriverLocationService
+import com.smartsoko.driver.domain.model.Location as DomainLocation
+import com.smartsoko.driver.service.LocationTrackingService
 import com.smartsoko.driver.service.LocationState
 import com.fooddelivery.driver.realtime.SocketManager
 import com.fooddelivery.driver.repository.OrderRepository
-import com.fooddelivery.driver.util.Resource
+import com.smartsoko.driver.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.collectLatest
@@ -74,36 +76,26 @@ class AppViewModel @Inject constructor(
             val currentOrders = _orders.value ?: emptyList()
             val existingIndex = currentOrders.indexOfFirst { it.id == update.orderId }
 
-            if (existingIndex >= 0) {
+            if (existingIndex >= 0 && update.status != "deleted") {
+                // Fast path: we already know this order - just refresh its status.
+                // The Realtime record carries the fresh status even for statuses that
+                // leave the "available" pool (accepted, picked_up, ...).
                 val updatedOrders = currentOrders.toMutableList()
                 updatedOrders[existingIndex] = currentOrders[existingIndex].copy(
-                    status = update.status
+                    status = update.status,
+                    updatedAt = update.data.optString("updated_at").ifEmpty {
+                        currentOrders[existingIndex].updatedAt
+                    }
                 )
                 _orders.value = updatedOrders
+            } else if (update.status == "deleted") {
+                // The order row was deleted upstream - drop the card from the list.
+                _orders.value = currentOrders.filterNot { it.id == update.orderId }
             } else {
-                val restaurantLocation = update.data.optJSONObject("restaurantLocation")
-                val customerLocation = update.data.optJSONObject("customerLocation")
-                val newOrder = Order(
-                    id = update.orderId,
-                    restaurantName = update.data.optString("restaurantName", "Unknown"),
-                    restaurantAddress = update.data.optString("restaurantAddress", ""),
-                    restaurantLocation = com.fooddelivery.driver.data.model.LocationData(
-                        restaurantLocation?.optDouble("lat", 0.0) ?: update.data.optDouble("restaurantLat", 0.0),
-                        restaurantLocation?.optDouble("lng", 0.0) ?: update.data.optDouble("restaurantLng", 0.0)
-                    ),
-                    customerName = update.data.optString("customerName", ""),
-                    customerAddress = update.data.optString("customerAddress", ""),
-                    customerLocation = com.fooddelivery.driver.data.model.LocationData(
-                        customerLocation?.optDouble("lat", 0.0) ?: update.data.optDouble("customerLat", 0.0),
-                        customerLocation?.optDouble("lng", 0.0) ?: update.data.optDouble("customerLng", 0.0)
-                    ),
-                    items = parseItemsFromJson(update.data.optJSONArray("items")),
-                    totalAmount = update.data.optDouble("totalAmount", 0.0),
-                    status = update.status,
-                    createdAt = update.data.optString("createdAt", ""),
-                    updatedAt = update.data.optString("updatedAt", "")
-                )
-                _orders.value = currentOrders + newOrder
+                // Unknown order - it just entered the system. Refetch the available
+                // list from the API so we get the enriched payload (restaurant name,
+                // joined location, items, totals) instead of the raw DB row.
+                loadAvailableOrders()
             }
         }
     }
@@ -138,9 +130,17 @@ class AppViewModel @Inject constructor(
         viewModelScope.launch {
             locationState.location.collectLatest { location ->
                 if (location != null) {
-                    _driverLocation.value = location
+                    val androidLoc = AndroidLocation("driver").apply {
+                        latitude = location.lat
+                        longitude = location.lng
+                        if (location.bearing != 0f) bearing = location.bearing
+                        if (location.speed != 0f) speed = location.speed
+                        if (location.accuracy != 0f) accuracy = location.accuracy
+                        time = location.timestamp
+                    }
+                    _driverLocation.value = androidLoc
                     if (socketManager.isConnected()) {
-                        socketManager.emitLocationUpdate(location.latitude, location.longitude)
+                        socketManager.emitLocationUpdate(location.lat, location.lng)
                     }
                 }
             }
@@ -176,7 +176,7 @@ class AppViewModel @Inject constructor(
 
     private fun startDriverLocationService() {
         try {
-            DriverLocationService.start(context)
+            LocationTrackingService.start(context)
         } catch (e: Exception) {
             _error.value = "Failed to start location tracking: ${e.message}"
         }
@@ -261,23 +261,6 @@ class AppViewModel @Inject constructor(
         }
     }
 
-    private fun parseItemsFromJson(itemsArray: org.json.JSONArray?): List<com.fooddelivery.driver.data.model.OrderItem> {
-        if (itemsArray == null) return emptyList()
-        val items = mutableListOf<com.fooddelivery.driver.data.model.OrderItem>()
-        for (i in 0 until itemsArray.length()) {
-            val item = itemsArray.optJSONObject(i) ?: continue
-            items.add(
-                com.fooddelivery.driver.data.model.OrderItem(
-                    name = item.optString("name", ""),
-                    quantity = item.optInt("quantity", 1),
-                    price = item.optDouble("price", 0.0),
-                    notes = item.optString("notes").ifEmpty { item.optString("specialInstructions") }
-                )
-            )
-        }
-        return items
-    }
-
     fun signIn(email: String, password: String) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -347,7 +330,7 @@ class AppViewModel @Inject constructor(
         sharedPreferences.edit().clear().apply()
 
         // Stop location tracking and disconnect socket
-        DriverLocationService.stop(context)
+        LocationTrackingService.stop(context)
         socketManager.disconnect()
         socketInitialized = false
     }
@@ -360,7 +343,7 @@ class AppViewModel @Inject constructor(
                 val response = orderRepository.acceptOrder(authToken, orderId)
 
                 when (response) {
-                    is com.fooddelivery.driver.util.Resource.Success -> {
+                    is Resource.Success -> {
                         val orderResponse = response.data
                         if (orderResponse?.success == true) {
                             val serverStatus = orderResponse.order?.status ?: "assigned"
@@ -387,7 +370,7 @@ class AppViewModel @Inject constructor(
                             _error.value = orderResponse?.message ?: "Failed to accept order"
                         }
                     }
-                    is com.fooddelivery.driver.util.Resource.Error -> {
+                    is Resource.Error -> {
                         _error.value = response.message ?: "Network error"
                     }
                     else -> {}
@@ -572,7 +555,7 @@ class AppViewModel @Inject constructor(
                 if (isOnline) {
                     startDriverLocationService()
                 } else {
-                    DriverLocationService.stop(context)
+                    LocationTrackingService.stop(context)
                 }
 
                 // Emit status via WebSocket

@@ -32,7 +32,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 
-private const val GOOGLE_WEB_CLIENT_ID = "727819507148-mercep.smartsoko.driver.firebase.googleapis.com"
+private const val GOOGLE_WEB_CLIENT_ID = "727819507148-o6npagrmj45q01de4t89tptj2kibc83t.apps.googleusercontent.com"
 
 @Composable
 fun LoginScreen(
@@ -50,6 +50,7 @@ fun LoginScreen(
     var passwordError by remember { mutableStateOf<String?>(null) }
     var attemptedSubmit by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
+    var googleError by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
 
@@ -60,7 +61,9 @@ fun LoginScreen(
         try {
             val account = task.getResult(ApiException::class.java)
             account?.idToken?.let { onGoogleSignIn(it) }
-        } catch (e: ApiException) { }
+        } catch (e: ApiException) {
+            googleError = "Google sign-in failed. Please try again."
+        }
     }
 
     fun validate(): Boolean {
@@ -131,6 +134,27 @@ fun LoginScreen(
                 LaunchedEffect(error) {
                     kotlinx.coroutines.delay(3000)
                     onClearError()
+                }
+            }
+
+            if (googleError != null) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    shape = SmartRadiusSmall,
+                    color = MaterialTheme.colorScheme.errorContainer
+                ) {
+                    Text(
+                        text = googleError!!,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(14.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+                LaunchedEffect(googleError) {
+                    kotlinx.coroutines.delay(4000)
+                    googleError = null
                 }
             }
 

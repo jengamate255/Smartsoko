@@ -7,8 +7,6 @@ import '../utils/logger.dart';
 import 'supabase_service.dart';
 import '../utils/rate_limiter.dart';
 import 'dart:math';
-import 'supabase_service.dart';
-import '../utils/rate_limiter.dart';
 
 class AuthService {
   final firebase_auth.FirebaseAuth _auth = firebase_auth.FirebaseAuth.instance;
@@ -189,7 +187,7 @@ class AuthService {
   Future<models.User?> getUserByPhone(String phone) async {
     final normalizedPhone = normalizePhone(phone);
     try {
-      final doc = await _firestore.collection(AppConfig.usersCollection)
+      final doc = await firestore.collection(AppConfig.usersCollection)
           .where('phone', isEqualTo: normalizedPhone)
           .limit(1)
           .get();
@@ -213,7 +211,7 @@ class AuthService {
       createdAt: DateTime.now(),
     );
 
-    final docRef = await _firestore.collection(AppConfig.usersCollection).add(newUser.toFirestore());
+    final docRef = await firestore.collection(AppConfig.usersCollection).add(newUser.toFirestore());
 
     final createdUser = models.User(
       id: docRef.id,
@@ -224,7 +222,7 @@ class AuthService {
 
     // Also create in Supabase for sync
     try {
-      await _supabaseService.client.from('profiles').insert({
+      await supabaseService.client.from('profiles').insert({
         'id': createdUser.id,
         'phone': normalizedPhone,
         'role': role.name,

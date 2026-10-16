@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>My Orders · SmartSoko</title><link rel="icon" href="/favicon.svg">
+  <style>
+    :root{color-scheme:light;--green:#064e3b;--paper:#f7f9f6;--line:#dce5dc}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:#18392c;font:16px/1.5 "Montserrat",sans-serif}
+    header{background:white;border-bottom:1px solid var(--line)}nav{max-width:960px;margin:auto;padding:20px 24px;display:flex;justify-content:space-between;gap:20px;align-items:center}
+    a{color:var(--green);text-underline-offset:4px}nav a:first-child{font-size:20px;font-weight:800;text-decoration:none}main{max-width:820px;margin:56px auto;padding:0 24px 64px}
+    .eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#587061}h1{font:600 clamp(36px,7vw,52px)/1.1 Georgia,serif;margin:10px 0 14px}p{color:#587061}.intro{margin-bottom:36px}
+    .state,article{background:white;border:1px solid var(--line);border-radius:20px;padding:28px;margin:0 0 16px}.state{text-align:center;padding:48px 24px}.button,button{display:inline-block;background:var(--green);color:white;padding:12px 22px;border:0;border-radius:999px;font:inherit;text-decoration:none;cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid #d3a044;outline-offset:4px}
+    .row{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}h2{font-size:18px;margin:0}.status{font-size:13px;background:#e9f3eb;border-radius:999px;padding:6px 12px;text-transform:capitalize}.total{font-size:20px;font-weight:700}time{font-size:14px;color:#587061}ul{padding-left:20px;margin:22px 0;color:#405a49}article footer{border-top:1px solid var(--line);padding-top:18px}article a{font-size:14px;font-weight:700}.small{font-size:13px}@media(max-width:500px){main{margin-top:32px}article{padding:20px}nav{padding:16px 20px}}
+  </style>
+</head>
+<body>
+  <header><nav aria-label="Main"><a href="/home">SmartSoko</a><a href="/discovery">Keep shopping</a><a href="/cart">Cart</a></nav></header>
+  <main><div class="intro"><div class="eyebrow">Your marketplace</div><h1>My orders</h1><p>Follow your deliveries and revisit your recent purchases.</p></div>
+    <section id="orderHistory" aria-label="Order history" aria-live="polite"><div class="state"><h2>Your orders, in one place.</h2><p>Sign in to see your purchases and delivery updates.</p><a class="button" href="/login?redirect=%2Fcustomer-orders">Sign in</a></div></section>
+  </main>
+  <script>
+    const historyContainer = document.getElementById('orderHistory');
+    function orderNode(tag, text, className) { const node = document.createElement(tag); node.textContent = text; if (className) node.className = className; return node; }
+    async function loadCustomerOrders(user) {
+      if (!user) return;
+      historyContainer.replaceChildren(orderNode('p', 'Loading your orders…'));
+      try {
+        const token = await user.getIdToken();
+        const response = await fetch('/api/orders', { headers: { Authorization: 'Bearer ' + token }, cache: 'no-store', signal: AbortSignal.timeout(15000) });
+        const data = await response.json();
+        if (!response.ok || !data.success || !Array.isArray(data.orders)) throw new Error(data.error || 'Unable to load your orders');
+        historyContainer.replaceChildren();
+        if (!data.orders.length) {
+          const state = orderNode('div', '', 'state'); state.append(orderNode('h2', 'Your first order starts here.'), orderNode('p', 'Explore local shops and find something fresh.'));
+          const link = orderNode('a', 'Explore the marketplace', 'button'); link.href = '/discovery'; state.append(link); historyContainer.append(state); return;
+        }
+        const orders = data.orders.sort((a,b) => Date.parse(b.createdAt || b.created_at || 0) - Date.parse(a.createdAt || a.created_at || 0));
+        for (const order of orders) {
+          const card = document.createElement('article'), top = orderNode('div', '', 'row');
+          top.append(orderNode('h2', 'Order #' + String(order.id).slice(-8)), orderNode('span', String(order.status || 'pending').replaceAll('_', ' '), 'status'));
+          const date = new Date(order.createdAt || order.created_at); const time = orderNode('time', isNaN(date) ? 'Order received' : date.toLocaleDateString(undefined, {day:'numeric',month:'long',year:'numeric'}));
+          const items = document.createElement('ul'); for (const item of order.items || []) items.append(orderNode('li', (item.quantity || 1) + ' × ' + (item.name || 'Product')));
+          const footer = orderNode('footer', '', 'row');footer.append(orderNode('span', 'TSh ' + Number(order.total || 0).toLocaleString(), 'total'));
+          const tracking = orderNode('a', 'View delivery updates');tracking.href = '/track-order?orderId=' + encodeURIComponent(order.id);footer.append(tracking);
+          card.append(top, time, items, footer);historyContainer.append(card);
+        }
+      } catch (error) {
+        const state = orderNode('div', '', 'state');state.append(orderNode('h2', 'We could not load your orders.'), orderNode('p', error.message));const retry = orderNode('button', 'Try again');retry.type='button';retry.onclick=()=>loadCustomerOrders(user);state.append(retry);historyContainer.replaceChildren(state);
+      }
+    }
+  </script>
+  <script type="module">
+    import { auth } from '/config/firebase-config.js?v=5';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+    onAuthStateChanged(auth, user => { if (user) loadCustomerOrders(user); });
+  </script>
+</body>
+</html>

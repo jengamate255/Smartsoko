@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="light" lang="en">
 <head>
   <meta charset="utf-8"/>
@@ -10,10 +10,11 @@
   <link rel="preload" href="dist/tailwind.css" as="style">
   <link rel="stylesheet" href="dist/tailwind.css">
   <link rel="stylesheet" href="design-system.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <!-- Mapbox GL JS -->
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet"/>
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css" rel="stylesheet"/>
   <script type="module" src="config/firebase-config.js?v=5"></script>
   <script type="module" src="config/cross-platform-service.js?v=4"></script>
   <script src="config/admin-data.js" defer></script>
@@ -175,7 +176,8 @@
                 <select onchange="changeDateRange('orders', this.value)" class="text-xs border border-gray-200 rounded px-2 py-1"><option value="all">All Time</option><option value="today">Today</option><option value="week">This Week</option></select>
               </div>
               <p class="text-sm text-gray-500">Total Orders</p>
-              <p class="text-3xl font-bold text-gray-900" id="totalOrders"><span class="skeleton skeleton-heading" style="height:32px;width:80px"></span></p>
+              <p class="text-3xl font-bold text-gray-900" id="totalCount"><span class="skeleton skeleton-heading" style="height:32px;width:80px"></span></p>
+              <div class="mt-2 flex gap-3 text-xs text-gray-500"><span class="px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full font-semibold">Pending <span id="pendingCount">0</span></span><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full font-semibold">Confirmed <span id="confirmedCount">0</span></span></div>
             </div>
             <div class="stat-card p-6 border-l-4 border-green-500">
               <div class="flex items-center justify-between mb-4">
@@ -184,6 +186,7 @@
               </div>
               <p class="text-sm text-gray-500">Total Revenue</p>
               <p class="text-3xl font-bold text-gray-900" id="totalRevenue"><span class="skeleton skeleton-heading" style="height:32px;width:80px"></span></p>
+              <div class="mt-2 flex gap-3 text-xs text-gray-500"><span class="px-2 py-0.5 bg-orange-50 text-orange-700 rounded-full font-semibold">Preparing <span id="preparingCount">0</span></span><span class="px-2 py-0.5 bg-green-50 text-green-700 rounded-full font-semibold">Delivered <span id="deliveredCount">0</span></span></div>
             </div>
             <div class="stat-card p-6 border-l-4 border-blue-500">
               <div class="flex items-center justify-between mb-4">
@@ -251,7 +254,7 @@
                   <button onclick="exportData('all')" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left"><span class="material-symbols-outlined text-green-700">download</span><span class="text-sm text-gray-700">Export All Data</span></button>
                 </div>
               </div>
-              <div class="stat-card p-6 bg-green-700 text-white shadow-lg shadow-green-700/20">
+              <div class="stat-card p-6 bg-green-700 text-white shadow-lg shadow-green-700/20" style="background:#15803d">
                 <h2 class="font-bold mb-2">Platform Status</h2>
                 <div class="flex items-center gap-2 mb-4"><span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span><span class="text-sm">All Systems Operational</span></div>
                 <p class="text-sm opacity-90">Firebase: Connected</p>
@@ -260,65 +263,7 @@
           </div>
         </section>
 
-        <!-- Orders Section -->
-        <section id="orders-section" class="tab-content hidden">
-          <div class="stat-card overflow-hidden">
-            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h2 class="font-bold text-gray-900">All Orders</h2>
-              <div class="flex gap-3 flex-wrap">
-                <select id="orderStatusFilter" class="border border-gray-200 rounded-lg px-4 py-2" onchange="filterOrders()">
-                  <option value="">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="preparing">Preparing</option>
-                  <option value="ready_for_delivery">Ready</option>
-                  <option value="dispatched">Dispatched</option>
-                  <option value="delivered">Delivered</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-                <button onclick="exportData('orders')" class="px-4 py-2 gradient-bg text-white rounded-lg flex items-center gap-2 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-sm">download</span> Export CSV</button>
-              </div>
-            </div>
-            <table class="w-full">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Order ID</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Customer</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Seller</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Items</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Amount</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="allOrdersTable" class="divide-y divide-gray-100"><tr><td colspan="8" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- Sellers Section -->
-        <section id="sellers-section" class="tab-content hidden">
-          <div class="stat-card overflow-hidden">
-            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h2 class="font-bold text-gray-900">All Sellers</h2>
-              <button onclick="exportData('sellers')" class="px-4 py-2 gradient-bg text-white rounded-lg flex items-center gap-2 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-sm">download</span> Export CSV</button>
-            </div>
-            <table class="w-full">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Seller</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Category</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Location</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Rating</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="sellersTable" class="divide-y divide-gray-100"><tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody>
-            </table>
-          </div>
-        </section>
+        <!-- (Legacy duplicate orders-section/sellers-section removed — content-orders/content-sellers above are canonical) -->
 
         <!-- Users Section -->
         <section id="users-section" class="tab-content hidden">
@@ -407,7 +352,7 @@
           </div>
         </section>
 
-        <!-- Orders Tab -->
+        <!-- Orders Tab (single source of truth — the old duplicate content-* sections were removed) -->
         <section id="content-orders" class="tab-content hidden">
           <div class="stat-card overflow-hidden">
             <div class="p-6 border-b border-gray-100 flex items-center justify-between">
@@ -441,6 +386,32 @@
               </thead>
               <tbody id="allOrdersTable" class="divide-y divide-gray-100"><tr><td colspan="8" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody>
             </table>
+            <div class="p-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3 text-sm">
+              <div class="flex items-center gap-2">
+                <input type="search" id="searchInput" placeholder="Search orders..." oninput="filterOrders()" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm w-44 focus:outline-none focus:ring-2 focus:ring-green-700/20">
+                <select id="statusFilter" onchange="filterOrders()" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm">
+                  <option value="">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="preparing">Preparing</option>
+                  <option value="ready_for_delivery">Ready</option>
+                  <option value="dispatched">Dispatched</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                <select id="dateFilter" onchange="filterOrders()" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm">
+                  <option value="all">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-gray-500"><span id="showingStart">0</span>–<span id="showingEnd">0</span> of <span id="showingTotal">0</span></span>
+                <button id="prevBtn" onclick="prevPage()" disabled class="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40">Prev</button>
+                <button id="nextBtn" onclick="nextPage()" disabled class="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40">Next</button>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -494,37 +465,10 @@
             <div class="stat-card p-6"><h3 class="font-bold mb-4 text-gray-900">Server Logs</h3><div class="flex gap-2 mb-3"><button onclick="loadServerLogs('all')" class="px-3 py-1 bg-gray-100 rounded text-xs hover:bg-gray-200">All</button><button onclick="loadServerLogs('error')" class="px-3 py-1 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100">Errors</button><button onclick="loadServerLogs('warn')" class="px-3 py-1 bg-amber-50 text-amber-600 rounded text-xs hover:bg-amber-100">Warnings</button><button onclick="loadServerLogs('info')" class="px-3 py-1 bg-blue-50 text-blue-600 rounded text-xs hover:bg-blue-100">Info</button></div><div id="serverLogsList" class="h-48 overflow-y-auto font-mono text-xs space-y-1"><p class="text-gray-400">Loading logs...</p></div></div>
           </div>
 
-          <div class="stat-card p-6"><div class="flex justify-between items-center mb-4"><h3 class="font-bold text-gray-900">API Endpoints Health</h3><button onclick="loadServerStatus()" class="px-3 py-1 gradient-bg text-white rounded text-xs hover:opacity-90">Refresh</button></div><div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="apiEndpoints"><div class="p-3 bg-gray-50 rounded-lg text-center"><p class="text-xs text-gray-500">/api/sellers</p><p class="text-green-600 font-bold">â— OK</p></div><div class="p-3 bg-gray-50 rounded-lg text-center"><p class="text-xs text-gray-500">/api/orders</p><p class="text-green-600 font-bold">â— OK</p></div><div class="p-3 bg-gray-50 rounded-lg text-center"><p class="text-xs text-gray-500">/api/admin/*</p><p class="text-green-600 font-bold">â— OK</p></div><div class="p-3 bg-gray-50 rounded-lg text-center"><p class="text-xs text-gray-500">/api/health</p><p class="text-green-600 font-bold">â— OK</p></div></div></div>
+          <div class="stat-card p-6"><div class="flex justify-between items-center mb-4"><h3 class="font-bold text-gray-900">API Endpoints Health</h3><button onclick="loadServerStatus()" class="px-3 py-1 gradient-bg text-white rounded text-xs hover:opacity-90">Refresh</button></div><div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="apiEndpoints"><div class="p-3 bg-gray-50 rounded-lg text-center"><p class="text-xs text-gray-500">/api/sellers</p><p class="text-green-600 font-bold">●  OK</p></div><div class="p-3 bg-gray-50 rounded-lg text-center"><p class="text-xs text-gray-500">/api/orders</p><p class="text-green-600 font-bold">●  OK</p></div><div class="p-3 bg-gray-50 rounded-lg text-center"><p class="text-xs text-gray-500">/api/admin/*</p><p class="text-green-600 font-bold">●  OK</p></div><div class="p-3 bg-gray-50 rounded-lg text-center"><p class="text-xs text-gray-500">/api/health</p><p class="text-green-600 font-bold">●  OK</p></div></div></div>
         </section>
 
-        <!-- Analytics Tab -->
-        <section id="content-analytics" class="tab-content hidden">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div class="stat-card p-6"><h3 class="font-bold mb-4 text-gray-900">Daily Orders (Last 7 Days)</h3><canvas id="dailyOrdersChart" height="200"></canvas></div>
-            <div class="stat-card p-6"><h3 class="font-bold mb-4 text-gray-900">Revenue by Category</h3><canvas id="categoryRevenueChart" height="200"></canvas></div>
-          </div>
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="stat-card p-6"><h3 class="font-bold mb-4 text-gray-900">Top Sellers</h3><div id="topSellersList" class="space-y-3"></div></div>
-            <div class="stat-card p-6"><h3 class="font-bold mb-4 text-gray-900">Top Products</h3><div id="topProductsList" class="space-y-3"></div></div>
-            <div class="stat-card p-6"><h3 class="font-bold mb-4 text-gray-900">User Growth</h3><canvas id="userGrowthChart" height="150"></canvas></div>
-          </div>
-        </section>
-
-        <!-- Server Tab -->
-        <section id="content-server" class="tab-content hidden">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <div class="stat-card p-6 border-l-4 border-green-500"><p class="text-xs text-gray-500 uppercase">Server Status</p><p class="text-2xl font-bold text-green-600" id="serverHealth">Loading...</p></div>
-            <div class="stat-card p-6 border-l-4 border-blue-500"><p class="text-xs text-gray-500 uppercase">Uptime</p><p class="text-2xl font-bold text-gray-900" id="serverUptime">-</p></div>
-            <div class="stat-card p-6 border-l-4 border-purple-500"><p class="text-xs text-gray-500 uppercase">Memory Usage</p><p class="text-2xl font-bold text-gray-900" id="serverMemory">-</p></div>
-            <div class="stat-card p-6 border-l-4 border-amber-500"><p class="text-xs text-gray-500 uppercase">API Response</p><p class="text-2xl font-bold text-gray-900" id="serverApiLatency">-</p></div>
-          </div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div class="stat-card p-6"><h3 class="font-bold mb-4 text-gray-900">Database Connections</h3><div class="space-y-3"><div class="flex justify-between items-center py-2 border-b"><span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">storage</span> Firebase</span><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium" id="dbFirebase">Checking...</span></div><div class="flex justify-between items-center py-2 border-b"><span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">cloud</span> Supabase</span><span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium" id="dbSupabase">Checking...</span></div><div class="flex justify-between items-center py-2"><span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">account_tree</span> Active Connections</span><span class="font-mono text-sm" id="activeConnections">0</span></div></div></div>
-            <div class="stat-card p-6"><h3 class="font-bold mb-4 text-gray-900">Server Logs</h3><div class="flex gap-2 mb-3"><button onclick="loadServerLogs('all')" class="px-3 py-1 bg-gray-100 rounded text-xs hover:bg-gray-200">All</button><button onclick="loadServerLogs('error')" class="px-3 py-1 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100">Errors</button><button onclick="loadServerLogs('warn')" class="px-3 py-1 bg-amber-50 text-amber-600 rounded text-xs hover:bg-amber-100">Warnings</button><button onclick="loadServerLogs('info')" class="px-3 py-1 bg-blue-50 text-blue-600 rounded text-xs hover:bg-blue-100">Info</button></div><div id="serverLogsList" class="h-48 overflow-y-auto font-mono text-xs space-y-1"><p class="text-gray-400">Loading logs...</p></div></div></div>
-
-          <div class="stat-card p-6"><div class="flex justify-between items-center mb-4"><h3 class="font-bold text-gray-900">API Endpoints Health</h3><button onclick="loadServerStatus()" class="px-3 py-1 gradient-bg text-white rounded text-xs hover:opacity-90">Refresh</button></div><div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="apiEndpoints"><div class="p-3 bg-gray-50 rounded-lg text-center"><p class="text-xs text-gray-500">/api/sellers</p><p class="text-green-600 font-bold">â— OK</p></div><div class="p-3 bg-gray-50 rounded-lg text-center"><p class="text-xs text-gray-500">/api/orders</p><p class="text-green-600 font-bold">â— OK</p></div><div class="p-3 bg-gray-50 rounded-lg text-center"><p class="text-xs text-gray-500">/api/admin/*</p><p class="text-green-600 font-bold">â— OK</p></div><div class="p-3 bg-gray-50 rounded-lg text-center"><p class="text-xs text-gray-500">/api/health</p><p class="text-green-600 font-bold">â— OK</p></div></div></div>
-        </section>
+        <!-- (Duplicate analytics/server tabs removed — see content-analytics / content-server above) -->
 
         <!-- Audit Tab -->
         <section id="content-audit" class="tab-content hidden">
@@ -546,6 +490,57 @@
       <a href="/admin" class="flex flex-col items-center justify-center bg-green-100 text-green-700 rounded-full px-3 py-1"><span class="material-symbols-outlined filled-icon">admin_panel_settings</span><span class="text-[10px] font-semibold">Dashboard</span></a>
     </nav>
 
+    <!-- Order Details Modal -->
+    <div id="orderModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 my-8">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="font-bold text-xl text-gray-900">Order <span id="modalOrderId">#</span></h3>
+          <button onclick="closeOrderModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"><span class="material-symbols-outlined text-gray-500">close</span></button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div class="p-4 bg-gray-50 rounded-xl">
+            <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Customer</p>
+            <p id="modalCustomerName" class="font-semibold text-gray-900">N/A</p>
+            <p id="modalCustomerPhone" class="text-sm text-gray-500"></p>
+            <p id="modalCustomerEmail" class="text-sm text-gray-400"></p>
+          </div>
+          <div class="p-4 bg-gray-50 rounded-xl">
+            <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Seller</p>
+            <p id="modalSellerName" class="font-semibold text-gray-900">N/A</p>
+            <p id="modalSellerPhone" class="text-sm text-gray-500"></p>
+          </div>
+        </div>
+        <div class="mb-6">
+          <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Delivery Address</p>
+          <p id="modalDeliveryAddress" class="text-sm text-gray-700">N/A</p>
+        </div>
+        <div class="mb-6">
+          <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Items</p>
+          <div id="modalItems" class="space-y-2"></div>
+          <div class="mt-3 pt-3 border-t flex justify-between text-sm"><span class="text-gray-500">Subtotal</span><span id="modalSubtotal" class="font-semibold"></span></div>
+          <div class="flex justify-between text-sm"><span class="text-gray-500">Delivery Fee</span><span id="modalDeliveryFee" class="font-semibold"></span></div>
+          <div class="flex justify-between text-base mt-1"><span class="font-semibold">Total</span><span id="modalTotal" class="font-bold"></span></div>
+        </div>
+        <div class="mb-6">
+          <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Timeline</p>
+          <div id="modalTimeline" class="space-y-2 text-sm"></div>
+        </div>
+        <div class="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t">
+          <select id="modalStatusSelect" class="flex-1 w-full px-4 py-2 border border-gray-200 rounded-lg text-sm">
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="preparing">Preparing</option>
+            <option value="ready_for_delivery">Ready for Delivery</option>
+            <option value="dispatched">Dispatched</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <button onclick="updateOrderStatus()" class="flex-1 w-full py-2.5 gradient-bg text-white rounded-lg font-medium text-sm hover:opacity-90 transition-all">Update Status</button>
+          <button onclick="printOrder()" class="px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Print</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Drawer Overlay (Mobile) -->
     <div class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity duration-300" id="drawer-overlay"></div>
   </div>
@@ -554,31 +549,28 @@
     let currentTab = 'dashboard';
     let ridersData = [];
     let allOrders = [];
+    let allSellers = [];
+    let allUsers = [];
     let filteredOrders = [];
+    let filteredUsers = [];
+    let filteredSellers = [];
     let currentPage = 1;
     let ordersPerPage = 20;
+    let currentOrderId = null;
+    let selectedRole = null;
+    let roleEditUserId = null;
+    let deleteUserId = null;
+    let dashboardRange = { orders: 'all', revenue: 'all' };
 
     const statusColors = {
       'pending': 'status-pending',
-      'confirmed': 'status-confirmed',
-      'preparing': 'status-preparing',
-      'ready_for_delivery': 'status-ready',
-      'dispatched': 'status-dispatched',
+      'confirmed': 'status-assigned',
+      'preparing': 'status-in_progress',
+      'ready_for_delivery': 'status-delivery',
+      'dispatched': 'status-assigned',
       'delivered': 'status-delivered',
       'cancelled': 'status-cancelled'
     };
-
-    function formatDate(timestamp) {
-      if (!timestamp) return 'N/A';
-      try {
-        if (timestamp.toDate && typeof timestamp.toDate === 'function') return timestamp.toDate().toLocaleDateString();
-        if (timestamp.seconds) return new Date(timestamp.seconds * 1000).toLocaleDateString();
-        if (typeof timestamp === 'string') return new Date(timestamp).toLocaleDateString();
-        if (timestamp instanceof Date) return timestamp.toLocaleDateString();
-        if (typeof timestamp === 'number') return new Date(timestamp).toLocaleDateString();
-        return 'N/A';
-      } catch (error) { console.warn('Error formatting date:', error); return 'N/A'; }
-    }
 
     /** Convert a Firestore Timestamp, {seconds}, ISO string, or number to a JS Date. */
     function safeToDate(v) {
@@ -592,77 +584,149 @@
       return null;
     }
 
-    function switchTab(tab) {
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-      const contentDiv = document.getElementById('content-' + tab);
-      if (contentDiv) contentDiv.classList.remove('hidden');
-      
-      document.querySelectorAll('[id^="tab-"]').forEach(t => { 
-        if (t) { t.classList.remove('tab-active', 'text-green-700'); t.classList.add('text-gray-600'); }
+    function fmtTSh(n) { return 'TSh ' + (Number(n) || 0).toLocaleString(); }
+    function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    function showToast(message, type = 'success') {
+      if (typeof SmartNav !== 'undefined' && SmartNav.showToast) { SmartNav.showToast(message, type); return; }
+      const colors = { success: '#16a34a', error: '#dc2626', warning: '#d97706', info: '#2563eb' };
+      const el = document.createElement('div');
+      el.style.cssText = `position:fixed;top:16px;right:16px;z-index:99999;background:${colors[type] || colors.success};color:white;padding:12px 20px;border-radius:14px;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,0.12)`;
+      el.textContent = message;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
+
+    // ─── Section navigation (sidebar) ───────────────────────────────
+    function showSection(name) {
+      currentTab = name;
+      document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
+      const map = { dashboard: 'dashboard-section', orders: 'content-orders', sellers: 'content-sellers', users: 'users-section', analytics: 'content-analytics', server: 'content-server', audit: 'content-audit', settings: 'content-settings' };
+      const target = document.getElementById(map[name] || (name + '-section'));
+      if (target) target.classList.remove('hidden');
+      else if (name === 'orders' || name === 'sellers') { showSection('dashboard'); return; }
+
+      document.querySelectorAll('.sidebar-link').forEach(a => a.classList.remove('active', 'bg-green-50'));
+      document.querySelectorAll('.sidebar-link').forEach(a => {
+        if (a.dataset.section === name) a.classList.add('active', 'bg-green-50');
       });
-      const activeTab = document.getElementById('tab-' + tab);
-      if (activeTab) { activeTab.classList.add('tab-active', 'text-green-700'); activeTab.classList.remove('text-gray-600'); }
-      
-      if (tab === 'verification') loadVerification();
-      if (tab === 'finance') loadFinance();
-      if (tab === 'support') loadSupport();
-      if (tab === 'analytics') { setTimeout(() => { if (typeof loadAnalytics === 'function') loadAnalytics(); }, 100); }
-      if (tab === 'server') loadServerStatus();
-      if (tab === 'logistics') initLogisticsMap();
+
+      if (name === 'sellers') loadSellers();
+      if (name === 'users') loadUsers();
+      if (name === 'analytics') loadAnalytics();
+      if (name === 'server') loadServerStatus();
+      if (name === 'audit') loadAuditLogs();
+    }
+
+    function showHelpCenter() {
+      showToast('Fleet Manager help — contact support@smartsoko.co.tz', 'info');
+    }
+
+    function logout() { if (typeof window.logout === 'function' && window.logout !== logout) window.logout(); else window.location.href = '/login'; }
+
+    // ─── Data loading ───────────────────────────────────────────────
+    function apiGet(path) {
+      return fetch(path, { headers: { 'Content-Type': 'application/json' } })
+        .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)));
     }
 
     async function loadOrders() {
       const tbody = document.getElementById('allOrdersTable');
-      tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-12"><div class="flex flex-col gap-4"><div class="skeleton-line"><div class="skeleton skeleton-thumbnail"></div><div style="flex:1"><div class="skeleton skeleton-text" style="width:40%"></div><div class="skeleton skeleton-text-sm"></div></div></div><div class="skeleton-line"><div class="skeleton skeleton-thumbnail"></div><div style="flex:1"><div class="skeleton skeleton-text" style="width:50%"></div><div class="skeleton skeleton-text-sm"></div></div></div><div class="skeleton-line"><div class="skeleton skeleton-thumbnail"></div><div style="flex:1"><div class="skeleton skeleton-text" style="width:35%"></div><div class="skeleton skeleton-text-sm"></div></div></div></div></td></tr>';
       try {
-        const data = await apiHelpers.get(API_ROUTES.ADMIN.ORDERS);
-        allOrders = data.orders || [];
+        const data = await apiGet('/api/admin/orders?limit=500');
+        allOrders = (data.orders || []).map(o => ({ ...o, id: o.id || (o.orderId || '') }));
         filteredOrders = [...allOrders];
         updateStats();
         renderOrders();
+        loadRecentOrders();
       } catch (error) {
         console.error('Error loading orders:', error);
-        tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-12 text-center text-red-500">Error loading orders</td></tr>';
+        if (error.message === 'HTTP 401' || error.message === 'HTTP 403') {
+          if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-12 text-center text-gray-500">Admin sign-in required to view orders.</td></tr>';
+          return;
+        }
+        if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-12 text-center text-red-500">Error loading orders</td></tr>';
       }
     }
 
     function updateStats() {
-      const stats = { total: allOrders.length, pending: 0, confirmed: 0, preparing: 0, delivered: 0 };
-      allOrders.forEach(o => {
+      const inRange = (o) => {
+        const range = dashboardRange.orders;
+        if (range === 'all') return true;
+        const d = safeToDate(o.createdAt || o.created_at);
+        if (!d) return range === 'all';
+        const now = new Date();
+        if (range === 'today') return d.toDateString() === now.toDateString();
+        if (range === 'week') return d >= new Date(now - 7 * 864e5);
+        return true;
+      };
+      const orders = allOrders.filter(inRange);
+      const stats = { total: orders.length, pending: 0, confirmed: 0, preparing: 0, delivered: 0 };
+      orders.forEach(o => {
         if (o.status === 'pending') stats.pending++;
         else if (o.status === 'confirmed') stats.confirmed++;
         else if (o.status === 'preparing') stats.preparing++;
         else if (o.status === 'delivered') stats.delivered++;
       });
-      document.getElementById('totalCount').textContent = stats.total;
-      document.getElementById('pendingCount').textContent = stats.pending;
-      document.getElementById('confirmedCount').textContent = stats.confirmed;
-      document.getElementById('preparingCount').textContent = stats.preparing;
-      document.getElementById('deliveredCount').textContent = stats.delivered;
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      set('totalCount', stats.total);
+      set('pendingCount', stats.pending);
+      set('confirmedCount', stats.confirmed);
+      set('preparingCount', stats.preparing);
+      set('deliveredCount', stats.delivered);
+      const revRange = dashboardRange.revenue;
+      const revOrders = allOrders.filter(o => {
+        if (revRange === 'all') return true;
+        const d = safeToDate(o.createdAt || o.created_at);
+        if (!d) return true;
+        const now = new Date();
+        if (revRange === 'today') return d.toDateString() === now.toDateString();
+        if (revRange === 'week') return d >= new Date(now - 7 * 864e5);
+        return true;
+      });
+      set('totalRevenue', fmtTSh(revOrders.reduce((s, o) => s + (o.total || 0), 0)));
     }
 
+    function changeDateRange(metric, value) {
+      dashboardRange[metric] = value;
+      updateStats();
+    }
+
+    function syncSearch(value) {
+      const input = document.getElementById('searchInput');
+      if (input && input.value !== value) input.value = value;
+      if (currentTab === 'orders' || document.getElementById('content-orders') && !document.getElementById('content-orders').classList.contains('hidden')) filterOrders();
+    }
+
+    // ─── Orders rendering & filtering ────────────────────────────────
     function filterOrders() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const status = document.getElementById('statusFilter').value;
-      const dateRange = document.getElementById('dateFilter').value;
+      const searchEl = document.getElementById('searchInput');
+      const statusEl = document.getElementById('statusFilter');
+      const dateEl = document.getElementById('dateFilter');
+      const search = (searchEl ? searchEl.value : '').toLowerCase();
+      const status = statusEl ? statusEl.value : '';
+      const dateRange = dateEl ? dateEl.value : 'all';
 
       filteredOrders = allOrders.filter(order => {
-        const matchesSearch = !search || 
-          order.id.toLowerCase().includes(search) ||
-          (order.customerName || '').toLowerCase().includes(search) ||
-          (order.customerPhone || '').includes(search);
-        
+        const orderSearch = search || (document.getElementById('quickSearch') ? document.getElementById('quickSearch').value.toLowerCase() : '');
+        const matchesSearch = !orderSearch ||
+          String(order.id || '').toLowerCase().includes(orderSearch) ||
+          (order.customerName || order.customer_name || '').toLowerCase().includes(orderSearch) ||
+          (order.customerPhone || order.contactPhone || '').includes(orderSearch);
+
         const matchesStatus = !status || order.status === status;
-        
+
         let matchesDate = true;
-        if (dateRange !== 'all' && order.createdAt) {
-          const orderDate = safeToDate(order.createdAt);
+        if (dateRange !== 'all') {
+          const orderDate = safeToDate(order.createdAt || order.created_at);
           const now = new Date();
-          if (dateRange === 'today') matchesDate = orderDate.toDateString() === now.toDateString();
-          else if (dateRange === 'week') matchesDate = orderDate >= new Date(now - 7 * 24 * 60 * 60 * 1000);
-          else if (dateRange === 'month') matchesDate = orderDate >= new Date(now - 30 * 24 * 60 * 60 * 1000);
+          if (orderDate) {
+            if (dateRange === 'today') matchesDate = orderDate.toDateString() === now.toDateString();
+            else if (dateRange === 'week') matchesDate = orderDate >= new Date(now - 7 * 864e5);
+            else if (dateRange === 'month') matchesDate = orderDate >= new Date(now - 30 * 864e5);
+          }
         }
-        
+
         return matchesSearch && matchesStatus && matchesDate;
       });
 
@@ -676,174 +740,422 @@
       const pageOrders = filteredOrders.slice(start, end);
 
       const tbody = document.getElementById('allOrdersTable');
+      if (!tbody) return;
       if (pageOrders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><span class="material-symbols-outlined empty-state-icon">receipt_long</span><div class="empty-state-title">' + (filteredOrders.length === 0 && allOrders.length === 0 ? 'No orders yet' : 'No matching orders') + '</div><div class="empty-state-message">' + (filteredOrders.length === 0 && allOrders.length === 0 ? 'Orders from customers will appear here once they start placing them.' : 'Try adjusting your search or filter criteria.') + '</div></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state py-12 text-center text-gray-500"><span class="material-symbols-outlined text-4xl mb-2 block">receipt_long</span><div class="font-semibold">' + (filteredOrders.length === 0 && allOrders.length === 0 ? 'No orders yet' : 'No matching orders') + '</div></div></td></tr>';
       } else {
         tbody.innerHTML = pageOrders.map(order => {
-          const statusClass = statusColors[order.status] || 'bg-gray-100 text-gray-800';
-          const date = order.createdAt ? safeToDate(order.createdAt).toLocaleDateString() : 'N/A';
+          const date = safeToDate(order.createdAt || order.created_at);
           const items = order.items ? order.items.length : 0;
+          const oid = String(order.id || '');
           return `
             <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 font-medium">#${order.id.substring(0, 8)}</td>
+              <td class="px-6 py-4 font-medium">#${esc(oid.substring(0, 8))}</td>
               <td class="px-6 py-4">
-                <p class="font-medium">${order.customerName || 'N/A'}</p>
-                <p class="text-sm text-gray-500">${order.customerPhone || ''}</p>
+                <p class="font-medium">${esc(order.customerName || order.customer_name || 'N/A')}</p>
+                <p class="text-sm text-gray-500">${esc(order.customerPhone || order.contactPhone || '')}</p>
               </td>
-              <td class="px-6 py-4">${order.sellerName || 'N/A'}</td>
+              <td class="px-6 py-4">${esc(order.sellerName || order.seller_name || 'N/A')}</td>
               <td class="px-6 py-4">${items} items</td>
-              <td class="px-6 py-4 font-semibold">TSh ${(order.total || 0).toLocaleString()}</td>
-              <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[order.status] || 'bg-gray-100 text-gray-800'}">${order.status || 'pending'}</span></td>
-              <td class="px-6 py-4 text-gray-600 text-sm">${date}</td>
+              <td class="px-6 py-4 font-semibold">${fmtTSh(order.total)}</td>
+              <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[order.status] || 'bg-gray-100 text-gray-800'}">${esc(order.status || 'pending')}</span></td>
+              <td class="px-6 py-4 text-gray-600 text-sm">${date ? date.toLocaleDateString() : 'N/A'}</td>
               <td class="px-6 py-4">
-                <button onclick="openOrderModal('${order.id}')" class="text-green-700 hover:underline text-sm">View Details</button>
+                <button onclick="openOrderModal('${esc(oid)}')" class="text-green-700 hover:underline text-sm">View Details</button>
               </td>
             </tr>
           `;
         }).join('');
       }
 
-      document.getElementById('showingStart').textContent = filteredOrders.length ? start + 1 : 0;
-      document.getElementById('showingEnd').textContent = Math.min(end, filteredOrders.length);
-      document.getElementById('showingTotal').textContent = filteredOrders.length;
-      document.getElementById('prevBtn').disabled = currentPage === 1;
-      document.getElementById('nextBtn').disabled = end >= filteredOrders.length;
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      set('showingStart', filteredOrders.length ? start + 1 : 0);
+      set('showingEnd', Math.min(end, filteredOrders.length));
+      set('showingTotal', filteredOrders.length);
+      const prev = document.getElementById('prevBtn');
+      const next = document.getElementById('nextBtn');
+      if (prev) prev.disabled = currentPage === 1;
+      if (next) next.disabled = end >= filteredOrders.length;
     }
 
     function prevPage() { if (currentPage > 1) { currentPage--; renderOrders(); } }
     function nextPage() { if (currentPage * ordersPerPage < filteredOrders.length) { currentPage++; renderOrders(); } }
 
-    async function openOrderModal(orderId) {
+    function loadRecentOrders() {
+      const tbody = document.getElementById('ordersTable');
+      if (!tbody) return;
+      const recent = allOrders.slice(0, 8);
+      if (!recent.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">No orders yet</td></tr>';
+        return;
+      }
+      tbody.innerHTML = recent.map(order => `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 font-medium">#${esc(String(order.id || '').substring(0, 8))}</td>
+          <td class="px-6 py-4">${esc(order.customerName || order.customer_name || 'N/A')}</td>
+          <td class="px-6 py-4 font-semibold">${fmtTSh(order.total)}</td>
+          <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[order.status] || 'bg-gray-100 text-gray-800'}">${esc(order.status || 'pending')}</span></td>
+          <td class="px-6 py-4"><button onclick="openOrderModal('${esc(String(order.id || ''))}')" class="text-green-700 hover:underline text-sm">View</button></td>
+        </tr>
+      `).join('');
+    }
+
+    // ─── Order modal ────────────────────────────────────────────────
+    function openOrderModal(orderId) {
       currentOrderId = orderId;
-      const order = allOrders.find(o => o.id === orderId);
-      if (!order) return;
+      const order = allOrders.find(o => String(o.id) === String(orderId));
+      if (!order) { showToast('Order not found', 'error'); return; }
 
-      document.getElementById('modalOrderId').textContent = orderId.substring(0, 8);
-      document.getElementById('modalStatusSelect').value = order.status || 'pending';
-      document.getElementById('modalCustomerName').textContent = order.customerName || 'N/A';
-      document.getElementById('modalCustomerPhone').textContent = order.customerPhone || 'N/A';
-      document.getElementById('modalCustomerEmail').textContent = order.customerEmail || '-';
-      document.getElementById('modalSellerName').textContent = order.sellerName || 'N/A';
-      document.getElementById('modalSellerPhone').textContent = order.sellerPhone || '-';
-      document.getElementById('modalDeliveryAddress').textContent = order.customerAddress || 'N/A';
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      set('modalOrderId', '#' + String(orderId).substring(0, 8));
+      const sel = document.getElementById('modalStatusSelect');
+      if (sel) sel.value = order.status || 'pending';
+      set('modalCustomerName', order.customerName || order.customer_name || 'N/A');
+      set('modalCustomerPhone', order.customerPhone || order.contactPhone || '');
+      set('modalCustomerEmail', order.customerEmail || '');
+      set('modalSellerName', order.sellerName || order.seller_name || 'N/A');
+      set('modalSellerPhone', order.sellerPhone || '');
+      set('modalDeliveryAddress', order.customerAddress || order.delivery_address || order.deliveryAddress || 'N/A');
 
-      const itemsHtml = (order.items || []).map(item => `
-        <div class="flex justify-between items-center py-2 border-b last:border-0">
-          <div>
-            <p class="font-medium">${item.name || 'Item'}</p>
-            <p class="text-sm text-gray-500">Qty: ${item.quantity || 1}</p>
+      const itemsEl = document.getElementById('modalItems');
+      if (itemsEl) {
+        const itemsHtml = (order.items || []).map(item => `
+          <div class="flex justify-between items-center py-2 border-b last:border-0">
+            <div>
+              <p class="font-medium">${esc(item.name || 'Item')}</p>
+              <p class="text-sm text-gray-500">Qty: ${item.quantity || 1}</p>
+            </div>
+            <p class="font-semibold">${fmtTSh((item.price || 0) * (item.quantity || 1))}</p>
           </div>
-          <p class="font-semibold">TSh ${(item.price * (item.quantity || 1) || 0).toLocaleString()}</p>
-        </div>
-      `).join('') || '<p class="text-gray-500">No items</p>';
-      document.getElementById('modalItems').innerHTML = itemsHtml;
+        `).join('') || '<p class="text-gray-500">No items</p>';
+        itemsEl.innerHTML = itemsHtml;
+      }
 
       const subtotal = order.subtotal || order.total || 0;
-      const deliveryFee = order.deliveryFee || 0;
+      const deliveryFee = order.deliveryFee || order.delivery_fee || 0;
       const total = order.total || 0;
-      document.getElementById('modalSubtotal').textContent = 'TSh ' + subtotal.toLocaleString;
-      document.getElementById('modalDeliveryFee').textContent = 'TSh ' + deliveryFee.toLocaleString;
-      document.getElementById('modalTotal').textContent = 'TSh ' + total.toLocaleString;
+      set('modalSubtotal', fmtTSh(subtotal));
+      set('modalDeliveryFee', fmtTSh(deliveryFee));
+      set('modalTotal', fmtTSh(total));
 
       const timeline = [];
-      if (order.createdAt) timeline.push({ date: safeToDate(order.createdAt), text: 'Order placed' });
+      if (order.createdAt || order.created_at) timeline.push({ date: safeToDate(order.createdAt || order.created_at), text: 'Order placed' });
       if (order.confirmedAt) timeline.push({ date: safeToDate(order.confirmedAt), text: 'Order confirmed' });
       if (order.preparingAt) timeline.push({ date: safeToDate(order.preparingAt), text: 'Preparing' });
       if (order.dispatchedAt) timeline.push({ date: safeToDate(order.dispatchedAt), text: 'Dispatched' });
       if (order.deliveredAt) timeline.push({ date: safeToDate(order.deliveredAt), text: 'Delivered' });
-      
-      const timelineHtml = timeline.length ? timeline.map(t => `
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 bg-green-700 rounded-full"></span>
-          <span>${t.text} - ${t.date.toLocaleString()}</span>
-        </div>
-      `).join('') : '<p class="text-gray-500">No timeline</p>';
-      document.getElementById('modalTimeline').innerHTML = timelineHtml;
+
+      const timelineEl = document.getElementById('modalTimeline');
+      if (timelineEl) {
+        timelineEl.innerHTML = timeline.length ? timeline.map(t => `
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 bg-green-700 rounded-full"></span>
+            <span>${esc(t.text)} — ${t.date ? t.date.toLocaleString() : ''}</span>
+          </div>
+        `).join('') : '<p class="text-gray-500">No timeline</p>';
+      }
 
       document.getElementById('orderModal').classList.remove('hidden');
     }
 
-    function closeModal() {
-      document.getElementById('orderModal').classList.add('hidden');
-      currentOrderId = null;
-    }
+    function closeOrderModal() { document.getElementById('orderModal').classList.add('hidden'); currentOrderId = null; }
+    function closeModal() { closeOrderModal(); }
 
     async function updateOrderStatus() {
       if (!currentOrderId) return;
       const newStatus = document.getElementById('modalStatusSelect').value;
       try {
-        await apiHelpers.put(API_ROUTES.ADMIN.ORDERS + '/' + currentOrderId, { status: newStatus });
+        const res = await fetch('/api/admin/orders/' + currentOrderId + '/status', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
         showToast('Order status updated to ' + newStatus);
+        closeOrderModal();
         await loadOrders();
       } catch (error) {
         console.error('Error updating order status:', error);
-        showToast('Failed to update status');
+        showToast(error.message === 'HTTP 401' || error.message === 'HTTP 403' ? 'Admin sign-in required' : 'Failed to update status', 'error');
       }
     }
 
     function printOrder() { window.print(); }
 
-    function exportOrders() {
-      if (!filteredOrders.length) { showToast('No orders to export'); return; }
-      const headers = ['Order ID', 'Customer', 'Phone', 'Seller', 'Items', 'Total', 'Status', 'Date'];
-      const data = filteredOrders.map(o => [
-        o.id, o.customerName || '', o.customerPhone || '', o.sellerName || '', 
-        o.items ? o.items.length : 0, o.total || 0, o.status || 'pending',
-        o.createdAt ? safeToDate(o.createdAt).toLocaleDateString() : ''
-      ]);
-      const csv = [headers.join(','), ...data.map(r => r.join(','))].join('\n');
+    // ─── Export ─────────────────────────────────────────────────────
+    function exportData(kind) {
+      let rows = [], filename = kind + '.csv';
+      if (kind === 'orders' || kind === 'all') rows = rows.concat(filteredOrders.map(o => ['order', o.id, o.customerName || o.customer_name || '', o.customerPhone || o.contactPhone || '', o.sellerName || o.seller_name || '', o.items ? o.items.length : 0, o.total || 0, o.status || '', o.createdAt || o.created_at || '']));
+      if (kind === 'sellers' || kind === 'all') rows = rows.concat(filteredSellers.map(s => ['seller', s.id, s.name || s.businessName || '', s.category || '', s.address || '', s.rating || '', s.isOpen !== false ? 'open' : 'closed']));
+      if (kind === 'users' || kind === 'all') rows = rows.concat(filteredUsers.map(u => ['user', u.id || u.uid || '', u.name || u.displayName || '', u.email || '', u.role || '', u.createdAt || '']));
+
+      if (!rows.length) { showToast('Nothing to export yet', 'warning'); return; }
+      const csv = rows.map(r => r.map(c => '"' + String(c ?? '').replace(/"/g, '""') + '"').join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = 'orders.csv'; a.click();
+      a.href = url; a.download = filename; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      showToast('Exported ' + filename);
+    }
+
+    function exportOrders() { exportData('orders'); }
+
+    // ─── Sellers ────────────────────────────────────────────────────
+    async function loadSellers() {
+      const tbody = document.getElementById('sellersTable');
+      try {
+        const sellers = await apiGet('/api/sellers');
+        allSellers = Array.isArray(sellers) ? sellers : (sellers.data || []);
+        filteredSellers = [...allSellers];
+        renderSellers();
+      } catch (error) {
+        console.error('Error loading sellers:', error);
+        if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-gray-500">Could not load sellers (' + esc(error.message) + ')</td></tr>';
+      }
+    }
+
+    function renderSellers() {
+      const tbody = document.getElementById('sellersTable');
+      if (!tbody) return;
+      if (!filteredSellers.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">No sellers found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = filteredSellers.map(s => `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 font-medium">${esc(s.name || s.businessName || 'Seller')}</td>
+          <td class="px-6 py-4">${esc(s.category || '-')}</td>
+          <td class="px-6 py-4">${esc(s.address || '-')}</td>
+          <td class="px-6 py-4">⭐ ${esc(s.rating ?? '-')}</td>
+          <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${s.isOpen !== false ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}">${s.isOpen !== false ? 'Open' : 'Closed'}</span></td>
+          <td class="px-6 py-4"><a href="/merchant" class="text-green-700 hover:underline text-sm">Manage</a></td>
+        </tr>
+      `).join('');
+    }
+
+    // ─── Users & roles ───────────────────────────────────────────────
+    async function loadUsers() {
+      const tbody = document.getElementById('usersTable');
+      try {
+        const data = await apiGet('/api/admin/users');
+        allUsers = data.data || [];
+        filteredUsers = [...allUsers];
+        renderUsers();
+      } catch (error) {
+        console.error('Error loading users:', error);
+        if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-gray-500">Admin sign-in required to view users.</td></tr>';
+      }
+    }
+
+    function filterUsersByRole() {
+      const filter = document.getElementById('userRoleFilter');
+      const role = filter ? filter.value : 'all';
+      filteredUsers = role === 'all' ? [...allUsers] : allUsers.filter(u => (u.role || 'customer') === role);
+      renderUsers();
+    }
+
+    function renderUsers() {
+      const tbody = document.getElementById('usersTable');
+      if (!tbody) return;
+      if (!filteredUsers.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">No users found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = filteredUsers.map(u => {
+        const uid = u.id || u.uid || '';
+        return `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4"><p class="font-medium">${esc(u.name || u.displayName || 'User')}</p><p class="text-sm text-gray-400">#${esc(String(uid).substring(0, 8))}</p></td>
+          <td class="px-6 py-4"><p>${esc(u.email || '-')}</p><p class="text-sm text-gray-500">${esc(u.phone || '')}</p></td>
+          <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">${esc(u.role || 'customer')}</span></td>
+          <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${u.suspended ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}">${u.suspended ? 'Suspended' : 'Active'}</span></td>
+          <td class="px-6 py-4 text-gray-500 text-sm">${u.createdAt ? (safeToDate(u.createdAt) || new Date(u.createdAt)).toLocaleDateString() : '-'}</td>
+          <td class="px-6 py-4">
+            <button onclick="openUserRoleModal('${esc(uid)}', this)" class="text-green-700 hover:underline text-sm">Edit Role</button>
+            <button onclick="openDeleteUserModal('${esc(uid)}', this)" class="text-red-600 hover:underline text-sm ml-2">Delete</button>
+          </td>
+        </tr>
+      `; }).join('');
+    }
+
+    function openUserRoleModal(userId, btn) {
+      roleEditUserId = userId;
+      const user = allUsers.find(u => String(u.id || u.uid) === String(userId));
+      selectedRole = (user && user.role) || 'customer';
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      set('modalUserName', (user && (user.name || user.displayName)) || 'User');
+      set('modalUserEmail', (user && user.email) || '');
+      selectRole(selectedRole);
+      document.getElementById('userRoleModal').classList.remove('hidden');
+    }
+
+    function closeUserRoleModal() { document.getElementById('userRoleModal').classList.add('hidden'); roleEditUserId = null; }
+
+    function selectRole(role) {
+      selectedRole = role;
+      ['customer', 'seller', 'driver', 'admin'].forEach(r => {
+        const el = document.getElementById('role-' + r);
+        if (el) {
+          el.classList.toggle('border-green-700', r === role);
+          el.classList.toggle('bg-green-50', r === role);
+          el.classList.toggle('border-gray-200', r !== role);
+        }
+      });
+    }
+
+    async function saveUserRole() {
+      if (!roleEditUserId) return;
+      try {
+        const res = await fetch('/api/admin/users/' + roleEditUserId + '/role', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role: selectedRole })
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        showToast('Role updated to ' + selectedRole);
+        closeUserRoleModal();
+        loadUsers();
+      } catch (error) {
+        showToast('Role updates require an admin role endpoint (not yet available)', 'warning');
+        closeUserRoleModal();
+      }
+    }
+
+    function openDeleteUserModal(userId, btn) {
+      deleteUserId = userId;
+      const user = allUsers.find(u => String(u.id || u.uid) === String(userId));
+      const el = document.getElementById('deleteUserName');
+      if (el) el.textContent = (user && (user.name || user.displayName || user.email)) || 'this user';
+      document.getElementById('deleteUserModal').classList.remove('hidden');
+    }
+
+    function closeDeleteUserModal() { document.getElementById('deleteUserModal').classList.add('hidden'); deleteUserId = null; }
+
+    async function deleteUser() {
+      if (!deleteUserId) return;
+      showToast('User deletion requires an admin endpoint (not yet available)', 'warning');
+      closeDeleteUserModal();
+    }
+
+    // ─── Server tab ──────────────────────────────────────────────────
+    async function loadServerStatus() {
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      const t0 = Date.now();
+      try {
+        const health = await (await fetch('/api/health')).json();
+        const latency = Date.now() - t0;
+        const svc = (health && health.data && health.data.services) || {};
+        set('serverHealth', (health && health.data && health.data.overall) === 'healthy' ? 'Healthy' : 'Degraded');
+        set('serverApiLatency', latency + ' ms');
+        set('dbFirebase', svc.firestore === 'connected' ? 'Connected' : (svc.firestore || 'n/a'));
+        set('dbSupabase', svc.supabase === 'connected' ? 'Connected' : (svc.supabase || 'n/a'));
+        if (typeof performance !== 'undefined' && performance.memory) {
+          set('serverMemory', (performance.memory.usedJSHeapSize / 1048576).toFixed(1) + ' MB');
+        } else {
+          set('serverMemory', 'n/a');
+        }
+        set('serverUptime', 'n/a');
+      } catch (e) {
+        set('serverHealth', 'Unreachable');
+      }
+      loadServerLogs(document.querySelector('#content-server .bg-gray-100') ? 'all' : 'all');
+    }
+
+    async function loadServerLogs(level) {
+      const list = document.getElementById('serverLogsList');
+      if (!list) return;
+      list.innerHTML = '<p class="text-gray-400">Loading logs...</p>';
+      try {
+        const res = await fetch('/api/logs?limit=100' + (level && level !== 'all' ? '&level=' + level : ''));
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const logs = data.logs || [];
+        list.innerHTML = logs.length
+          ? logs.map(l => `<p class="${l.level === 'error' ? 'text-red-600' : l.level === 'warn' ? 'text-amber-600' : 'text-gray-600'}">[${esc(l.level || 'info')}] ${esc(String(l.message || l.msg || '').slice(0, 200))}</p>`).join('')
+          : '<p class="text-gray-400">No logs (admin sign-in may be required)</p>';
+      } catch (e) {
+        list.innerHTML = '<p class="text-gray-400">Logs unavailable (admin sign-in required)</p>';
+      }
+    }
+
+    // ─── Analytics & audit ───────────────────────────────────────────
+    function loadAnalytics() {
+      // Lightweight inline summaries from loaded orders (no chart lib needed)
+      const topSellers = document.getElementById('topSellersList');
+      if (topSellers) {
+        const bySeller = {};
+        allOrders.forEach(o => { const s = o.sellerName || o.seller_name || 'Unknown'; bySeller[s] = (bySeller[s] || 0) + (o.total || 0); });
+        const top = Object.entries(bySeller).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        topSellers.innerHTML = top.length ? top.map(([name, rev], i) => `
+          <div class="flex items-center justify-between text-sm">
+            <span class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-green-100 text-green-700 text-xs font-bold flex items-center justify-center">${i + 1}</span>${esc(name)}</span>
+            <span class="font-semibold">${fmtTSh(rev)}</span>
+          </div>`).join('') : '<p class="text-sm text-gray-500">No data yet</p>';
+      }
+      const topProducts = document.getElementById('topProductsList');
+      if (topProducts) {
+        const byProduct = {};
+        allOrders.forEach(o => (o.items || []).forEach(it => { byProduct[it.name || 'Item'] = (byProduct[it.name || 'Item'] || 0) + (it.quantity || 1); }));
+        const top = Object.entries(byProduct).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        topProducts.innerHTML = top.length ? top.map(([name, units], i) => `
+          <div class="flex items-center justify-between text-sm">
+            <span class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 text-xs font-bold flex items-center justify-center">${i + 1}</span>${esc(name)}</span>
+            <span class="font-semibold">${units} units</span>
+          </div>`).join('') : '<p class="text-sm text-gray-500">No data yet</p>';
+      }
+      ['dailyOrdersChart', 'categoryRevenueChart', 'userGrowthChart'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.outerHTML = '<div class="text-sm text-gray-500 py-8 text-center" id="' + id + '">Chart data pending sign-in</div>';
+      });
+    }
+
+    async function loadAuditLogs() {
+      const tbody = document.getElementById('auditLogs');
+      if (!tbody) return;
+      try {
+        const res = await fetch('/api/audit-logs?limit=50');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const logs = data.logs || [];
+        tbody.innerHTML = logs.length ? logs.map(l => `
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 text-gray-500">${esc(l.timestamp || l.time || '')}</td>
+            <td class="px-6 py-4 font-bold">${esc(l.user || 'system')}</td>
+            <td class="px-6 py-4">${esc(l.action || l.message || '')}</td>
+            <td class="px-6 py-4 text-gray-400">${esc(l.ip || '')}</td>
+          </tr>`).join('') : '<tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">No audit logs yet</td></tr>';
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">Audit logs require admin sign-in</td></tr>';
+      }
     }
 
     function refreshOrders() { loadOrders(); }
 
     function refreshAll() {
       loadOrders();
+      if (typeof loadSellers === 'function') loadSellers();
       showToast('Dashboard refreshed');
-    }
-
-    function showToast(message, type = 'success') {
-      if (typeof SmartNav !== 'undefined' && SmartNav.showToast) { SmartNav.showToast(message, type); return; }
-      const el = document.createElement('div');
-      el.style.cssText = 'position:fixed;top:16px;right:16px;z-index:99999;background:#16a34a;color:white;padding:12px 20px;border-radius:14px;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,0.12)';
-      el.textContent = message;
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 4000);
     }
 
     function waitForAuth(callback, retries) {
       if (retries === undefined) retries = 30;
-      if (window.auth && window.auth.currentUser) {
-        callback();
-        return;
-      }
-      if (retries <= 0) {
-        callback();
-        return;
-      }
-      setTimeout(function() { waitForAuth(callback, retries - 1); }, 500);
+      if (window.auth && window.auth.currentUser) { callback(); return; }
+      if (retries <= 0) { callback(); return; }
+      setTimeout(function () { waitForAuth(callback, retries - 1); }, 500);
     }
 
+    // ─── Init ────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof SmartNav !== 'undefined' && typeof SmartNav.initPageTransition === 'function') {
         SmartNav.initPageTransition();
       }
-      waitForAuth(function() { loadOrders(); });
+      waitForAuth(function () { loadOrders(); });
+      // Close modals on Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { closeOrderModal(); closeUserRoleModal(); closeDeleteUserModal(); }
+      });
     });
-
-    // Order modal
-    function closeOrderModal() { document.getElementById('orderModal').classList.add('hidden'); }
-
-    // Stub tab loaders (not yet implemented in this build)
-    function loadVerification() { console.log('verification tab - not yet implemented'); }
-    function loadFinance() { console.log('finance tab - not yet implemented'); }
-    function loadSupport() { console.log('support tab - not yet implemented'); }
-    function loadAnalytics() { console.log('analytics tab - not yet implemented'); }
-    function loadServerStatus() { console.log('server status tab - not yet implemented'); }
-    function initLogisticsMap() { console.log('logistics map tab - not yet implemented'); }
   </script>
 </body>
 </html>

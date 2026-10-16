@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SmartSoko Driver | Elite Fleet</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Mapbox GL JS -->
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css" rel="stylesheet" />
     <!-- Mapbox Directions API -->
     <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css" rel="stylesheet" />
@@ -501,15 +502,15 @@
             </div>
 
             <div class="auth-card">
-                <div id="loginForm">
+                <form id="loginForm" onsubmit="event.preventDefault(); handleAuth('signIn')">
                     <h2 style="margin-bottom: 24px; font-weight: 800; font-size: 20px;">Welcome back</h2>
                     <div class="input-group">
                         <label>Email Address</label>
-                        <input type="email" id="emailInput" class="input-field" placeholder="driver@smartsoko.com">
+                        <input type="email" id="emailInput" class="input-field" placeholder="driver@smartsoko.com" aria-label="Email address">
                     </div>
                     <div class="input-group">
                         <label>Secure Password</label>
-                        <input type="password" id="passwordInput" class="input-field" placeholder="••••••••">
+                        <input type="password" id="passwordInput" class="input-field" placeholder="••••••••" aria-label="Password">
                     </div>
                     <button class="btn btn-primary" onclick="handleAuth('signIn')">
                         <span id="signInText">Authenticate</span>
@@ -527,9 +528,9 @@
                     <p style="text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-dim);">
                         New partner? <span style="color: var(--primary-light); font-weight: 700; cursor: pointer;" onclick="toggleAuthForm('signup')">Join the fleet</span>
                     </p>
-                </div>
+                </form>
 
-                <div id="signupForm" class="hidden">
+                <form id="signupForm" class="hidden" onsubmit="event.preventDefault(); handleAuth('signUp')">
                     <h2 style="margin-bottom: 24px; font-weight: 800; font-size: 20px;">Join Elite Fleet</h2>
                     <div class="input-group">
                         <label>Full Name</label>
@@ -549,7 +550,7 @@
                     <p style="text-align: center; margin-top: 24px; font-size: 13px; color: var(--text-dim);">
                         Already partner? <span style="color: var(--primary-light); font-weight: 700; cursor: pointer;" onclick="toggleAuthForm('login')">Sign In</span>
                     </p>
-                </div>
+                </form>
             </div>
         </section>
 
@@ -664,7 +665,7 @@
                         <p style="font-size: 12px; margin-top: 8px;">Start chatting with the customer</p>
                     </div>
                 </div>
-                <div style="padding: 16px 20px; background: var(--surface); border-top: 1px solid var(--border); position: fixed; bottom: 80px; left: 0; right: 0;">
+                <div style="padding: 16px 20px; background: var(--surface); border-top: 1px solid var(--border); position: fixed; bottom: 120px; left: 0; right: 0;">
                     <div style="display: flex; gap: 8px; align-items: center;">
                         <button onclick="sendQuickMessage('I\'m on my way!')" style="padding: 8px 12px; background: var(--surface-glass); border: 1px solid var(--border); border-radius: 16px; font-size: 12px; color: var(--text); cursor: pointer;">👋 I'm on my way!</button>
                         <button onclick="sendQuickMessage('Arrived at pickup')" style="padding: 8px 12px; background: var(--surface-glass); border: 1px solid var(--border); border-radius: 16px; font-size: 12px; color: var(--text); cursor: pointer;">📍 Arrived</button>
@@ -1717,313 +1718,6 @@
                 body: body,
                 icon: '/favicon.png',
                 badge: '/favicon.png',
-                tag: 'new-order',
-                requireInteraction: true
-            });
-        }
-
-        // ==================== ENHANCED SCREEN SWITCHING ====================
-        function switchScreen(screenName) {
-            // Hide all screens
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-            // Show selected screen
-            const screenMap = {
-                'home': 'homeScreen',
-                'map': 'mapScreen',
-                'chat': 'chatScreen',
-                'history': 'historyScreen',
-                'profile': 'profileScreen'
-            };
-            
-            const screenId = screenMap[screenName];
-            if (screenId) {
-                document.getElementById(screenId).classList.remove('hidden');
-            }
-            
-            // Update nav
-            const navMap = {
-                'home': 'nav-home',
-                'map': 'nav-map',
-                'chat': 'nav-chat',
-                'history': 'nav-history',
-                'profile': 'nav-profile'
-            };
-            
-            const navId = navMap[screenName];
-            if (navId) {
-                document.getElementById(navId).classList.add('active');
-            }
-
-            // Initialize specific screens
-            if (screenName === 'map') {
-                initMap();
-            } else if (screenName === 'chat' && activeOrder) {
-                initChat(activeOrder.id, activeOrder.customerId, activeOrder.customerName);
-            }
-
-            currentScreen = screenName;
-        }
-
-        // Check for existing session on page load
-        (function checkSession() {
-            const savedToken = localStorage.getItem('driver_token');
-            const savedUser = localStorage.getItem('driver_user');
-            
-            if (savedToken && savedUser) {
-                try {
-                    state.authToken = savedToken;
-                    state.user = JSON.parse(savedUser);
-                    console.log('Restored session for:', state.user.email);
-                    initApp();
-                } catch (e) {
-                    console.error('Failed to restore session:', e);
-                    localStorage.removeItem('driver_token');
-                    localStorage.removeItem('driver_user');
-                }
-            }
-        })();
-
-        // Initialize on page load
-        window.addEventListener('beforeunload', () => {
-            if (chatListener) chatListener();
-            stopLocationTracking();
-        });
-
-        function logout() {
-            if(confirm('Securely end your session?')) {
-                localStorage.removeItem('driver_token');
-                localStorage.removeItem('driver_user');
-                location.reload();
-            }
-        }
-    </script>
-</body>
-</html>
-            if (chatListener) chatListener();
-            chatListener = db.collection('chats').doc(currentChatId)
-                .collection('messages')
-                .orderBy('timestamp', 'asc')
-                .onSnapshot(snapshot => {
-                    snapshot.docChanges().forEach(change => {
-                        if (change.type === 'added') {
-                            const msg = change.doc.data();
-                            displayMessage(msg);
-                        }
-                    });
-                });
-        }
-
-        function loadChatMessages() {
-            const container = document.getElementById('chatMessages');
-            container.innerHTML = '';
-            
-            if (!currentChatId) {
-                document.getElementById('chatEmptyState').style.display = 'block';
-                return;
-            }
-            
-            document.getElementById('chatEmptyState').style.display = 'none';
-            
-            // Load initial messages
-            db.collection('chats').doc(currentChatId)
-                .collection('messages')
-                .orderBy('timestamp', 'asc')
-                .limit(50)
-                .get()
-                .then(snapshot => {
-                    snapshot.forEach(doc => displayMessage(doc.data()));
-                });
-        }
-
-        function displayMessage(msg) {
-            const container = document.getElementById('chatMessages');
-            const isDriver = msg.sender === 'driver';
-            
-            const div = document.createElement('div');
-            div.style.cssText = `display: flex; justify-content: ${isDriver ? 'flex-end' : 'flex-start'}; margin-bottom: 12px;`;
-            
-            const bubble = document.createElement('div');
-            bubble.style.cssText = `max-width: 75%; padding: 12px 16px; border-radius: 16px; background: ${isDriver ? 'var(--primary)' : 'var(--surface-glass)'}; color: ${isDriver ? 'white' : 'var(--text)'}; font-size: 14px; line-height: 1.4;`;
-            bubble.textContent = msg.text;
-            
-            const time = document.createElement('div');
-            time.style.cssText = 'font-size: 10px; color: var(--text-dim); margin-top: 4px; text-align: right;';
-            time.textContent = msg.timestamp ? new Date(msg.timestamp.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-            
-            bubble.appendChild(time);
-            div.appendChild(bubble);
-            container.appendChild(div);
-            
-            // Scroll to bottom
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const text = input.value.trim();
-            
-            if (!text || !currentChatId) {
-                showNotif('No active chat', 'error');
-                return;
-            }
-            
-            const msg = {
-                text: text,
-                sender: 'driver',
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            };
-            
-            db.collection('chats').doc(currentChatId)
-                .collection('messages')
-                .add(msg)
-                .then(() => {
-                    input.value = '';
-                })
-                .catch(e => {
-                    showNotif('Failed to send message', 'error');
-                });
-        }
-
-        function sendQuickMessage(text) {
-            document.getElementById('chatInput').value = text;
-            sendMessage();
-        }
-
-        // ==================== PUSH NOTIFICATIONS ====================
-        let notificationPermission = false;
-
-        async function requestNotificationPermission() {
-            if (!('Notification' in window)) {
-                console.log('Notifications not supported');
-                return;
-            }
-
-            const permission = await Notification.requestPermission();
-            notificationPermission = permission === 'granted';
-            
-            if (notificationPermission) {
-                console.log('Notification permission granted');
-                subscribeToOrderNotifications();
-            }
-        }
-
-        function subscribeToOrderNotifications() {
-            const user = auth.currentUser;
-            if (!user) return;
-            
-            // Listen for new orders assigned to this driver
-            db.collection('orders')
-                .where('driverId', '==', user.uid)
-                .where('status', 'in', ['assigned', 'pickup', 'in_transit'])
-                .onSnapshot(snapshot => {
-                    snapshot.docChanges().forEach(change => {
-                        if (change.type === 'added' || change.type === 'modified') {
-                            const order = change.doc.data();
-                            
-                            // Show notification for new assignments
-                            if (order.status === 'assigned' && notificationPermission) {
-                                showOrderNotification('New Order Assigned!', 
-                                    `Order #${change.doc.id.slice(-4)} from ${order.restaurant?.name || 'Restaurant'}`);
-                            }
-                        }
-                    });
-                });
-        }
-
-        function showOrderNotification(title, body) {
-            if (!notificationPermission) return;
-            
-            new Notification(title, {
-                body: body,
-                icon: '/favicon.png',
-                badge: '/favicon.png',
-                tag: 'new-order',
-                requireInteraction: true
-            });
-        }
-
-        // ==================== ENHANCED SCREEN SWITCHING ====================
-        function switchScreen(screenName) {
-            // Hide all screens
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-            // Show selected screen
-            const screenMap = {
-                'home': 'homeScreen',
-                'map': 'mapScreen',
-                'chat': 'chatScreen',
-                'history': 'historyScreen',
-                'profile': 'profileScreen'
-            };
-            
-            const screenId = screenMap[screenName];
-            if (screenId) {
-                document.getElementById(screenId).classList.remove('hidden');
-            }
-            
-            // Update nav
-            const navMap = {
-                'home': 'nav-home',
-                'map': 'nav-map',
-                'chat': 'nav-chat',
-                'history': 'nav-history',
-                'profile': 'nav-profile'
-            };
-            
-            const navId = navMap[screenName];
-            if (navId) {
-                document.getElementById(navId).classList.add('active');
-            }
-
-            // Initialize specific screens
-            if (screenName === 'map') {
-                initMap();
-            } else if (screenName === 'chat' && activeOrder) {
-                initChat(activeOrder.id, activeOrder.customerId, activeOrder.customerName);
-            }
-
-            currentScreen = screenName;
-        }
-
-        // Check for existing session on page load
-        (function checkSession() {
-            const savedToken = localStorage.getItem('driver_token');
-            const savedUser = localStorage.getItem('driver_user');
-            
-            if (savedToken && savedUser) {
-                try {
-                    state.authToken = savedToken;
-                    state.user = JSON.parse(savedUser);
-                    console.log('Restored session for:', state.user.email);
-                    initApp();
-                } catch (e) {
-                    console.error('Failed to restore session:', e);
-                    localStorage.removeItem('driver_token');
-                    localStorage.removeItem('driver_user');
-                }
-            }
-        })();
-
-        // Initialize on page load
-        window.addEventListener('beforeunload', () => {
-            if (chatListener) chatListener();
-            stopLocationTracking();
-        });
-
-        function logout() {
-            if(confirm('Securely end your session?')) {
-                localStorage.removeItem('driver_token');
-                localStorage.removeItem('driver_user');
-                location.reload();
-            }
-        }
-    </script>
-</body>
-</html>
-</html>
                 tag: 'new-order',
                 requireInteraction: true
             });

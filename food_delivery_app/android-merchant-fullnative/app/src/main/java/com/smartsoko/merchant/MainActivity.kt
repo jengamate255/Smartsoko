@@ -159,6 +159,9 @@ class MainActivity : ComponentActivity() {
                                 isAddingProduct = false
                                 viewModel.loadProducts()
                             }
+                        },
+                        onAiAssist = { uri, onSuccess, onError ->
+                            viewModel.aiAssistProduct(uri, onSuccess, onError)
                         }
                     )
                 } else if (productToEdit != null) {
@@ -166,6 +169,9 @@ class MainActivity : ComponentActivity() {
                         product = productToEdit!!,
                         isLoading = uiState.isLoading,
                         onBack = { productToEdit = null },
+                        onAiAssist = { uri, onSuccess, onError ->
+                            viewModel.aiAssistProduct(uri, onSuccess, onError)
+                        },
                         onSave = { id, name, desc, price, origPrice, cat, unit, stock, featured, imageUri ->
                             viewModel.updateProduct(
                                 productId = id,

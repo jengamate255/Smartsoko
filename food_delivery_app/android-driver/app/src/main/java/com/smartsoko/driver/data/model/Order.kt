@@ -21,6 +21,8 @@ data class Order(
     val paymentStatus: String = "",
     val deliveryAddress: String = "",
     val deliveryNotes: String = "",
+    val deliveryLatitude: Double? = null,
+    val deliveryLongitude: Double? = null,
     val driverId: String = "",
     val driverName: String = "",
     val createdAt: Date = Date(),

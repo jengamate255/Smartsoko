@@ -7,37 +7,37 @@ data class OrderDto(
     val id: String,
     
     @SerializedName("user_id")
-    val userId: String,
+    val userId: String = "",
     
     @SerializedName("items")
-    val items: List<OrderItemDto>,
+    val items: List<OrderItemDto> = emptyList(),
     
     @SerializedName("status")
-    val status: String,
+    val status: String = "pending",
     
     @SerializedName("delivery_address")
-    val deliveryAddress: AddressDto,
+    val deliveryAddress: AddressDto? = null,
     
     @SerializedName("payment_method")
-    val paymentMethod: PaymentMethodDto,
+    val paymentMethod: PaymentMethodDto? = null,
     
     @SerializedName("subtotal")
-    val subtotal: Double,
+    val subtotal: Double = 0.0,
     
     @SerializedName("delivery_fee")
-    val deliveryFee: Double,
+    val deliveryFee: Double = 0.0,
     
     @SerializedName("total")
-    val total: Double,
+    val total: Double = 0.0,
     
     @SerializedName("currency")
     val currency: String = "TSh",
     
     @SerializedName("created_at")
-    val createdAt: Long,
+    val createdAt: Long = System.currentTimeMillis(),
     
     @SerializedName("updated_at")
-    val updatedAt: Long,
+    val updatedAt: Long = System.currentTimeMillis(),
     
     @SerializedName("estimated_delivery_time")
     val estimatedDeliveryTime: Long? = null,
@@ -51,25 +51,25 @@ data class OrderDto(
 
 data class OrderItemDto(
     @SerializedName("product_id")
-    val productId: String,
+    val productId: String = "",
     
     @SerializedName("product_name")
-    val productName: String,
+    val productName: String = "",
     
     @SerializedName("product_image")
-    val productImage: String,
+    val productImage: String = "",
     
     @SerializedName("quantity")
-    val quantity: Int,
+    val quantity: Int = 1,
     
     @SerializedName("price")
-    val price: Double,
+    val price: Double = 0.0,
     
     @SerializedName("seller_id")
-    val sellerId: String,
+    val sellerId: String = "",
     
     @SerializedName("seller_name")
-    val sellerName: String
+    val sellerName: String = ""
 )
 
 data class OrderTrackingDto(
@@ -94,34 +94,34 @@ data class OrderTrackingDto(
 
 data class AddressDto(
     @SerializedName("id")
-    val id: String,
+    val id: String = "",
     
     @SerializedName("user_id")
-    val userId: String,
+    val userId: String = "",
     
     @SerializedName("title")
-    val title: String,
+    val title: String = "",
     
     @SerializedName("full_name")
-    val fullName: String,
+    val fullName: String = "",
     
     @SerializedName("phone_number")
-    val phoneNumber: String,
+    val phoneNumber: String = "",
     
     @SerializedName("street_address")
-    val streetAddress: String,
+    val streetAddress: String = "",
     
     @SerializedName("apartment")
     val apartment: String? = null,
     
     @SerializedName("city")
-    val city: String,
+    val city: String = "",
     
     @SerializedName("postal_code")
     val postalCode: String? = null,
     
     @SerializedName("location")
-    val location: LocationDto,
+    val location: LocationDto? = null,
     
     @SerializedName("is_default")
     val isDefault: Boolean = false,
@@ -132,10 +132,10 @@ data class AddressDto(
 
 data class LocationDto(
     @SerializedName("latitude")
-    val latitude: Double,
+    val latitude: Double = 0.0,
     
     @SerializedName("longitude")
-    val longitude: Double,
+    val longitude: Double = 0.0,
     
     @SerializedName("address")
     val address: String? = null,

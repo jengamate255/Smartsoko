@@ -222,14 +222,14 @@
         const qty = item.quantity || item.qty || 1;
         const effectivePrice = (item.price || 0) + (item.variationDelta || 0);
         const lineTotal = effectivePrice * qty;
-        const imageUrl = item.imageUrl || 'images/default-product.png';
+        const imageUrl = item.imageUrl || '/images/product-placeholder.svg';
         const variationHtml = item.variation ? `<p class="text-xs text-gray-500">${escapeHtml(item.variation)}</p>` : '';
         return `
         <div class="cart-item bg-white rounded-xl p-4 flex gap-4 relative overflow-hidden group border border-gray-50" data-id="${escapeHtml(item.id)}">
           <div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gray-50">
             <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(item.name)}"
               class="w-full h-full object-cover" loading="lazy"
-              onerror="this.onerror=null; this.src='images/default-product.png';">
+              onerror="this.onerror=null; this.src='/images/product-placeholder.svg';">
           </div>
           <div class="flex-1 flex flex-col justify-between min-w-0">
             <div class="flex justify-between items-start">

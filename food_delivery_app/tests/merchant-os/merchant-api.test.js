@@ -55,11 +55,12 @@ async function makeApp(seed) {
   return app;
 }
 
+const today = new Date().toISOString();
 const SEED = {
   orders: [
-    { id: 'o1', sellerId: 'S-A', customerId: 'c1', customerName: 'Asha', total: 12000, status: 'pending', paymentMethod: 'cod', paymentStatus: 'cod', createdAt: '2026-08-25T08:00:00Z', items: [{ id: 'p1', name: 'Chapati', price: 3000, quantity: 4 }] },
-    { id: 'o2', sellerId: 'S-A', customerId: 'c2', customerName: 'Baraka', total: 5000, status: 'delivered', paymentMethod: 'mobile_money', paymentStatus: 'paid', escrowStatus: 'released', createdAt: '2026-08-24T08:00:00Z', items: [] },
-    { id: 'o3', sellerId: 'S-B', customerId: 'c9', customerName: 'OtherMerchantCustomer', total: 777777, status: 'delivered', createdAt: '2026-08-24T09:00:00Z', items: [] }, // foreign!
+    { id: 'o1', sellerId: 'S-A', customerId: 'c1', customerName: 'Asha', total: 12000, status: 'pending', paymentMethod: 'cod', paymentStatus: 'cod', createdAt: today, items: [{ id: 'p1', name: 'Chapati', price: 3000, quantity: 4 }] },
+    { id: 'o2', sellerId: 'S-A', customerId: 'c2', customerName: 'Baraka', total: 5000, status: 'delivered', paymentMethod: 'mobile_money', paymentStatus: 'paid', escrowStatus: 'released', createdAt: today, items: [] },
+    { id: 'o3', sellerId: 'S-B', customerId: 'c9', customerName: 'OtherMerchantCustomer', total: 777777, status: 'delivered', createdAt: today, items: [] }, // foreign!
   ],
   products: [
     { id: 'p1', name: 'Chapati', sellerId: 'S-A', price: 3000, stockQuantity: 25, minStock: 5, cost: 1500, isAvailable: true },

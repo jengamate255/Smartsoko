@@ -1,3 +1,7 @@
+// ⚠️ DEPRECATED (legacy): The served admin page uses `public/config/api-config.js`
+// (local Express /api/admin/*). This file targets the Supabase edge function and
+// is kept only for legacy `web/`-folder Netlify deployments. Prefer removing it once
+// the Netlify mirror is retired.
 // API Configuration - Intelligent Routing between Firebase and Supabase
 // Primary API uses Express server, intelligently routes to Firebase or Supabase based on use case
 
@@ -15,8 +19,9 @@ const getApiBaseUrl = () => {
     return `${protocol}//${hostname}:${currentPort || 3000}/api`;
   }
 
-  // In production, use Express server
-  return `${protocol}//${hostname}/api`;
+  // In production, use the Supabase Edge Function (free tier) as the SmartSoko API.
+  // Requests are routed to https://<ref>.supabase.co/functions/v1/api/...
+  return `https://vonkqyiczeqhuqhahsxm.supabase.co/functions/v1/api`;
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -104,14 +109,23 @@ async function getAuthToken() {
 
 // Build headers with optional auth token
 async function buildHeaders(customHeaders = {}) {
+  const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvbmtxeWljemVxaHVxaGFoc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjIzNDksImV4cCI6MjA5MDM5ODM0OX0.UKAT3re6P_oAB3E1svwCFdqTQWZL6yulJ1ZX4nAgJJ8';
   const headers = {
     'Content-Type': 'application/json',
+    'apikey': anonKey,
     ...customHeaders
   };
 
   const token = await getAuthToken();
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  if (isLocal) {
+    // Local Express server expects the Firebase ID token in Authorization.
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+  } else {
+    // Supabase gateway only accepts Supabase JWTs in Authorization — the anon key
+    // satisfies it; the Firebase ID token travels in x-firebase-token.
+    headers['Authorization'] = `Bearer ${window.supabase ? window.supabase.supabaseKey : anonKey}`;
+    if (token) headers['x-firebase-token'] = token;
   }
 
   return headers;

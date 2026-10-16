@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -25,6 +26,7 @@ import com.fooddelivery.driver.data.model.Order
 import com.fooddelivery.driver.data.model.OrderItem
 import com.fooddelivery.driver.ui.state.AppViewModel
 import com.fooddelivery.driver.ui.theme.SmartSokoDriverTheme
+import com.fooddelivery.driver.util.AppConfig
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -554,7 +556,7 @@ private fun OrderItemRow(item: OrderItem) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "₦${"%.2f".format(item.price * item.quantity)}",
+                text = "${AppConfig.CURRENCY_SYMBOL}${"%.2f".format(item.price * item.quantity)}",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -592,7 +594,7 @@ private fun OrderSummarySection(
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "₦${"%.2f".format(subtotal)}",
+                text = "${AppConfig.CURRENCY_SYMBOL}${"%.2f".format(subtotal)}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -609,7 +611,7 @@ private fun OrderSummarySection(
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "₦${"%.2f".format(tax)}",
+                text = "${AppConfig.CURRENCY_SYMBOL}${"%.2f".format(tax)}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -626,7 +628,7 @@ private fun OrderSummarySection(
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "₦${"%.2f".format(deliveryFee)}",
+                text = "${AppConfig.CURRENCY_SYMBOL}${"%.2f".format(deliveryFee)}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -648,7 +650,7 @@ private fun OrderSummarySection(
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "₦${"%.2f".format(total)}",
+                text = "${AppConfig.CURRENCY_SYMBOL}${"%.2f".format(total)}",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -667,6 +669,7 @@ private fun OrderActionsSection(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
+        val context = LocalContext.current
         when (order.status) {
             "pending" -> {
                 Row(
@@ -703,52 +706,80 @@ private fun OrderActionsSection(
                     }
                 }
             }
-            "accepted" -> {
-                Button(
-                    onClick = { viewModel.updateOrderStatus(order.id, "picked_up") },
-                    enabled = isOnline,
+            "accepted", "assigned" -> {
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        text = "Pick Up Order",
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
-            }
-            "assigned" -> {
-                Button(
-                    onClick = { viewModel.updateOrderStatus(order.id, "picked_up") },
-                    enabled = isOnline,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    Text(
-                        text = "Pick Up Order",
-                        style = MaterialTheme.typography.labelLarge
-                    )
+                    Button(
+                        onClick = { viewModel.updateOrderStatus(order.id, "picked_up") },
+                        enabled = isOnline,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Text(
+                            text = "Pick Up Order",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                    Button(
+                        onClick = {
+                            val intent = Intent(context, com.smartsoko.driver.ui.NavigationActivity::class.java)
+                            intent.putExtra("orderId", order.id)
+                            context.startActivity(intent)
+                        },
+                        enabled = isOnline,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary
+                        )
+                    ) {
+                        Icon(imageVector = Icons.Default.Navigation, contentDescription = "Navigation", modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Open Navigation")
+                    }
                 }
             }
             "picked_up" -> {
-                Button(
-                    onClick = { viewModel.updateOrderStatus(order.id, "delivered") },
-                    enabled = isOnline,
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        text = "Deliver Order",
-                        style = MaterialTheme.typography.labelLarge
-                    )
+                    Button(
+                        onClick = { viewModel.updateOrderStatus(order.id, "delivered") },
+                        enabled = isOnline,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Text(
+                            text = "Deliver Order",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                    Button(
+                        onClick = {
+                            val intent = Intent(context, com.smartsoko.driver.ui.NavigationActivity::class.java)
+                            intent.putExtra("orderId", order.id)
+                            context.startActivity(intent)
+                        },
+                        enabled = isOnline,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary
+                        )
+                    ) {
+                        Icon(imageVector = Icons.Default.Navigation, contentDescription = "Navigation", modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Open Navigation")
+                    }
                 }
             }
         }

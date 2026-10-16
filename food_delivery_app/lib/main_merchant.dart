@@ -10,6 +10,7 @@ import 'services/auth_service.dart';
 import 'services/order_service.dart';
 import 'services/restaurant_service.dart';
 import 'services/connectivity_service.dart';
+import 'services/supabase_service.dart';
 import 'screens/merchant/merchant_login_screen.dart';
 import 'screens/merchant/merchant_main_screen.dart';
 import 'utils/logger.dart';
@@ -27,6 +28,9 @@ void main() async {
     } catch (e) {
       AppLogger.warning('Environment file not loaded, using default config');
     }
+    
+    // Initialize Supabase (must be before Firebase for auth fallback)
+    await SupabaseService().initialize();
     
     // Initialize Firebase
     await Firebase.initializeApp(

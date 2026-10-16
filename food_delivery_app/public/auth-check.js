@@ -4,18 +4,26 @@
    * Handles authentication state and role-based access control.
    */
 
-  // Configuration: Define roles required for specific paths
+  // Configuration: Define roles required for specific paths.
+  // Keys are page names; both /<name> (extensionless server route) and
+  // /<name>.html must match, e.g. /admin and /admin.html.
   const PROTECTED_PAGES = {
-    '/admin.html': ['admin'],
-    '/merchant.html': ['merchant', 'seller'],
-    '/driver.html': ['driver'],
-    '/customer.html': ['customer'],
-    '/profile.html': ['customer', 'admin', 'merchant', 'driver'],
-    '/orders.html': ['customer', 'admin', 'merchant', 'driver']
+    'admin': ['admin'],
+    // 'admin' included to match the server's requireMerchant policy (auth.js),
+    // which lets admins view the merchant portal. Without it, an admin signing
+    // in on the merchant tab gets bounced back to login ("logged out" loop).
+    'merchant': ['merchant', 'seller', 'admin'],
+    'driver': ['driver'],
+    'profile': ['customer', 'admin', 'merchant', 'driver', 'seller'],
+    'orders': ['customer', 'admin', 'merchant', 'driver', 'seller'],
+    'cart': ['customer', 'admin', 'merchant', 'driver', 'seller'],
+    'fleet-manager': ['admin', 'driver'],
+    'admin-panel': ['admin']
   };
 
   const currentPath = window.location.pathname;
-  const requiredRoles = Object.entries(PROTECTED_PAGES).find(([path]) => currentPath.endsWith(path))?.[1];
+  const currentPage = currentPath.replace(/^\/+|\/+$/g, '').replace(/\.html$/, '');
+  const requiredRoles = Object.entries(PROTECTED_PAGES).find(([page]) => currentPage === page)?.[1];
 
   let cachedUserRole = null;
   let cachedUserId = null;
@@ -164,8 +172,18 @@
   function redirectToLogin(reason) {
     // Don't redirect if we're already on the login page
     if (window.location.pathname.includes('login.html')) return;
-    
-    const loginUrl = 'login.html' + (reason ? `?reason=${reason}` : '');
+
+    const isMerchantPage = window.location.pathname.includes('merchant') || window.location.pathname.includes('seller');
+    // Remember where the user was trying to go so login can send them back
+    // (previously: sign-in with a customer account on a merchant page
+    // bounced to /home and the user appeared "logged out").
+    try {
+      const dest = window.location.pathname + window.location.search;
+      if (!dest.includes('login')) sessionStorage.setItem('smartsoko_auth_redirect', dest);
+    } catch (_) { /* storage unavailable */ }
+
+    const roleParam = isMerchantPage ? 'role=merchant&' : '';
+    const loginUrl = 'login.html' + (reason ? `?${roleParam}reason=${reason}` : (isMerchantPage ? '?role=merchant' : ''));
     window.location.replace(loginUrl);
   }
 
@@ -237,7 +255,8 @@
       }
 
       // Redirect to login
-      window.location.href = 'login.html';
+      const isMerchantPage = window.location.pathname.includes('merchant') || window.location.pathname.includes('seller');
+      window.location.href = isMerchantPage ? 'login.html?role=merchant' : 'login.html';
     } catch (error) {
       console.error('Logout error:', error);
       window.location.href = 'login.html';

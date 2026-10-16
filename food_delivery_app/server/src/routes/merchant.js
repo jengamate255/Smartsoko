@@ -47,6 +47,45 @@ function guard(capability) {
     if (!req.merchantId) {
       req.merchantId = await resolveMerchant(getDb(req), getAdmin(req), req);
     }
+
+    // Platform staff (admin / super_admin) own no store. They may act on a
+    // specific merchant by passing ?merchantId=<sellers.id> (or an
+    // x-merchant-id header) — validated against the sellers table so the id is
+    // not simply trusted. Without it we now fail loudly: letting the request
+    // through with a null tenant made every route filter on `null` and return
+    // empty lists and zeroed totals, which reads as "this merchant has no data"
+    // instead of "no merchant selected".
+    const isPlatformStaff = ['admin', 'super_admin'].includes(req.user.role);
+    if (!req.merchantId && isPlatformStaff) {
+      const requested = String(req.query.merchantId || req.get('x-merchant-id') || '').trim();
+      if (requested) {
+        try {
+          const db = getDb(req);
+          const seller = db ? await db.get('sellers', requested) : null;
+          if (!seller) return fail(res, 400, `Unknown merchantId: ${requested}`, 'UNKNOWN_MERCHANT');
+          req.merchantId = requested;
+        } catch (e) {
+          return fail(res, 400, `Could not resolve merchantId: ${e.message}`, 'UNKNOWN_MERCHANT');
+        }
+      }
+    }
+    // SECURITY: a merchant with no resolved seller/store must NOT proceed
+    // with a null merchantId — unattributed rows (sellerId null) would match
+    // every tenant's data.
+    if (!req.merchantId && !isPlatformStaff) {
+      return res.status(403).json({
+        success: false,
+        error: 'Merchant profile not found — complete your seller registration first',
+        code: 'NO_MERCHANT_PROFILE',
+      });
+    }
+    if (!req.merchantId && isPlatformStaff) {
+      return res.status(409).json({
+        success: false,
+        error: 'Platform admin has no merchant context — pass ?merchantId=<sellers.id> to act on a specific merchant',
+        code: 'NO_MERCHANT_CONTEXT',
+      });
+    }
     // Owning the store confers owner capabilities WITHIN this tenant.
     // Sellers whose docs are keyed by UUID (ownerId field) resolve as
     // 'customer' in the platform role lookup — upgrade them here so the
@@ -65,6 +104,53 @@ function guard(capability) {
 
 function fail(res, status, error, code) {
   return res.status(status).json({ success: false, error, ...(code ? { code } : {}) });
+}
+
+/**
+ * Translate backend errors honestly: if the Supabase fallback is active but
+ * the merchant-OS tables haven't been migrated yet, say exactly that instead
+ * of leaking a raw driver message (§34: mark dependencies, never fake).
+ */
+const TABLE_MISSING = /Could not find the table|PGRST205|schema cache/i;
+
+/**
+ * Input-validation messages thrown by the inventory ledger. These are the
+ * caller's fault, so they must surface as 4xx — previously they fell through
+ * to failDb() and were reported as 500s.
+ */
+const LEDGER_INPUT_ERROR = /is required|Invalid movement type|must be a finite number|must have negative delta|must have positive delta/i;
+
+/**
+ * Strict-ish boolean coercion. `Boolean("false")` is true, so a string value
+ * from a form or proxy silently marked an unavailable product available.
+ */
+function toBool(value) {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    const s = value.trim().toLowerCase();
+    if (['true', '1', 'yes', 'on'].includes(s)) return true;
+    if (['false', '0', 'no', 'off', ''].includes(s)) return false;
+  }
+  return Boolean(value);
+}
+
+/**
+ * Lower-cased status comparison. The live orders table contains "COMPLETED"
+ * and "REFUNDED" alongside lowercase values, so every case-sensitive filter
+ * silently miscounted (a refunded order was counted as pending income).
+ */
+function normStatus(value) {
+  return String(value || '').toLowerCase();
+}
+
+function failDb(res, e) {
+  console.error('[merchant-os] DB error:', e && e.stack ? e.stack : e);
+  if (TABLE_MISSING.test(e.message || '')) {
+    return fail(res, 503,
+      'Merchant OS tables not present in the active database — apply supabase/migrations/20260825120000_merchant_os_tables.sql',
+      'MIGRATION_REQUIRED');
+  }
+  return fail(res, 500, e.message);
 }
 
 function parseRange(query) {
@@ -87,6 +173,9 @@ router.get('/overview', ...guard('reports.read'), async (req, res) => {
     // Tenant filter server-side. Orders may carry sellerId or merchantId.
     const myOrders = orders.filter((o) => o.sellerId === mid || o.merchantId === mid);
     const myProducts = products.filter((p) => p.sellerId === mid || p.merchantId === mid);
+    // Expenses must be tenant-filtered too — otherwise every merchant's net
+    // profit subtracts every other merchant's expenses.
+    const myExpenses = expenses.filter((e) => e.merchantId === mid || e.sellerId === mid);
 
     const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
     const todayRange = { from: startOfDay.toISOString() };
@@ -97,7 +186,7 @@ router.get('/overview', ...guard('reports.read'), async (req, res) => {
     });
 
     const pendingOrders = myOrders.filter((o) =>
-      ['pending', 'accepted', 'preparing'].includes(o.status || 'pending')).length;
+      ['pending', 'accepted', 'preparing'].includes(normStatus(o.status) || 'pending')).length;
 
     const lowStockProducts = myProducts.filter((p) => {
       const q = Number(p.stockQuantity); if (!Number.isFinite(q)) return false;
@@ -108,10 +197,10 @@ router.get('/overview', ...guard('reports.read'), async (req, res) => {
     // Outstanding payments = non-cod orders not yet paid
     const outstandingPayments = myOrders.filter((o) =>
       o.paymentMethod !== 'cod' &&
-      !['paid', 'completed', 'released'].includes(o.paymentStatus || '') &&
-      !['cancelled', 'refunded'].includes(o.status || ''));
+      !['paid', 'completed', 'released'].includes(normStatus(o.paymentStatus)) &&
+      !['cancelled', 'refunded'].includes(normStatus(o.status)));
 
-    const netToday = analytics.netProfit(today, expenses, todayRange);
+    const netToday = analytics.netProfit(today, myExpenses, todayRange);
 
     res.json({
       success: true,
@@ -135,7 +224,7 @@ router.get('/overview', ...guard('reports.read'), async (req, res) => {
         alerts: buildAlerts(pendingOrders, lowStockProducts.length, outOfStock.length, outstandingPayments.length),
       },
     });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 function buildAlerts(pending, low, out, outstanding) {
@@ -157,7 +246,10 @@ router.get('/orders', ...guard('orders.read'), async (req, res) => {
 
     let out = mine;
     if (req.query.status && req.query.status !== 'all') {
-      out = out.filter((o) => (o.status || 'pending') === req.query.status);
+      // Canonicalize the requested status too, so ?status=confirmed matches the
+      // orders stored as `accepted` (and case differences never matter).
+      const wanted = stateMachine.canonicalStatus(req.query.status);
+      out = out.filter((o) => (normStatus(o.status) || 'pending') === wanted);
     }
     if (req.query.q) {
       const q = String(req.query.q).toLowerCase();
@@ -173,13 +265,13 @@ router.get('/orders', ...guard('orders.read'), async (req, res) => {
       success: true,
       data: out.slice(0, limit),
       counts: stateMachine.ORDER_STATUSES.reduce((acc, s) => {
-        acc[s] = mine.filter((o) => (o.status || 'pending') === s).length; return acc;
+        acc[s] = mine.filter((o) => (normStatus(o.status) || 'pending') === s).length; return acc;
       }, {}),
       allowedTransitionsHint: Object.fromEntries(
         out.slice(0, limit).map((o) => [o.id, stateMachine.allowedNextStatuses(o.status || 'pending')])
       ),
     });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.get('/orders/:orderId', ...guard('orders.read'), async (req, res) => {
@@ -190,7 +282,7 @@ router.get('/orders/:orderId', ...guard('orders.read'), async (req, res) => {
       return fail(res, 403, 'Not your order'); // IDOR guard §27
     }
     res.json({ success: true, data: order, allowedNextStatuses: stateMachine.allowedNextStatuses(order.status || 'pending') });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.post('/orders/:orderId/status', ...guard('orders.write'), async (req, res) => {
@@ -202,17 +294,32 @@ router.post('/orders/:orderId/status', ...guard('orders.write'), async (req, res
       return fail(res, 403, 'Not your order');
     }
 
-    const to = String(req.body && req.body.status || '');
+    // Canonicalize BEFORE validating and persisting. assertTransition maps
+    // aliases internally, but storing the raw alias (e.g. "confirmed" or
+    // "ready") left the order in NO bucket of any count, filter or consumer
+    // that iterates ORDER_STATUSES.
+    const to = stateMachine.canonicalStatus((req.body && req.body.status) || '');
+    if (!to) return fail(res, 400, 'status is required');
     const from = order.status || 'pending';
     try { stateMachine.assertTransition(from, to); } catch (e) {
       return fail(res, 422, e.message, 'INVALID_TRANSITION');
     }
 
     const now = new Date().toISOString();
-    await db.update('orders', req.params.orderId, {
-      status: to, updatedAt: now, [`statusTimestamps.${to}`]: now,
-      ...(to === 'cancelled' ? { cancelledBy: req.user.uid } : {}),
-    });
+    // The orders table has no statusTimestamps.* / cancelled_by / accepted_at
+    // columns — writing them made every transition 500/503. Only the milestone
+    // columns that physically exist are written.
+    const MILESTONE_COLS = {
+      preparing: 'preparationStartedAt',
+      in_transit: 'preparationStartedAt',
+      dispatched: 'preparationStartedAt',
+      delivered: 'completedAt',
+      completed: 'completedAt',
+    };
+    const milestone = MILESTONE_COLS[to];
+    const patch = { status: to, updatedAt: now };
+    if (milestone) patch[milestone] = now;
+    await db.update('orders', req.params.orderId, patch);
 
     await recordAudit(db, {
       actorId: req.user.uid, actorEmail: req.user.email,
@@ -227,7 +334,7 @@ router.post('/orders/:orderId/status', ...guard('orders.write'), async (req, res
     });
 
     res.json({ success: true, data: { id: req.params.orderId, status: to, previous: from, allowedNextStatuses: stateMachine.allowedNextStatuses(to) } });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 // ═══════════════════════════════ PRODUCTS ═══════════════════════════════
@@ -252,7 +359,7 @@ router.get('/products', ...guard('products.read'), async (req, res) => {
       total: mine.length,
       categories: [...new Set(mine.map((p) => p.category).filter(Boolean))].sort(),
     });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 function normalizeProduct(p) {
@@ -285,11 +392,28 @@ function validateProductInput(body) {
   return { errors, name, price, cost: body.cost === '' || body.cost == null ? null : Number(body.cost) };
 }
 
+/**
+ * Inline data-URL images (base64) bloat the products table and made every
+ * catalogue query transfer megabytes. Reject them at the API boundary.
+ * Small inline icons (< 8 KB) are tolerated.
+ */
+function isInlineImage(image) {
+  if (typeof image !== 'string') return false;
+  if (!/^data:image\//i.test(image)) return false;
+  return image.length > 8 * 1024;
+}
+
 router.post('/products', ...guard('products.write'), async (req, res) => {
   try {
     const db = getDb(req);
     const { errors, name, price, cost } = validateProductInput(req.body || {});
     if (errors.length) return fail(res, 400, errors.join('; '));
+    if (isInlineImage(req.body.image)) return fail(res, 400, 'Inline base64 images are not allowed — upload the file and pass its URL');
+
+    const openingStock = Number(req.body.stockQuantity ?? 0);
+    if (!Number.isFinite(openingStock) || openingStock < 0) {
+      return fail(res, 400, 'stockQuantity must be a non-negative number');
+    }
 
     const doc = {
       name, price, cost,
@@ -300,20 +424,25 @@ router.post('/products', ...guard('products.write'), async (req, res) => {
       barcode: String(req.body.barcode || ''),
       sellerId: req.merchantId,
       merchantId: req.merchantId,
-      isAvailable: req.body.isAvailable !== false,
-      stockQuantity: Number(req.body.stockQuantity ?? 0),
+      isAvailable: req.body.isAvailable === undefined ? true : toBool(req.body.isAvailable),
+      // Inserted as 0: the ledger below is the single writer of the balance.
+      // Inserting the opening stock and then also sending it as a ledger delta
+      // counted it twice, so a product created with 10 ended up with 20.
+      stockQuantity: 0,
       minStock: Number(req.body.minStock ?? 5),
       createdAt: new Date().toISOString(),
     };
     const ref = await db.add('products', doc);
 
     // Opening stock goes through the ledger for auditability
-    if (doc.stockQuantity > 0) {
-      await ledger.applyMovement(db, getAdmin(req), {
+    let stockQuantity = 0;
+    if (openingStock > 0) {
+      const movement = await ledger.applyMovement(db, getAdmin(req), {
         merchantId: req.merchantId, productId: ref.id,
-        delta: doc.stockQuantity, type: 'adjustment',
+        delta: openingStock, type: 'adjustment',
         reason: 'opening stock', actorId: req.user.uid,
       });
+      stockQuantity = movement.newStock;
     }
 
     await recordAudit(db, {
@@ -321,8 +450,8 @@ router.post('/products', ...guard('products.write'), async (req, res) => {
       action: 'product.created', resourceType: 'product', resourceId: ref.id,
       merchantId: req.merchantId, after: { name, price }, req,
     });
-    res.json({ success: true, data: { id: ref.id, ...doc } });
-  } catch (e) { fail(res, 500, e.message); }
+    res.json({ success: true, data: { ...doc, id: ref.id, stockQuantity } });
+  } catch (e) { failDb(res, e); }
 });
 
 router.put('/products/:productId', ...guard('products.write'), async (req, res) => {
@@ -338,17 +467,43 @@ router.put('/products/:productId', ...guard('products.write'), async (req, res) 
     if (req.body.name != null) patch.name = String(req.body.name).trim();
     if (req.body.description != null) patch.description = String(req.body.description);
     if (req.body.category != null) patch.category = String(req.body.category);
-    if (req.body.image != null) patch.image = String(req.body.image);
+    if (req.body.image != null) {
+      if (isInlineImage(req.body.image)) return fail(res, 400, 'Inline base64 images are not allowed — upload the file and pass its URL');
+      patch.image = String(req.body.image);
+    }
     if (req.body.sku != null) patch.sku = String(req.body.sku);
     if (req.body.barcode != null) patch.barcode = String(req.body.barcode);
-    if (req.body.isAvailable != null) patch.isAvailable = Boolean(req.body.isAvailable);
-    if (req.body.minStock != null) patch.minStock = Number(req.body.minStock);
+    if (req.body.isAvailable != null) patch.isAvailable = toBool(req.body.isAvailable);
+    if (req.body.minStock != null) {
+      const minStock = Number(req.body.minStock);
+      if (!Number.isFinite(minStock) || minStock < 0) {
+        return fail(res, 400, 'minStock must be a non-negative number');
+      }
+      patch.minStock = minStock;
+    }
     if (req.body.price != null) {
       const price = Number(req.body.price);
       if (!Number.isFinite(price) || price < 0) return fail(res, 400, 'price must be a non-negative number');
       patch.price = price;
     }
-    if (req.body.cost != null) patch.cost = req.body.cost === '' ? null : Number(req.body.cost);
+    if (req.body.cost != null) {
+      if (req.body.cost === '') {
+        patch.cost = null;
+      } else {
+        const cost = Number(req.body.cost);
+        if (!Number.isFinite(cost) || cost < 0) return fail(res, 400, 'cost must be a non-negative number');
+        patch.cost = cost;
+      }
+    }
+
+    // minStock and cost have no physical column in the Supabase schema (see
+    // TABLE_FIELD_MAP in lib/server-db.js) and are dropped by the adapter.
+    // Warn instead of silently reporting a save that never happened.
+    for (const field of ['minStock', 'cost']) {
+      if (patch[field] !== undefined) {
+        console.warn(`[merchant-os] products has no column for "${field}" in the active database — write dropped`);
+      }
+    }
 
     await db.update('products', req.params.productId, { ...patch, updatedAt: new Date().toISOString() });
 
@@ -359,8 +514,11 @@ router.put('/products/:productId', ...guard('products.write'), async (req, res) 
       before: { price: existing.price, name: existing.name, isAvailable: existing.isAvailable },
       after: patch, req,
     });
-    res.json({ success: true, data: { id: req.params.productId, ...patch } });
-  } catch (e) { fail(res, 500, e.message); }
+    // Re-read so the response reflects what is actually persisted; echoing the
+    // patch told callers that dropped fields had been saved.
+    const persisted = await db.get('products', req.params.productId);
+    res.json({ success: true, data: persisted || { id: req.params.productId, ...patch } });
+  } catch (e) { failDb(res, e); }
 });
 
 /** Archive instead of hard delete when the product has order history. */
@@ -374,9 +532,12 @@ router.delete('/products/:productId', ...guard('products.write'), async (req, re
     }
 
     const orders = await listAll(db, 'orders');
+    // itemsToArray: Supabase can return `items` as a JSON string (text column),
+    // and `(o.items || []).some(...)` then threw "some is not a function",
+    // 500-ing the delete route for any merchant with such an order.
     const referenced = orders.some((o) =>
       (o.sellerId === req.merchantId || o.merchantId === req.merchantId) &&
-      (o.items || []).some((it) => it.id === req.params.productId));
+      analytics.itemsToArray(o.items).some((it) => it.id === req.params.productId));
 
     if (referenced) {
       await db.update('products', req.params.productId, {
@@ -396,7 +557,7 @@ router.delete('/products/:productId', ...guard('products.write'), async (req, re
       before: { name: existing.name }, req,
     });
     res.json({ success: true, data: { id: req.params.productId, deleted: true } });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.post('/products/bulk', ...guard('products.write'), async (req, res) => {
@@ -411,7 +572,7 @@ router.post('/products/bulk', ...guard('products.write'), async (req, res) => {
         results.push({ id, ok: false }); continue;
       }
       if (action === 'setAvailability') {
-        await db.update('products', id, { isAvailable: Boolean(value), updatedAt: new Date().toISOString() });
+        await db.update('products', id, { isAvailable: toBool(value), updatedAt: new Date().toISOString() });
         results.push({ id, ok: true });
       } else if (action === 'archive') {
         await db.update('products', id, { archived: true, isAvailable: false, updatedAt: new Date().toISOString() });
@@ -425,7 +586,7 @@ router.post('/products/bulk', ...guard('products.write'), async (req, res) => {
       merchantId: req.merchantId, after: { ids, value }, req,
     });
     res.json({ success: true, data: results });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 // ═══════════════════════════════ INVENTORY ═══════════════════════════════
@@ -455,7 +616,7 @@ router.get('/inventory', ...guard('inventory.read'), async (req, res) => {
         inventoryValue: Math.round(rows.reduce((s, r) => s + r.value, 0)),
       },
     });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.get('/inventory/movements', ...guard('inventory.read'), async (req, res) => {
@@ -465,26 +626,46 @@ router.get('/inventory/movements', ...guard('inventory.read'), async (req, res) 
     if (req.query.productId) mine = mine.filter((m) => m.productId === req.query.productId);
     mine.sort((a, b) => String(b.ts || '').localeCompare(String(a.ts || '')));
     res.json({ success: true, data: mine.slice(0, parseInt(req.query.limit, 10) || 100) });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.post('/inventory/adjust', ...guard('inventory.write'), async (req, res) => {
   try {
+    const db = getDb(req);
     const { productId, delta, type, reason } = req.body || {};
-    const result = await ledger.applyMovement(getDb(req), getAdmin(req), {
-      merchantId: req.merchantId, productId: String(productId || ''),
-      delta: Number(delta), type: String(type || 'adjustment'),
+
+    const pid = String(productId || '').trim();
+    if (!pid) return fail(res, 400, 'productId is required');
+
+    const n = Number(delta);
+    if (!Number.isFinite(n)) return fail(res, 400, 'delta must be a finite number');
+    if (n === 0) return fail(res, 400, 'delta must be non-zero');
+
+    // TENANT ISOLATION: the ledger loads and rewrites whatever productId it is
+    // given, so ownership must be proven here. Without this check any merchant
+    // could rewrite another merchant's stock (the movement row was even tagged
+    // with the caller's merchantId, hiding it from the victim's ledger view).
+    const product = await db.get('products', pid);
+    if (!product) return fail(res, 404, 'Product not found');
+    if (product.sellerId !== req.merchantId && product.merchantId !== req.merchantId) {
+      return fail(res, 403, 'Not your product');
+    }
+
+    const result = await ledger.applyMovement(db, getAdmin(req), {
+      merchantId: req.merchantId, productId: pid,
+      delta: n, type: String(type || 'adjustment'),
       reason: reason ? String(reason) : undefined, actorId: req.user.uid,
     });
-    await recordAudit(getDb(req), {
+    await recordAudit(db, {
       actorId: req.user.uid, action: 'inventory.adjusted', resourceType: 'product',
-      resourceId: productId, merchantId: req.merchantId,
-      after: { delta, type, newStock: result.newStock }, req,
+      resourceId: pid, merchantId: req.merchantId,
+      after: { delta: n, type, newStock: result.newStock }, req,
     });
     res.json({ success: true, data: result });
   } catch (e) {
     if (e.code === 'INSUFFICIENT_STOCK') return fail(res, 422, e.message, e.code);
-    fail(res, 500, e.message);
+    if (LEDGER_INPUT_ERROR.test(e.message || '')) return fail(res, 400, e.message);
+    failDb(res, e);
   }
 });
 
@@ -515,7 +696,7 @@ router.get('/customers', ...guard('customers.read'), async (req, res) => {
         id: o.customerId, name: o.customerName || '', phone: o.customerPhone || o.contactPhone || '',
         ordersCount: 0, totalSpent: 0, lastOrderAt: null,
       };
-      if (!['cancelled', 'refunded'].includes(o.status || '')) {
+      if (!['cancelled', 'refunded'].includes(normStatus(o.status))) {
         prev.ordersCount++;
         prev.totalSpent += Number(o.total) || 0;
       }
@@ -539,7 +720,7 @@ router.get('/customers', ...guard('customers.read'), async (req, res) => {
 
     customers.sort((a, b) => b.totalSpent - a.totalSpent);
     res.json({ success: true, data: customers.slice(0, parseInt(req.query.limit, 10) || 200) });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.get('/customers/:customerId', ...guard('customers.read'), async (req, res) => {
@@ -555,28 +736,40 @@ router.get('/customers/:customerId', ...guard('customers.read'), async (req, res
     const profile = {
       id: req.params.customerId,
       name: mine[0].customerName || '', phone: mine[0].customerPhone || mine[0].contactPhone || '',
-      ordersCount: mine.filter((o) => !['cancelled', 'refunded'].includes(o.status || '')).length,
-      totalSpent: Math.round(mine.filter((o) => !['cancelled', 'refunded'].includes(o.status || '')).reduce((s, o) => s + (Number(o.total) || 0), 0)),
+      ordersCount: mine.filter((o) => !['cancelled', 'refunded'].includes(normStatus(o.status))).length,
+      totalSpent: Math.round(mine.filter((o) => !['cancelled', 'refunded'].includes(normStatus(o.status))).reduce((s, o) => s + (Number(o.total) || 0), 0)),
       lastOrderAt: mine[0].createdAt,
       orders: mine.slice(0, 20).map(({ id, total, status, createdAt }) => ({ id, total, status, createdAt })),
     };
     profile.segment = segment(profile);
     res.json({ success: true, data: profile });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.post('/customers/:customerId/notes', ...guard('customers.write'), async (req, res) => {
   try {
     const db = getDb(req);
+    const customerId = String(req.params.customerId || '').trim();
+    if (!customerId) return fail(res, 400, 'customerId required');
     const note = String((req.body || {}).note || '').slice(0, 2000);
     if (!note) return fail(res, 400, 'note required');
+
+    // The customer must actually belong to this merchant's order history,
+    // otherwise notes could be attached to any customer id platform-wide.
+    // Identity matches GET /customers/:customerId (same o.customerId check).
+    const orders = await listAll(db, 'orders');
+    const known = orders.some((o) =>
+      (o.sellerId === req.merchantId || o.merchantId === req.merchantId) &&
+      o.customerId === customerId);
+    if (!known) return fail(res, 404, 'Customer not found for this merchant');
+
     const doc = {
-      merchantId: req.merchantId, customerId: req.params.customerId,
+      merchantId: req.merchantId, customerId,
       note, authorId: req.user.uid, ts: new Date().toISOString(),
     };
     const ref = await db.add('customer_notes', doc);
     res.json({ success: true, data: { id: ref.id, ...doc } });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 // ═══════════════════════════════ PAYMENTS (read-only view) ═══════════════════════════════
@@ -616,7 +809,7 @@ router.get('/payments', ...guard('payments.read'), async (req, res) => {
     out.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
 
     res.json({ success: true, data: out.slice(0, parseInt(req.query.limit, 10) || 200), summary });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 // ═══════════════════════════════ SUPPLIERS ═══════════════════════════════
@@ -630,7 +823,7 @@ router.get('/suppliers', ...guard('suppliers.read'), async (req, res) => {
       mine = mine.filter((s) => String(s.name || '').toLowerCase().includes(q));
     }
     res.json({ success: true, data: mine });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.post('/suppliers', ...guard('suppliers.write'), async (req, res) => {
@@ -651,7 +844,7 @@ router.post('/suppliers', ...guard('suppliers.write'), async (req, res) => {
       resourceId: ref.id, merchantId: req.merchantId, after: { name: doc.name }, req,
     });
     res.json({ success: true, data: { id: ref.id, ...doc } });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.put('/suppliers/:supplierId', ...guard('suppliers.write'), async (req, res) => {
@@ -671,7 +864,7 @@ router.put('/suppliers/:supplierId', ...guard('suppliers.write'), async (req, re
       before: { name: existing.name }, after: patch, req,
     });
     res.json({ success: true, data: { id: req.params.supplierId, ...patch } });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 // ═══════════════════════════════ PURCHASE ORDERS ═══════════════════════════════
@@ -694,7 +887,7 @@ router.get('/purchases', ...guard('purchases.read'), async (req, res) => {
     const mine = pos.filter((p) => p.merchantId === req.merchantId);
     mine.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
     res.json({ success: true, data: mine.slice(0, 200) });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.post('/purchases', ...guard('purchases.write'), async (req, res) => {
@@ -729,7 +922,7 @@ router.post('/purchases', ...guard('purchases.write'), async (req, res) => {
       resourceId: ref.id, merchantId: req.merchantId, after: { status: 'draft', total: doc.totalCost }, req,
     });
     res.json({ success: true, data: { id: ref.id, ...doc } });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.post('/purchases/:poId/status', ...guard('purchases.write'), async (req, res) => {
@@ -751,7 +944,7 @@ router.post('/purchases/:poId/status', ...guard('purchases.write'), async (req, 
       before: { status: po.status }, after: { status: to }, req,
     });
     res.json({ success: true, data: { id: req.params.poId, status: to } });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 /**
@@ -769,7 +962,14 @@ router.post('/purchases/:poId/receive', ...guard('purchases.write'), async (req,
     }
 
     const receipts = Array.isArray((req.body || {}).receipts) ? req.body.receipts : [];
-    const applied = [];
+    if (!receipts.length) return fail(res, 400, 'receipts[] required');
+
+    // ── Phase 1: validate the WHOLE batch before touching inventory ──────
+    // Ledger movements used to be applied inside this loop, so a bad later line
+    // returned 400 with the earlier lines already applied: stock and the PO's
+    // quantityReceived diverged, and replaying the same request double-counted
+    // the stock. Validate everything first, then apply.
+    const planned = [];
     for (const r of receipts) {
       const line = po.items.find((it) => it.productId === r.productId);
       if (!line) return fail(res, 400, `Product ${r.productId} is not on this purchase order`);
@@ -779,15 +979,24 @@ router.post('/purchases/:poId/receive', ...guard('purchases.write'), async (req,
       if (already + qty > line.quantityOrdered) {
         return fail(res, 422, `Cannot receive ${qty} of ${line.name}: only ${line.quantityOrdered - already} remaining`, 'OVER_RECEIPT');
       }
+      if (planned.some((p) => p.line === line)) {
+        return fail(res, 400, `Product ${line.productId} appears more than once in this receipt`);
+      }
+      planned.push({ line, qty });
+    }
+    if (!planned.length) return fail(res, 400, 'No positive quantities received');
+
+    // ── Phase 2: apply. Nothing below can return a 4xx mid-batch. ────────
+    const applied = [];
+    for (const { line, qty } of planned) {
       const mv = await ledger.applyMovement(db, getAdmin(req), {
         merchantId: req.merchantId, productId: line.productId,
         delta: qty, type: 'purchase_receive',
         reason: `PO ${req.params.poId}`, refId: req.params.poId, actorId: req.user.uid,
       });
-      line.quantityReceived = already + qty;
+      line.quantityReceived = (line.quantityReceived || 0) + qty;
       applied.push({ productId: line.productId, name: line.name, qty, newStock: mv.newStock });
     }
-    if (!applied.length) return fail(res, 400, 'No positive quantities received');
 
     const allReceived = po.items.every((it) => (it.quantityReceived || 0) >= it.quantityOrdered);
     const someReceived = po.items.some((it) => (it.quantityReceived || 0) > 0);
@@ -805,7 +1014,7 @@ router.post('/purchases/:poId/receive', ...guard('purchases.write'), async (req,
       after: { applied, newStatus }, req,
     });
     res.json({ success: true, data: { id: req.params.poId, status: newStatus, applied } });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 // ═══════════════════════════════ EXPENSES ═══════════════════════════════
@@ -831,7 +1040,7 @@ router.get('/expenses', ...guard('expenses.read'), async (req, res) => {
       totalsByCategory,
       total: Math.round(mine.reduce((s, x) => s + (Number(x.amount) || 0), 0)),
     });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.post('/expenses', ...guard('expenses.write'), async (req, res) => {
@@ -852,7 +1061,7 @@ router.post('/expenses', ...guard('expenses.write'), async (req, res) => {
       resourceId: ref.id, merchantId: req.merchantId, after: { amount, category }, req,
     });
     res.json({ success: true, data: { id: ref.id, ...doc } });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.put('/expenses/:expenseId', ...guard('expenses.write'), async (req, res) => {
@@ -876,7 +1085,7 @@ router.put('/expenses/:expenseId', ...guard('expenses.write'), async (req, res) 
       before: { amount: existing.amount, category: existing.category }, after: patch, req,
     });
     res.json({ success: true, data: { id: req.params.expenseId, ...patch } });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.delete('/expenses/:expenseId', ...guard('expenses.write'), async (req, res) => {
@@ -891,7 +1100,7 @@ router.delete('/expenses/:expenseId', ...guard('expenses.write'), async (req, re
       before: { amount: existing.amount, category: existing.category }, req,
     });
     res.json({ success: true, data: { id: req.params.expenseId, deleted: true } });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 // ═══════════════════════════════ STAFF ═══════════════════════════════
@@ -908,7 +1117,7 @@ router.get('/staff', ...guard('staff.read'), async (req, res) => {
         createdAt: s.createdAt || null,
       }));
     res.json({ success: true, data: mine });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.post('/staff', ...guard('staff.manage'), async (req, res) => {
@@ -932,7 +1141,7 @@ router.post('/staff', ...guard('staff.manage'), async (req, res) => {
       resourceId: ref.id, merchantId: req.merchantId, after: { email: doc.email, role: doc.staffRole }, req,
     });
     res.json({ success: true, data: { id: ref.id, ...doc } });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.put('/staff/:staffId/capabilities', ...guard('staff.manage'), async (req, res) => {
@@ -960,7 +1169,7 @@ router.put('/staff/:staffId/capabilities', ...guard('staff.manage'), async (req,
       before, after: caps, req,
     });
     res.json({ success: true, data: { id: req.params.staffId, capabilities: caps } });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.delete('/staff/:staffId', ...guard('staff.manage'), async (req, res) => {
@@ -977,7 +1186,7 @@ router.delete('/staff/:staffId', ...guard('staff.manage'), async (req, res) => {
       before: { email: member.email }, req,
     });
     res.json({ success: true, data: { id: req.params.staffId, deactivated: true } });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 // ═══════════════════════════════ NOTIFICATIONS ═══════════════════════════════
@@ -990,7 +1199,7 @@ router.get('/notifications', ...guard('notifications.read'), async (req, res) =>
       .slice(0, 50);
     const unread = mine.filter((n) => !n.read).length;
     res.json({ success: true, data: mine, unread });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
 });
 
 router.post('/notifications/mark-read', ...guard('notifications.read'), async (req, res) => {
@@ -1003,7 +1212,462 @@ router.post('/notifications/mark-read', ...guard('notifications.read'), async (r
       await db.update('merchant_notifications', n.id, { read: true, readAt: new Date().toISOString() });
     }
     res.json({ success: true, data: { marked: mine.length } });
-  } catch (e) { fail(res, 500, e.message); }
+  } catch (e) { failDb(res, e); }
+});
+
+// ─── Merchant profile (settings "Save Changes") ─────────────────────────
+// GET is the read counterpart of PUT /profile: the dashboard needs the store
+// name/logo/category for its header and Settings form, and previously got them
+// by querying Firestore directly from the browser.
+router.get('/profile', ...guard('settings.read'), async (req, res) => {
+  try {
+    const db = getDb(req);
+    const seller = await db.get('sellers', req.merchantId);
+    if (!seller) return fail(res, 404, 'Merchant profile not found');
+
+    // Nothing recomputes sellers.rating when reviews are written, so a merchant
+    // that has reviews but no stored rating would otherwise see "—". Derive it
+    // on read; the stored value still wins when present.
+    let rating = seller.rating ?? null;
+    if (rating == null) {
+      try {
+        const reviews = await listAll(db, 'reviews');
+        const mine = reviews.filter((r) =>
+          r.sellerId === req.merchantId || r.merchantId === req.merchantId || r.restaurantId === req.merchantId);
+        const scored = mine.map((r) => Number(r.rating)).filter((n) => Number.isFinite(n) && n > 0);
+        if (scored.length) {
+          rating = Math.round((scored.reduce((s, n) => s + n, 0) / scored.length) * 10) / 10;
+        }
+      } catch (_) { /* reviews are optional; leave the rating null */ }
+    }
+
+    res.json({
+      success: true,
+      data: {
+        id: req.merchantId,
+        name: seller.name || '',
+        phone: seller.phone || seller.sellerPhone || seller.seller_phone || '',
+        description: seller.description || '',
+        address: seller.address || '',
+        category: seller.category || '',
+        logoUrl: seller.logoUrl || seller.logo_url || '',
+        isOpen: seller.isOpen !== false,
+        rating,
+        ratingSource: seller.rating != null ? 'stored' : (rating != null ? 'computed-from-reviews' : null),
+      },
+    });
+  } catch (e) { failDb(res, e); }
+});
+
+router.put('/profile', ...guard('settings.write'), async (req, res) => {
+  try {
+    const db = getDb(req);
+    const patch = { updatedAt: new Date().toISOString() };
+    if (req.body.name != null) {
+      const name = String(req.body.name).trim();
+      if (!name) return fail(res, 400, 'name cannot be empty');
+      patch.name = name;
+    }
+    if (req.body.phone != null) patch.phone = String(req.body.phone).trim();
+    if (req.body.description != null) patch.description = String(req.body.description);
+    if (req.body.address != null) patch.address = String(req.body.address);
+    // Storefront controls the dashboard exposes. Without these the settings form
+    // could only honestly say "the API cannot save this".
+    if (req.body.isOpen != null) patch.isOpen = toBool(req.body.isOpen);
+    if (req.body.logoUrl != null) patch.logoUrl = String(req.body.logoUrl).trim();
+    if (req.body.category != null) patch.category = String(req.body.category).trim();
+    if (Object.keys(patch).length === 1) return fail(res, 400, 'no updatable fields supplied');
+    await db.update('sellers', req.merchantId, patch);
+    // Re-read so the response reflects what is actually persisted.
+    const persisted = await db.get('sellers', req.merchantId);
+    res.json({ success: true, data: persisted || { id: req.merchantId, ...patch } });
+  } catch (e) { failDb(res, e); }
+});
+
+// ─── Promotions (merchant promo codes) ─────────────────────────────────
+// The `promotions` table exists in Supabase with columns:
+//   id, code, discount_type, discount_value, usage_count, ... — map the
+//   merchant-OS camelCase promo shape onto it.
+router.get('/promos', ...guard('products.read'), async (req, res) => {
+  try {
+    const db = getDb(req);
+    const promos = await listAll(db, 'promotions');
+    const mine = promos.filter((p) => p.merchantId === req.merchantId || p.sellerId === req.merchantId)
+      .map((p) => ({
+        id: p.id, code: p.code,
+        discount: Number(p.discountValue ?? p.discount_value ?? p.discount ?? 0),
+        // Exposed so the UI can render a percentage and an amount differently,
+        // instead of labelling a TSh 5,000 promo as "5000%".
+        discountType: p.discountType || p.discount_type || (Number(p.discountValue ?? 0) > 100 ? 'amount' : 'percent'),
+        usageCount: Number(p.usageCount ?? p.usage_count ?? 0),
+        maxUses: p.maxUses ?? p.usage_limit ?? null,
+        minOrder: p.minOrder ?? p.min_order_amount ?? null,
+        expiresAt: p.expiresAt ?? p.valid_until ?? null,
+        isActive: p.isActive ?? p.is_active ?? true,
+        createdAt: p.createdAt ?? p.created_at ?? null,
+      }));
+    res.json({ success: true, data: mine });
+  } catch (e) { failDb(res, e); }
+});
+
+router.post('/promos', ...guard('products.write'), async (req, res) => {
+  try {
+    const db = getDb(req);
+    const b = req.body || {};
+    const code = String(b.code || '').trim().toUpperCase();
+    const discount = Number(b.discount ?? b.discountValue);
+    if (!code || !Number.isFinite(discount) || discount <= 0) {
+      return fail(res, 400, 'code and a positive discount are required');
+    }
+    const doc = {
+      merchantId: req.merchantId, code,
+      discountType: b.discountType || (discount <= 100 ? 'percent' : 'amount'),
+      discountValue: discount,
+      maxUses: Number(b.maxUses) || 100,
+      minOrder: Number(b.minOrder) || 0,
+      expiresAt: b.expiresAt || null,
+      isActive: b.isActive !== false,
+      createdAt: new Date().toISOString(),
+    };
+    const ref = await db.add('promotions', doc);
+    res.json({ success: true, data: { id: ref.id, ...doc } });
+  } catch (e) { failDb(res, e); }
+});
+
+router.put('/promos/:promoId', ...guard('products.write'), async (req, res) => {
+  try {
+    const db = getDb(req);
+    const existing = await db.get('promotions', req.params.promoId);
+    if (!existing) return fail(res, 404, 'Promo not found');
+    if (existing.merchantId !== req.merchantId && existing.sellerId !== req.merchantId) {
+      return fail(res, 403, 'Not your promo');
+    }
+    const b = req.body || {};
+    const patch = { updatedAt: new Date().toISOString() };
+    if (b.isActive != null) patch.isActive = Boolean(b.isActive);
+    if (b.discount != null) {
+      const discount = Number(b.discount);
+      if (!Number.isFinite(discount) || discount <= 0) return fail(res, 400, 'discount must be a positive number');
+      patch.discountValue = discount;
+    }
+    if (b.maxUses != null) patch.maxUses = Number(b.maxUses) || null;
+    if (b.minOrder != null) patch.minOrder = Number(b.minOrder) || 0;
+    if (b.expiresAt !== undefined) patch.expiresAt = b.expiresAt || null;
+    await db.update('promotions', req.params.promoId, patch);
+    await recordAudit(db, {
+      actorId: req.user.uid, actorEmail: req.user.email,
+      action: 'promo.updated', resourceType: 'promo', resourceId: req.params.promoId,
+      merchantId: req.merchantId, before: { isActive: existing.isActive }, after: patch, req,
+    });
+    res.json({ success: true, data: { id: req.params.promoId, ...patch } });
+  } catch (e) { failDb(res, e); }
+});
+
+router.delete('/promos/:promoId', ...guard('products.write'), async (req, res) => {
+  try {
+    const db = getDb(req);
+    const existing = await db.get('promotions', req.params.promoId);
+    if (!existing) return fail(res, 404, 'Promo not found');
+    if (existing.merchantId !== req.merchantId && existing.sellerId !== req.merchantId) {
+      return fail(res, 403, 'Not your promo');
+    }
+    await db.delete('promotions', req.params.promoId);
+    await recordAudit(db, {
+      actorId: req.user.uid, action: 'promo.deleted', resourceType: 'promo',
+      resourceId: req.params.promoId, merchantId: req.merchantId,
+      before: { code: existing.code }, req,
+    });
+    res.json({ success: true, data: { id: req.params.promoId, deleted: true } });
+  } catch (e) { failDb(res, e); }
+});
+
+router.get('/reviews', ...guard('products.read'), async (req, res) => {
+  try {
+    const reviews = await listAll(getDb(req), 'reviews');
+    const mine = reviews.filter((r) =>
+      r.sellerId === req.merchantId || r.merchantId === req.merchantId || r.restaurantId === req.merchantId);
+    mine.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    res.json({ success: true, data: mine.slice(0, 200) });
+  } catch (e) { failDb(res, e); }
+});
+
+// ─── Drivers ────────────────────────────────────────────────────────────
+// Dispatch-scoped: listing drivers is part of assigning orders, so it needs
+// orders.write rather than products.read (which every inventory-only role has).
+router.get('/drivers', ...guard('orders.write'), async (req, res) => {
+  try {
+    const drivers = await listAll(getDb(req), 'drivers');
+    // Whitelisted fields only. Spreading the whole driver document (`...d`)
+    // leaked profile ids, phone numbers and location fields for every driver
+    // on the platform to any merchant.
+    const available = drivers
+      .filter(d => d.isOnline !== false && d.is_online !== false && !d.currentOrderId && !d.current_order_id)
+      .map(d => ({
+        id: d.id,
+        name: d.name || d.displayName || d.display_name || '',
+        phone: d.phone || null,
+        vehicleType: d.vehicleType || d.vehicle_type || null,
+        vehicleNumber: d.vehicleNumber || d.vehicle_number || null,
+        rating: d.rating ?? null,
+        isOnline: d.isOnline !== false && d.is_online !== false,
+      }));
+    res.json({ success: true, data: available });
+  } catch (e) { failDb(res, e); }
+});
+
+router.post('/orders/:id/assign-driver', ...guard('orders.write'), async (req, res) => {
+  try {
+    const db = getDb(req);
+    const orderId = String(req.params.id || '');
+    const driverId = (req.body || {}).driverId;
+    if (!driverId) return fail(res, 400, 'driverId required');
+
+    // `db` is the flat adapter object (server-production.js makeRouteDb), NOT a
+    // callable query builder. The previous db('orders').where(...).first() threw
+    // "db is not a function" and returned 500 on every single call.
+    const order = await db.get('orders', orderId);
+    if (!order) return fail(res, 404, 'Order not found');
+    // Tenant isolation: without this any merchant could reassign another
+    // merchant's order and mutate an arbitrary driver row.
+    if (order.sellerId !== req.merchantId && order.merchantId !== req.merchantId) {
+      return fail(res, 403, 'Not your order');
+    }
+
+    const driver = await db.get('drivers', driverId);
+    if (!driver) return fail(res, 404, 'Driver not found');
+
+    const driverName = (req.body || {}).driverName
+      || driver.name || driver.displayName || driver.display_name || '';
+
+    const now = new Date().toISOString();
+    await db.update('orders', orderId, {
+      driverId, driverName, status: 'assigned', assignedAt: now, updatedAt: now,
+    });
+    await db.update('drivers', driverId, {
+      available: false, currentOrderId: orderId, updatedAt: now,
+    });
+
+    await recordAudit(db, {
+      actorId: req.user.uid, actorEmail: req.user.email,
+      action: 'order.driver_assigned', resourceType: 'order', resourceId: orderId,
+      merchantId: req.merchantId, before: { driverId: order.driverId || null },
+      after: { driverId, driverName }, req,
+    });
+
+    res.json({ success: true, message: 'Driver assigned', data: { orderId, driverId, driverName } });
+  } catch (e) { failDb(res, e); }
+});
+
+
+// ─── Balance & payouts (wallet-based) ──────────────────────────────────
+router.get('/balance', ...guard('payments.read'), async (req, res) => {
+  try {
+    const db = getDb(req);
+    const payments = await listAll(db, 'orders');
+    const mine = payments.filter((o) => o.sellerId === req.merchantId || o.merchantId === req.merchantId);
+    // Compare case-insensitively (see normStatus): live data holds "COMPLETED"
+    // and "REFUNDED", which made a refunded order count as pending income and
+    // hid completed orders from the balance.
+    const paid = mine.filter((o) => ['paid', 'released', 'completed'].includes(normStatus(o.paymentStatus)) || ['delivered', 'completed'].includes(normStatus(o.status)));
+    const pending = mine.filter((o) => o.paymentMethod !== 'cod' && !['paid', 'released', 'completed'].includes(normStatus(o.paymentStatus)) && !['cancelled', 'refunded'].includes(normStatus(o.status)));
+    const lifetime = paid.reduce((s, o) => s + (Number(o.total) || 0) - (Number(o.deliveryFee) || 0) - (Number(o.serviceFee) || 0), 0);
+    const pendingAmt = pending.reduce((s, o) => s + (Number(o.total) || 0), 0);
+    res.json({
+      success: true,
+      data: {
+        availableBalance: Math.round(lifetime * 0.9), // platform commission ~10%
+        pendingBalance: Math.round(pendingAmt),
+        lifetimeEarnings: Math.round(lifetime),
+        currency: 'TZS',
+      },
+    });
+  } catch (e) { failDb(res, e); }
+});
+
+/**
+ * Resolve the vendor_payouts.vendor_id for this merchant.
+ * vendor_payouts FKs vendors(id) — vendors are keyed by profile_id, while
+ * req.merchantId is the sellers id. Chain: profiles(firebase_uid=uid) →
+ * vendors(profile_id=profile.id). Falls back to req.merchantId when no
+ * vendors row exists (Firestore mode stores payouts by seller id).
+ */
+async function resolveVendorId(db, req) {
+  try {
+    if (db && db.where) {
+      const profiles = await db.where('profiles', 'firebase_uid', '==', req.user.uid);
+      const profile = Array.isArray(profiles) && profiles[0];
+      if (profile && profile.id) {
+        const vendors = await db.where('vendors', 'profile_id', '==', profile.id);
+        if (Array.isArray(vendors) && vendors.length > 0) return vendors[0].id;
+      }
+    }
+  } catch (_) { /* fall through */ }
+  return req.merchantId;
+}
+
+router.post('/payout', ...guard('payments.write'), async (req, res) => {
+  try {
+    const db = getDb(req);
+    const amount = Math.max(0, Math.round(Number(req.body && req.body.amount) || 0));
+    if (!amount) return fail(res, 400, 'amount (TZS) is required');
+
+    // Available balance (same math as GET /balance, including the
+    // case-insensitive status comparison so the two never disagree)
+    const orders = await listAll(db, 'orders');
+    const mine = orders.filter((o) => o.sellerId === req.merchantId || o.merchantId === req.merchantId);
+    const paidOrders = mine.filter((o) => ['paid', 'released', 'completed'].includes(normStatus(o.paymentStatus)) || ['delivered', 'completed'].includes(normStatus(o.status)));
+    const lifetime = paidOrders.reduce((s, o) => s + (Number(o.total) || 0) - (Number(o.deliveryFee) || 0) - (Number(o.serviceFee) || 0), 0);
+    const available = Math.round(lifetime * 0.9);
+
+    const vendorId = await resolveVendorId(db, req);
+
+    // Sum of prior non-rejected payout requests must not exceed available
+    let prior = [];
+    try { prior = (await db.where('vendor_payouts', 'vendorId', '==', vendorId)) || []; } catch (_) { prior = []; }
+    const outstanding = prior.filter((p) => (p.status || 'pending') !== 'rejected' && (p.status || 'pending') !== 'failed').reduce((s, p) => s + (Number(p.amount) || 0), 0);
+    if (amount + outstanding > available) {
+      return fail(res, 422, `Requested ${amount} TZS exceeds available balance ${available} TZS (outstanding requests: ${outstanding} TZS)`);
+    }
+
+    const now = new Date().toISOString();
+    const ref = await db.add('vendor_payouts', {
+      vendorId,
+      amount,
+      method: req.body.method || 'mobile_money',
+      destination: req.body.destination || null,
+      status: 'pending',
+      requestedBy: req.user.email || req.user.uid,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await db.add('merchant_notifications', {
+      merchantId: req.merchantId, type: 'payout_requested',
+      message: `Payout of ${amount.toLocaleString()} TZS requested`,
+      severity: 'info', read: false, ts: now,
+    });
+    res.json({ success: true, data: { message: 'Payout request submitted', requestId: ref.id, amount, status: 'pending' } });
+  } catch (e) { failDb(res, e); }
+});
+
+// Payout history for this merchant
+router.get('/payouts', ...guard('payments.read'), async (req, res) => {
+  try {
+    const db = getDb(req);
+    const vendorId = await resolveVendorId(db, req);
+    let rows = [];
+    try { rows = (await db.where('vendor_payouts', 'vendorId', '==', vendorId)) || []; } catch (_) { rows = []; }
+    rows.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
+    res.json({
+      success: true,
+      data: rows.slice(0, limit),
+      counts: rows.reduce((acc, p) => { const s = p.status || 'pending'; acc[s] = (acc[s] || 0) + 1; return acc; }, {}),
+    });
+  } catch (e) { failDb(res, e); }
+});
+
+// ─── Analytics export (CSV) ─────────────────────────────────────────────
+// GET /analytics/export?range=30&type=orders|products|sales
+router.get('/analytics/export', ...guard('reports.read'), async (req, res) => {
+  try {
+    const db = getDb(req);
+    const mid = req.merchantId;
+    const rangeDays = Math.min(Math.max(parseInt(req.query.range, 10) || 30, 1), 365);
+    const type = ['orders', 'products', 'sales'].includes(req.query.type) ? req.query.type : 'orders';
+    const since = new Date(Date.now() - rangeDays * 86400000).toISOString();
+
+    const [orders, products] = await Promise.all([
+      listAll(db, 'orders'), listAll(db, 'products'),
+    ]);
+    const myOrders = orders
+      .filter((o) => o.sellerId === mid || o.merchantId === mid)
+      .filter((o) => !o.createdAt || o.createdAt >= since);
+    const myProducts = products.filter((p) => p.sellerId === mid || p.merchantId === mid);
+
+    let csv = '';
+    if (type === 'orders') {
+      csv = toCsv(['order_id', 'date', 'customer', 'phone', 'status', 'payment_status', 'payment_method', 'items', 'subtotal', 'delivery_fee', 'total'],
+        myOrders.map((o) => ({
+          order_id: o.id,
+          date: o.createdAt || '',
+          customer: o.customerName || o.customer_name || '',
+          phone: o.customerPhone || o.customer_phone || '',
+          status: o.status || 'pending',
+          payment_status: o.paymentStatus || o.payment_status || '',
+          payment_method: o.paymentMethod || o.payment_method || '',
+          items: analytics.itemsToArray(o.items).map((i) => `${i.quantity}x ${i.name}`).join('; '),
+          subtotal: Number(o.subtotal) || 0,
+          delivery_fee: Number(o.deliveryFee ?? o.delivery_fee) || 0,
+          total: Number(o.total) || 0,
+        })));
+    } else if (type === 'products') {
+      csv = toCsv(['product_id', 'name', 'category', 'price', 'stock', 'min_stock', 'available'],
+        myProducts.map((p) => ({
+          product_id: p.id,
+          name: p.name || p.title || '',
+          category: p.category || '',
+          price: Number(p.price) || 0,
+          stock: Number(p.stockQuantity) || 0,
+          min_stock: Number(p.minStock) || 5,
+          available: p.isAvailable !== false,
+        })));
+    } else { // sales — daily aggregation over the range
+      const byDay = {};
+      for (const o of myOrders) {
+        if (['cancelled', 'refunded'].includes(normStatus(o.status))) continue;
+        const day = String(o.createdAt || '').slice(0, 10);
+        if (!day) continue;
+        byDay[day] = byDay[day] || { date: day, orders: 0, revenue: 0, delivery_fees: 0 };
+        byDay[day].orders++;
+        byDay[day].revenue += Number(o.total) || 0;
+        byDay[day].delivery_fees += Number(o.deliveryFee ?? o.delivery_fee) || 0;
+      }
+      csv = toCsv(['date', 'orders', 'revenue', 'delivery_fees'],
+        Object.values(byDay).sort((a, b) => a.date.localeCompare(b.date)));
+    }
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${type}-${rangeDays}d-${new Date().toISOString().slice(0, 10)}.csv"`);
+    res.send(csv);
+  } catch (e) { failDb(res, e); }
+});
+
+/** Minimal RFC-4180 CSV writer (quotes fields, escapes quotes). */
+function toCsv(headers, rows) {
+  const esc = (v) => {
+    let s = v === null || v === undefined ? '' : String(v);
+    // Spreadsheet formula injection: Excel/Sheets execute a cell that starts
+    // with = + - @ (or a tab/CR). Customer names and addresses are attacker
+    // controlled, so neutralise them with a leading apostrophe.
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+    return /[",\r\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  return [headers.join(',')]
+    .concat(rows.map((r) => headers.map((h) => esc(r[h])).join(',')))
+    .join('\r\n') + '\r\n';
+}
+
+// ─── Low-stock threshold configuration ──────────────────────────────────
+// GET/PUT /config/low-stock-threshold — per-merchant default stored on the
+// sellers row (minStock field) with optional per-product overrides in the
+// products table (minStock column, used by inventory-ledger already).
+router.get('/config/low-stock-threshold', ...guard('inventory.read'), async (req, res) => {
+  try {
+    const db = getDb(req);
+    const seller = await db.get('sellers', req.merchantId).catch(() => null);
+    res.json({ success: true, data: { threshold: Number(seller && seller.minStock) || 5 } });
+  } catch (e) { failDb(res, e); }
+});
+
+router.put('/config/low-stock-threshold', ...guard('inventory.write'), async (req, res) => {
+  try {
+    const db = getDb(req);
+    const threshold = Math.max(0, Math.min(10000, Math.round(Number(req.body && req.body.threshold))));
+    if (!Number.isFinite(threshold)) return fail(res, 400, 'threshold must be a number');
+    await db.update('sellers', req.merchantId, { minStock: threshold, updatedAt: new Date().toISOString() })
+      .catch(async () => db.set('sellers', req.merchantId, { minStock: threshold, updatedAt: new Date().toISOString() }));
+    res.json({ success: true, data: { threshold } });
+  } catch (e) { failDb(res, e); }
 });
 
 // Wire the notification writers once per process: domain events → notifications.

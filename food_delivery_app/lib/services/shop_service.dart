@@ -234,13 +234,12 @@ class ShopService {
     const double earthRadius = 6371; // km
     final dLat = _degreesToRadians(lat2 - lat1);
     final dLon = _degreesToRadians(lon2 - lon1);
-    final a = (dLat / 2) * (dLat / 2) +
-        (lon1 * 3.14159265359 / 180) *
-            (lon2 * 3.14159265359 / 180) *
-            (dLon / 2) *
-            (dLon / 2);
-    final c = 2 * (a > 1 ? 1 : (a < 0 ? 0 : a)).toDouble();
-    return earthRadius * 2 * asin(sqrt(c));
+    final lat1Rad = _degreesToRadians(lat1);
+    final lat2Rad = _degreesToRadians(lat2);
+    final a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(lat1Rad) * cos(lat2Rad) * sin(dLon / 2) * sin(dLon / 2);
+    final c = 2 * asin(sqrt(min(max(a, 0), 1)));
+    return earthRadius * c;
   }
 
   double _degreesToRadians(double degrees) {

@@ -11,6 +11,7 @@ data class PaymentMethod(
 
 enum class PaymentType {
     CASH_ON_DELIVERY,
+    PESAPAL,
     MPESA,
     CARD,
     BANK_TRANSFER,

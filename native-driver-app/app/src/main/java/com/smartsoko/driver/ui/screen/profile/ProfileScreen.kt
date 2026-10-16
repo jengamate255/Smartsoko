@@ -22,14 +22,39 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.smartsoko.driver.ui.components.LoadingOverlay
 import com.smartsoko.driver.ui.components.OnlineToggle
+import com.fooddelivery.driver.di.NavigationEngine
+import com.fooddelivery.driver.di.getNavigationEngine
+import com.fooddelivery.driver.di.setNavigationEngine
+import com.fooddelivery.driver.di.isVoiceGuidanceEnabled
+import com.fooddelivery.driver.di.setVoiceGuidanceEnabled
+import com.fooddelivery.driver.di.getVoiceVolume
+import com.fooddelivery.driver.di.setVoiceVolume
+import android.content.SharedPreferences
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     onLogout: () -> Unit,
+    sharedPreferences: SharedPreferences,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    var navEngine by remember { mutableStateOf(sharedPreferences.getNavigationEngine()) }
+    var voiceEnabled by remember { mutableStateOf(sharedPreferences.isVoiceGuidanceEnabled()) }
+    var voiceVolume by remember { mutableStateOf(sharedPreferences.getVoiceVolume()) }
+
+    val onNavEngineChange: (NavigationEngine) -> Unit = { engine ->
+        navEngine = engine
+        sharedPreferences.setNavigationEngine(engine)
+    }
+    val onVoiceEnabledChange: (Boolean) -> Unit = { enabled ->
+        voiceEnabled = enabled
+        sharedPreferences.setVoiceGuidanceEnabled(enabled)
+    }
+    val onVoiceVolumeChange: (Float) -> Unit = { volume ->
+        voiceVolume = volume
+        sharedPreferences.setVoiceVolume(volume)
+    }
 
     Scaffold(
         topBar = {
@@ -91,6 +116,40 @@ fun ProfileScreen(
                         SettingsItem(Icons.Default.Info, "About") {}
                         SettingsItem(Icons.AutoMirrored.Filled.Help, "Help & Support") {}
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                        // Navigation Settings Section
+                        Text(
+                            "Navigation",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                        )
+
+                        SettingsItem(
+                            icon = Icons.Default.Map,
+                            label = "Navigation Engine"
+                        ) {
+                            // Handled by dropdown below
+                        }
+                        NavigationEngineDropdown(
+                            selectedEngine = navEngine,
+                            onEngineChange = onNavEngineChange
+                        )
+
+                        SettingsItem(
+                            icon = Icons.Default.VolumeUp,
+                            label = "Voice Guidance"
+                        ) {
+                            // Handled by switch below
+                        }
+                        VoiceGuidanceSettings(
+                            enabled = voiceEnabled,
+                            volume = voiceVolume,
+                            onEnabledChange = onVoiceEnabledChange,
+                            onVolumeChange = onVoiceVolumeChange
+                        )
+
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                         SettingsItem(Icons.AutoMirrored.Filled.Logout, "Sign Out", isDestructive = true) {
                             viewModel.logout()
                             onLogout()
@@ -143,5 +202,70 @@ private fun SettingsItem(
         Spacer(Modifier.weight(1f))
         Icon(Icons.Default.ChevronRight, contentDescription = null, modifier = Modifier.size(20.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun NavigationEngineDropdown(
+    selectedEngine: NavigationEngine,
+    onEngineChange: (NavigationEngine) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text("Preferred Engine", style = MaterialTheme.typography.bodyMedium)
+        DropdownMenu(
+            expanded = true,
+            onDismissRequest = {},
+            modifier = Modifier.width(200.dp)
+        ) {
+            NavigationEngine.values().forEach { engine ->
+                DropdownMenuItem(
+                    text = { Text(engine.label) },
+                    onClick = { onEngineChange(engine) },
+                    leadingIcon = {
+                        if (engine == selectedEngine) {
+                            Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun VoiceGuidanceSettings(
+    enabled: Boolean,
+    volume: Float,
+    onEnabledChange: (Boolean) -> Unit,
+    onVolumeChange: (Float) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("Voice Guidance", style = MaterialTheme.typography.bodyMedium)
+            androidx.compose.material3.Switch(
+                checked = enabled,
+                onCheckedChange = onEnabledChange
+            )
+        }
+        if (enabled) {
+            Column(modifier = Modifier.padding(top = 8.dp)) {
+                Text("Volume: ${(volume * 100).toInt()}%", style = MaterialTheme.typography.labelMedium)
+                androidx.compose.material3.Slider(
+                    value = volume,
+                    onValueChange = onVolumeChange,
+                    valueRange = 0f..1f,
+                    steps = 10,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
     }
 }

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../config/app_config.dart';
 import 'driver_dashboard_screen.dart';
 
@@ -251,7 +253,41 @@ class _SmartMoveDriverLoginScreenState extends State<SmartMoveDriverLoginScreen>
     );
   }
 
-  Future<void> _googleSignIn() async {}
+  Future<void> _googleSignIn() async {
+    if (_isLoading) return;
+    setState(() { _isLoading = true; _errorMessage = null; });
+
+    try {
+      final googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+      await googleSignIn.signOut();
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        setState(() { _isLoading = false; });
+        return;
+      }
+      final googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+      if (idToken == null) throw Exception('Failed to get Google ID token');
+
+      final supabase = Supabase.instance.client;
+      final authResponse = await supabase.auth.signInWithIdToken(
+        provider: Provider.google,
+        idToken: idToken,
+        accessToken: googleAuth.accessToken,
+      );
+
+      final userId = authResponse.user?.id;
+      if (userId != null && mounted) {
+        _goToDashboard(userId);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _errorMessage = _friendlyError(e));
+      }
+    } finally {
+      if (mounted) setState(() { _isLoading = false; });
+    }
+  }
 
   Widget _buildTextField(TextEditingController ctl, String hint, IconData icon, bool obscure, TextInputType type) {
     return Container(

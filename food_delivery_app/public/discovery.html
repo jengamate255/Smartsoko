@@ -283,7 +283,7 @@
             <p class="text-xs text-gray-500">Verified Gold Member</p>
             <div class="flex items-center gap-1 mt-0.5">
               <span class="material-symbols-outlined text-yellow-500 text-xs" style="font-variation-settings:'FILL' 1;">star</span>
-              <span class="text-xs text-gray-500">4.8 Â· 240+ reviews</span>
+              <span class="text-xs text-gray-500">4.8 · 240+ reviews</span>
             </div>
           </div>
           <span class="material-symbols-outlined text-gray-300">chevron_right</span>
@@ -302,7 +302,7 @@
             <p class="text-xs text-gray-500">Premium Food Vendor</p>
             <div class="flex items-center gap-1 mt-0.5">
               <span class="material-symbols-outlined text-yellow-500 text-xs" style="font-variation-settings:'FILL' 1;">star</span>
-              <span class="text-xs text-gray-500">4.6 Â· 112 reviews</span>
+              <span class="text-xs text-gray-500">4.6 · 112 reviews</span>
             </div>
           </div>
           <span class="material-symbols-outlined text-gray-300">chevron_right</span>
@@ -321,7 +321,7 @@
             <p class="text-xs text-gray-500">Master Baker</p>
             <div class="flex items-center gap-1 mt-0.5">
               <span class="material-symbols-outlined text-yellow-500 text-xs" style="font-variation-settings:'FILL' 1;">star</span>
-              <span class="text-xs text-gray-500">4.9 Â· 89 reviews</span>
+              <span class="text-xs text-gray-500">4.9 · 89 reviews</span>
             </div>
           </div>
           <span class="material-symbols-outlined text-gray-300">chevron_right</span>
@@ -401,6 +401,7 @@
         price: d.price || 0,
         imageUrl: d.imageUrl || d.image_url || d.image || '',
         category: d.category || 'General',
+        isAvailable: d.isAvailable !== false,
         sellerId: d.sellerId || d.seller_id || d.restaurantId || d.restaurant_id || '',
         seller: d.seller || d.seller_name || d.restaurantName || d.restaurant_name || 'SmartSoko',
       };
@@ -411,35 +412,10 @@
       const db = window.db;
 
       try {
-        let items = null;
-
-        // Try cross-platform service first (Firebase + Supabase fallback)
-        if (svc && svc.isReady()) {
-          try {
-            items = await svc.list('menuItems', { limit: 100 });
-            console.log(`[CrossPlatform] menuItems: ${items.length} docs (${items[0]?._source})`);
-          } catch (e) { console.log('[CrossPlatform] menuItems:', e.message); }
-          if (!items || items.length === 0) {
-            try {
-              items = await svc.list('products', { limit: 100 });
-              console.log(`[CrossPlatform] products: ${items.length} docs (${items[0]?._source})`);
-            } catch (e) { console.log('[CrossPlatform] products:', e.message); }
-          }
-        }
-
-        // Fallback to direct Firebase
-        if ((!items || items.length === 0) && db && db.collection) {
-          console.log('[Discovery] Falling back to direct Firebase');
-          const { collection, query, getDocs, limit } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-          let snapshot = null;
-          try { snapshot = await getDocs(query(collection(db, 'menuItems'), limit(100))); } catch (e) { /* silent */ }
-          if (!snapshot || snapshot.empty) {
-            try { snapshot = await getDocs(query(collection(db, 'products'), limit(100))); } catch (e) { /* silent */ }
-          }
-          if (snapshot && !snapshot.empty) {
-            items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          }
-        }
+        const response = await fetch('/api/products?limit=100', { signal: AbortSignal.timeout(10000) });
+        const payload = await response.json();
+        if (!response.ok || !payload.success || !Array.isArray(payload.data)) throw new Error(payload.error || 'Catalog unavailable');
+        const items = payload.data;
 
         if (!items || items.length === 0) {
           document.getElementById('productsGrid').innerHTML = '<div class="col-span-full text-center py-12 text-gray-400"><span class="material-symbols-outlined text-5xl mb-2 block">inventory_2</span><p>No products available yet</p></div>';
@@ -495,9 +471,9 @@
         return `
         <a href="/product?id=${p.id}" class="product-card no-underline" style="animation: fadeIn 0.4s cubic-bezier(0.23,1,0.32,1) ${Math.min(idx, 12) * 0.04}s backwards;">
           <div class="relative aspect-square bg-gray-50 overflow-hidden">
-            <img src="${p.imageUrl || 'images/default-product.png'}" alt="${p.name}" loading="lazy" decoding="async"
+            <img src="${p.imageUrl || '/images/product-placeholder.svg'}" alt="${p.name}" loading="lazy" decoding="async"
               class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              onerror="this.onerror=null; this.src='images/default-product.png';">
+              onerror="this.onerror=null; this.src='/images/product-placeholder.svg';">
             <button onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('${p.id}', this)"
               class="absolute top-2.5 right-2.5 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-sm active:scale-90 transition-transform">
               <span class="material-symbols-outlined text-base text-gray-400" style="font-variation-settings:'FILL' 0;">favorite</span>
@@ -605,15 +581,15 @@
     }
 
     function tryLoadProducts() {
-      if (window.crossPlatformService?.isReady() || window.db) loadProducts();
+      loadProducts();
     }
+
+    tryLoadProducts();
 
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof SmartNav !== 'undefined' && typeof SmartNav.initPageTransition === 'function') SmartNav.initPageTransition();
       updateCartUI();
-      tryLoadProducts();
-      document.addEventListener('firebase-initialized', tryLoadProducts, { once: true });
-      document.addEventListener('data-service-ready', tryLoadProducts, { once: true });
+
     });
 
     document.getElementById('searchInputMobile').addEventListener('input', e => syncSearch(e.target.value));

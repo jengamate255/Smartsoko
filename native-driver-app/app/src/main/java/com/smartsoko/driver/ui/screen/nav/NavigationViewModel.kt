@@ -2,7 +2,6 @@ package com.smartsoko.driver.ui.screen.nav
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.smartsoko.driver.data.remote.WebSocketManager
 import com.smartsoko.driver.data.repository.OrderRepository
 import com.smartsoko.driver.domain.model.Order
 import com.smartsoko.driver.domain.model.OrderStatus
@@ -15,6 +14,7 @@ import javax.inject.Inject
 
 data class NavUiState(
     val order: Order? = null,
+    val driverLocation: android.location.Location? = null,
     val driverLat: Double = 0.0,
     val driverLng: Double = 0.0,
     val eta: String = "",
@@ -34,8 +34,7 @@ enum class NavPhase {
 class NavigationViewModel @Inject constructor(
     private val driverState: DriverState,
     private val orderRepository: OrderRepository,
-    private val locationState: LocationState,
-    private val webSocketManager: WebSocketManager
+    private val locationState: LocationState
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(NavUiState())
@@ -58,7 +57,15 @@ class NavigationViewModel @Inject constructor(
         viewModelScope.launch {
             locationState.location.collect { loc ->
                 if (loc != null) {
-                    _state.value = _state.value.copy(driverLat = loc.lat, driverLng = loc.lng)
+                    val location = android.location.Location("fused").apply {
+                        latitude = loc.lat
+                        longitude = loc.lng
+                    }
+                    _state.value = _state.value.copy(
+                        driverLocation = location,
+                        driverLat = loc.lat,
+                        driverLng = loc.lng
+                    )
                 }
             }
         }

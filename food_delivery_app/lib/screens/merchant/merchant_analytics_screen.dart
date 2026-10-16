@@ -39,7 +39,7 @@ class MerchantAnalyticsScreen extends StatelessWidget {
               // Revenue Card
               _buildStatCard(
                 title: 'Total Revenue',
-                value: 'KSh ${totalRevenue.toStringAsFixed(0)}',
+                value: 'TSh ${totalRevenue.toStringAsFixed(0)}',
                 subtitle: 'From ${deliveredOrders.length} orders',
                 icon: Icons.payments_outlined,
                 color: const Color(0xFF064E3B),
@@ -105,7 +105,7 @@ class MerchantAnalyticsScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Text('KSh ${order.total.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text('TSh ${order.total.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold)),
                   ],
                 ),
               )),

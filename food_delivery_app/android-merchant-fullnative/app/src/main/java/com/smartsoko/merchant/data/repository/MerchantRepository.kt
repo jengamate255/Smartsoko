@@ -2,6 +2,7 @@
 
 import android.content.Context
 import android.net.Uri
+import android.util.Base64
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -9,6 +10,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
+import com.smartsoko.merchant.data.model.AiExtraction
 import com.smartsoko.merchant.data.model.Merchant
 import com.smartsoko.merchant.data.model.Order
 import com.smartsoko.merchant.data.model.OrderStatus
@@ -19,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
@@ -28,6 +31,9 @@ class MerchantRepository {
     companion object {
         private const val SUPABASE_URL = "https://vonkqyiczeqhuqhahsxm.supabase.co"
         private const val SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvbmtxeWljemVxaHVxaGFoc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjIzNDksImV4cCI6MjA5MDM5ODM0OX0.UKAT3re6P_oAB3E1svwCFdqTQWZL6yulJ1ZX4nAgJJ8"
+        // SmartSoko backend running the AI Product Agent. Point to deployed API.
+        private const val AI_API_BASE = "https://vonkqyiczeqhuqhahsxm.supabase.co/functions/v1/api"
+        private const val AI_EXTRACT_PATH = "/ai/products/extract"
     }
 
     private val firestore = FirebaseFirestore.getInstance()
@@ -327,6 +333,79 @@ class MerchantRepository {
             Result.success(docRef.id)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    /**
+     * Sends the selected product image to the SmartSoko AI Product Agent
+     * (POST /ai/products/extract) and returns the extracted product fields.
+     */
+    suspend fun aiExtractProduct(imageUri: Uri): Result<AiExtraction> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val context = FirebaseApp.getInstance().applicationContext
+                val bytes = context.contentResolver.openInputStream(imageUri)?.use { it.readBytes() }
+                    ?: return@withContext Result.failure(Exception("Could not read the selected image"))
+                val mimeType = context.contentResolver.getType(imageUri) ?: "image/jpeg"
+                val imageBase64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
+
+                val body = JSONObject()
+                    .put("imageBase64", imageBase64)
+                    .put("mimeType", mimeType)
+
+                val conn = URL("$AI_API_BASE$AI_EXTRACT_PATH").openConnection() as HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.doOutput = true
+                conn.connectTimeout = 15_000
+                conn.readTimeout = 90_000
+                conn.setRequestProperty("Content-Type", "application/json")
+                conn.outputStream.use { it.write(body.toString().toByteArray()) }
+
+                val responseCode = conn.responseCode
+                if (responseCode !in 200..299) {
+                    val error = conn.errorStream?.bufferedReader()?.readText() ?: "HTTP $responseCode"
+                    android.util.Log.e("MerchantRepo", "AI extract failed: $error")
+                    return@withContext Result.failure(Exception("AI Assistant failed ($responseCode)"))
+                }
+
+                val responseText = conn.inputStream.bufferedReader().readText()
+                android.util.Log.i("MerchantRepo", "AI extract response: ${responseText.take(200)}")
+
+                val json = JSONObject(responseText)
+                if (!json.optBoolean("success", false)) {
+                    return@withContext Result.failure(Exception(json.optString("error", "Extraction failed")))
+                }
+                val data = json.optJSONObject("data") ?: return@withContext Result.failure(Exception("Empty extraction result"))
+
+                val priceValue = data.opt("selling_price")
+                val sellingPrice = when (priceValue) {
+                    is Number -> priceValue.toDouble()
+                    is String -> priceValue.toDoubleOrNull()
+                    else -> null
+                }
+
+                val unitValue = data.optString("unit", "").ifEmpty {
+                    data.optString("volume", "").ifEmpty { data.optString("size", "") }
+                }
+
+                Result.success(
+                    AiExtraction(
+                        name = data.optString("name").ifEmpty { null },
+                        brand = data.optString("brand").ifEmpty { null },
+                        description = data.optString("description").ifEmpty { null },
+                        category = data.optString("category").ifEmpty { null },
+                        unit = unitValue.ifEmpty { null },
+                        size = data.optString("size").ifEmpty { null },
+                        volume = data.optString("volume").ifEmpty { null },
+                        weight = data.optString("weight").ifEmpty { null },
+                        barcode = data.optString("barcode").ifEmpty { null },
+                        sellingPrice = sellingPrice
+                    )
+                )
+            } catch (e: Exception) {
+                android.util.Log.e("MerchantRepo", "AI extract error: ${e.message}")
+                Result.failure(e)
+            }
         }
     }
 

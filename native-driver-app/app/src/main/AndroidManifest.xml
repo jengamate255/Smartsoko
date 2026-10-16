@@ -20,10 +20,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SmartSokoDriver"
-        android:usesCleartextTraffic="true">
+        android:networkSecurityConfig="@xml/network_security_config">
 
         <activity
-            android:name=".ui.MainActivity"
+            android:name="com.smartsoko.driver.ui.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/Theme.SmartSokoDriver.NoActionBar">
@@ -35,29 +35,34 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Custom scheme for order deep links, e.g. smartsoko://driver/order/ORD123 -->
                 <data android:scheme="smartsoko" android:host="driver" />
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="com.smartsoko.driver.ui.NavigationActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.SmartSokoDriver.NoActionBar" />
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.SmartSokoDriver.NoActionBar" />
+
         <service
-            android:name=".service.LocationTrackingService"
+            android:name="com.smartsoko.driver.service.LocationTrackingService"
             android:exported="false"
             android:foregroundServiceType="location" />
 
         <service
-            android:name=".notification.DriverMessagingService"
+            android:name=".notifications.DriverMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        
-        <!-- Foreground location service (started while the driver is online) -->
-        <service
-            android:name=".location.DriverLocationService"
-            android:exported="false"
-            android:foregroundServiceType="location" />
         
         <!-- Mapbox Access Token -->
         <meta-data

@@ -1,414 +1,935 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="light" lang="en">
 <head>
-  <!-- Performance: Preconnect to external domains -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>SmartSoko - Your Local Marketplace | Shop Food, Groceries & More</title>
+  <meta name="description" content="SmartSoko - Tanzania's premier marketplace. Shop fresh food, groceries, dairy, fruits, and bakery items from local sellers. Fast delivery, great prices.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link rel="dns-prefetch" href="https://www.gstatic.com">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <title>FoodDelivery TZ - Tanzania's Premier Food Delivery</title>
-  <meta name="description" content="Complete Food Delivery System with M-Pesa Payments">
-  <meta name="theme-color" content="#064e3b">
-  
-  <!-- Production CSS (replaces Tailwind CDN) -->
-  <link rel="stylesheet" href="production-styles.css">
-  
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js" defer></script>
-  
-  <style> /* Additional styles specific to this page */ .hero-section {min-height: 100vh;background: linear-gradient(135deg,#064e3b 0%,#059669 100%);position: relative;display: flex;align-items: center} .hero-content {position: relative;z-index: 2} .floating-card {animation: float 6s ease-in-out infinite} @keyframes float {0%,100% {transform: translateY(0px)} 50% {transform: translateY(-20px)} } .feature-card {background: rgba(255,255,255,0.95);backdrop-filter: blur(10px);border: 1px solid rgba(255,255,255,0.2)} .stat-card {background: linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05));backdrop-filter: blur(10px);border: 1px solid rgba(255,255,255,0.2)} .app-preview {background: #1a1a1a;border-radius: 2rem;padding: 0.5rem;box-shadow: 0 20px 40px rgba(0,0,0,0.3)} .app-screen {background: white;border-radius: 1.5rem;overflow: hidden} .gradient-text {background: linear-gradient(135deg,#064e3b,#059669);-webkit-background-clip: text;-webkit-text-fill-color: transparent;background-clip: text} .pulse-button {animation: pulse 2s infinite} @keyframes pulse {0% {box-shadow: 0 0 0 0 rgba(255,102,0,0.7)} 70% {box-shadow: 0 0 0 10px rgba(255,102,0,0)} 100% {box-shadow: 0 0 0 0 rgba(255,102,0,0)} } /* Responsive adjustments */ @media (max-width: 768px) {.hero-section {min-height: 100vh;padding: 2rem 0} .floating-card {animation: none} } </style>
+  <link rel="preload" href="dist/tailwind.css" as="style">
+  <link rel="stylesheet" href="dist/tailwind.css">
+  <link rel="stylesheet" href="design-system.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script type="module" src="config/firebase-config.js?v=5"></script>
+  <script type="module" src="config/cross-platform-service.js?v=4"></script>
+  <script src="js/cart-service.js?v=5" defer></script>
+  <script src="js/location-picker.js?v=5" defer></script>
+  <script src="nav-component.js?v=5" defer></script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display: inline-block; line-height: 1; vertical-align: middle; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    * { box-sizing: border-box; }
+    body { overflow-x: hidden; font-family: 'Be Vietnam Pro','Plus Jakarta Sans',sans-serif; min-height: 100vh; }
+    h1,h2,h3,h4 { font-family: 'Plus Jakarta Sans',sans-serif; }
+    .gradient-bg { background: #064e3b; }
+
+    /* Header */
+    .top-header { background: linear-gradient(135deg, #064e3b, #065f46); position: sticky; top: 0; z-index: 40; }
+
+    /* Hero Carousel */
+    .hero-carousel { position: relative; height: 360px; overflow: hidden; border-radius: 0 0 24px 24px; background: linear-gradient(135deg, #F1E6CC 0%, #FBE7C6 55%, #FBF5E9 100%); }
+    @media (min-width: 768px) { .hero-carousel { height: 420px; } }
+    .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s ease; background-size: cover; background-position: center; background-color: #F1E6CC; }
+    .hero-slide.active { opacity: 1; }
+    .hero-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 40px 24px 32px; box-sizing: border-box; background: linear-gradient(transparent, rgba(251,245,233,0.85)); color: #1E2A22; max-width: 560px; }
+    .hero-slide p { color: #5B6B5E; }
+    .carousel-dots { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(30,42,34,0.3); cursor: pointer; transition: all 0.3s; }
+    .dot.active { background: #137A69; width: 28px; border-radius: 5px; }
+
+    /* Category Scroll */
+    .cat-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; }
+    .cat-pill {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 12px 10px; border-radius: 14px; background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06); cursor: pointer;
+      transition: all 0.25s ease; text-decoration: none; flex-shrink: 0;
+      min-width: 72px;
+    }
+    .cat-pill:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+    .cat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: transform 0.25s; }
+    .cat-pill:hover .cat-icon { transform: scale(1.1); }
+    .cat-pill span:last-child { font-size: 11px; font-weight: 600; color: #374151; }
+
+    /* Flash Deals */
+    .flash-deals { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 18px; padding: 20px; margin: 20px 0; box-shadow: 0 4px 16px rgba(251, 191, 36, 0.15); }
+    .countdown { display: flex; gap: 6px; align-items: center; }
+    .countdown-item { background: #064e3b; color: white; padding: 7px 11px; border-radius: 10px; font-weight: 700; font-size: 15px; min-width: 40px; text-align: center; }
+
+    /* Product Cards */
+    .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 100%; box-sizing: border-box; }
+    @media (min-width: 768px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 1024px) { .product-grid { grid-template-columns: repeat(4, 1fr); } }
+    .product-card {
+      background: white; border-radius: 14px; overflow: hidden; border: 1px solid #f0f0f0;
+      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease;
+      cursor: pointer; display: flex; flex-direction: column;
+    }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(44,62,80,0.12); }
+
+    /* Seller cards */
+    .seller-card {
+      background: white; border-radius: 14px; padding: 14px;
+      border: 1px solid #f0f0f0; transition: all 0.3s; cursor: pointer;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .seller-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.06); transform: translateY(-2px); }
+
+    /* Quick links */
+    .quick-link {
+      background: white; border-radius: 16px; padding: 16px; border: 1px solid #f0f0f0;
+      display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.3s;
+    }
+    .quick-link:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-2px); }
+    .quick-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: transform 0.25s; }
+    .quick-link:hover .quick-icon { transform: scale(1.1); }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      background: white; box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+      display: flex; justify-content: space-around; align-items: center;
+      height: 68px; padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    @media (min-width: 720px) { .bottom-nav { display: none; } }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 8px 14px; color: #64748B; font-size: 11px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; border-radius: 12px;
+      min-height: 44px; min-width: 44px; justify-content: center;
+    }
+    .nav-item.active { color: #064e3b; background: #064e3b15; }
+    .nav-item .material-symbols-outlined { font-size: 22px; }
+
+    /* Touch targets: minimum 44x44 for all interactive elements on mobile + tablet */
+    @media (max-width: 1024px) {
+      a, button { min-height: 44px; }
+      header a, header button { padding: 10px; }
+      .cat-pill { min-height: 44px; padding: 10px 10px; }
+      footer a { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 10px; }
+    }
+    /* Footer: always large enough for readability + tap */
+    footer a { padding: 10px 12px; line-height: 1.6; }
+    /* "View all" / "See all" links: larger tap target */
+    .text-green-700.font-semibold { padding: 8px 6px; min-height: 40px; display: inline-flex; align-items: center; }
+    /* Header icon buttons: ensure 44px touch target */
+    header .p-2 { padding: 10px !important; }
+
+    /* Skeleton */
+    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-slide { transition: none; }
+      .skeleton { animation: none; }
+      .product-card { animation: none !important; }
+      .fade-in { animation: none !important; }
+    }
+    .skeleton-text { height: 12px; width: 80%; border-radius: 4px; }
+    .skeleton-text-sm { height: 10px; width: 50%; border-radius: 4px; }
+
+    /* ===== Orientation responsive ===== */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .hero-carousel { height: 50vw; max-height: 280px; min-height: 140px; border-radius: 0; }
+      .hero-content { padding: 16px 20px 12px; }
+      .hero-content h2 { font-size: 1.1rem; }
+      .hero-content p { display: none; }
+      .bottom-nav { display: none; }
+      body { padding-bottom: 0 !important; }
+      .cat-scroll { padding-bottom: 4px; scroll-padding-inline: 16px; }
+      .cat-pill { padding: 8px 8px; min-width: 60px; }
+      .cat-icon { width: 36px; height: 36px; }
+      .cat-pill span:last-child { font-size: 10px; }
+      .flash-deals { padding: 14px; margin: 12px 0; }
+      .product-grid { gap: 8px; }
+      .top-header { height: 48px; }
+      .top-header > div { height: 48px; }
+    }
+    @media (orientation: landscape) and (min-height: 500px) and (max-height: 700px) {
+      .hero-carousel { height: 65vw; max-height: 360px; min-height: 200px; }
+      .bottom-nav { display: none; }
+      body { padding-bottom: 0 !important; }
+    }
+    @media (orientation: portrait) and (max-height: 600px) {
+      .hero-carousel { height: 50vw; max-height: 300px; min-height: 160px; }
+      .hero-content { padding: 24px 20px 20px; }
+      .hero-content h2 { font-size: 1.25rem; }
+    }
+    @media (max-height: 400px) {
+      .bottom-nav { display: none; }
+      body { padding-bottom: 0 !important; }
+      .top-header { height: 44px; }
+      .top-header > div { height: 44px; }
+      .hero-carousel { max-height: 220px; }
+    }
+  </style>
+<style>
+    /* ===== Base utility shims missing from dist/tailwind.css ===== */
+    .left-3\.5 { left: .875rem; }
+    .top-2\.5 { top: .625rem; }
+    .-top-0\.5 { top: -0.125rem; }
+    .-right-0\.5 { right: -0.125rem; }
+    .bottom-2 { bottom: .5rem; }
+    .w-4 { width: 1rem; }
+    .border-0 { border-width: 0; }
+    .opacity-0 { opacity: 0; }
+    .opacity-70 { opacity: .7; }
+    .ml-0\.5 { margin-left: .125rem; }
+    .mt-0\.5 { margin-top: .125rem; }
+    .mt-1\.5 { margin-top: .375rem; }
+    .mt-auto { margin-top: auto; }
+    .mx-8 { margin-left: 2rem; margin-right: 2rem; }
+    .p-1\.5 { padding: .375rem; }
+    .pt-1 { padding-top: .25rem; }
+    .pt-5 { padding-top: 1.25rem; }
+    .px-7 { padding-left: 1.75rem; padding-right: 1.75rem; }
+    .py-3\.5 { padding-top: .875rem; padding-bottom: .875rem; }
+    .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: .375rem; }
+    .space-y-2 > :not([hidden]) ~ :not([hidden]) { margin-top: .5rem; }
+    .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem; }
+    .no-underline { text-decoration: none; }
+    .line-through { text-decoration: line-through; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+    .min-h-\[40px\] { min-height: 40px; }
+    .max-w-\[1280px\] { max-width: 1280px; }
+    .text-\[9px\] { font-size: 9px; }
+    .text-\[10px\] { font-size: 10px; }
+    .text-\[12px\] { font-size: 12px; }
+    .text-primary { color: var(--os-primary); }
+    .hover\:text-primary:hover { color: var(--os-primary); }
+    .font-headline { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .text-on-surface-variant { color: var(--os-text-dim); }
+    .active\:scale-\[0\.98\]:active { transform: scale(.98); }
+    .text-cyan-600 { color: #0891b2; }
+    .text-emerald-600 { color: #059669; }
+    .text-pink-600 { color: #db2777; }
+    .bg-cyan-100 { background-color: #cffafe; }
+    .bg-emerald-100 { background-color: #d1fae5; }
+    .bg-pink-100 { background-color: #fce7f3; }
+    .bg-black\/50 { background-color: rgba(0,0,0,.5); }
+    .bg-white\/15 { background-color: rgba(255,255,255,.15); }
+    .bg-white\/80 { background-color: rgba(255,255,255,.8); }
+    .bg-white\/90 { background-color: rgba(255,255,255,.9); }
+    .text-white\/80 { color: rgba(255,255,255,.8); }
+    .text-white\/90 { color: rgba(255,255,255,.9); }
+    .from-amber-500 { --tw-gradient-from: #f59e0b; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(245,158,11,0)); }
+    .from-black\/70 { --tw-gradient-from: rgba(0,0,0,.7); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(0,0,0,0)); }
+    .via-black\/30 { --tw-gradient-via: rgba(0,0,0,.3); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to, rgba(0,0,0,0)); }
+    .to-amber-600 { --tw-gradient-to: #d97706; }
+    .to-emerald-600 { --tw-gradient-to: #059669; }
+    .to-indigo-600 { --tw-gradient-to: #4f46e5; }
+    .to-violet-600 { --tw-gradient-to: #7c3aed; }
+    .to-yellow-600 { --tw-gradient-to: #ca8a04; }
+    .focus\:border-green-600:focus { border-color: #16a34a; }
+    .focus\:ring-white\/50:focus { --tw-ring-color: rgba(255,255,255,.5); }
+    .focus\:ring-green-500\/20:focus { --tw-ring-color: rgba(34,197,94,.2); }
+    @media (min-width: 640px) {
+      .sm\:block { display: block; }
+    }
+    @media (min-width: 768px) {
+      .md\:pb-0 { padding-bottom: 0; }
+      .md\:px-12 { padding-left: 3rem; padding-right: 3rem; }
+      .md\:text-5xl { font-size: 3rem; line-height: 1; }
+    }
+    @media (min-width: 1024px) {
+      .lg\:block { display: block; }
+      .lg\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    }
+  </style>
 </head>
-<body class="bg-gray-50">
-  <!-- Navigation -->
-  <nav class="nav-top">
-    <div class="container">
-      <div class="flex justify-between items-center">
-        <div class="flex items-center gap-4">
-          <h1 class="text-2xl font-bold text-primary">🍴 FoodDelivery TZ</h1>
-          <div class="hidden md:flex gap-6">
-            <a href="#features" class="text-gray-600 hover:text-primary transition-colors">Features</a>
-            <a href="#how-it-works" class="text-gray-600 hover:text-primary transition-colors">How It Works</a>
-            <a href="#download" class="text-gray-600 hover:text-primary transition-colors">Download</a>
+<body class="bg-[#F8FAF6] text-on-background min-h-screen pb-24 md:pb-0">
+
+  <!-- Header -->
+  <header class="top-header">
+    <div class="flex items-center justify-between px-4 md:px-12 h-16 max-w-[1280px] mx-auto">
+      <div class="flex items-center gap-3">
+        <a href="/home" class="flex items-center gap-2 text-white no-underline">
+          <div class="w-9 h-9 bg-white/15 rounded-lg flex items-center justify-center">
+            <span class="material-symbols-outlined text-white">shopping_basket</span>
+          </div>
+          <span class="text-lg font-bold hidden sm:block">SmartSoko</span>
+        </a>
+        <button type="button" data-location-picker class="hidden md:flex items-center gap-1 text-white/80 text-sm cursor-pointer hover:text-white transition-colors bg-transparent border-0 p-0 text-left">
+          <span class="material-symbols-outlined text-sm">location_on</span>
+          <div>
+            <div class="text-xs opacity-70">Deliver to</div>
+            <div class="font-semibold" data-location-value>Dar es Salaam</div>
+          </div>
+        </button>
+      </div>
+      <div class="hidden md:flex flex-1 max-w-md mx-8">
+        <div class="relative w-full">
+          <input id="searchInputDesktop" aria-label="Search products" type="text" placeholder="Search products, brands and more..."
+            class="w-full h-10 pl-10 pr-4 rounded-full border-none bg-white/90 text-sm focus:ring-2 focus:ring-white/50 outline-none transition-all"
+            oninput="syncSearch(this.value)"/>
+          <span class="material-symbols-outlined absolute left-3 top-2.5 text-gray-400 text-lg">search</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="document.getElementById('searchInputMobile').focus()" class="md:hidden p-2 text-white/80 hover:text-white rounded-full">
+          <span class="material-symbols-outlined">search</span>
+        </button>
+        <a href="/cart" class="relative p-2 text-white/80 hover:text-white rounded-full">
+          <span class="material-symbols-outlined">shopping_cart</span>
+          <span id="headerCartBadge" class="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-[1280px] mx-auto px-4 md:px-12 pt-5 pb-24">
+
+    <!-- Mobile Search -->
+    <div class="md:hidden mb-4">
+      <div class="relative">
+        <input id="searchInputMobile" aria-label="Search products" type="text" placeholder="Search products, brands and more..."
+          class="w-full h-11 pl-10 pr-4 rounded-2xl border border-gray-200 bg-white text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all shadow-sm"
+          oninput="syncSearch(this.value)"/>
+        <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-gray-400 text-lg">search</span>
+      </div>
+    </div>
+
+    <!-- Hero Carousel -->
+    <section class="hero-carousel mb-6">
+      <div class="hero-slide active">
+        <div class="hero-content relative">
+          <span class="inline-block bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold mb-2 tracking-wide">Flash Sale</span>
+          <h2 class="text-3xl md:text-5xl font-bold mb-2 leading-tight">Fresh Groceries<br>Delivered Fast</h2>
+          <p class="text-lg text-white/90 mb-4 max-w-md">Up to 40% off on fresh fruits & vegetables from local farms</p>
+          <a href="/discovery" class="inline-block bg-white text-green-800 px-7 py-3 rounded-xl font-bold text-sm hover:bg-gray-100 transition shadow-lg no-underline">Shop Now</a>
+        </div>
+      </div>
+      <div class="hero-slide">
+        <div class="hero-content relative">
+          <span class="inline-block bg-white text-orange-600 px-3 py-1 rounded-full text-xs font-bold mb-2 tracking-wide">New Arrivals</span>
+          <h2 class="text-3xl md:text-5xl font-bold mb-2 leading-tight">Local Restaurants<br>At Your Door</h2>
+          <p class="text-lg text-white/90 mb-4 max-w-md">Discover the best food from local sellers near you</p>
+          <a href="/discovery?category=food" class="inline-block bg-white text-orange-600 px-7 py-3 rounded-xl font-bold text-sm hover:bg-gray-100 transition shadow-lg no-underline">Explore</a>
+        </div>
+      </div>
+      <div class="hero-slide">
+        <div class="hero-content relative">
+          <span class="inline-block bg-white text-green-700 px-3 py-1 rounded-full text-xs font-bold mb-2 tracking-wide">Free Delivery</span>
+          <h2 class="text-3xl md:text-5xl font-bold mb-2 leading-tight">Daily Fresh Dairy<br>Products</h2>
+          <p class="text-lg text-white/90 mb-4 max-w-md">Milk, cheese, yogurt â€” delivered fresh daily</p>
+          <a href="/discovery?category=dairy" class="inline-block bg-white text-green-700 px-7 py-3 rounded-xl font-bold text-sm hover:bg-gray-100 transition shadow-lg no-underline">Order Now</a>
+        </div>
+      </div>
+      <div class="carousel-dots">
+        <span class="dot active" onclick="goToSlide(0)"></span>
+        <span class="dot" onclick="goToSlide(1)"></span>
+        <span class="dot" onclick="goToSlide(2)"></span>
+      </div>
+    </section>
+
+    <!-- Quick Categories -->
+    <section class="mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <span class="material-symbols-outlined text-green-600 text-xl">category</span> Shop by Category
+        </h2>
+      </div>
+      <div class="cat-scroll hide-scrollbar px-4">
+        <a href="/discovery?category=food" class="cat-pill">
+          <div class="cat-icon bg-orange-100"><span class="material-symbols-outlined text-2xl text-orange-600">restaurant</span></div>
+          <span>Food</span>
+        </a>
+        <a href="/discovery?category=dairy" class="cat-pill">
+          <div class="cat-icon bg-blue-100"><span class="material-symbols-outlined text-2xl text-blue-600">water_drop</span></div>
+          <span>Dairy</span>
+        </a>
+        <a href="/discovery?category=fruits" class="cat-pill">
+          <div class="cat-icon bg-green-100"><span class="material-symbols-outlined text-2xl text-green-600">nutrition</span></div>
+          <span>Fruits</span>
+        </a>
+        <a href="/discovery?category=groceries" class="cat-pill">
+          <div class="cat-icon bg-purple-100"><span class="material-symbols-outlined text-2xl text-purple-600">shopping_bag</span></div>
+          <span>Grocery</span>
+        </a>
+        <a href="/discovery?category=bakery" class="cat-pill">
+          <div class="cat-icon bg-yellow-100"><span class="material-symbols-outlined text-2xl text-yellow-600">bakery_dining</span></div>
+          <span>Bakery</span>
+        </a>
+        <a href="/discovery?category=vegetables" class="cat-pill hidden md:flex">
+          <div class="cat-icon bg-emerald-100"><span class="material-symbols-outlined text-2xl text-emerald-600">eco</span></div>
+          <span>Vegs</span>
+        </a>
+        <a href="/discovery?category=snacks" class="cat-pill hidden md:flex">
+          <div class="cat-icon bg-pink-100"><span class="material-symbols-outlined text-2xl text-pink-600">cookie</span></div>
+          <span>Snacks</span>
+        </a>
+        <a href="/discovery?category=drinks" class="cat-pill hidden md:flex">
+          <div class="cat-icon bg-cyan-100"><span class="material-symbols-outlined text-2xl text-cyan-600">local_bar</span></div>
+          <span>Drinks</span>
+        </a>
+        <a href="/discovery?category=meat" class="cat-pill hidden md:flex">
+          <div class="cat-icon bg-red-100"><span class="material-symbols-outlined text-2xl text-red-600">set_meal</span></div>
+          <span>Meat</span>
+        </a>
+        <a href="/discovery" class="cat-pill hidden md:flex">
+          <div class="cat-icon bg-gray-100"><span class="material-symbols-outlined text-2xl text-gray-600">grid_view</span></div>
+          <span>All</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Flash Deals -->
+    <section class="flash-deals mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-2xl text-red-600">flash_on</span>
+          <div>
+            <h2 class="text-lg font-bold text-gray-800">Flash Deals</h2>
+            <p class="text-xs text-gray-600">Limited time offers</p>
           </div>
         </div>
-        <div class="flex items-center gap-4">
-          <a href="customer.html" class="btn btn-secondary">
-            <i class="fas fa-user mr-2"></i>Customer App
-          </a>
-          <a href="driver.html" class="btn btn-primary">
-            <i class="fas fa-motorcycle mr-2"></i>Driver App
-          </a>
+        <div class="countdown">
+          <span class="text-xs font-medium text-gray-600 mr-1">Ends in:</span>
+          <div class="countdown-item" id="hours">04</div>
+          <span class="text-lg font-bold">:</span>
+          <div class="countdown-item" id="minutes">32</div>
+          <span class="text-lg font-bold">:</span>
+          <div class="countdown-item" id="seconds">15</div>
+        </div>
+      </div>
+      <div id="flashDealsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div class="bg-white rounded-xl overflow-hidden shadow-sm"><div class="aspect-square skeleton"></div><div class="p-2 skeleton-text"></div><div class="p-2 skeleton-text-sm"></div><div class="p-2 skeleton" style="height:16px;width:30%"></div></div>
+        <div class="bg-white rounded-xl overflow-hidden shadow-sm"><div class="aspect-square skeleton"></div><div class="p-2 skeleton-text"></div><div class="p-2 skeleton-text-sm"></div><div class="p-2 skeleton" style="height:16px;width:30%"></div></div>
+        <div class="bg-white rounded-xl overflow-hidden shadow-sm"><div class="aspect-square skeleton"></div><div class="p-2 skeleton-text"></div><div class="p-2 skeleton-text-sm"></div><div class="p-2 skeleton" style="height:16px;width:30%"></div></div>
+        <div class="bg-white rounded-xl overflow-hidden shadow-sm"><div class="aspect-square skeleton"></div><div class="p-2 skeleton-text"></div><div class="p-2 skeleton-text-sm"></div><div class="p-2 skeleton" style="height:16px;width:30%"></div></div>
+        <div class="bg-white rounded-xl overflow-hidden shadow-sm hidden lg:block"><div class="aspect-square skeleton"></div><div class="p-2 skeleton-text"></div><div class="p-2 skeleton-text-sm"></div><div class="p-2 skeleton" style="height:16px;width:30%"></div></div>
+      </div>
+    </section>
+
+    <!-- Featured Sellers -->
+    <section class="mb-8">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <span class="material-symbols-outlined text-green-600 text-xl">storefront</span> Featured Sellers
+        </h2>
+        <a href="/discovery" class="text-green-700 font-semibold text-sm flex items-center gap-1 no-underline">View all <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <a href="/discovery?seller=Fresh+Mart" class="seller-card no-underline">
+          <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+            <span class="material-symbols-outlined text-xl text-white">store</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-gray-800 text-sm">Fresh Mart</h3>
+            <div class="flex items-center gap-1 text-xs text-gray-500">
+              <span class="text-yellow-500">â˜…</span> 4.8 Â· 1.2k reviews
+            </div>
+            <p class="text-xs text-green-600 mt-0.5 font-medium">25-35 min</p>
+          </div>
+          <span class="material-symbols-outlined text-gray-300">chevron_right</span>
+        </a>
+        <a href="/discovery?seller=Tasty+Kitchen" class="seller-card no-underline">
+          <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+            <span class="material-symbols-outlined text-xl text-white">restaurant</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-gray-800 text-sm">Tasty Kitchen</h3>
+            <div class="flex items-center gap-1 text-xs text-gray-500">
+              <span class="text-yellow-500">â˜…</span> 4.6 Â· 856 reviews
+            </div>
+            <p class="text-xs text-orange-600 mt-0.5 font-medium">30-45 min</p>
+          </div>
+          <span class="material-symbols-outlined text-gray-300">chevron_right</span>
+        </a>
+        <a href="/discovery?seller=Daily+Bread" class="seller-card no-underline">
+          <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+            <span class="material-symbols-outlined text-xl text-white">bakery_dining</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-gray-800 text-sm">Daily Bread</h3>
+            <div class="flex items-center gap-1 text-xs text-gray-500">
+              <span class="text-yellow-500">â˜…</span> 4.9 Â· 2.1k reviews
+            </div>
+            <p class="text-xs text-amber-600 mt-0.5 font-medium">20-30 min</p>
+          </div>
+          <span class="material-symbols-outlined text-gray-300">chevron_right</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Popular Products -->
+    <section class="mb-8" id="popularSection">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <span class="material-symbols-outlined text-orange-500 text-xl">trending_up</span> Popular Products
+        </h2>
+        <a href="/discovery" class="text-green-700 font-semibold text-sm flex items-center gap-1 no-underline">See all <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+      </div>
+      <div id="popularProducts" class="product-grid">
+        <!-- Skeleton loaders -->
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+      </div>
+    </section>
+
+    <!-- Recommended for You -->
+    <section class="mb-8" id="recommendedSection">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <span class="material-symbols-outlined text-purple-500 text-xl">recommend</span> Recommended for You
+        </h2>
+        <a href="/discovery" class="text-green-700 font-semibold text-sm flex items-center gap-1 no-underline">See all <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+      </div>
+      <div id="recommendedProducts" class="product-grid">
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+        <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
+      </div>
+    </section>
+
+    <!-- Quick Links -->
+    <section class="mb-8 grid grid-cols-2 md:grid-cols-4 gap-3">
+      <a href="/customer" class="quick-link no-underline">
+        <div class="quick-icon bg-gradient-to-br from-green-500 to-emerald-600 shadow-md">
+          <span class="material-symbols-outlined text-xl text-white">receipt_long</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-gray-800 text-sm">My Orders</h3>
+          <p class="text-xs text-gray-500">Track deliveries</p>
+        </div>
+      </a>
+      <a href="/profile" class="quick-link no-underline">
+        <div class="quick-icon bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md">
+          <span class="material-symbols-outlined text-xl text-white">person</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-gray-800 text-sm">My Profile</h3>
+          <p class="text-xs text-gray-500">Manage account</p>
+        </div>
+      </a>
+      <a href="/track-order" class="quick-link no-underline">
+        <div class="quick-icon bg-gradient-to-br from-orange-500 to-amber-600 shadow-md">
+          <span class="material-symbols-outlined text-xl text-white">local_shipping</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-gray-800 text-sm">Track Order</h3>
+          <p class="text-xs text-gray-500">Real-time tracking</p>
+        </div>
+      </a>
+      <a href="/merchant" class="quick-link no-underline">
+        <div class="quick-icon bg-gradient-to-br from-purple-500 to-violet-600 shadow-md">
+          <span class="material-symbols-outlined text-xl text-white">store</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-gray-800 text-sm">Sell Items</h3>
+          <p class="text-xs text-gray-500">Become a seller</p>
+        </div>
+      </a>
+    </section>
+  </main>
+
+  <!-- Cart Sidebar -->
+  <div id="cartShell" class="fixed inset-0 z-50 overflow-hidden pointer-events-none">
+    <div id="cartSidebar" class="absolute top-0 right-0 h-full w-full md:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]" aria-hidden="true">
+      <div class="h-full flex flex-col">
+        <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+          <h2 class="text-xl font-bold text-green-800">Your Cart</h2>
+          <button onclick="toggleCart()" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div id="cartItems" class="flex-1 overflow-y-auto p-5">
+          <p class="text-center text-gray-400 py-12">Your cart is empty</p>
+        </div>
+        <div class="p-5 border-t border-gray-100">
+          <div class="flex justify-between mb-3">
+            <span class="text-gray-500">Subtotal</span>
+            <span id="cartTotal" class="font-bold text-green-800">TSh 0</span>
+          </div>
+          <button onclick="checkout()" class="w-full gradient-bg text-white py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all active:scale-[0.98]">
+            Checkout
+          </button>
         </div>
       </div>
     </div>
+  </div>
+  <div id="cartOverlay" class="fixed inset-0 bg-black/50 z-40 opacity-0 pointer-events-none transition-opacity duration-300" onclick="toggleCart()"></div>
+
+  <!-- Bottom Nav (Mobile) -->
+  <nav class="bottom-nav">
+    <a href="/home" class="nav-item active">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">home</span>
+      <span>Home</span>
+    </a>
+    <a href="/discovery" class="nav-item">
+      <span class="material-symbols-outlined">search</span>
+      <span>Browse</span>
+    </a>
+    <a href="/cart" class="nav-item relative">
+      <div class="relative">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <span id="bottomCartBadge" class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+      </div>
+      <span>Cart</span>
+    </a>
+    <a href="/profile" class="nav-item">
+      <span class="material-symbols-outlined">person</span>
+      <span>Profile</span>
+    </a>
   </nav>
 
-  <!-- Hero Section -->
-  <section class="hero-section">
-    <div class="container">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div class="hero-content">
-          <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">
-            Food Delivery<br>
-            <span class="text-yellow-300">Made for Tanzania</span>
-          </h1>
-          <p class="text-xl text-white/90 mb-8">
-            Order from your favorite restaurants and get delivery in minutes. 
-            Pay with M-Pesa, Tigo Pesa, or cash on delivery.
-          </p>
-          <div class="flex flex-col sm:flex-row gap-4">
-            <a href="customer.html" class="btn bg-white text-primary hover:bg-gray-100 px-8 py-4 rounded-lg text-lg font-semibold pulse-button">
-              <i class="fas fa-mobile-alt mr-2"></i>
-              Order Food Now
-            </a>
-            <a href="driver.html" class="btn bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-4 rounded-lg text-lg font-semibold">
-              <i class="fas fa-motorcycle mr-2"></i>
-              Become a Driver
-            </a>
-          </div>
-          
-          <!-- Stats -->
-          <div class="grid grid-cols-3 gap-6 mt-12">
-            <div class="text-center">
-              <div class="text-3xl font-bold text-white">50K+</div>
-              <div class="text-white/80">Active Users</div>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl font-bold text-white">200+</div>
-              <div class="text-white/80">Restaurants</div>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl font-bold text-white">4.8★</div>
-              <div class="text-white/80">App Rating</div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- App Preview -->
-        <div class="floating-card hidden md:block">
-          <div class="app-preview w-80 h-96 mx-auto">
-            <div class="app-screen h-full p-4">
-              <div class="flex justify-between items-center mb-4">
-                <h3 class="font-semibold">FoodDelivery TZ</h3>
-                <div class="w-3 h-3 bg-green-400 rounded-full pulse-dot"></div>
-              </div>
-              <div class="p-4">
-                <p class="text-gray-600 text-sm mb-4">Order food from all regions</p>
-                <div class="flex items-center justify-between">
-                  <span class="text-xs text-gray-500">4.8 ⭐ • 1K+ users</span>
-                  <a href="customer.html" class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm hover:bg-blue-700 transition-all">
-                    Open
-                  </a>
-                </div>
-              </div>
-              <div class="space-y-3">
-                <div class="bg-gray-100 p-3 rounded-lg">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-orange-200 rounded-lg"></div>
-                    <div>
-                      <div class="font-medium text-sm">Restaurant Name</div>
-                      <div class="text-xs text-gray-500">20-30 min • TZS 5,000</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="bg-gray-100 p-3 rounded-lg">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-blue-200 rounded-lg"></div>
-                    <div>
-                      <div class="font-medium text-sm">Another Restaurant</div>
-                      <div class="text-xs text-gray-500">15-25 min • TZS 3,000</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <script>
+    let cart = window.CartService ? CartService.getCart() : (JSON.parse(localStorage.getItem('smartsoko_cart')) || []);
+    let products = [];
 
-  <!-- Features Section -->
-  <section id="features" class="py-20">
-    <div class="container">
-      <div class="text-center mb-16">
-        <h2 class="text-4xl font-bold mb-4">Why Choose FoodDelivery TZ?</h2>
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-          We're built for Tanzanians, with local payment methods and restaurants you love.
-        </p>
-      </div>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="feature-card p-8 rounded-2xl card-hover">
-          <div class="w-16 h-16 bg-primary-fixed rounded-2xl flex items-center justify-center mb-6">
-            <i class="fas fa-mobile-money text-2xl text-primary"></i>
-          </div>
-          <h3 class="text-xl font-semibold mb-4">M-Pesa & Tigo Pesa</h3>
-          <p class="text-gray-600">
-            Pay with your preferred mobile money service. Fast, secure, and instant.
-          </p>
-        </div>
-        
-        <div class="feature-card p-8 rounded-2xl card-hover">
-          <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
-            <i class="fas fa-clock text-2xl text-blue-600"></i>
-          </div>
-          <h3 class="text-xl font-semibold mb-4">Fast Delivery</h3>
-          <p class="text-gray-600">
-            Get your food delivered in 30 minutes or less. Track your order in real-time.
-          </p>
-        </div>
-        
-        <div class="feature-card p-8 rounded-2xl card-hover">
-          <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-6">
-            <i class="fas fa-store text-2xl text-green-600"></i>
-          </div>
-          <h3 class="text-xl font-semibold mb-4">Local Restaurants</h3>
-          <p class="text-gray-600">
-            Support local businesses. Order from your favorite Tanzanian restaurants.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
+    function syncSearch(val) {
+      document.getElementById('searchInputMobile').value = val;
+      if (document.getElementById('searchInputDesktop')) document.getElementById('searchInputDesktop').value = val;
+    }
 
-  <!-- How It Works -->
-  <section id="how-it-works" class="py-20 bg-gray-100">
-    <div class="container">
-      <div class="text-center mb-16">
-        <h2 class="text-4xl font-bold mb-4">How It Works</h2>
-        <p class="text-xl text-gray-600">Get your favorite food delivered in 3 simple steps</p>
-      </div>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="text-center">
-          <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
-            <span class="text-3xl font-bold text-white">1</span>
-          </div>
-          <h3 class="text-xl font-semibold mb-4">Browse Restaurants</h3>
-          <p class="text-gray-600">
-            Explore hundreds of local restaurants and their menus
-          </p>
-        </div>
-        
-        <div class="text-center">
-          <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
-            <span class="text-3xl font-bold text-white">2</span>
-          </div>
-          <h3 class="text-xl font-semibold mb-4">Place Order</h3>
-          <p class="text-gray-600">
-            Add items to cart and pay with M-Pesa, Tigo Pesa, or cash
-          </p>
-        </div>
-        
-        <div class="text-center">
-          <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
-            <span class="text-3xl font-bold text-white">3</span>
-          </div>
-          <h3 class="text-xl font-semibold mb-4">Get Delivery</h3>
-          <p class="text-gray-600">
-            Track your order in real-time and enjoy your meal
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
+    function goToSearch() {
+      const query = (document.getElementById('searchInputMobile').value || '').trim();
+      if (!query) return;
+      window.location.href = '/discovery?search=' + encodeURIComponent(query);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      ['searchInputMobile', 'searchInputDesktop'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); goToSearch(); } });
+      });
+    });
 
-  <!-- Download Section -->
-  <section id="download" class="py-20">
-    <div class="container">
-      <div class="text-center mb-16">
-        <h2 class="text-4xl font-bold mb-4">Download the App</h2>
-        <p class="text-xl text-gray-600">Available for Android and iOS</p>
-      </div>
+    // Hero Carousel
+    let currentSlide = 0;
+    const totalSlides = 3;
+    function goToSlide(index) {
+      document.querySelectorAll('.hero-slide').forEach((s, i) => s.classList.toggle('active', i === index));
+      document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === index));
+      currentSlide = index;
+    }
+    setInterval(() => goToSlide((currentSlide + 1) % totalSlides), 5000);
+
+    // Countdown Timer
+    function updateCountdown() {
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+      const diff = endOfDay - new Date();
+      const h = String(Math.floor(diff / 3.6e6)).padStart(2, '0');
+      const m = String(Math.floor((diff % 3.6e6) / 6e4)).padStart(2, '0');
+      const s = String(Math.floor((diff % 6e4) / 1000)).padStart(2, '0');
+      document.getElementById('hours').textContent = h;
+      document.getElementById('minutes').textContent = m;
+      document.getElementById('seconds').textContent = s;
+    }
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // Render functions
+    function renderProducts(items, containerId) {
+      // Filter out unavailable products (isAvailable === false)
+      items = items.filter(p => p.isAvailable !== false);
       
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-        <div class="text-center">
-          <div class="bg-gray-900 p-8 rounded-2xl mb-6">
-            <i class="fas fa-mobile-alt text-6xl text-white mb-4"></i>
-            <h3 class="text-2xl font-bold text-white mb-2">Customer App</h3>
-            <p class="text-gray-300 mb-6">Order food from anywhere</p>
-            <a href="customer.html" class="btn btn-primary w-full">
-              <i class="fas fa-download mr-2"></i>
-              Download Now
-            </a>
+      const container = document.getElementById(containerId);
+      if (items.length === 0) {
+        container.innerHTML = '<div class="col-span-full text-center py-8 text-gray-400">No products available</div>';
+        return;
+      }
+      const ratingHtml = () => {
+        const full = Math.floor(Math.random() * 2) + 4;
+        let html = '';
+        for (let i = 0; i < 5; i++) {
+          html += `<span class="material-symbols-outlined text-[12px] ${i < full ? 'text-amber-400' : 'text-gray-200'}" style="font-variation-settings:'FILL' ${i < full ? 1 : 0};">star</span>`;
+        }
+        return html;
+      };
+      container.innerHTML = items.map((p, idx) => {
+        const reviews = Math.floor(Math.random() * 500) + 50;
+        const originalPrice = Math.round((p.price || 0) * 1.2);
+        return `
+        <a href="/product?id=${p.id}" class="product-card no-underline" style="animation: fadeIn 0.4s cubic-bezier(0.23,1,0.32,1) ${Math.min(idx, 12) * 0.04}s backwards;">
+          <div class="relative aspect-square bg-gray-50 overflow-hidden">
+            <img src="${p.imageUrl || 'images/default-product.png'}" alt="${p.name}" loading="lazy" decoding="async"
+              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              onerror="this.onerror=null; this.src='images/default-product.png';">
+            <button onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('${p.id}', this)"
+              class="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-sm active:scale-90 transition-transform">
+              <span class="material-symbols-outlined text-base text-gray-400" style="font-variation-settings:'FILL' 0;">favorite</span>
+            </button>
           </div>
-        </div>
-        
-        <div class="text-center">
-          <div class="bg-gray-900 p-8 rounded-2xl mb-6">
-            <i class="fas fa-motorcycle text-6xl text-white mb-4"></i>
-            <h3 class="text-2xl font-bold text-white mb-2">Driver App</h3>
-            <p class="text-gray-300 mb-6">Earn money delivering food</p>
-            <a href="driver.html" class="btn btn-primary w-full">
-              <i class="fas fa-download mr-2"></i>
-              Download Now
-            </a>
+          <div class="p-3 space-y-1.5 flex-1 flex flex-col">
+            <div class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-green-600 text-[12px]" style="font-variation-settings:'FILL' 1;">verified</span>
+              <span class="text-[10px] text-green-600 font-semibold">Verified</span>
+            </div>
+            <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 leading-tight">${p.name}</h3>
+            <div class="flex items-center gap-1">${ratingHtml()}<span class="text-[10px] text-gray-400 ml-0.5">(${reviews})</span></div>
+            <div class="flex items-center justify-between mt-auto pt-1">
+              <span class="text-base font-extrabold text-green-800">TSh ${(p.price || 0).toLocaleString()}</span>
+              <button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}')"
+                class="w-8 h-8 gradient-bg text-white rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all hover:bg-green-800">
+                <span class="material-symbols-outlined text-base">add</span>
+              </button>
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </section>
+        </a>`;
+      }).join('');
+      checkPriceDrops(items);
+    }
+
+    function renderFlashDeals(items) {
+      const container = document.getElementById('flashDealsGrid');
+      if (!container || items.length === 0) return;
+      const discounts = [30, 40, 50, 25, 35, 45];
+      container.innerHTML = items.slice(0, 6).map((p, i) => {
+        const disc = discounts[i] || 30;
+        return `
+        <a href="/product?id=${p.id}" class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition cursor-pointer">
+          <div class="aspect-square bg-gray-50 relative overflow-hidden">
+            <img src="${p.imageUrl || 'images/default-product.png'}" alt="${p.name}"
+              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              onerror="this.onerror=null; this.src='images/default-product.png';">
+            <span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">-${disc}%</span>
+            <span class="absolute bottom-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">HOT</span>
+          </div>
+          <div class="p-2">
+            <p class="text-sm font-bold text-gray-900">TSh ${(p.price || 0).toLocaleString()}</p>
+            <p class="text-xs text-gray-400 line-through">TSh ${Math.round((p.price || 0) * 1.3).toLocaleString()}</p>
+            <div class="mt-1.5 h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div class="h-full bg-red-500 rounded-full" style="width: ${Math.random() * 50 + 40}%"></div>
+            </div>
+            <p class="text-xs font-medium text-red-600 mt-1">${Math.floor(Math.random() * 20 + 5)} left</p>
+          </div>
+        </a>`;
+      }).join('');
+    }
+
+    function normalizeProduct(item) {
+      return {
+        id: item.id,
+        name: item.name || item.product_name || 'Unnamed Item',
+        description: item.description || '',
+        price: item.price || 0,
+        imageUrl: item.imageUrl || item.image_url || item.image || '',
+        category: item.category || 'General',
+        sellerId: item.sellerId || item.seller_id || item.restaurantId || item.restaurant_id || '',
+        seller: item.seller || item.seller_name || item.restaurantName || item.restaurant_name || 'SmartSoko'
+      };
+    }
+
+    async function loadProducts() {
+      const svc = window.crossPlatformService;
+      const db = window.db;
+
+      if (!svc && !db) { console.warn('No data service available'); return; }
+
+      try {
+        let items = null;
+
+        // Try cross-platform service first (Firebase + Supabase with fallback)
+        if (svc && svc.isReady()) {
+          try {
+            items = await svc.list('menuItems', { limit: 12 });
+            console.log(`[CrossPlatform] menuItems: ${items.length} docs (${items[0]?._source || 'unknown'})`);
+          } catch (e) { console.log('[CrossPlatform] menuItems:', e.message); }
+          if (!items || items.length === 0) {
+            try {
+              items = await svc.list('products', { limit: 12 });
+              console.log(`[CrossPlatform] products: ${items.length} docs (${items[0]?._source || 'unknown'})`);
+            } catch (e) { console.log('[CrossPlatform] products:', e.message); }
+          }
+        }
+
+        // Fallback to direct Firebase access
+        if ((!items || items.length === 0) && db) {
+          console.log('[Products] Falling back to direct Firebase');
+          const { collection, query, getDocs, limit } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+          let snapshot = null;
+          try {
+            snapshot = await getDocs(query(collection(db, 'menuItems'), limit(12)));
+          } catch (e) { /* silent */ }
+          if (!snapshot || snapshot.empty) {
+            try {
+              snapshot = await getDocs(query(collection(db, 'products'), limit(12)));
+            } catch (e) { /* silent */ }
+          }
+          if (snapshot && !snapshot.empty) {
+            items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          }
+        }
+
+        if (!items || items.length === 0) {
+          document.getElementById('popularProducts').innerHTML = '<div class="col-span-full text-center py-8 text-gray-400"><span class="material-symbols-outlined text-5xl mb-2 block">inventory_2</span><p>No products available yet</p></div>';
+          return;
+        }
+
+        products = items.map(normalizeProduct);
+        renderProducts(products, 'popularProducts');
+        renderProducts(products.length > 4 ? products.slice(4, 8) : [...products].reverse(), 'recommendedProducts');
+        renderFlashDeals(products.slice(0, 6));
+      } catch (err) {
+        console.error('Load error:', err);
+        document.getElementById('popularProducts').innerHTML = `<div class="col-span-full text-center py-8"><p class="text-red-500 mb-2">Failed to load products</p><button onclick="loadProducts()" class="mt-3 px-5 py-2 gradient-bg text-white rounded-xl text-sm font-semibold">Retry</button></div>`;
+      }
+    }
+
+    function addToCart(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+      const existing = cart.find(i => i.id === productId);
+      if (existing) existing.quantity++; else cart.push({ ...product, quantity: 1 });
+      saveCart();
+      updateCartUI();
+      showToast(`${product.name} added to cart`);
+    }
+
+    function saveCart() {
+      if (window.CartService) CartService.saveCart(cart);
+      else localStorage.setItem('smartsoko_cart', JSON.stringify(cart));
+    }
+
+    function updateCartUI() {
+      if (typeof SmartNav !== 'undefined' && SmartNav.updateCartBadge) SmartNav.updateCartBadge();
+      const count = cart.reduce((s, i) => s + (i.quantity || 1), 0);
+      [document.getElementById('headerCartBadge'), document.getElementById('bottomCartBadge')].forEach(b => {
+        if (!b) return;
+        if (count > 0) { b.classList.remove('hidden'); b.textContent = count; } else b.classList.add('hidden');
+      });
+    }
+
+    function toggleWishlist(id, btn) {
+      const icon = btn.querySelector('.material-symbols-outlined');
+      const filled = icon.style.fontVariationSettings.includes("'FILL' 1");
+      icon.style.fontVariationSettings = filled ? "'FILL' 0" : "'FILL' 1";
+      icon.classList.toggle('text-red-500', !filled);
+      icon.classList.toggle('text-gray-400', filled);
+      try {
+        let list = JSON.parse(localStorage.getItem('smartsoko_wishlist') || '[]');
+        if (filled) list = list.filter(x => x !== id);
+        else if (!list.includes(id)) list.push(id);
+        localStorage.setItem('smartsoko_wishlist', JSON.stringify(list));
+      } catch (e) { /* storage unavailable */ }
+    }
+
+    function checkPriceDrops(items) {
+      try {
+        let list = JSON.parse(localStorage.getItem('smartsoko_wishlist') || '[]');
+        if (!list.length) return;
+        let snapshot = JSON.parse(localStorage.getItem('smartsoko_wishlist_prices') || '{}');
+        const dropped = [];
+        items.forEach(p => {
+          if (!list.includes(p.id)) return;
+          const oldPrice = snapshot[p.id];
+          const newPrice = parseFloat(p.price) || 0;
+          if (oldPrice !== undefined && newPrice > 0 && newPrice < oldPrice) {
+            dropped.push(`${p.name}: TSh ${Number(oldPrice).toLocaleString()} â†’ ${newPrice.toLocaleString()}`);
+          }
+          snapshot[p.id] = newPrice;
+        });
+        localStorage.setItem('smartsoko_wishlist_prices', JSON.stringify(snapshot));
+        if (dropped.length) showToast('ðŸ“‰ Price drop: ' + dropped.join(' | '));
+      } catch (e) { /* ignore */ }
+    }
+
+    function showToast(message) {
+      if (typeof SmartNav !== 'undefined' && SmartNav.showToast) { SmartNav.showToast(message, 'success'); return; }
+      const t = document.createElement('div');
+      t.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-5 py-2.5 rounded-full shadow-lg z-50 text-sm font-medium';
+      t.textContent = message;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 2500);
+    }
+
+    function toggleCart() {
+      const s = document.getElementById('cartSidebar');
+      const o = document.getElementById('cartOverlay');
+      const open = s.classList.contains('translate-x-full');
+      s.classList.toggle('translate-x-full', !open);
+      s.classList.toggle('pointer-events-auto', open);
+      o.classList.toggle('opacity-0', !open);
+      o.classList.toggle('pointer-events-none', !open);
+      s.setAttribute('aria-hidden', open ? 'false' : 'true');
+    }
+    // Close cart on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !document.getElementById('cartSidebar').classList.contains('translate-x-full')) {
+        toggleCart();
+      }
+    });
+
+    function checkout() {
+      if (cart.length === 0) { showToast('Your cart is empty'); return; }
+      window.location.href = '/checkout';
+    }
+
+    function tryLoadProducts() {
+      if (window.crossPlatformService?.isReady() || window.db) {
+        loadProducts();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof SmartNav !== 'undefined' && typeof SmartNav.initPageTransition === 'function') SmartNav.initPageTransition();
+      updateCartUI();
+      tryLoadProducts();
+      document.addEventListener('firebase-initialized', tryLoadProducts, { once: true });
+      document.addEventListener('data-service-ready', tryLoadProducts, { once: true });
+    });
+
+    document.getElementById('searchInputMobile').addEventListener('input', e => syncSearch(e.target.value));
+  </script>
 
   <!-- Footer -->
-  <footer class="bg-gray-900 text-white py-12">
-    <div class="container">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+  <footer class="bg-surface-container-lowest border-t border-outline-variant mt-auto">
+    <div class="max-w-[1280px] mx-auto px-4 md:px-12 py-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-6">
         <div>
-          <h3 class="text-2xl font-bold mb-4">🍴 FoodDelivery TZ</h3>
-          <p class="text-gray-400">
-            Tanzania's premier food delivery service. Fast, reliable, and made for you.
-          </p>
+          <h3 class="font-headline text-lg font-bold text-primary mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">shopping_basket</span>
+            SmartSoko
+          </h3>
+          <p class="text-body-sm text-on-surface-variant">Tanzania's premier marketplace for fresh food, groceries, and daily essentials.</p>
         </div>
-        
         <div>
-          <h4 class="font-semibold mb-4">Quick Links</h4>
-          <ul class="space-y-2 text-gray-400">
-            <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
-            <li><a href="#how-it-works" class="hover:text-white transition-colors">How It Works</a></li>
-            <li><a href="#download" class="hover:text-white transition-colors">Download</a></li>
+          <h4 class="font-semibold text-body-md mb-3">Quick Links</h4>
+          <ul class="space-y-2 text-body-sm text-on-surface-variant">
+            <li><a href="/home" class="hover:text-primary transition-colors">Home</a></li>
+            <li><a href="/discovery" class="hover:text-primary transition-colors">Discover</a></li>
+            <li><a href="/cart" class="hover:text-primary transition-colors inline-flex items-center min-h-[40px] px-2">Cart</a></li>
+            <li><a href="/customer" class="hover:text-primary transition-colors">My Account</a></li>
           </ul>
         </div>
-        
         <div>
-          <h4 class="font-semibold mb-4">Support</h4>
-          <ul class="space-y-2 text-gray-400">
-            <li><a href="profile.html" class="hover:text-white transition-colors">Help Center</a></li>
-            <li><a href="#contact" class="hover:text-white transition-colors">Contact Us</a></li>
-            <li><a href="profile.html" class="hover:text-white transition-colors">Terms of Service</a></li>
+          <h4 class="font-semibold text-body-md mb-3">Support</h4>
+          <ul class="space-y-2 text-body-sm text-on-surface-variant">
+            <li><a href="#" class="hover:text-primary transition-colors">Help Center</a></li>
+            <li><a href="#" class="hover:text-primary transition-colors">Contact Us</a></li>
+            <li><a href="#" class="hover:text-primary transition-colors">Track Order</a></li>
+            <li><a href="#" class="hover:text-primary transition-colors">FAQs</a></li>
           </ul>
         </div>
-        
         <div>
-          <h4 class="font-semibold mb-4">Connect</h4>
+          <h4 class="font-semibold text-body-md mb-3">Connect</h4>
           <div class="flex gap-4">
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors">
-              <i class="fab fa-facebook text-xl"></i>
+            <a href="#" class="text-on-surface-variant hover:text-primary transition-colors" aria-label="Facebook">
+              <span class="material-symbols-outlined text-xl">facebook</span>
             </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors">
-              <i class="fab fa-twitter text-xl"></i>
+            <a href="#" class="text-on-surface-variant hover:text-primary transition-colors" aria-label="Twitter">
+              <span class="material-symbols-outlined text-xl">alternate_email</span>
             </a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors">
-              <i class="fab fa-instagram text-xl"></i>
+            <a href="#" class="text-on-surface-variant hover:text-primary transition-colors" aria-label="Instagram">
+              <span class="material-symbols-outlined text-xl">camera</span>
             </a>
           </div>
         </div>
       </div>
-      
-      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-        <p>&copy; 2024 FoodDelivery TZ. All rights reserved.</p>
+      <div class="border-t border-outline-variant pt-6 text-center text-body-sm text-on-surface-variant">
+        <p>&copy; 2026 SmartSoko. All rights reserved.</p>
       </div>
     </div>
   </footer>
-
-  <!-- Firebase Configuration and Initialization -->
-  <script>
-    // Firebase configuration - wrapped to prevent redeclaration
-    if (typeof firebaseConfig === 'undefined') {
-      const firebaseConfig = {
-        apiKey: "AIzaSyBBKliW4sQwBFEYMptJ8VuWYHTJ73DbHoE",
-        authDomain: "fooddelievry-dce15.firebaseapp.com",
-        projectId: "fooddelievry-dce15",
-        storageBucket: "fooddelievry-dce15.firebasestorage.app",
-        messagingSenderId: "727819507148",
-        appId: "1:727819507148:web:372bee2608d5c7a9587969"
-      };
-
-      // Initialize Firebase only if not already initialized
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
-      
-      const db = firebase.firestore();
-      
-      // Make available globally
-      window.firebaseConfig = firebaseConfig;
-      window.db = db;
-    }
-
-    // Initialize app when DOM is ready
-    document.addEventListener('DOMContentLoaded', function() {
-      initNavigation();
-      initScrollAnimations();
-      initSearch();
-      initFirebaseFeatures();
-    });
-
-    function initNavigation() {
-      // Smooth scrolling for anchor links
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-          e.preventDefault();
-          const target = document.querySelector(this.getAttribute('href'));
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        });
-      });
-    }
-
-    function initScrollAnimations() {
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      };
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('slide-in');
-          }
-        });
-      }, observerOptions);
-
-      // Observe sections for animation
-      document.querySelectorAll('section').forEach(section => {
-        observer.observe(section);
-      });
-    }
-
-    function initSearch() {
-      const searchInput = document.querySelector('input[type="text"]');
-      if (searchInput) {
-        searchInput.addEventListener('input', function(e) {
-          const searchTerm = e.target.value.toLowerCase();
-          console.log('Searching for:', searchTerm);
-          // Add search logic here
-        });
-      }
-    }
-
-    function initFirebaseFeatures() {
-      // Initialize Firebase features if available
-      if (typeof db !== 'undefined') {
-        console.log('Firebase initialized successfully');
-        
-        // Example: Listen for real-time updates
-        // db.collection('restaurants').onSnapshot((snapshot) => {
-        //   console.log('Restaurants updated:', snapshot.docs.length);
-        // });
-      } else {
-        console.log('Firebase not available');
-      }
-    }
-
-    // Category interactions
-    document.querySelectorAll('.card-hover').forEach(card => {
-      card.addEventListener('click', function() {
-        console.log('Category selected');
-        // Add category selection logic
-      });
-    });
-  </script>
 </body>
 </html>
+

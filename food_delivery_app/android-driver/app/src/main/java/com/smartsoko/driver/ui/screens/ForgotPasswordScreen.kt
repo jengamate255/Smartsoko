@@ -24,12 +24,12 @@ import com.smartsoko.driver.ui.components.*
 fun ForgotPasswordScreen(
     isLoading: Boolean,
     error: String?,
+    resetSent: Boolean,
     onResetPassword: (String) -> Unit,
     onBack: () -> Unit,
     onClearError: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
-    var resetSent by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -138,7 +138,6 @@ fun ForgotPasswordScreen(
                     text = "Send Reset Email",
                     onClick = {
                         onResetPassword(email)
-                        resetSent = true
                     },
                     isLoading = isLoading,
                     enabled = !isLoading && email.isNotBlank()

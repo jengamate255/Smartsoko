@@ -9,6 +9,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kilimanjaro Fresh - SMARTSOKO</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,9 +20,9 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   
   <!-- Design System -->
-  <link rel="stylesheet" href="smartsoko-design-system.css">
+  <link rel="stylesheet" href="design-system.css">
   
-  <style> .vendor-hero {background: linear-gradient(135deg,var(--color-terra) 0%,var(--color-gold) 100%);padding: var(--spacing-xl) 0;color: var(--color-white)} .vendor-header {display: flex;align-items: center;gap: var(--spacing-lg);margin-bottom: var(--spacing-lg)} .vendor-logo {width: 120px;height: 120px;border-radius: var(--radius-lg);background-color: var(--color-white);display: flex;align-items: center;justify-content: center;font-size: 48px;color: var(--color-terra);box-shadow: var(--shadow-lg)} .vendor-info h1 {font-size: clamp(28px,4vw,48px);color: var(--color-white);margin-bottom: var(--spacing-xs)} .vendor-badge {display: inline-block;background-color: rgba(255,255,255,0.2);padding: 4px 12px;border-radius: var(--radius-full);font-size: var(--text-small);font-weight: 600;margin-bottom: var(--spacing-sm)} .vendor-stats {display: flex;gap: var(--spacing-lg);margin-top: var(--spacing-md)} .vendor-stat {text-align: center} .vendor-stat-number {font-family: var(--font-display);font-size: 24px;font-weight: 700;color: var(--color-white)} .vendor-stat-label {font-size: var(--text-small);opacity: 0.9} .vendor-actions {display: flex;gap: var(--spacing-sm);margin-top: var(--spacing-lg)} .tabs {display: flex;border-bottom: 2px solid var(--color-taupe);margin-bottom: var(--spacing-lg);overflow-x: auto} .tab {padding: var(--spacing-sm) var(--spacing-md);font-family: var(--font-accent);font-weight: 600;color: var(--color-gray);border-bottom: 3px solid transparent;cursor: pointer;transition: all var(--transition-fast);white-space: nowrap} .tab.active {color: var(--color-gold);border-bottom-color: var(--color-gold)} .tab:hover {color: var(--color-charcoal)} .tab-content {display: none} .tab-content.active {display: block} .products-section {margin-bottom: var(--spacing-xl)} .section-title {font-size: var(--text-h3);margin-bottom: var(--spacing-md);display: flex;align-items: center;justify-content: space-between} .view-all {color: var(--color-gold);font-size: var(--text-small);text-decoration: none;font-weight: 600} .view-all:hover {text-decoration: underline} .info-grid {display: grid;grid-template-columns: repeat(auto-fit,minmax(250px,1fr));gap: var(--spacing-md);margin-bottom: var(--spacing-lg)} .info-card {background-color: var(--color-white);padding: var(--spacing-md);border-radius: var(--radius-lg);box-shadow: var(--shadow-sm)} .info-card h3 {font-size: var(--text-body);margin-bottom: var(--spacing-sm);display: flex;align-items: center;gap: var(--spacing-xs)} .info-card p {color: var(--color-gray);font-size: var(--text-small);line-height: 1.5} .reviews-section {margin-bottom: var(--spacing-xl)} .review-card {background-color: var(--color-white);padding: var(--spacing-md);border-radius: var(--radius-lg);box-shadow: var(--shadow-sm);margin-bottom: var(--spacing-md)} .review-header {display: flex;align-items: center;gap: var(--spacing-sm);margin-bottom: var(--spacing-sm)} .reviewer-avatar {width: 40px;height: 40px;border-radius: var(--radius-full);background-color: var(--color-taupe);display: flex;align-items: center;justify-content: center;color: var(--color-white);font-weight: 600} .reviewer-info {flex: 1} .reviewer-name {font-weight: 600;font-size: var(--text-small)} .review-date {font-size: var(--text-caption);color: var(--color-gray)} .review-rating {color: var(--color-gold);font-size: 14px} .review-text {color: var(--color-charcoal);line-height: 1.6;font-size: var(--text-small)} .floating-cart {position: fixed;bottom: 80px;right: var(--spacing-md);z-index: var(--z-dropdown)} @media (max-width: 768px) {.vendor-header {flex-direction: column;text-align: center} .vendor-stats {justify-content: center} .vendor-actions {justify-content: center;flex-wrap: wrap} .tabs {justify-content: center} } </style>
+  <style> .vendor-hero {background: linear-gradient(135deg,var(--color-terra) 0%,var(--color-gold) 100%);padding: var(--spacing-xl) 0;color: var(--color-white)} .vendor-header {display: flex;align-items: center;gap: var(--spacing-lg);margin-bottom: var(--spacing-lg)} .vendor-logo {width: 120px;height: 120px;border-radius: var(--radius-lg);background-color: var(--color-white);display: flex;align-items: center;justify-content: center;font-size: 48px;color: var(--color-terra);box-shadow: var(--shadow-lg)} .vendor-info h1 {font-size: clamp(28px,4vw,48px);color: var(--color-white);margin-bottom: var(--spacing-xs)} .vendor-badge {display: inline-block;background-color: rgba(255,255,255,0.2);padding: 4px 12px;border-radius: var(--radius-full);font-size: var(--text-small);font-weight: 600;margin-bottom: var(--spacing-sm)} .vendor-stats {display: flex;gap: var(--spacing-lg);margin-top: var(--spacing-md)} .vendor-stat {text-align: center} .vendor-stat-number {font-family: var(--font-display);font-size: 24px;font-weight: 700;color: var(--color-white)} .vendor-stat-label {font-size: var(--text-small);opacity: 0.9} .vendor-actions {display: flex;gap: var(--spacing-sm);margin-top: var(--spacing-lg)} .tabs {display: flex;border-bottom: 2px solid var(--color-taupe);margin-bottom: var(--spacing-lg);overflow-x: auto} .tab {padding: var(--spacing-sm) var(--spacing-md);font-family: var(--font-accent);font-weight: 600;color: var(--color-gray);border-bottom: 3px solid transparent;cursor: pointer;transition: all var(--transition-fast);white-space: nowrap} .tab.active {color: var(--color-gold);border-bottom-color: var(--color-gold)} .tab:hover {color: var(--color-charcoal)} .tab-content {display: none} .tab-content.active {display: block} .products-section {margin-bottom: var(--spacing-xl)} .section-title {font-size: var(--text-h3);margin-bottom: var(--spacing-md);display: flex;align-items: center;justify-content: space-between} .view-all {color: var(--color-gold);font-size: var(--text-small);text-decoration: none;font-weight: 600} .view-all:hover {text-decoration: underline} .info-grid {display: grid;grid-template-columns: repeat(auto-fit,minmax(250px,1fr));gap: var(--spacing-md);margin-bottom: var(--spacing-lg)} .info-card {background-color: var(--color-white);padding: var(--spacing-md);border-radius: var(--radius-lg);box-shadow: var(--shadow-sm)} .info-card h3 {font-size: var(--text-body);margin-bottom: var(--spacing-sm);display: flex;align-items: center;gap: var(--spacing-xs)} .info-card p {color: var(--color-gray);font-size: var(--text-small);line-height: 1.5} .reviews-section {margin-bottom: var(--spacing-xl)} .review-card {background-color: var(--color-white);padding: var(--spacing-md);border-radius: var(--radius-lg);box-shadow: var(--shadow-sm);margin-bottom: var(--spacing-md)} .review-header {display: flex;align-items: center;gap: var(--spacing-sm);margin-bottom: var(--spacing-sm)} .reviewer-avatar {width: 40px;height: 40px;border-radius: var(--radius-full);background-color: var(--color-taupe);display: flex;align-items: center;justify-content: center;color: var(--color-white);font-weight: 600} .reviewer-info {flex: 1} .reviewer-name {font-weight: 600;font-size: var(--text-small)} .review-date {font-size: var(--text-caption);color: var(--color-gray)} .review-rating {color: var(--color-gold);font-size: 14px} .review-text {color: var(--color-charcoal);line-height: 1.6;font-size: var(--text-small)} .floating-cart {position: fixed;bottom: 80px;right: var(--spacing-md);z-index: var(--z-dropdown)} @media (max-width: 768px) {.vendor-header {flex-direction: column;text-align: center} .vendor-stats {justify-content: center} .vendor-actions {justify-content: center;flex-wrap: wrap} .tabs {justify-content: center} }  .quantity-selector {display: flex;align-items: center;gap: var(--spacing-xs);border: 1px solid var(--color-taupe);border-radius: var(--radius-md);padding: 2px} .quantity-btn {width: 36px;height: 36px;border: none;background-color: transparent;border-radius: var(--radius-sm);display: flex;align-items: center;justify-content: center;cursor: pointer;transition: background-color var(--transition-fast)} .quantity-btn:hover {background-color: var(--color-cream)} .quantity-value {min-width: 32px;text-align: center;font-weight: 600;font-size: var(--text-small)}</style>
 </head>
 <body>
   <!-- Top Navigation -->
@@ -122,7 +123,7 @@
         <div class="products-section">
           <div class="section-title">
             <h2>Featured Products</h2>
-            <a href="#" class="view-all">View All â†’</a>
+            <a href="#" class="view-all">View All â†’â€™</a>
           </div>
           
           <div class="grid grid-cols-4">
@@ -431,7 +432,7 @@
       <span class="material-icons nav-icon">shopping_cart</span>
       <span class="nav-label">Cart</span>
     </a>
-    <a href="customer.html" class="nav-item">
+    <a href="cart.html" class="nav-item">
       <span class="material-icons nav-icon">receipt_long</span>
       <span class="nav-label">Orders</span>
     </a>
@@ -511,7 +512,7 @@
       button.disabled = true;
       button.innerHTML = '<span class="material-icons">check</span> Added';
       
-      showToast(`Added ${quantity} Ã— ${productName} to cart`, 'success');
+      showToast(`Added ${quantity} â€”â€” ${productName} to cart`, 'success');
       
       // Update cart count
       setTimeout(() => {
@@ -540,3 +541,4 @@
   </script>
 </body>
 </html>
+

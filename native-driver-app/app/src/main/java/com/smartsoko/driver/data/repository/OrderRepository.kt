@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import com.smartsoko.driver.data.local.AppDatabase
 import com.smartsoko.driver.data.local.entity.OrderEntity
 import com.smartsoko.driver.data.remote.ApiService
-import com.smartsoko.driver.data.remote.WebSocketManager
+import com.smartsoko.driver.data.remote.LocationPingDto
 import com.smartsoko.driver.data.remote.dto.*
 import com.smartsoko.driver.domain.model.*
 import com.smartsoko.driver.util.Resource
@@ -19,7 +19,6 @@ import javax.inject.Singleton
 class OrderRepository @Inject constructor(
     private val db: AppDatabase,
     private val api: ApiService,
-    private val ws: WebSocketManager,
     private val gson: Gson
 ) {
     private val orderDao = db.orderDao()
@@ -50,7 +49,6 @@ class OrderRepository @Inject constructor(
                 val order = dto.toDomain()
                 orderDao.insertOrder(dto.toEntity())
                 prefsDao.setActiveOrder(orderId)
-                ws.sendOrderAccepted(orderId)
                 Resource.Success(order)
             } else throw Exception(body?.message ?: "Accept failed")
         } catch (e: Exception) {
@@ -79,14 +77,12 @@ class OrderRepository @Inject constructor(
                 val order = dto.toDomain()
                 orderDao.insertOrder(dto.toEntity())
                 orderDao.updateOrderStatus(orderId, status.name, now)
-                ws.sendOrderStatus(orderId, status.name)
                 if (status == OrderStatus.DELIVERED) prefsDao.setActiveOrder(null)
                 Resource.Success(order)
             } else throw Exception(body?.message ?: "Status update failed")
         } catch (e: Exception) {
             // Fallback: update locally
             orderDao.updateOrderStatus(orderId, status.name, System.currentTimeMillis())
-            ws.sendOrderStatus(orderId, status.name)
             Resource.Error(e.message ?: "Sync error, updated locally", e)
         }
     }
@@ -125,14 +121,33 @@ class OrderRepository @Inject constructor(
         }
     }
 
-    suspend fun syncPendingLocations() {
+    suspend fun getAvailableOrders(token: String): Resource<List<Order>> = withContext(Dispatchers.IO) {
+        try {
+            val resp = api.getAvailableOrders("Bearer $token")
+            val body = resp.body()
+            if (resp.isSuccessful && body?.success == true && body.data != null) {
+                Resource.Success(body.data.map { it.toDomain() })
+            } else throw Exception(body?.message ?: "Failed to load orders")
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to load orders", e)
+        }
+    }
+
+    suspend fun syncPendingLocations(token: String) {
         val pending = db.locationQueueDao().getPendingLocations()
         if (pending.isEmpty()) return
+        val sent = mutableListOf<Long>()
         pending.forEach { loc ->
-            ws.sendLocationUpdate(Location(loc.lat, loc.lng, loc.bearing, loc.speed, 0f, loc.timestamp))
+            val resp = api.postLocation(
+                "Bearer $token",
+                LocationPingDto(lat = loc.lat, lng = loc.lng, heading = loc.bearing, speed = loc.speed)
+            )
+            if (resp.isSuccessful) sent.add(loc.id)
         }
-        db.locationQueueDao().markSent(pending.map { it.id })
-        db.locationQueueDao().clearSent()
+        if (sent.isNotEmpty()) {
+            db.locationQueueDao().markSent(sent)
+            db.locationQueueDao().clearSent()
+        }
     }
 }
 

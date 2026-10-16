@@ -58,6 +58,7 @@ fun SmartSokoDriverNavHost(
     val context = LocalContext.current
     val user by viewModel.user.observeAsState()
     val activeOrder by viewModel.activeOrder.observeAsState()
+    val driverLocation by viewModel.driverLocation.observeAsState()
 
     // Handle notification taps / deep links once the user session is loaded
     LaunchedEffect(pendingOrderId, pendingAction, user) {
@@ -119,7 +120,7 @@ fun SmartSokoDriverNavHost(
             composable("map") {
                 MapScreen(
                     activeOrder = activeOrder,
-                    driverLocation = viewModel.driverLocation.value,
+                    driverLocation = driverLocation,
                     onOrderStatusUpdated = { orderId, status ->
                         viewModel.updateOrderStatus(orderId, status)
                     },

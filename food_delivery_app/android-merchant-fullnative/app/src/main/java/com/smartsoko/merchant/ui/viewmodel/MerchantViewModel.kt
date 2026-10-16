@@ -337,6 +337,18 @@ class MerchantViewModel : ViewModel() {
         }
     }
 
+    fun aiAssistProduct(
+        imageUri: android.net.Uri,
+        onSuccess: (com.smartsoko.merchant.data.model.AiExtraction) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            repository.aiExtractProduct(imageUri)
+                .onSuccess { extraction -> onSuccess(extraction) }
+                .onFailure { error -> onError(error.message ?: "AI extraction failed") }
+        }
+    }
+
     fun signOut() {
         repository.signOut()
         _uiState.update { MerchantUiState(isAuthenticated = false, isLoading = false) }

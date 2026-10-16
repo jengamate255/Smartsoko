@@ -23,10 +23,31 @@ import java.util.*
 fun EarningsScreen(
     assignedOrders: List<Order>
 ) {
-    val deliveredOrders = assignedOrders.filter { it.status == OrderStatus.DELIVERED }
-    val totalEarned = deliveredOrders.sumOf { it.totalAmount * 0.1 }
-    val deliveryCount = deliveredOrders.size
+    var filter by remember { mutableStateOf(0) } // 0 = Today, 1 = This Week, 2 = All Time
     val dateFormat = remember { SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()) }
+
+    val startOfToday = remember {
+        Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+    }
+    val startOfWeek = remember {
+        Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
+            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+    }
+
+    val allDelivered = assignedOrders.filter { it.status == OrderStatus.DELIVERED }
+    val deliveredOrders = when (filter) {
+        0 -> allDelivered.filter { it.deliveredAt?.time ?: it.updatedAt.time >= startOfToday }
+        1 -> allDelivered.filter { it.deliveredAt?.time ?: it.updatedAt.time >= startOfWeek }
+        else -> allDelivered
+    }
+    val totalEarned = deliveredOrders.sumOf { it.deliveryFee }
+    val deliveryCount = deliveredOrders.size
 
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
@@ -37,6 +58,24 @@ fun EarningsScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 16.dp)
         )
+
+        // Filter chips
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf("Today", "This Week", "All Time").forEachIndexed { index, label ->
+                FilterChip(
+                    selected = filter == index,
+                    onClick = { filter = index },
+                    label = { Text(label) }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
 
         Row(
             modifier = Modifier

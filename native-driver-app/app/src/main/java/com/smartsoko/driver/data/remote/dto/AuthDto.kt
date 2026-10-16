@@ -14,6 +14,7 @@ data class OtpVerifyDto(
 
 data class AuthResponseDto(
     @SerializedName("token") val token: String,
+    @SerializedName("token_type") val tokenType: String? = null,
     @SerializedName("driver_id") val driverId: String,
     @SerializedName("full_name") val fullName: String?,
     @SerializedName("phone") val phone: String,

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary brand colors - Tanzania Orange -->
+    <color name="primary_orange">#FF6B00</color>
+    <color name="primary_orange_dark">#E05A00</color>
+    <color name="primary_orange_light">#FF9500</color>
+    <color name="primary_orange_container">#FFE5D0</color>
+    <color name="on_primary_orange">#FFFFFF</color>
+    <color name="on_primary_orange_container">#3D1C00</color>
+    
+    <!-- Secondary brand colors - Tanzania Green -->
+    <color name="primary_green">#1B8A3C</color>
+    <color name="primary_green_dark">#156B2E</color>
+    <color name="primary_green_light">#4CAF50</color>
+    <color name="primary_green_container">#D0F0D8</color>
+    <color name="on_primary_green">#FFFFFF</color>
+    <color name="on_primary_green_container">#00220B</color>
+    
+    <!-- Error colors -->
+    <color name="error_red">#DC2626</color>
+    <color name="error_red_dark">#B91C1C</color>
+    <color name="error_red_light">#EF4444</color>
+    <color name="error_red_container">#FEE2E2</color>
+    <color name="on_error_red">#FFFFFF</color>
+    <color name="on_error_red_container">#450A0A</color>
+    
+    <!-- Neutral colors (Light theme) -->
+    <color name="background_light">#FAFAFA</color>
+    <color name="surface_light">#FFFFFF</color>
+    <color name="surface_variant_light">#F5F5F5</color>
+    <color name="outline_light">#E0E0E0</color>
+    <color name="on_background_light">#1C1C1C</color>
+    <color name="on_surface_light">#1C1C1C</color>
+    <color name="on_surface_variant_light">#4A4A4A</color>
+    <color name="inverse_on_surface_light">#FFFFFF</color>
+    <color name="inverse_surface_light">#313131</color>
+    
+    <!-- Neutral colors (Dark theme) -->
+    <color name="background_dark">#121212</color>
+    <color name="surface_dark">#1E1E1E</color>
+    <color name="surface_variant_dark">#2C2C2C</color>
+    <color name="outline_dark">#444444</color>
+    <color name="on_background_dark">#E6E6E6</color>
+    <color name="on_surface_dark">#E6E6E6</color>
+    <color name="on_surface_variant_dark">#CACACA</color>
+    <color name="inverse_on_surface_dark">#1C1C1C</color>
+    <color name="inverse_surface_dark">#E6E6E6</color>
+    
+    <!-- Legacy support -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+    
+    <!-- Semantic colors -->
+    <color name="success_green">#1B8A3C</color>
+    <color name="warning_amber">#F59E0B</color>
+    <color name="info_blue">#3B82F6</color>
+    
+    <!-- Order status colors -->
+    <color name="status_pending">#F59E0B</color>
+    <color name="status_accepted">#3B82F6</color>
+    <color name="status_picked_up">#8B5CF6</color>
+    <color name="status_on_the_way">#06B6D4</color>
+    <color name="status_delivered">#1B8A3C</color>
+    <color name="status_cancelled">#DC2626</color>
+    
+    <!-- Elevation overlays -->
+    <color name="elevation_overlay_01">#FFFFFF</color>
+    <color name="elevation_overlay_02">#FFFFFF</color>
+    <color name="elevation_overlay_03">#FFFFFF</color>
+    <color name="elevation_overlay_04">#FFFFFF</color>
+    <color name="elevation_overlay_05">#FFFFFF</color>
+    
+    <!-- Scrim -->
+    <color name="scrim">#75000000</color>
+</resources>

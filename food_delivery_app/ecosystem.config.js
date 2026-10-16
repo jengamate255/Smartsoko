@@ -1,15 +1,21 @@
 module.exports = {
   apps: [{
     name: 'smartsoko-api',
-    script: 'server-production.js',
+    script: 'server/server-production.js',
     cwd: 'E:\\Project\\notsmartsoko\\Smartsoko\\food_delivery_app',
     instances: 'max',  // Use all CPU cores
     exec_mode: 'cluster',
-    max_memory_restart: '2G',
-    node_args: '--max-old-space-size=4096',
+    max_memory_restart: '512M',  // Lower for faster restarts & less GC pause
+    node_args: [
+      '--max-old-space-size=512',
+      '--optimize-for-size',
+      '--no-warnings',
+      '--enable-source-maps'
+    ],
     env: {
       NODE_ENV: 'production',
       PORT: 3000,
+      UV_THREADPOOL_SIZE: 16,  // Increase libuv thread pool for I/O
       FIREBASE_SERVICE_ACCOUNT_BASE64: process.env.FIREBASE_SERVICE_ACCOUNT_BASE64,
       FIREBASE_API_KEY: process.env.FIREBASE_API_KEY || 'AIzaSyBBKliW4sQwBFEYMptJ8VuWYHTJ73DbHoE',
       FIREBASE_AUTH_DOMAIN: process.env.FIREBASE_AUTH_DOMAIN || 'fooddelievry-dce15.firebaseapp.com',
@@ -36,12 +42,13 @@ module.exports = {
     min_uptime: '10s',
     restart_delay: 5000,
     watch: false,
-    kill_timeout: 10000,
-    listen_timeout: 8000,
+    kill_timeout: 5000,
+    listen_timeout: 5000,
     shutdown_with_message: true,
     env_production: {
       NODE_ENV: 'production',
-      PORT: 3000
+      PORT: 3000,
+      UV_THREADPOOL_SIZE: 16
     }
   }]
 };

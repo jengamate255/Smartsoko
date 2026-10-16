@@ -20,6 +20,7 @@ import com.smartsoko.customer.presentation.search.SearchScreen
 import com.smartsoko.customer.presentation.splash.SplashScreen
 import com.smartsoko.customer.presentation.address.AddressListScreen
 import com.smartsoko.customer.presentation.address.AddressFormScreen
+import com.smartsoko.customer.presentation.payment.PaymentMethodsScreen
 import com.smartsoko.customer.presentation.tracking.OrderTrackingScreen
 
 @Composable
@@ -218,7 +219,9 @@ fun SmartsokoNavGraph(
                 onNavigateToAddresses = {
                     navController.navigate(Screen.AddressList.route)
                 },
-                onNavigateToPaymentMethods = { /* TODO: Add payment methods screen */ },
+                onNavigateToPaymentMethods = {
+                    navController.navigate(Screen.PaymentMethods.route)
+                },
                 onNavigateToSettings = { /* TODO: Add settings screen */ },
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login.route) {
@@ -240,6 +243,12 @@ fun SmartsokoNavGraph(
 
         composable(Screen.AddAddress.route) {
             AddressFormScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.PaymentMethods.route) {
+            PaymentMethodsScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

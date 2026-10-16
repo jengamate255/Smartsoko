@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -17,6 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.fooddelivery.driver.di.AppModule.SharedPreferencesEntryPoint
 import com.smartsoko.driver.ui.screen.auth.AuthScreen
 import com.smartsoko.driver.ui.screen.auth.ProfileSetupScreen
 import com.smartsoko.driver.ui.screen.earnings.EarningsScreen
@@ -25,6 +27,7 @@ import com.smartsoko.driver.ui.screen.home.HomeScreen
 import com.smartsoko.driver.ui.screen.nav.NavigationScreen
 import com.smartsoko.driver.ui.screen.profile.ProfileScreen
 import com.smartsoko.driver.ui.screen.splash.SplashScreen
+import dagger.hilt.android.EntryPointAccessors
 
 data class BottomNavItem(
     val route: String,
@@ -167,12 +170,18 @@ fun AppNavigation() {
             }
 
             composable(Screen.Profile.route) {
+                val context = LocalContext.current
+                val sharedPrefs = remember(context) {
+                    EntryPointAccessors.fromApplication(context.applicationContext, SharedPreferencesEntryPoint::class.java)
+                        .sharedPreferences()
+                }
                 ProfileScreen(
                     onLogout = {
                         navController.navigate(Screen.Auth.route) {
                             popUpTo(0) { inclusive = true }
                         }
-                    }
+                    },
+                    sharedPreferences = sharedPrefs
                 )
             }
         }

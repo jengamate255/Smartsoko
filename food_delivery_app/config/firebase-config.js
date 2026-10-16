@@ -11,7 +11,7 @@ export const firebaseConfig = {
   projectId: "fooddelievry-dce15",
   storageBucket: "fooddelievry-dce15.firebasestorage.app",
   messagingSenderId: "727819507148",
-  appId: "1:727819507148:web:0ccbfa749c29f4c1587969"
+  appId: "1:727819507148:web:372bee2608d5c7a9587969"
 };
 
 const app = initializeApp(firebaseConfig);

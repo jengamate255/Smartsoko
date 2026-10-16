@@ -181,7 +181,7 @@
       '</div>' +
       '<div class="px-5 pb-2 relative">' +
       '<span class="material-symbols-outlined absolute left-8 top-1/2 text-gray-400 text-lg -translate-y-1/2">search</span>' +
-      '<input id="smrtLocSearch" type="text" placeholder="Search places, areas or cities" autocomplete="off" autocapitalize="words" ' +
+      '<input id="smrtLocSearch" type="text" placeholder="Search places, areas or cities" autocomplete="off" autocapitalize="words" aria-label="Search places, areas or cities" ' +
       'class="w-full h-11 pl-10 pr-4 rounded-2xl border border-gray-200 bg-gray-50 text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all"/>' +
       '</div>' +
       '<ul id="smrtLocList" class="overflow-y-auto flex-1 px-2.5 py-3 space-y-0.5 max-h-[44vh] sm:max-h-[50vh]"></ul>' +

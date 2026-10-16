@@ -1,4 +1,4 @@
-package com.fooddelivery.driver.ui.screens
+﻿package com.fooddelivery.driver.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -39,7 +39,7 @@ import androidx.compose.ui.draw.clip
 @Composable
 fun ChatScreen(
     viewModel: AppViewModel = viewModel(),
-    orderId: String = "sample_order_123" // In real app, this would come from navigation arguments
+    orderId: String = ""
 ) {
     SmartSokoDriverTheme {
         // Collect state from ViewModel
@@ -49,6 +49,8 @@ fun ChatScreen(
         val user by viewModel.user.observeAsState()
         val isOnline by viewModel.isOnline.observeAsState(false)
         val activeOrder by viewModel.activeOrder.observeAsState()
+
+        val activeOrderId = orderId.ifBlank { activeOrder?.id ?: "" }
 
         // Text field state for message input
         var messageText by remember { mutableStateOf("") }
@@ -76,7 +78,7 @@ fun ChatScreen(
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
-                                text = "Order #${orderId.takeLast(4)}",
+                                text = if (activeOrderId.isNotEmpty()) "Order #${activeOrderId.takeLast(4)}" else "No active order",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -167,7 +169,7 @@ fun ChatScreen(
                                         onClick = {
                                             if (messageText.isNotEmpty()) {
                                                 // Send message
-                                                viewModel.sendChatMessage(orderId, messageText)
+                                                viewModel.sendChatMessage(activeOrderId, messageText)
                                                 messageText = ""
                                                 // Scroll to bottom
                                                 coroutineScope.launch {
@@ -190,7 +192,7 @@ fun ChatScreen(
                                 keyboardActions = KeyboardActions(
                                     onSend = {
                                         if (messageText.isNotEmpty()) {
-                                            viewModel.sendChatMessage(orderId, messageText)
+                                            viewModel.sendChatMessage(activeOrderId, messageText)
                                             messageText = ""
                                             coroutineScope.launch {
                                                 listState.animateScrollToItem(messages.size - 1)

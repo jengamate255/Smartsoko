@@ -2,7 +2,8 @@
 <resources>
     <string name="app_name">SmartSoko Driver</string>
     <string name="nav_home">Home</string>
-    <string name="nav_earnings">Earnings</string>
+    <string name="nav_map">Map</string>
+    <string name="nav_chat">Chat</string>
     <string name="nav_history">History</string>
     <string name="nav_profile">Profile</string>
     <string name="go_online">Go Online</string>

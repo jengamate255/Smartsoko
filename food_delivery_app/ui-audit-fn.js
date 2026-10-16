@@ -119,6 +119,32 @@ function runAudit() {
     return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
   };
   const parseRgb = (str) => { const m2 = str.match(/([0-9.]+)/g); return m2 ? m2.slice(0, 3).map(Number) : null; };
+  // Effective painted background: alpha-composite the element's own bg over
+  // ancestor backgrounds. Returns null when unknowable (all transparent over
+  // an image/gradient), in which case the contrast check is skipped.
+  const effectiveBackground = (el) => {
+    const layers = [];
+    let cur = el;
+    for (let i = 0; cur && i < 10; i++) {
+      const cs = getComputedStyle(cur);
+      const m = cs.backgroundColor.match(/rgba?\(([0-9.]+), ([0-9.]+), ([0-9.]+)(?:, ([0-9.]+))?\)/);
+      if (m) {
+        layers.push({ r: parseFloat(m[1]), g: parseFloat(m[2]), b: parseFloat(m[3]), a: m[4] !== undefined ? parseFloat(m[4]) : 1 });
+        if (layers[layers.length - 1].a === 1) break;
+      } else if (cs.backgroundImage && cs.backgroundImage !== 'none') {
+        return null;
+      }
+      cur = cur.parentElement;
+    }
+    if (!layers.length) return null;
+    let r = 255, g = 255, b = 255;
+    for (const l of layers.reverse()) {
+      r = l.a * l.r + (1 - l.a) * r;
+      g = l.a * l.g + (1 - l.a) * g;
+      b = l.a * l.b + (1 - l.a) * b;
+    }
+    return [Math.round(r), Math.round(g), Math.round(b)];
+  };
   let lowContrast = 0;
   for (const el of textEls) {
     if (!visible(el) || !el.textContent.trim()) continue;
@@ -127,16 +153,14 @@ function runAudit() {
     if (!s.color || !s.color.includes('rgb')) continue;
     const fg = parseRgb(s.color);
     if (!fg) continue;
-    let bgLum = 1;
-    const bg = parseRgb(s.backgroundColor);
-    if (bg && s.backgroundColor.includes('rgb') && s.backgroundColor.indexOf('0, 0, 0, 0') === -1) {
-      bgLum = lum(bg.slice(0, 3).map(c => Math.round(c).toString(16).padStart(2, '0')).join(''));
-    }
+    const bg = effectiveBackground(el);
+    if (!bg) continue;
+    const bgLum = lum(bg.map(c => c.toString(16).padStart(2, '0')).join(''));
     const fgLum = lum(fg.slice(0, 3).map(c => Math.round(c).toString(16).padStart(2, '0')).join(''));
     const ratio = (Math.max(fgLum, bgLum) + 0.05) / (Math.min(fgLum, bgLum) + 0.05);
     if (ratio < 2.2 && parseFloat(s.fontSize) >= 11 && lowContrast < 6) {
       lowContrast++;
-      issue('low-contrast', 'medium', el, 'Contrast ' + ratio.toFixed(2) + ' fg=' + s.color + ' bg=' + (s.backgroundColor || 'none'));
+      issue('low-contrast', 'medium', el, 'Contrast ' + ratio.toFixed(2) + ' fg=' + s.color + ' bg=rgb(' + bg.join(', ') + ')');
     }
   }
   results.stats.lowContrast = lowContrast;

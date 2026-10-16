@@ -9,6 +9,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout - SMARTSOKO</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,7 +32,7 @@
     <div class="nav-search">
       <div class="search-bar">
         <span class="material-icons search-icon">search</span>
-        <input type="text" class="search-input" placeholder="Search products...">
+        <input type="text" class="search-input" placeholder="Search products..." aria-label="Search products">
       </div>
     </div>
     
@@ -215,17 +216,17 @@
             <h1 class="summary-title">Order Summary</h1>
             
             <div class="summary-item">
-              <span>Organic Vine Tomatoes Ã— 2</span>
+              <span>Organic Vine Tomatoes â€”â€” 2</span>
               <span>TZS 17,000</span>
             </div>
             
             <div class="summary-item">
-              <span>Mountain Spinach Ã— 1</span>
+              <span>Mountain Spinach â€”â€” 1</span>
               <span>TZS 3,200</span>
             </div>
             
             <div class="summary-item">
-              <span>Rainbow Carrots Ã— 1</span>
+              <span>Rainbow Carrots â€”â€” 1</span>
               <span>TZS 4,800</span>
             </div>
             
@@ -289,7 +290,7 @@
       <span class="material-icons nav-icon">shopping_cart</span>
       <span class="nav-label">Cart</span>
     </a>
-    <a href="customer.html" class="nav-item">
+    <a href="cart.html" class="nav-item">
       <span class="material-icons nav-icon">receipt_long</span>
       <span class="nav-label">Orders</span>
     </a>
@@ -430,7 +431,7 @@
       
       // Simulate order processing
       setTimeout(() => {
-        showToast('Order placed successfully! ðŸŽ‰', 'success');
+        showToast('Order placed successfully! Ã°Å¸Å½â€°', 'success');
         
         // Redirect to order confirmation
         setTimeout(() => {

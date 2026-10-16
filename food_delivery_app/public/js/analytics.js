@@ -1,125 +1,119 @@
-﻿// Analytics helper for merchant page
-// Provides functions to load analytics data and prepare it for charts
+﻿/**
+ * Analytics Module
+ * Provides analytics data loading and rendering for the merchant dashboard
+ */
 
-export async function loadAnalytics() {
-  const auth = window.auth;
-  const db = window.db;
-  
-  if (!auth || !auth.currentUser || !db) {
-    console.error('Analytics: Auth or DB not available');
-    return null;
+import { db } from '../config/firebase-config.js';
+import { collection, query, where, getDocs, orderBy, limit } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+import { getSalesAnalytics } from './merchant-enhancements.js';
+
+/**
+ * Load analytics data for the dashboard
+ * @param {string} period - Period in days: '7', '30', '365'
+ * @returns {Promise<Object>} Analytics data
+ */
+export async function loadAnalytics(period = '30') {
+  const sellerId = window.currentSeller?.id;
+  if (!sellerId) {
+    console.warn('No seller ID for analytics');
+    return getEmptyAnalytics();
   }
-  
-  const merchantId = auth.currentUser.uid;
-  const now = new Date();
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - 7);
-  
+
   try {
-    const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-    
-    // Simple query with just merchantId to avoid composite index requirements
-    const ordersQuery = query(
-      collection(db, 'orders'),
-      where('merchantId', '==', merchantId)
-    );
-    
-    const snapshot = await getDocs(ordersQuery);
-    
-    const weeklyData = [];
-    const dailyTotals = {};
-    
-    // Generate 7 days with default zero values
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(now.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-      dailyTotals[dateStr] = { date: dateStr, revenue: 0, orders: 0 };
-    }
-    
-    // Process orders data
-    snapshot.docs.forEach(doc => {
-      const order = doc.data();
-      const createdAt = order.createdAt?.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
-      
-      const dateStr = createdAt.toISOString().split('T')[0];
-      
-      if (createdAt >= startOfWeek && dailyTotals[dateStr]) {
-        dailyTotals[dateStr].revenue += order.totalAmount || 0;
-        dailyTotals[dateStr].orders += 1;
-      }
-    });
-    
-    // Convert to array and sort by date
-    const analyticsData = Object.values(dailyTotals).sort((a, b) => new Date(a.date) - new Date(b.date));
-    
-    return analyticsData;
-    
+    return await getSalesAnalytics(period, sellerId);
   } catch (error) {
-    console.error('Analytics Error:', error);
-    return null;
+    console.error('Error loading analytics:', error);
+    return getEmptyAnalytics();
   }
 }
 
-// Function to render analytics chart with given data
-function renderChart(data, canvasId) {
-  const ctx = document.getElementById(canvasId)?.getContext('2d');
-  if (!ctx) return;
-  
-  if (window.analyticsChart) {
-    window.analyticsChart.destroy();
-  }
-  
-  window.analyticsChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: data.map(d => {
-        const date = new Date(d.date);
-        return date.toLocaleDateString('default', { month: 'short', day: 'numeric' });
-      }),
-      datasets: [
-        {
-          label: 'Revenue',
-          data: data.map(d => d.revenue),
-          borderColor: '#022D1D',
-          backgroundColor: 'rgba(9, 29, 46, 0.1)',
-          tension: 0.1,
-          fill: true
-        },
-        {
-          label: 'Orders',
-          data: data.map(d => d.orders),
-          borderColor: '#064E3B',
-          backgroundColor: 'rgba(148, 74, 12, 0.1)',
-          tension: 0.1,
-          fill: true
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        title: { 
-          display: true, 
-          text: 'Weekly Performance (Last 7 Days)',
-          color: '#022D1D'
-        },
-        legend: { position: 'top' }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          title: { display: true, text: 'Amount / Count' },
-          ticks: {
-            callback: (value) => {
-              if (value >= 1000) return 'TSh ' + (value / 1000) + 'k';
-              return value;
-            }
-          }
-        }
-      }
-    }
-  });
+/**
+ * Fetch dashboard analytics (alias for loadAnalytics)
+ * @param {string} period - Period in days
+ * @returns {Promise<Object>} Analytics data
+ */
+export async function fetchDashboardAnalytics(period = '30') {
+  return loadAnalytics(period);
 }
 
-export { renderChart };
+/**
+ * Render dashboard analytics to the UI
+ * @param {Object} data - Analytics data from loadAnalytics
+ */
+export function renderDashboardAnalytics(data) {
+  if (!data) return;
+
+  // Update KPI cards
+  updateElement('todaySales', formatTSh(data.todaySales));
+  updateElement('orderCount', data.todayOrders);
+  updateElement('avgOrderValue', formatTSh(data.avgToday));
+  updateElement('pendingOrders', `${data.pendingCount} pending order${data.pendingCount === 1 ? '' : 's'}`);
+
+  // Update delta badges
+  updateDelta('salesDeltaBadge', data.salesChange);
+  updateDelta('ordersDeltaBadge', data.ordersChange);
+  updateDelta('aovDeltaBadge', data.aovChange);
+
+  // Update analytics tab if visible
+  updateElement('analyticsRevenue', formatTSh(data.totalSales));
+  updateElement('analyticsOrders', data.totalOrders);
+  updateElement('analyticsAov', formatTSh(data.avgOrderValue));
+  updateElement('analyticsRetention', '68%'); // Placeholder
+}
+
+function updateElement(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+function updateDelta(id, change) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  let icon = 'trending_flat', text = '0%', cls = 'kpi-delta';
+  if (change > 0) {
+    icon = 'trending_up';
+    text = `+${change.toFixed(1)}%`;
+    cls += ' delta-positive';
+  } else if (change < 0) {
+    icon = 'trending_down';
+    text = `${change.toFixed(1)}%`;
+    cls += ' delta-negative';
+  }
+  el.className = cls;
+  el.innerHTML = `<span class="material-symbols-outlined" style="font-size: 12px;">${icon}</span>${text}`;
+}
+
+function formatTSh(amount) {
+  return 'TSh ' + (amount || 0).toLocaleString();
+}
+
+function getEmptyAnalytics() {
+  return {
+    todaySales: 0,
+    todayOrders: 0,
+    pendingCount: 0,
+    totalSales: 0,
+    totalOrders: 0,
+    completedOrders: 0,
+    avgOrderValue: 0,
+    avgToday: 0,
+    avgYesterday: 0,
+    yestSales: 0,
+    yestOrders: 0,
+    salesChange: 0,
+    ordersChange: 0,
+    aovChange: 0,
+    orders: []
+  };
+}
+
+/**
+ * Initialize analytics module
+ */
+export async function initAnalytics() {
+  console.log('Analytics module initialized');
+  return true;
+}
+
+export { formatTSh };

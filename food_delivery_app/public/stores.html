@@ -215,7 +215,7 @@
   
   <div class="container">
     <div class="categories-section">
-      <h2 class="section-title">ï¿½_categories</h2>
+      <h2 class="section-title">Categories</h2>
       <div class="categories-grid" id="categoriesGrid"></div>
     </div>
     
@@ -386,7 +386,7 @@
             <div class="store-meta">
               <div class="store-meta-left">
                 <div class="rating">
-                  <span class="rating-star">â˜…</span>
+                  <span class="rating-star">★</span>
                   <span>${store.rating > 0 ? store.rating.toFixed(1) : 'New'}</span>
                   <span class="rating-count">${store.totalRatings ? `(${store.totalRatings})` : ''}</span>
                 </div>
@@ -405,7 +405,7 @@
     }
 
     function openStore(storeId) {
-      window.location.href = `customer.html?store=${storeId}`;
+      window.location.href = `smartsoko-vendor.html?id=${storeId}`;
     }
 
     init();

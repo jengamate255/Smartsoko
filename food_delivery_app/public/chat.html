@@ -63,7 +63,7 @@
         </div>
         <div>
           <p class="font-semibold text-gray-900">Order #<span id="orderId">-</span></p>
-          <p class="text-xs text-gray-500">2 items â€¢ TSh <span id="orderTotal">0</span></p>
+          <p class="text-xs text-gray-500">2 items • TSh <span id="orderTotal">0</span></p>
         </div>
       </div>
       <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -305,7 +305,7 @@
       // Rider info displayed in order card
     }
 
-    function initChat(orderId) {
+    async function initChat(orderId) {
       chatId = `order_${orderId}`;
       let pollInterval = null;
 
@@ -369,7 +369,7 @@
       }
     }
 
-    function sendMessage() {
+    async function sendMessage() {
       const input = document.getElementById('messageInput');
       const text = input.value.trim();
       

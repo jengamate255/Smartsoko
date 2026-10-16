@@ -36,7 +36,6 @@ async function seed() {
   const users = [
     { id: 'mock-merchant-001', email: 'merchant@smartsoko.com', name: 'Soko Merchant', role: 'merchant' },
     { id: 'mock-admin-001', email: 'admin@smartsoko.com', name: 'Admin User', role: 'admin' },
-    { id: 'mock-driver-001', email: 'driver@smartsoko.com', name: 'Soko Driver', role: 'driver' },
     { id: 'demo-customer-001', email: 'demo@smartsoko.com', name: 'Demo Customer', role: 'customer' },
     { id: 'test-customer-001', email: 'ashura@example.com', name: 'Ashura Mteja', role: 'customer' }
   ];

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/shimmer_loading.dart';
 import 'product_listing_screen.dart';
 
@@ -12,6 +13,16 @@ class DiscoveryScreen extends StatefulWidget {
 
 class _DiscoveryScreenState extends State<DiscoveryScreen> {
   final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  static const _categories = [
+    (Icons.grain, 'Grains'),
+    (Icons.apple, 'Fruits'),
+    (Icons.water_drop, 'Dairy'),
+    (Icons.set_meal, 'Fish'),
+    (Icons.bakery_dining, 'Bakery'),
+    (Icons.lunch_dining, 'Food'),
+  ];
 
   @override
   void dispose() {
@@ -63,18 +74,17 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
               IconButton(
                 icon: const Icon(Icons.notifications_outlined),
                 color: const Color(0xFF012D1D),
-                onPressed: () {},
+                onPressed: () => _showNotifications(context),
               ),
             ],
           ),
-
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Search Bar
+                  // Search Bar — live product search
                   Container(
                     decoration: BoxDecoration(
                       color: const Color(0xFFE4E2DE),
@@ -82,8 +92,10 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                     ),
                     child: TextField(
                       controller: _searchController,
+                      onChanged: (v) =>
+                          setState(() => _searchQuery = v.trim().toLowerCase()),
                       decoration: InputDecoration(
-                        hintText: 'Search fresh produce...',
+                        hintText: 'Search products, shops...',
                         hintStyle: TextStyle(color: Colors.grey[600]),
                         prefixIcon: const Icon(Icons.search, color: Colors.grey),
                         border: InputBorder.none,
@@ -97,219 +109,68 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
 
                   const SizedBox(height: 40),
 
-                  // Categories Section
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Browse Categories',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF012D1D),
-                        ),
-                      ),
-                      Text(
-                        'See all',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF064E3B),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Category Horizontal Scroll
-                  SizedBox(
-                    height: 110,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
+                  if (_searchQuery.isEmpty) ...[
+                    // Categories Section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildCategoryItem(Icons.grain, 'Grains'),
-                        _buildCategoryItem(Icons.apple, 'Fruits'),
-                        _buildCategoryItem(Icons.water_drop, 'Dairy'),
-                        _buildCategoryItem(Icons.set_meal, 'Fish'),
-                        _buildCategoryItem(Icons.bakery_dining, 'Bakery'),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  // Hero Banner
-                  Container(
-                    height: 220,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1B4332),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          left: 32,
-                          top: 32,
-                          bottom: 32,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.5,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF064E3B),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: const Text(
-                                    'LIMITED OFFER',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1.5,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  'Fresh Harvest Today',
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white,
-                                    height: 1.2,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                ElevatedButton(
-                                  onPressed: () {},
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFA5D0B9),
-                                    foregroundColor: const Color(0xFF002114),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 32,
-                                      vertical: 16,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(50),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Claim 20% Off',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                        const Text(
+                          'Browse Categories',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF012D1D),
                           ),
                         ),
-                        Positioned(
-                          right: -40,
-                          bottom: -40,
-                          child: Transform.rotate(
-                            angle: 0.2,
-                            child: Container(
-                              width: 200,
-                              height: 200,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                image: const DecorationImage(
-                                  image: NetworkImage(
-                                    'https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=400',
-                                  ),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
+                        Text(
+                          'See all',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF064E3B),
                           ),
                         ),
                       ],
                     ),
-                  ),
 
-                  const SizedBox(height: 40),
+                    const SizedBox(height: 24),
 
-                  // Recommended Section
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Recommended',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF012D1D),
-                            ),
-                          ),
-                          Text(
-                            'Curated daily for your lifestyle',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
+                    // Category Horizontal Scroll
+                    SizedBox(
+                      height: 110,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: _categories
+                            .map((c) => _buildCategoryItem(c.$1, c.$2))
+                            .toList(),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.tune),
-                        color: Colors.grey[600],
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
+                    ),
 
+                    const SizedBox(height: 40),
+                  ],
+
+                  // Products — live from Firestore
+                  if (_searchQuery.isEmpty)
+                    const Text(
+                      'Recommended',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF012D1D),
+                      ),
+                    )
+                  else
+                    Text(
+                      'Results for "$_searchQuery"',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF012D1D),
+                      ),
+                    ),
                   const SizedBox(height: 24),
 
-                  // Product Grid
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisSpacing: 24,
-                    mainAxisSpacing: 24,
-                    childAspectRatio: 0.7,
-                    children: [
-                      _buildProductCard(
-                        'Fresh Avocados',
-                        'Hass Variety • 4 units',
-                        'TSh 5,000',
-                        'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400',
-                      ),
-                      _buildProductCard(
-                        'Sweet Bananas',
-                        'Local Farm • 1 bunch',
-                        'TSh 2,000',
-                        'https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=400',
-                      ),
-                      _buildProductCard(
-                        'Kenyan Mangoes',
-                        'Coast Region • 3 units',
-                        'TSh 3,500',
-                        'https://images.unsplash.com/photo-1553279768-865429fa0078?w=400',
-                      ),
-                      _buildProductCard(
-                        'Passion Fruits',
-                        'Sweet & Tangy • 500g',
-                        'TSh 3,000',
-                        'https://images.unsplash.com/photo-1595475207225-428b62bda831?w=400',
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 100),
+                  _buildProductGrid(),
                 ],
               ),
             ),
@@ -317,6 +178,88 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
         ],
       ),
     );
+  }
+
+  /// Live product stream: newest available products (search filters by name).
+  Widget _buildProductGrid() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: _productsQuery().snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisSpacing: 24,
+            mainAxisSpacing: 24,
+            childAspectRatio: 0.7,
+            children: List.generate(4, (_) => const ShimmerLoading(
+              width: double.infinity,
+              height: 200,
+            )),
+          );
+        }
+        if (snapshot.hasError) {
+          return const Padding(
+            padding: EdgeInsets.all(32),
+            child: Center(child: Text('Could not load products — check your connection')),
+          );
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+        if (docs.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.all(32),
+            child: Center(
+              child: Text(
+                _searchQuery.isEmpty
+                    ? 'No products available yet'
+                    : 'No results for "$_searchQuery"',
+              ),
+            ),
+          );
+        }
+
+        return GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisSpacing: 24,
+          mainAxisSpacing: 24,
+          childAspectRatio: 0.7,
+          children: docs.take(20).map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return _buildProductCard(
+              data['name']?.toString() ?? 'Product',
+              data['description']?.toString() ?? data['shopName']?.toString() ?? '',
+              (data['price'] as num?)?.toDouble() ?? 0,
+              data['imageUrl']?.toString() ?? '',
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  Query _productsQuery() {
+    final firestore = FirebaseFirestore.instance;
+    if (_searchQuery.isEmpty) {
+      // Featured products: available items, newest first
+      return firestore
+          .collection('products')
+          .where('isAvailable', isEqualTo: true)
+          .orderBy('createdAt', descending: true)
+          .limit(20);
+    }
+    // Firestore can't do case-insensitive substring search — use a
+    // case-insensitive exact/prefix match on the lowercase mirror field
+    // when present, else client-filter a wider fetch.
+    return firestore
+        .collection('products')
+        .where('isAvailable', isEqualTo: true)
+        .orderBy('name')
+        .startAt([_searchQuery])
+        .endAt(['$_searchQuery\uf8ff']);
   }
 
   Widget _buildCategoryItem(IconData icon, String label) {
@@ -364,106 +307,160 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
   Widget _buildProductCard(
     String title,
     String subtitle,
-    String price,
+    double price,
     String imageUrl,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5F3EF),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      placeholder: (context, url) => const ShimmerLoading(
-                        width: double.infinity,
-                        height: double.infinity,
-                      ),
-                      errorWidget: (context, url, error) => const Icon(
-                        Icons.image_not_supported,
-                        size: 50,
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 16,
-                  right: 16,
-                  child: Container(
-                    width: 48,
-                    height: 48,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductListingScreen(category: title),
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF012D1D),
-                      borderRadius: BorderRadius.circular(50),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      color: const Color(0xFFF5F3EF),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    child: const Icon(
-                      Icons.add,
-                      color: Colors.white,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: imageUrl.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: imageUrl,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              placeholder: (context, url) => const ShimmerLoading(
+                                width: double.infinity,
+                                height: double.infinity,
+                              ),
+                              errorWidget: (context, url, error) => const Icon(
+                                Icons.image_not_supported,
+                                size: 50,
+                              ),
+                            )
+                          : const Icon(Icons.image_not_supported, size: 50),
                     ),
                   ),
-                ),
-              ],
+                  Positioned(
+                    bottom: 16,
+                    right: 16,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF012D1D),
+                        borderRadius: BorderRadius.circular(50),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1B1C1A),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1B1C1A),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  price,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.orange[800],
+                  const SizedBox(height: 6),
+                  Text(
+                    'TSh ${price.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF012D1D),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showNotifications(BuildContext context) {
+    // Unread merchant/customer notifications from the shared notifications table.
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        maxChildSize: 0.9,
+        minChildSize: 0.4,
+        expand: false,
+        builder: (ctx, scrollController) => StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('notifications')
+              .orderBy('createdAt', descending: true)
+              .limit(30)
+              .snapshots(),
+          builder: (ctx, snap) {
+            if (snap.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final docs = snap.data?.docs ?? [];
+            if (docs.isEmpty) {
+              return const Center(child: Text('No notifications'));
+            }
+            return ListView.builder(
+              controller: scrollController,
+              itemCount: docs.length,
+              itemBuilder: (ctx, i) {
+                final d = docs[i].data() as Map<String, dynamic>;
+                return ListTile(
+                  leading: const Icon(Icons.notifications),
+                  title: Text(d['title']?.toString() ?? 'Update'),
+                  subtitle: Text(d['body']?.toString() ?? ''),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

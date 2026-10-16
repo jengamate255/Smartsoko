@@ -168,7 +168,7 @@ class PaymentRepositoryImpl @Inject constructor(
     private fun PaymentMethodDto.toDomainModel(): PaymentMethod {
         return PaymentMethod(
             id = id,
-            type = PaymentType.valueOf(type),
+            type = runCatching { PaymentType.valueOf(type) }.getOrDefault(PaymentType.CASH_ON_DELIVERY),
             displayName = displayName,
             isDefault = isDefault,
             lastFourDigits = lastFourDigits,

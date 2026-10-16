@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<title>SmartSoko · Error Monitoring</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e;
+    --error: #f85149; --warn: #d29922; --ok: #3fb950; --accent: #58a6ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; padding: 24px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  header h1 { font-size: 22px; }
+  header h1 span { color: var(--error); }
+  #generated { color: var(--muted); font-size: 12px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .card .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+  .card .value { font-size: 26px; font-weight: 600; margin-top: 4px; }
+  .card .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .err { color: var(--error); } .warn { color: var(--warn); } .ok { color: var(--ok); }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 24px; }
+  .panel h2 { font-size: 15px; margin-bottom: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--muted); font-weight: 500; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 10px; border-bottom: 1px solid #21262d; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .msg { max-width: 480px; word-break: break-word; color: var(--text); }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .badge.error { background: rgba(248,81,73,.15); color: var(--error); }
+  .badge.warning { background: rgba(210,153,34,.15); color: var(--warn); }
+  .badge.regression { background: rgba(248,81,73,.18); color: var(--error); }
+  .badge.spike { background: rgba(210,153,34,.18); color: var(--warn); }
+  .badge.ok { background: rgba(63,185,80,.15); color: var(--ok); }
+  .mono { font-family: Consolas, monospace; font-size: 12px; color: var(--muted); }
+  .alerts-list { display: flex; flex-direction: column; gap: 8px; }
+  .alert-item { display: flex; gap: 10px; align-items: baseline; font-size: 13px; }
+  .alert-item .day { color: var(--muted); font-size: 12px; min-width: 88px; }
+  #chart { width: 100%; height: 200px; }
+  .empty { color: var(--muted); font-size: 13px; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>SmartSoko <span>Error</span> Monitoring</h1>
+  <div id="generated">loading…</div>
+</header>
+
+<div class="cards" id="cards"></div>
+
+<div class="panel">
+  <h2>Occurrences · last 14 days</h2>
+  <svg id="chart" role="img" aria-label="Error occurrences per day"></svg>
+</div>
+
+<div class="panel">
+  <h2>Top errors · last 7 days</h2>
+  <table>
+    <thead><tr><th>Score</th><th>Level</th><th>Source</th><th>Window</th><th>Total</th><th>Last active</th><th>Message</th></tr></thead>
+    <tbody id="top-errors"></tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <h2>Recent regressions &amp; spikes · 7 days</h2>
+  <div class="alerts-list" id="alerts"></div>
+</div>
+
+<footer>
+  Data: <span class="mono">.ai-memory/error-reports/scan-state.json</span> via smartsoko-mcp dist · Full report: <span class="mono">ERRORS-REPORT.md</span>
+</footer>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+
+  async function load() {
+    let data;
+    try {
+      const res = await fetch('/errors/data');
+      if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + (await res.text()).slice(0, 200));
+      data = await res.json();
+    } catch (e) {
+      $('generated').textContent = 'Failed to load /errors/data — ' + e.message;
+      document.querySelectorAll('.panel').forEach(p => { p.style.display = 'none'; });
+      return;
+    }
+
+    $('generated').textContent = 'generated ' + new Date(data.generatedAt).toLocaleString();
+    renderCards(data.summary);
+    renderChart(data.trends);
+    renderTopErrors(data.topErrors);
+    renderAlerts(data.recentAlerts);
+  }
+
+  function renderCards(s) {
+    const cards = [
+      { label: 'Active issues (7d)', value: s.activeIssues, cls: s.activeIssues > 0 ? 'err' : 'ok' },
+      { label: 'Occurrences 7d', value: s.occurrences7d, sub: s.occurrencesToday + ' today' },
+      { label: 'New today', value: s.newToday, cls: s.newToday > 0 ? 'warn' : 'ok' },
+      { label: 'Regressions', value: s.regressionsActive, sub: 'active today', cls: s.regressionsActive > 0 ? 'err' : 'ok' },
+      { label: 'Spikes', value: s.spikesActive, sub: 'active today', cls: s.spikesActive > 0 ? 'warn' : 'ok' },
+      { label: 'Known fingerprints', value: s.errors, sub: s.warnings + ' warnings' }
+    ];
+    $('cards').innerHTML = cards.map(c =>
+      `<div class="card"><div class="label">${c.label}</div><div class="value ${c.cls || ''}">${c.value}</div>${c.sub ? `<div class="sub">${c.sub}</div>` : ''}</div>`
+    ).join('');
+  }
+
+  function renderChart(trends) {
+    const svg = $('chart');
+    const W = svg.clientWidth || 900, H = 200, pad = 26, barW = 22, gap = 6;
+    const max = Math.max(1, ...trends.map(t => t.occurrences));
+    const n = trends.length;
+    const chartW = n * (barW + gap) + pad * 2;
+    svg.setAttribute('viewBox', `0 0 ${Math.max(W, chartW)} ${H}`);
+    svg.innerHTML = '';
+    const ns = 'http://www.w3.org/2000/svg';
+
+    const grid = document.createElementNS(ns, 'g');
+    for (let i = 0; i <= 4; i++) {
+      const y = pad + (H - pad - 10) * (1 - i / 4);
+      const line = document.createElementNS(ns, 'line');
+      line.setAttribute('x1', pad); line.setAttribute('x2', Math.max(W, chartW) - 8); line.setAttribute('y1', y); line.setAttribute('y2', y);
+      line.setAttribute('stroke', '#21262d'); line.setAttribute('stroke-width', '1');
+      grid.appendChild(line);
+      const txt = document.createElementNS(ns, 'text');
+      txt.setAttribute('x', pad - 6); txt.setAttribute('y', y + 4); txt.setAttribute('text-anchor', 'end');
+      txt.setAttribute('fill', '#8b949e'); txt.setAttribute('font-size', '10');
+      txt.textContent = Math.round(max * i / 4);
+      grid.appendChild(txt);
+    }
+    svg.appendChild(grid);
+
+    trends.forEach((t, i) => {
+      const x = pad + i * (barW + gap);
+      const h = (t.occurrences / max) * (H - pad - 10);
+      const y = H - 10 - h;
+      const bar = document.createElementNS(ns, 'rect');
+      bar.setAttribute('x', x); bar.setAttribute('y', y); bar.setAttribute('width', barW); bar.setAttribute('height', h);
+      bar.setAttribute('rx', '3');
+      bar.setAttribute('fill', t.occurrences === 0 ? '#21262d' : (t.alerts > 0 ? '#d29922' : '#58a6ff'));
+      const title = document.createElementNS(ns, 'title');
+      title.textContent = `${t.day}: ${t.occurrences} occurrences, ${t.newFindings} new, ${t.alerts} alerts`;
+      bar.appendChild(title);
+      svg.appendChild(bar);
+      const label = document.createElementNS(ns, 'text');
+      label.setAttribute('x', x + barW / 2); label.setAttribute('y', H - 2); label.setAttribute('text-anchor', 'middle');
+      label.setAttribute('fill', '#8b949e'); label.setAttribute('font-size', '9');
+      label.textContent = t.day.slice(5);
+      svg.appendChild(label);
+    });
+  }
+
+  function renderTopErrors(top) {
+    const tbody = $('top-errors');
+    if (!top.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty">No errors recorded in the last 7 days.</td></tr>'; return; }
+    tbody.innerHTML = top.map(e => `<tr>
+      <td class="mono">${e.score.toFixed(1)}</td>
+      <td><span class="badge ${e.level}">${e.level}</span></td>
+      <td class="mono">${esc(e.source)}</td>
+      <td>${e.windowCount}</td>
+      <td>${e.totalCount}</td>
+      <td>${e.lastActiveDays}d ago</td>
+      <td class="msg">${esc(e.message)}</td>
+    </tr>`).join('');
+  }
+
+  function renderAlerts(alerts) {
+    const div = $('alerts');
+    if (!alerts.length) { div.innerHTML = '<div class="empty">No regressions or spikes in the last 7 days.</div>'; return; }
+    div.innerHTML = alerts.map(a => `<div class="alert-item">
+      <span class="day">${a.day}</span>
+      <span class="badge ${a.type}">${a.type}</span>
+      <span class="mono">${esc(a.source)}</span>
+      <span class="msg">${esc(a.message)}</span>
+    </div>`).join('');
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>

@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 public class MerchantRepository {
 
     private final FirebaseFirestore firestore;
@@ -146,6 +149,50 @@ public class MerchantRepository {
                     listener.onReviewsLoaded(reviews, averageRating, count);
                 })
                 .addOnFailureListener(e -> listener.onError(e.getMessage()));
+    }
+
+    public void extractProductFromImage(byte[] imageData, OnProductExtractedListener listener) {
+        new Thread(() -> {
+            try {
+                URL url = new URL("https://vonkqyiczeqhuqhahsxm.supabase.co/functions/v1/ai/products/extract");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "image/jpeg");
+                connection.setRequestProperty("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvbmtxeWljemVxaHVxaGFoc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjIzNDksImV4cCI6MjA5MDM5ODM0OX0.UKAT3re6P_oAB3E1svwCFdqTQWZL6yulJ1ZX4nAgJJ8");
+                connection.setDoOutput(true);
+                connection.getOutputStream().write(imageData);
+                connection.connect();
+
+                int responseCode = connection.getResponseCode();
+                StringBuilder response = new StringBuilder();
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                }
+
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    // Parse JSON response: {"name":"...","price":...,"description":"...,"category":...,"tags":[...]}
+                    JSONObject json = new JSONObject(response.toString());
+                    Product extractedProduct = new Product();
+                    extractedProduct.setName(json.optString("name", ""));
+                    extractedProduct.setDescription(json.optString("description", ""));
+                    extractedProduct.setPrice(json.optDouble("price", 0.0));
+                    extractedProduct.setCategory(json.optString("category", ""));
+                    extractedProduct.setTags(json.optJSONArray("tags") != null ? new ArrayList<>(json.optJSONArray("tags")) : new ArrayList<>());
+                    listener.onProductExtracted(extractedProduct, null);
+                } else {
+                    listener.onError("AI extraction failed: HTTP " + responseCode);
+                }
+            } catch (Exception e) {
+                listener.onError("AI extraction error: " + e.getMessage());
+            }
+        }).start();
+    }
+
+    public interface OnProductExtractedListener {
+        void onProductExtracted(Product product, String error);
     }
 
     // Interfaces

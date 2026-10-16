@@ -41,6 +41,26 @@ describe('applyMovement', () => {
   let products, movements;
   beforeEach(() => { products = { p1: { id: 'p1', stockQuantity: 10, minStock: 3 } }; movements = []; });
 
+  it('uses the database transaction result without a second stock write', async () => {
+    const db = memoryDb(products, movements);
+    db.applyInventoryMovement = async entry => {
+      expect(entry.delta).toBe(-2);
+      return { movementId: 'atomic-movement', newStock: 8 };
+    };
+    expect(await applyMovement(db, null, {merchantId:'m1',productId:'p1',delta:-2,type:'sale'}))
+      .toEqual({movementId:'atomic-movement',newStock:8});
+    expect(movements).toHaveLength(0);
+    expect(products.p1.stockQuantity).toBe(10);
+  });
+
+  it('does not retry an ambiguous database transaction as separate writes', async () => {
+    const db = memoryDb(products, movements);
+    db.applyInventoryMovement = async () => { throw new Error('connection lost'); };
+    await expect(applyMovement(db,null,{merchantId:'m1',productId:'p1',delta:2,type:'adjustment'})).rejects.toThrow('connection lost');
+    expect(movements).toHaveLength(0);
+    expect(products.p1.stockQuantity).toBe(10);
+  });
+
   it('records an auditable movement and syncs product stock', async () => {
     const db = memoryDb(products, movements);
     const out = await applyMovement(db, null, { merchantId: 'm1', productId: 'p1', delta: 5, type: 'purchase_receive' });

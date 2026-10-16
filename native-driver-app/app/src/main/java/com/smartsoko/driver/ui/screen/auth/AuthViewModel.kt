@@ -3,11 +3,9 @@ package com.smartsoko.driver.ui.screen.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.smartsoko.driver.data.local.AppDatabase
-import com.smartsoko.driver.data.remote.WebSocketManager
 import com.smartsoko.driver.data.repository.AuthRepository
 import com.smartsoko.driver.domain.model.Driver
 import com.smartsoko.driver.ui.state.DriverState
-import com.smartsoko.driver.util.AppConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,8 +26,7 @@ data class AuthUiState(
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val driverState: DriverState,
-    private val db: AppDatabase,
-    private val webSocketManager: WebSocketManager
+    private val db: AppDatabase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AuthUiState())
@@ -68,7 +65,6 @@ class AuthViewModel @Inject constructor(
                     )
                     driverState.setLoggedIn(auth.token, driver, auth.isNew)
                     db.driverPrefsDao().upsert(com.smartsoko.driver.data.local.entity.DriverPrefsEntity())
-                    webSocketManager.connect(AppConfig.WEBSOCKET_URL, auth.token)
                     _state.value = _state.value.copy(verified = true, isLoading = false, isNewDriver = auth.isNew)
                 },
                 onFailure = { _state.value = _state.value.copy(error = it.message, isLoading = false) }

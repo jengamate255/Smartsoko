@@ -2,15 +2,13 @@ package com.smartsoko.driver.data.repository
 
 import com.smartsoko.driver.data.local.AppDatabase
 import com.smartsoko.driver.data.local.entity.DriverPrefsEntity
-import com.smartsoko.driver.data.remote.WebSocketManager
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class DriverRepository @Inject constructor(
-    private val db: AppDatabase,
-    private val ws: WebSocketManager
+    private val db: AppDatabase
 ) {
     private val prefsDao = db.driverPrefsDao()
 
@@ -20,7 +18,6 @@ class DriverRepository @Inject constructor(
 
     suspend fun setOnline(isOnline: Boolean) {
         prefsDao.setOnline(isOnline)
-        if (isOnline) ws.goOnline() else ws.goOffline()
     }
 
     suspend fun setActiveOrder(orderId: String?) = prefsDao.setActiveOrder(orderId)

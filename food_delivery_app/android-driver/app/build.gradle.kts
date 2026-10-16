@@ -103,4 +103,7 @@ dependencies {
 
   // Maps & Location
   implementation("com.google.android.gms:play-services-location:21.3.0")
+
+  // OpenStreetMap embedded map (no API key required)
+  implementation("org.osmdroid:osmdroid-android:6.1.20")
 }

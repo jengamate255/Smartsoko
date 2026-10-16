@@ -1,7 +1,6 @@
 const CACHE_NAME = 'smartsoko-v2';
 const urlsToCache = [
   '/',
-  '/customer.html',
   '/index.html',
   '/login.html',
   '/signup.html',
@@ -9,6 +8,7 @@ const urlsToCache = [
   '/orders.html',
   '/wallet.html',
   '/profile.html',
+  '/cart.html',
   '/merchant.html',
   '/admin.html',
   '/dist/tailwind.css',

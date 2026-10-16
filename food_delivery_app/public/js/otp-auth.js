@@ -155,6 +155,7 @@ window.OTPAuth = {
   showOTPForm(phone) {
     const container = document.getElementById('otp-container');
     const phoneDisplay = document.getElementById('otp-phone-display');
+    const phoneInput = document.getElementById('otp-phone-input');
     
     if (phoneDisplay) {
       phoneDisplay.textContent = this.formatPhone(phone);
@@ -165,10 +166,13 @@ window.OTPAuth = {
       container.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     
-    // Focus first input
+    // Focus first input and add accessibility attributes
     setTimeout(() => {
       const firstInput = document.querySelector('.otp-input');
-      if (firstInput) firstInput.focus();
+      if (firstInput) {
+        firstInput.focus();
+        firstInput.setAttribute('aria-label', 'OTP digit ' + (document.querySelectorAll('.otp-input:focus-visible').length + 1));
+      }
     }, 100);
   },
   

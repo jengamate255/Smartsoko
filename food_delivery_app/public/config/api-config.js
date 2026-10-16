@@ -27,6 +27,11 @@ const API_BASE_URL = getApiBaseUrl();
 // Get Firebase ID token for authenticated requests
 async function getAuthToken() {
   try {
+    // Modular SDK v9+ — use window.auth (set by firebase-config.js)
+    if (window.auth && window.auth.currentUser) {
+      return await window.auth.currentUser.getIdToken(true);
+    }
+    // Fallback: compat SDK (legacy pages)
     if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
       return await firebase.auth().currentUser.getIdToken(true);
     }
@@ -82,6 +87,15 @@ if (typeof API_ROUTES === 'undefined') {
       SELLERS: '/admin/sellers',
       ORDERS: '/admin/orders',
       ANALYTICS: '/admin/analytics',
+    },
+    ADMIN_API: {
+      LOG: '/admin/log',
+      ORDERS: '/admin/orders',
+      SELLERS: '/admin/sellers',
+      USERS: '/admin/users',
+      MARKETING: '/admin/marketing',
+      ORDER_STATUS: (orderId) => `/admin/orders/${orderId}/status`,
+      SELLER: (sellerId) => `/admin/sellers/${sellerId}`,
     }
   };
 }
@@ -194,6 +208,9 @@ if (typeof apiHelpers === 'undefined') {
 
     // Utility: Check if user is authenticated
     isAuthenticated() {
+      // Modular SDK v9+
+      if (window.auth && window.auth.currentUser) return true;
+      // Compat SDK fallback
       return typeof firebase !== 'undefined' &&
              firebase.auth &&
              !!firebase.auth().currentUser;
@@ -201,6 +218,17 @@ if (typeof apiHelpers === 'undefined') {
 
     // Utility: Get current user info
     async getCurrentUser() {
+      // Modular SDK v9+
+      const modUser = window.auth && window.auth.currentUser;
+      if (modUser) {
+        return {
+          uid: modUser.uid,
+          email: modUser.email,
+          displayName: modUser.displayName,
+          photoURL: modUser.photoURL
+        };
+      }
+      // Compat SDK fallback
       if (typeof firebase === 'undefined' || !firebase.auth) return null;
       const user = firebase.auth().currentUser;
       if (!user) return null;

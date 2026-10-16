@@ -60,12 +60,12 @@
     /* Hero Carousel */
     .hero-carousel { position: relative; height: 360px; overflow: hidden; border-radius: 0 0 24px 24px; background: linear-gradient(135deg, #F1E6CC 0%, #FBE7C6 55%, #FBF5E9 100%); }
     @media (min-width: 768px) { .hero-carousel { height: 420px; } }
-    .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s ease; background-size: cover; background-position: center; background-color: #F1E6CC; }
+    .hero-slide { position: absolute; inset: 0; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.6s ease; background-size: cover; background-position: center; background-color: #F1E6CC; }
     .hero-slide:nth-child(1) { background-image: linear-gradient(rgba(250,247,242,.92), rgba(250,247,242,.55) 45%, rgba(250,247,242,.9)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=70'); }
     .hero-slide:nth-child(2) { background-image: linear-gradient(rgba(250,247,242,.92), rgba(250,247,242,.55) 45%, rgba(250,247,242,.9)), url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=70'); }
     .hero-slide:nth-child(3) { background-image: linear-gradient(rgba(250,247,242,.92), rgba(250,247,242,.55) 45%, rgba(250,247,242,.9)), url('https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=1600&q=70'); }
     .hero-slide .hero-content p, .hero-slide .trust-row { color: var(--sk-charcoal); }
-    .hero-slide.active { opacity: 1; }
+    .hero-slide.active { opacity: 1; visibility: visible; pointer-events: auto; z-index: 1; }
     .hero-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 40px 24px 32px; box-sizing: border-box; background: linear-gradient(transparent, rgba(251,245,233,0.85)); color: #1E2A22; max-width: 560px; }
     .hero-slide p { color: #5B6B5E; }
     .carousel-dots { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
@@ -488,7 +488,7 @@
           <div class="flex-1 min-w-0">
             <h3 class="font-bold text-gray-800 text-sm">Fresh Mart</h3>
             <div class="flex items-center gap-1 text-xs text-gray-500">
-              <span class="text-yellow-500">â˜…</span> 4.8 Â· 1.2k reviews
+              <span class="text-yellow-500">★</span> 4.8 · 1.2k reviews
             </div>
             <p class="text-xs text-green-600 mt-0.5 font-medium">25-35 min</p>
           </div>
@@ -501,7 +501,7 @@
           <div class="flex-1 min-w-0">
             <h3 class="font-bold text-gray-800 text-sm">Tasty Kitchen</h3>
             <div class="flex items-center gap-1 text-xs text-gray-500">
-              <span class="text-yellow-500">â˜…</span> 4.6 Â· 856 reviews
+              <span class="text-yellow-500">★</span> 4.6 · 856 reviews
             </div>
             <p class="text-xs text-orange-600 mt-0.5 font-medium">30-45 min</p>
           </div>
@@ -514,7 +514,7 @@
           <div class="flex-1 min-w-0">
             <h3 class="font-bold text-gray-800 text-sm">Daily Bread</h3>
             <div class="flex items-center gap-1 text-xs text-gray-500">
-              <span class="text-yellow-500">â˜…</span> 4.9 Â· 2.1k reviews
+              <span class="text-yellow-500">★</span> 4.9 · 2.1k reviews
             </div>
             <p class="text-xs text-amber-600 mt-0.5 font-medium">20-30 min</p>
           </div>
@@ -671,6 +671,8 @@
       if (!query) return;
       window.location.href = '/discovery?search=' + encodeURIComponent(query);
     }
+    tryLoadProducts();
+
     document.addEventListener('DOMContentLoaded', () => {
       ['searchInputMobile', 'searchInputDesktop'].forEach(id => {
         const el = document.getElementById(id);
@@ -727,9 +729,9 @@
         return `
         <a href="/product?id=${p.id}" class="product-card no-underline" style="animation: fadeIn 0.4s cubic-bezier(0.23,1,0.32,1) ${Math.min(idx, 12) * 0.04}s backwards;">
           <div class="relative aspect-square bg-gray-50 overflow-hidden">
-            <img src="${p.imageUrl || 'images/default-product.png'}" alt="${p.name}" loading="lazy" decoding="async"
+            <img src="${p.imageUrl || '/images/product-placeholder.svg'}" alt="${p.name}" loading="lazy" decoding="async"
               class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              onerror="this.onerror=null; this.src='images/default-product.png';">
+              onerror="this.onerror=null; this.src='/images/product-placeholder.svg';">
             <button onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('${p.id}', this)"
               class="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-sm active:scale-90 transition-transform">
               <span class="material-symbols-outlined text-base text-gray-400" style="font-variation-settings:'FILL' 0;">favorite</span>
@@ -764,9 +766,9 @@
         return `
         <a href="/product?id=${p.id}" class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition cursor-pointer">
           <div class="aspect-square bg-gray-50 relative overflow-hidden">
-            <img src="${p.imageUrl || 'images/default-product.png'}" alt="${p.name}"
+            <img src="${p.imageUrl || '/images/product-placeholder.svg'}" alt="${p.name}"
               class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              onerror="this.onerror=null; this.src='images/default-product.png';">
+              onerror="this.onerror=null; this.src='/images/product-placeholder.svg';">
             <span class="deal-badge absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 rounded-md">-${disc}%</span>
             <span class="absolute bottom-2 right-2 deal-badge text-white text-[10px] font-bold px-2 py-0.5 rounded-full">HOT</span>
           </div>
@@ -790,6 +792,7 @@
         price: item.price || 0,
         imageUrl: item.imageUrl || item.image_url || item.image || '',
         category: item.category || 'General',
+        isAvailable: item.isAvailable !== false,
         sellerId: item.sellerId || item.seller_id || item.restaurantId || item.restaurant_id || '',
         seller: item.seller || item.seller_name || item.restaurantName || item.restaurant_name || 'SmartSoko'
       };
@@ -799,49 +802,20 @@
       const svc = window.crossPlatformService;
       const db = window.db;
 
-      if (!svc && !db) { console.warn('No data service available'); return; }
+
 
       try {
-        let items = null;
-
-        // Try cross-platform service first (Firebase + Supabase with fallback)
-        if (svc && svc.isReady()) {
-          try {
-            items = await svc.list('menuItems', { limit: 12 });
-            console.log(`[CrossPlatform] menuItems: ${items.length} docs (${items[0]?._source || 'unknown'})`);
-          } catch (e) { console.log('[CrossPlatform] menuItems:', e.message); }
-          if (!items || items.length === 0) {
-            try {
-              items = await svc.list('products', { limit: 12 });
-              console.log(`[CrossPlatform] products: ${items.length} docs (${items[0]?._source || 'unknown'})`);
-            } catch (e) { console.log('[CrossPlatform] products:', e.message); }
-          }
-        }
-
-        // Fallback to direct Firebase access
-        if ((!items || items.length === 0) && db) {
-          console.log('[Products] Falling back to direct Firebase');
-          const { collection, query, getDocs, limit } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-          let snapshot = null;
-          try {
-            snapshot = await getDocs(query(collection(db, 'menuItems'), limit(12)));
-          } catch (e) { /* silent */ }
-          if (!snapshot || snapshot.empty) {
-            try {
-              snapshot = await getDocs(query(collection(db, 'products'), limit(12)));
-            } catch (e) { /* silent */ }
-          }
-          if (snapshot && !snapshot.empty) {
-            items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          }
-        }
+        const response = await fetch('/api/products?limit=100', { signal: AbortSignal.timeout(10000) });
+        const payload = await response.json();
+        if (!response.ok || !payload.success || !Array.isArray(payload.data)) throw new Error(payload.error || 'Catalog unavailable');
+        const items = payload.data;
 
         if (!items || items.length === 0) {
           document.getElementById('popularProducts').innerHTML = '<div class="col-span-full text-center py-8 text-gray-400"><span class="material-symbols-outlined text-5xl mb-2 block">inventory_2</span><p>No products available yet</p></div>';
           return;
         }
 
-        products = items.map(normalizeProduct);
+        products = items.map(normalizeProduct).filter(p => p.isAvailable !== false);
         renderProducts(products, 'popularProducts');
         renderProducts(products.length > 4 ? products.slice(4, 8) : [...products].reverse(), 'recommendedProducts');
         renderFlashDeals(products.slice(0, 6));
@@ -941,17 +915,13 @@
     }
 
     function tryLoadProducts() {
-      if (window.crossPlatformService?.isReady() || window.db) {
-        loadProducts();
-      }
+      loadProducts();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof SmartNav !== 'undefined' && typeof SmartNav.initPageTransition === 'function') SmartNav.initPageTransition();
       updateCartUI();
-      tryLoadProducts();
-      document.addEventListener('firebase-initialized', tryLoadProducts, { once: true });
-      document.addEventListener('data-service-ready', tryLoadProducts, { once: true });
+
     });
 
     document.getElementById('searchInputMobile').addEventListener('input', e => syncSearch(e.target.value));

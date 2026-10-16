@@ -23,9 +23,14 @@ function showToast(message, type = 'info') {
   const existing = document.querySelector('.toast-notification');
   if (existing) existing.remove();
   const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600', warning: 'bg-orange-600' };
+  const icons = { success: 'check_circle', error: 'error', info: 'info', warning: 'warning' };
   const t = document.createElement('div');
   t.className = `toast-notification fixed top-6 right-6 ${colors[type]} text-white px-6 py-3 rounded-2xl shadow-xl z-50 flex items-center gap-2 max-w-sm`;
-  t.innerHTML = `<span class="material-symbols-outlined">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}</span> ${message}`;
+  const iconEl = document.createElement('span');
+  iconEl.className = 'material-symbols-outlined';
+  iconEl.textContent = icons[type] || 'info';
+  t.appendChild(iconEl);
+  t.appendChild(document.createTextNode(' ' + message));
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 4000);
 }
@@ -88,12 +93,14 @@ function renderHolidays() {
     container.innerHTML = '<p class="text-xs text-on-surface-variant">No holiday closures set</p>';
     return;
   }
-  container.innerHTML = holidays.map((h, i) => `
-    <span class="inline-flex items-center gap-1 px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-full text-xs font-medium">
-      ${h.date}${h.reason ? ': ' + h.reason : ''}
+  container.innerHTML = holidays.map((h, i) => {
+    const dateSpan = document.createElement('span');
+    dateSpan.textContent = h.date + (h.reason ? ': ' + h.reason : '');
+    return `<span class="inline-flex items-center gap-1 px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-full text-xs font-medium">
+      ${dateSpan.textContent}
       <button onclick="removeHoliday(${i})" class="text-red-500 hover:text-red-700"><span class="material-symbols-outlined text-sm">close</span></button>
-    </span>
-  `).join('');
+    </span>`;
+  }).join('');
 }
 
 window.addHoliday = function() {

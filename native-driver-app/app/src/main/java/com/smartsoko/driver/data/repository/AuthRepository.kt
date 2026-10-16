@@ -1,8 +1,10 @@
 package com.smartsoko.driver.data.repository
 
+import com.google.firebase.auth.FirebaseAuth
 import com.smartsoko.driver.data.remote.ApiService
 import com.smartsoko.driver.data.remote.dto.*
 import com.smartsoko.driver.domain.model.Driver
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,8 +21,20 @@ class AuthRepository @Inject constructor(
     suspend fun verifyOtp(phone: String, otp: String, fcmToken: String?): Result<AuthResponseDto> = runCatching {
         val resp = api.verifyOtp(OtpVerifyDto(phone, otp, fcmToken))
         val body = resp.body()
-        if (resp.isSuccessful && body?.success == true && body.data != null) body.data
-        else throw Exception(body?.message ?: "Verification failed")
+        if (resp.isSuccessful && body?.success == true && body.data != null) {
+            val auth = body.data
+            if (auth.tokenType == "custom") {
+                val token = exchangeCustomToken(auth.token)
+                auth.copy(token = token)
+            } else auth
+        } else throw Exception(body?.message ?: "Verification failed")
+    }
+
+    private suspend fun exchangeCustomToken(customToken: String): String {
+        val fbAuth = FirebaseAuth.getInstance()
+        val result = fbAuth.signInWithCustomToken(customToken).await()
+        val idToken = result.user?.getIdToken(true)?.await()
+        return idToken?.token ?: throw Exception("Failed to obtain session token")
     }
 
     suspend fun completeProfile(token: String, fullName: String, email: String?, vehicleType: String?, vehiclePlate: String?): Result<AuthResponseDto> = runCatching {

@@ -151,7 +151,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                               ),
                             ),
                             Text(
-                              'KSh ${order.total.toStringAsFixed(0)}',
+                              'TSh ${order.total.toStringAsFixed(0)}',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,

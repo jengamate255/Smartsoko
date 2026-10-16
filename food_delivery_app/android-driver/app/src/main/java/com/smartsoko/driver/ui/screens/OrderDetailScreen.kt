@@ -8,14 +8,19 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import android.content.Intent
+import android.net.Uri
 import com.smartsoko.driver.data.model.Order
 import com.smartsoko.driver.data.model.OrderItem
 import com.smartsoko.driver.data.model.OrderStatus
@@ -29,8 +34,10 @@ fun OrderDetailScreen(
     order: Order,
     onBack: () -> Unit,
     onAcceptOrder: (String) -> Unit,
+    onDeclineOrder: (String) -> Unit,
     onMarkPickedUp: (String) -> Unit,
-    onMarkDelivered: (String) -> Unit
+    onMarkDelivered: (String) -> Unit,
+    onOpenMap: (Order) -> Unit = {}
 ) {
     val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()) }
 
@@ -97,8 +104,10 @@ fun OrderDetailScreen(
                 DriverOrderActions(
                     status = order.status,
                     onAccept = { onAcceptOrder(order.id) },
+                    onDecline = { onDeclineOrder(order.id) },
                     onPickedUp = { onMarkPickedUp(order.id) },
-                    onDelivered = { onMarkDelivered(order.id) }
+                    onDelivered = { onMarkDelivered(order.id) },
+                    onNavigate = { onOpenMap(order) }
                 )
             }
         }
@@ -255,6 +264,7 @@ private fun DriverOrderItemCard(item: OrderItem) {
 
 @Composable
 private fun DriverDeliveryInfoCard(order: Order) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = SmartRadius,
@@ -277,6 +287,43 @@ private fun DriverDeliveryInfoCard(order: Order) {
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(order.deliveryAddress, style = MaterialTheme.typography.bodyMedium)
+            }
+
+            Spacer(Modifier.height(12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                // Call customer
+                OutlinedButton(
+                    onClick = {
+                        if (order.customerPhone.isNotEmpty()) {
+                            context.startActivity(
+                                Intent(Intent.ACTION_DIAL, Uri.parse("tel:${order.customerPhone}"))
+                            )
+                        }
+                    },
+                    enabled = order.customerPhone.isNotEmpty(),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.Phone, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Call")
+                }
+                // Navigate to dropoff address
+                Button(
+                    onClick = {
+                        val address = Uri.encode(order.deliveryAddress.ifEmpty { "Tanzania" })
+                        context.startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("geo:0,0?q=$address")
+                            )
+                        )
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.Navigation, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Navigate")
+                }
             }
 
             if (order.deliveryNotes.isNotEmpty()) {
@@ -323,12 +370,14 @@ private fun DriverDeliveryInfoCard(order: Order) {
 private fun DriverOrderActions(
     status: OrderStatus,
     onAccept: () -> Unit,
+    onDecline: () -> Unit,
     onPickedUp: () -> Unit,
-    onDelivered: () -> Unit
+    onDelivered: () -> Unit,
+    onNavigate: () -> Unit = {}
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         when (status) {
-            OrderStatus.PENDING -> {
+            OrderStatus.PENDING, OrderStatus.READY -> {
                 PrimaryButton(
                     text = "Accept Order",
                     onClick = onAccept,
@@ -336,24 +385,44 @@ private fun DriverOrderActions(
                         Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(20.dp))
                     }
                 )
+                OutlinedButton(
+                    onClick = onDecline,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Decline")
+                }
             }
-            OrderStatus.ACCEPTED -> {
+            OrderStatus.ACCEPTED, OrderStatus.PICKEDUP -> {
                 PrimaryButton(
-                    text = "Mark as Picked Up",
-                    onClick = onPickedUp,
+                    text = "Navigate to Customer",
+                    onClick = onNavigate,
                     leadingIcon = {
-                        Icon(Icons.Default.LocalShipping, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Navigation, contentDescription = null, modifier = Modifier.size(20.dp))
                     }
                 )
-            }
-            OrderStatus.PICKEDUP -> {
-                PrimaryButton(
-                    text = "Mark as Delivered",
-                    onClick = onDelivered,
-                    leadingIcon = {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(20.dp))
+                if (status == OrderStatus.ACCEPTED) {
+                    PrimaryButton(
+                        text = "Mark as Picked Up",
+                        onClick = onPickedUp,
+                        leadingIcon = {
+                            Icon(Icons.Default.LocalShipping, contentDescription = null, modifier = Modifier.size(20.dp))
+                        }
+                    )
+                    OutlinedButton(
+                        onClick = onDecline,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Can't take it — release order")
                     }
-                )
+                } else {
+                    PrimaryButton(
+                        text = "Mark as Delivered",
+                        onClick = onDelivered,
+                        leadingIcon = {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(20.dp))
+                        }
+                    )
+                }
             }
             else -> {}
         }

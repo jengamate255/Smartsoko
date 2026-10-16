@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Motion durations (Material 3) -->
+    <integer name="motion_duration_short_1">50</integer>
+    <integer name="motion_duration_short_2">100</integer>
+    <integer name="motion_duration_short_3">150</integer>
+    <integer name="motion_duration_short_4">200</integer>
+    <integer name="motion_duration_medium_1">250</integer>
+    <integer name="motion_duration_medium_2">300</integer>
+    <integer name="motion_duration_medium_3">350</integer>
+    <integer name="motion_duration_medium_4">400</integer>
+    <integer name="motion_duration_long_1">450</integer>
+    <integer name="motion_duration_long_2">500</integer>
+    <integer name="motion_duration_long_3">550</integer>
+    <integer name="motion_duration_long_4">600</integer>
+    
+    <!-- Spring animations (multiplied by 100 for integer storage) -->
+    <integer name="spring_stiffness_low">200</integer>
+    <integer name="spring_stiffness_medium">500</integer>
+    <integer name="spring_stiffness_high">1500</integer>
+    <integer name="spring_damping_ratio_low">75</integer>
+    <integer name="spring_damping_ratio_medium">90</integer>
+    <integer name="spring_damping_ratio_high">100</integer>
+    <integer name="spring_damping_ratio_bouncy">50</integer>
+    
+    <!-- Spacing -->
+    <integer name="spacing_xs">4</integer>
+    <integer name="spacing_sm">8</integer>
+    <integer name="spacing_md">16</integer>
+    <integer name="spacing_lg">24</integer>
+    <integer name="spacing_xl">32</integer>
+    <integer name="spacing_xxl">48</integer>
+    
+    <!-- Border radius -->
+    <integer name="radius_xs">4</integer>
+    <integer name="radius_sm">8</integer>
+    <integer name="radius_md">12</integer>
+    <integer name="radius_lg">16</integer>
+    <integer name="radius_xl">24</integer>
+    <integer name="radius_full">9999</integer>
+    
+    <!-- Elevation -->
+    <integer name="elevation_level_0">0</integer>
+    <integer name="elevation_level_1">1</integer>
+    <integer name="elevation_level_2">3</integer>
+    <integer name="elevation_level_3">6</integer>
+    <integer name="elevation_level_4">8</integer>
+    <integer name="elevation_level_5">12</integer>
+    
+    <!-- Animation durations for specific components -->
+    <integer name="fab_animation_duration">300</integer>
+    <integer name="bottom_sheet_animation_duration">400</integer>
+    <integer name="snackbar_animation_duration">250</integer>
+    <integer name="dialog_animation_duration">300</integer>
+    <integer name="page_transition_duration">350</integer>
+    <integer name="shared_element_transition_duration">400</integer>
+    
+    <!-- List/item animations -->
+    <integer name="item_animation_delay">50</integer>
+    <integer name="item_animation_duration">300</integer>
+    <integer name="stagger_delay">30</integer>
+    
+    <!-- Pull to refresh -->
+    <integer name="refresh_spinner_size">48</integer>
+    <integer name="refresh_trigger_distance">80</integer>
+</resources>

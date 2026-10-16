@@ -7,7 +7,6 @@ import android.os.Build
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
-@HiltAndroidApp
 class SmartSokoDriverApp : Application() {
     override fun onCreate() {
         super.onCreate()

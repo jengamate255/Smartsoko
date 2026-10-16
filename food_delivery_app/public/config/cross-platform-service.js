@@ -28,6 +28,11 @@ const FIREBASE_CONFIG = {
 const SUPABASE_URL = 'https://vonkqyiczeqhuqhahsxm.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvbmtxeWljemVxaHVxaGFoc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjIzNDksImV4cCI6MjA5MDM5ODM0OX0.UKAT3re6P_oAB3E1svwCFdqTQWZL6yulJ1ZX4nAgJJ8';
 
+// Expose for stateless pages (e.g. admin.html Realtime) so credentials are
+// defined once here instead of being duplicated on every page.
+window.__SUPABASE_URL = SUPABASE_URL;
+window.__SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
+
 const COLLECTION_MAP = {
   menuItems: 'products',
   products: 'products',

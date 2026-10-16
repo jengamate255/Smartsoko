@@ -204,27 +204,62 @@
   </nav>
 
   <script>
-    const WALLET_SUPABASE_URL = 'https://vonkqyiczeqhuqhahsxm.supabase.co';
-    const WALLET_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvbmtxeWljemVxaHVxaGFoc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjIzNDksImV4cCI6MjA5MDM5ODM0OX0.UKAT3re6P_oAB3E1svwCFdqTQWZL6yulJ1ZX4nAgJJ8';
-    let _walletSupabase = null;
-    async function getWalletSupabase() { if (_walletSupabase) return _walletSupabase; const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'); _walletSupabase = createClient(WALLET_SUPABASE_URL, WALLET_SUPABASE_ANON_KEY); return _walletSupabase; }
-    async function walletRPC(fnName, params = {}) { const supabase = await getWalletSupabase(); const { data, error } = await supabase.rpc(fnName, params); if (error) throw error; return data; }
-    let _currentUserEmail = null;
-    async function getCustomerEmail() { if (_currentUserEmail) return _currentUserEmail; try { const { getAuth } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js'); const user = getAuth().currentUser; if (user?.email) { _currentUserEmail = user.email; return user.email; } } catch (e) {} return null; }
+    let _currentUser = null;
+    async function getCustomerAuth() {
+      if (_currentUser) return _currentUser;
+      try {
+        const { getAuth } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (user) { _currentUser = user; return user; }
+        // Auth state restores asynchronously after a fresh page load; wait for it.
+        await new Promise(resolve => {
+          const unsub = auth.onAuthStateChanged(u => {
+            if (u) _currentUser = u;
+            unsub();
+            resolve();
+          });
+        });
+        return _currentUser;
+      } catch (e) { console.error('getCustomerAuth error:', e); }
+      return null;
+    }
+    async function getCustomerEmail() {
+      const user = await getCustomerAuth();
+      return user ? user.email : null;
+    }
+    let _walletCache = null;
+    // Money endpoints are auth-gated — attach the caller's Firebase ID token.
+    async function authHeaders() {
+      try {
+        const user = await getCustomerAuth();
+        const token = user ? await user.getIdToken() : null;
+        return token ? { 'Authorization': 'Bearer ' + token } : {};
+      } catch (e) { return {}; }
+    }
+    async function getWalletData() {
+      if (_walletCache) return _walletCache;
+      const user = await getCustomerAuth();
+      if (!user) return null;
+      const resp = await fetch('/api/payments/pesapal/wallet', { headers: await authHeaders() });
+      const data = await resp.json();
+      if (!data.success) throw new Error(data.error || 'Failed to load wallet');
+      _walletCache = data;
+      return data;
+    }
     function fmt(amount) { return 'TSh ' + (amount || 0).toLocaleString(); }
     function fmtDate(d) { if (!d) return 'N/A'; return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
 
     async function loadWallet() {
       const email = await getCustomerEmail();
-      if (!email) { document.getElementById('walletBalance').textContent = 'Sign in to view'; return; }
+      const user = await getCustomerAuth();
+      if (!user) { document.getElementById('walletBalance').textContent = 'Sign in to view'; return; }
       try {
-        const data = await walletRPC('get_customer_wallet_summary', { p_email: email });
-        if (data) {
-          document.getElementById('walletBalance').textContent = fmt(data.balance);
-          document.getElementById('spentToday').textContent = fmt(data.spent_today);
-          document.getElementById('toppedUpToday').textContent = fmt(data.topped_up_today);
-          document.getElementById('pendingRefunds').textContent = fmt(data.pending_refunds);
-        }
+        const data = await getWalletData();
+        document.getElementById('walletBalance').textContent = fmt(data.balance);
+        document.getElementById('spentToday').textContent = fmt(data.spent_today);
+        document.getElementById('toppedUpToday').textContent = fmt(data.topped_up_today);
+        document.getElementById('pendingRefunds').textContent = fmt(data.pending_refunds);
       } catch (e) { console.error('loadWallet error:', e); document.getElementById('walletBalance').textContent = 'Error loading'; }
     }
 
@@ -232,25 +267,26 @@
       const email = await getCustomerEmail();
       if (!email) return;
       try {
-        const result = await walletRPC('get_customer_transactions', { p_email: email, p_limit: 100, p_offset: 0 });
+        const data = await getWalletData();
+        const txs = data.transactions || [];
         const tbody = document.getElementById('walletTransactions');
         document.getElementById('walletTxCount').textContent = '';
-        if (!result || !Array.isArray(result.data) || result.data.length === 0) {
+        if (txs.length === 0) {
           tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400">No transactions yet</td></tr>';
           return;
         }
-        tbody.innerHTML = result.data.map(tx => {
-          const isCredit = tx.type === 'credit' || tx.type === 'refund';
+        tbody.innerHTML = txs.map(tx => {
+          const isCredit = tx.type === 'credit' || tx.type === 'topup' || tx.type === 'refund';
           const icon = isCredit ? '<span class="material-symbols-outlined text-[12px] filled-icon">add_circle</span>' : '<span class="material-symbols-outlined text-[12px] filled-icon">remove_circle</span>';
           const cls = isCredit ? 'text-green-600' : 'text-red-600';
           return '<tr class="hover:bg-gray-50">'
             + '<td class="px-4 py-3 font-medium ' + cls + '">' + icon + ' ' + tx.type + '</td>'
             + '<td class="px-4 py-3 font-medium">' + fmt(tx.amount) + '</td>'
-            + '<td class="px-4 py-3 text-gray-600 text-xs">' + (tx.description || tx.reference || '--') + '</td>'
-            + '<td class="px-4 py-3 text-xs text-gray-500">' + fmtDate(tx.created_at) + '</td>'
+            + '<td class="px-4 py-3 text-gray-600 text-xs">' + (tx.description || '--') + '</td>'
+            + '<td class="px-4 py-3 text-xs text-gray-500">' + fmtDate(tx.createdAt) + '</td>'
             + '</tr>';
         }).join('');
-        document.getElementById('walletTxCount').textContent = 'Showing ' + result.data.length + ' of ' + (result.total || result.data.length) + ' transactions';
+        document.getElementById('walletTxCount').textContent = 'Showing ' + txs.length + ' transactions';
       } catch (e) { console.error('loadTransactions error:', e); }
     }
 
@@ -258,16 +294,16 @@
       const email = await getCustomerEmail();
       if (!email) return;
       try {
-        const result = await walletRPC('get_customer_transactions', { p_email: email, p_limit: 100, p_offset: 0 });
+        const data = await getWalletData();
+        const refunds = (data.transactions || []).filter(tx => tx.type === 'refund' || (tx.description || '').toLowerCase().includes('refund'));
         const tbody = document.getElementById('walletRefunds');
-        const refunds = (result?.data || []).filter(tx => tx.type === 'credit' && (tx.description || '').toLowerCase().includes('refund'));
         if (refunds.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400">No refunds yet</td></tr>'; return; }
         tbody.innerHTML = refunds.map(r => {
           return '<tr class="hover:bg-gray-50">'
             + '<td class="px-4 py-3 font-mono text-xs">' + ((r.order_id || '').substring(0, 8) || 'N/A') + '...</td>'
             + '<td class="px-4 py-3 font-medium text-green-600">' + fmt(r.amount) + '</td>'
             + '<td class="px-4 py-3 text-xs text-gray-600">' + (r.description || 'Refund') + '</td>'
-            + '<td class="px-4 py-3 text-xs text-gray-500">' + fmtDate(r.created_at) + '</td>'
+            + '<td class="px-4 py-3 text-xs text-gray-500">' + fmtDate(r.createdAt) + '</td>'
             + '</tr>';
         }).join('');
       } catch (e) { console.error('loadRefunds error:', e); }
@@ -295,7 +331,7 @@
       info.textContent = 'Creating top-up order...';
 
       try {
-        const resp = await fetch('/api/payments/pesapal/wallet-topup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, email }) });
+        const resp = await fetch('/api/payments/pesapal/wallet-topup', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(await authHeaders()) }, body: JSON.stringify({ amount }) });
         const result = await resp.json();
         if (!result.success || !result.redirectUrl) { throw new Error(result.error || 'Failed to initiate payment'); }
         _topupOrderTrackingId = result.orderTrackingId;
@@ -305,12 +341,12 @@
         if (_topupPoll) clearInterval(_topupPoll);
         _topupPoll = setInterval(async () => {
           try {
-            const resp = await fetch('/api/payments/pesapal/wallet-status/' + _topupOrderTrackingId);
+            const resp = await fetch('/api/payments/pesapal/wallet-status/' + _topupOrderTrackingId, { headers: await authHeaders() });
             const status = await resp.json();
             if (!status.success) return;
             if (status.completed) {
               clearInterval(_topupPoll); _topupPoll = null;
-              try { await fetch('/api/payments/pesapal/complete-topup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderTrackingId: _topupOrderTrackingId, email }) }); } catch (e) { console.error('Complete topup call failed:', e); }
+              try { await fetch('/api/payments/pesapal/complete-topup', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(await authHeaders()) }, body: JSON.stringify({ orderTrackingId: _topupOrderTrackingId }) }); } catch (e) { console.error('Complete topup call failed:', e); }
               container.innerHTML = '';
               success.classList.remove('hidden');
               document.getElementById('topupSuccessAmount').textContent = fmt(amount) + ' added to your wallet';

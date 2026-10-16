@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SmartSoko Driver</string>
+    <string name="nav_home">Nyumbani</string>
+    <string name="nav_map">Ramani</string>
+    <string name="nav_chat">Mazungumzo</string>
+    <string name="nav_history">Historia</string>
+    <string name="nav_profile">Wasifu</string>
+    <string name="go_online">Kuwa Mtandaoni</string>
+    <string name="go_offline">Kuwa Mewani</string>
+    <string name="available_orders">Oda Zinazopatikana</string>
+    <string name="no_orders_available">Hakuna Oda Zinazopatikana</string>
+    <string name="pull_to_refresh">Tega Kurejesha</string>
+    
+    <!-- Map screen -->
+    <string name="current_location">Mahali Pangu</string>
+    <string name="navigate_to_pickup">Endelea Kwenye Mahali ya Kukamata</string>
+    <string name="navigate_to_delivery">Endelea Kwenye Mahali ya Utoaji</string>
+    <string name="order_picked_up">Oda Imekamatwa</string>
+    <string name="order_delivered">Oda Imetolewa</string>
+    <string name="mapbox_access_token">pk.eyJ1IjoiZGF2ZXkxMDEiLCJhIjoiY2p1ZWc3aWh1MDJ5cjQ0cXd1ZXh2cmd2eCJ9.iE0RngMfwyivH7OrYO_Bag</string>
+    
+    <!-- Chat screen -->
+    <string name="chat_with_customer">Mazungumzo na Mteja</string>
+    <string name="type_a_message">Andika ujumbe...</string>
+    <string name="send">Tuma</string>
+    
+    <!-- History screen -->
+    <string name="order_history">Historia ya Oda</string>
+    <string name="no_past_orders">Hakuna oda zilizopita hivi karibuni</string>
+    <string name="your_completed_orders_will_appear_here">Oda zako zilizokamilika zitaonekana hapa</string>
+    
+    <!-- Profile screen -->
+    <string name="profile">Wasifu</string>
+    <string name="today_s_earnings">Mapato ya Leo</string>
+    <string name="view_details">Tazama Maelezo</string>
+    <string name="statistics">Takwimu</string>
+    <string name="orders_today">Oda ya Leo</string>
+    <string name="rating">Rekebisha</string>
+    <string name="distance">Umbali</string>
+    <string name="settings">Mipangilio</string>
+    <string name="notification_settings">Mipangilio ya Arifa</string>
+    <string name="payment_methods">Njia ya Malipo</string>
+    <string name="help_support">Msaada</string>
+    <string name="logout">Ondoka</string>
+    <string name="don_t_have_an_account_contact_support_to_create_one">Huna akaunti? Wasiliana na msaada kuijenga.</string>
+    <string name="sign_in">Ingia</string>
+    <string name="email">Barua Pepe</string>
+    <string name="password">Nenosiri</string>
+    <string name="welcome_to_smart_soko_driver">Karibu SmartSoko Driver</string>
+    
+    <!-- Order detail screen -->
+    <string name="order_details">Maelezo ya Oda</string>
+    <string name="customer_information">Maelezo ya Mteja</string>
+    <string name="pickup_location">Mahali ya Kukamata</string>
+    <string name="delivery_location">Mahali ya Utoaji</string>
+    <string name="order_items">Vipengele vya Oda</string>
+    <string name="order_summary">Muhtasari wa Oda</string>
+    <string name="subtotal">Jumla ndogo:</string>
+    <string name="tax">Kodi:</string>
+    <string name="delivery_fee">Ada ya Utoaji:</string>
+    <string name="total">Jumla:</string>
+    <string name="reject">Kataa</string>
+    <string name="accept">Kubali</string>
+    <string name="pick_up">Kamata</string>
+    <string name="delivered">Imetolewa</string>
+    <string name="arrived">Nimefika Mahali ya Kukamata</string>
+    <string name="picked_up">Nimekamata</string>
+    <string name="on_the_way">Njiani</string>
+    <string name="call">Piga Simu</string>
+    <string name="message">Ujumbe</string>
+    <string name="login">Ingia</string>
+    <string name="verify_otp">Thibitisha OTP</string>
+    <string name="enter_phone">Ingiza nambari ya simu</string>
+    <string name="tracking_active">Kufuatilia Kitaalamu</string>
+    <string name="tracking_description">SmartSoko Driver inafuata mahali pako</string>
+    <string name="new_order_title">Oda Mpya ya Utoaji</string>
+    <string name="earnings_today">Mapato ya Leo</string>
+    <string name="deliveries_completed">Utoaji Umekamilika</string>
+    <string name="weekly_summary">Muhtasari wa Wiki</string>
+    <string name="no_orders">Hakuna oda bado</string>
+    <string name="go_online_hint">Kuwa mtandaoni kupata oda</string>
+</resources>

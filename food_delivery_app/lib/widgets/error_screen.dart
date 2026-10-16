@@ -1,5 +1,73 @@
 import 'package:flutter/material.dart';
 
+/// Base empty state widget with consistent design system styling
+/// Follows DRY principle - used by both ErrorScreen and EmptyStateScreen
+class BaseEmptyState extends StatelessWidget {
+  final String message;
+  final Widget? icon;
+  final Widget? action;
+  final EdgeInsetsGeometry? padding;
+  final bool showTitle;
+  final TextStyle? titleStyle;
+  final TextStyle? messageStyle;
+  final bool respectReducedMotion;
+
+  const BaseEmptyState({
+    super.key,
+    required this.message,
+    this.icon,
+    this.action,
+    this.padding,
+    this.showTitle = true,
+    this.titleStyle,
+    this.messageStyle,
+    this.respectReducedMotion = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isReduced = respectReducedMotion || 
+        Theme.of(context).platformBrightness == Brightness.dark; // simplified check
+
+    final effectivePadding = padding ?? const EdgeInsets.all(24);
+
+    return Center(
+      child: Padding(
+        padding: effectivePadding,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (showTitle) ...[
+              Icon(
+                icon ?? Icons.error_outline,
+                size: 80,
+                color: isReduced ? colorScheme.onSurfaceVariant : colorScheme.error,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: messageStyle ??
+                    theme.textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ] ...[
+              if (action != null) ...[
+                const SizedBox(height: 24),
+                action!,
+              ],
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Error screen widget with consistent design system styling
 class ErrorScreen extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
@@ -11,52 +79,27 @@ class ErrorScreen extends StatelessWidget {
   });
   
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 80,
-              color: Colors.red.shade300,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Oops!',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+  Widget build(BuildContext context) => BaseEmptyState(
+    message: message,
+    icon: Icons.error_outline,
+    action: onRetry != null
+        ? ElevatedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Try Again'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 32,
+                vertical: 16,
               ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            if (onRetry != null) ...[
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: onRetry,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Try Again'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
+          )
+        : null,
+    respectReducedMotion: true,
+  );
 }
 
+/// Generic empty state widget with customizable icon and action
 class EmptyStateScreen extends StatelessWidget {
   final String message;
   final IconData icon;
@@ -70,33 +113,10 @@ class EmptyStateScreen extends StatelessWidget {
   });
   
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 80,
-              color: Colors.grey.shade400,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.grey.shade600,
-              ),
-            ),
-            if (action != null) ...[
-              const SizedBox(height: 24),
-              action!,
-            ],
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => BaseEmptyState(
+    message: message,
+    icon: icon,
+    action: action,
+    respectReducedMotion: true,
+  );
 }

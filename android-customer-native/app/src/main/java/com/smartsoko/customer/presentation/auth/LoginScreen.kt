@@ -64,9 +64,11 @@ fun LoginScreen(
         }
     }
 
-    LaunchedEffect(uiState.isLoginSuccess) {
-        if (uiState.isLoginSuccess) {
-            onNavigateToHome()
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is LoginEvent.NavigateToHome -> onNavigateToHome()
+            }
         }
     }
 

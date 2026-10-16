@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="light" lang="en">
 <head>
   <meta charset="utf-8"/>
@@ -19,12 +19,38 @@
   <script src="js/cart-service.js?v=5" defer></script>
   <script src="js/location-picker.js?v=5" defer></script>
   <script src="nav-component.js?v=5" defer></script>
-  <style>
+<style>
+:root {
+  --os-primary: #064e3b;
+  --os-primary-glow: rgba(6,78,59,0.18);
+  --os-success: #10b981;
+  --os-warning: #f59e0b;
+  --os-error: #ef4444;
+  --os-shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --os-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.05);
+  --os-shadow-lg: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+}
+
+/* Reduced-motion: disable most transitions */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
+
+/* ===== Base utility shims missing from dist/tailwind.css ===== */
     .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display: inline-block; line-height: 1; vertical-align: middle; }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     * { box-sizing: border-box; }
-    body { overflow-x: hidden; font-family: 'Be Vietnam Pro','Plus Jakarta Sans',sans-serif; min-height: 100vh; }
+    body { overflow-x: hidden; font-family: 'Be Vietnam Pro','Plus Jakarta Sans',sans-serif; min-height: 100vh; font-size: 14px; }
+    /* Minimum font size for accessibility */
+    p, span, a, li, td, th, label, div, button, input, select, textarea { min-font-size: 12px; }
+    @media (max-width: 768px) {
+      html { font-size: 14px; }
+      p, span, a, li, td, th, label, div, button, input, select, textarea { font-size: max(12px, 1rem); }
+    }
     h1,h2,h3,h4 { font-family: 'Plus Jakarta Sans',sans-serif; }
     .gradient-bg { background: #064e3b; }
 
@@ -34,8 +60,8 @@
     /* Hero Carousel */
     .hero-carousel { position: relative; height: 360px; overflow: hidden; border-radius: 0 0 24px 24px; background: linear-gradient(135deg, #F1E6CC 0%, #FBE7C6 55%, #FBF5E9 100%); }
     @media (min-width: 768px) { .hero-carousel { height: 420px; } }
-    .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s ease; background-size: cover; background-position: center; background-color: #F1E6CC; }
-    .hero-slide.active { opacity: 1; }
+    .hero-slide { position: absolute; inset: 0; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.6s ease; background-size: cover; background-position: center; background-color: #F1E6CC; }
+    .hero-slide.active { opacity: 1; visibility: visible; pointer-events: auto; z-index: 1; }
     .hero-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 40px 24px 32px; box-sizing: border-box; background: linear-gradient(transparent, rgba(251,245,233,0.85)); color: #1E2A22; max-width: 560px; }
     .hero-slide p { color: #5B6B5E; }
     .carousel-dots { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
@@ -75,17 +101,41 @@
     /* Seller cards */
     .seller-card {
       background: white; border-radius: 14px; padding: 14px;
-      border: 1px solid #f0f0f0; transition: all 0.3s; cursor: pointer;
+      border: 1px solid var(--os-shadow-sm);
+      transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      cursor: pointer;
       display: flex; align-items: center; gap: 12px;
     }
-    .seller-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.06); transform: translateY(-2px); }
+    .seller-card:hover {
+      border-color: var(--os-primary);
+      box-shadow: 0 0 0 2px var(--os-primary-glow), var-os-shadow;
+      transform: translateY(-2px);
+    }
+    .seller-card:focus-visible {
+      outline: 2px solid var(--os-primary);
+      outline-offset: 2px;
+    }
+    .seller-card:active {
+      transform: translateY(1px) scale(0.98);
+    }
 
     /* Quick links */
     .quick-link {
-      background: white; border-radius: 16px; padding: 16px; border: 1px solid #f0f0f0;
-      display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.3s;
+      background: white; border-radius: 16px; padding: 16px; border: 1px solid var(--os-shadow-sm);
+      display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s ease;
     }
-    .quick-link:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-2px); }
+    .quick-link:hover {
+      border-color: var(--os-primary);
+      box-shadow: 0 0 0 2px var(--os-primary-glow), var-os-shadow;
+      transform: translateY(-2px);
+    }
+    .quick-link:focus-visible {
+      outline: 2px solid var(--os-primary);
+      outline-offset: 2px;
+    }
+    .quick-link:active {
+      transform: scale(0.97);
+    }
     .quick-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: transform 0.25s; }
     .quick-link:hover .quick-icon { transform: scale(1.1); }
 
@@ -133,7 +183,21 @@
     .skeleton-text { height: 12px; width: 80%; border-radius: 4px; }
     .skeleton-text-sm { height: 10px; width: 50%; border-radius: 4px; }
 
-    /* ===== Orientation responsive ===== */
+    /* ===== Product entrance animations ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Apply staggered fade-in to product cards */
+.product-card { animation: fadeInUp 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; opacity: 0; }
+.product-card.visible { opacity: 1; transform: translateY(0); }
+
+/* ===== Orientation responsive ===== */
     @media (orientation: landscape) and (max-height: 500px) {
       .hero-carousel { height: 50vw; max-height: 280px; min-height: 140px; border-radius: 0; }
       .hero-content { padding: 16px 20px 12px; }
@@ -169,7 +233,27 @@
     }
   </style>
 <style>
-    /* ===== Base utility shims missing from dist/tailwind.css ===== */
+    /* ===== Animation & Glow Variables ===== */
+:root {
+  --os-primary: #064e3b;
+  --os-primary-glow: rgba(6,78,59,0.18);
+  --os-success: #10b981;
+  --os-warning: #f59e0b;
+  --os-error: #ef4444;
+  --os-shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --os-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.05);
+  --os-shadow-lg: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+}
+
+/* Reduced-motion: disable most transitions */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
+
+/* ===== Base utility shims missing from dist/tailwind.css ===== */
     .left-3\.5 { left: .875rem; }
     .top-2\.5 { top: .625rem; }
     .-top-0\.5 { top: -0.125rem; }
@@ -241,6 +325,7 @@
       .lg\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
     }
   </style>
+  <meta name="theme-color" content="#1B4332">
 </head>
 <body class="bg-[#F8FAF6] text-on-background min-h-screen pb-24 md:pb-0">
 
@@ -316,7 +401,7 @@
         <div class="hero-content relative">
           <span class="inline-block bg-white text-green-700 px-3 py-1 rounded-full text-xs font-bold mb-2 tracking-wide">Free Delivery</span>
           <h2 class="text-3xl md:text-5xl font-bold mb-2 leading-tight">Daily Fresh Dairy<br>Products</h2>
-          <p class="text-lg text-white/90 mb-4 max-w-md">Milk, cheese, yogurt â€” delivered fresh daily</p>
+          <p class="text-lg text-white/90 mb-4 max-w-md">Milk, cheese, yogurt — delivered fresh daily</p>
           <a href="/discovery?category=dairy" class="inline-block bg-white text-green-700 px-7 py-3 rounded-xl font-bold text-sm hover:bg-gray-100 transition shadow-lg no-underline">Order Now</a>
         </div>
       </div>
@@ -422,7 +507,7 @@
           <div class="flex-1 min-w-0">
             <h3 class="font-bold text-gray-800 text-sm">Fresh Mart</h3>
             <div class="flex items-center gap-1 text-xs text-gray-500">
-              <span class="text-yellow-500">â˜…</span> 4.8 Â· 1.2k reviews
+              <span class="text-yellow-500">★</span> 4.8 · 1.2k reviews
             </div>
             <p class="text-xs text-green-600 mt-0.5 font-medium">25-35 min</p>
           </div>
@@ -435,7 +520,7 @@
           <div class="flex-1 min-w-0">
             <h3 class="font-bold text-gray-800 text-sm">Tasty Kitchen</h3>
             <div class="flex items-center gap-1 text-xs text-gray-500">
-              <span class="text-yellow-500">â˜…</span> 4.6 Â· 856 reviews
+              <span class="text-yellow-500">★</span> 4.6 · 856 reviews
             </div>
             <p class="text-xs text-orange-600 mt-0.5 font-medium">30-45 min</p>
           </div>
@@ -448,7 +533,7 @@
           <div class="flex-1 min-w-0">
             <h3 class="font-bold text-gray-800 text-sm">Daily Bread</h3>
             <div class="flex items-center gap-1 text-xs text-gray-500">
-              <span class="text-yellow-500">â˜…</span> 4.9 Â· 2.1k reviews
+              <span class="text-yellow-500">★</span> 4.9 · 2.1k reviews
             </div>
             <p class="text-xs text-amber-600 mt-0.5 font-medium">20-30 min</p>
           </div>
@@ -490,7 +575,7 @@
       </div>
     </section>
 
-    <!-- Quick Links -->
+<!-- Quick Links -->
     <section class="mb-8 grid grid-cols-2 md:grid-cols-4 gap-3">
       <a href="/customer" class="quick-link no-underline">
         <div class="quick-icon bg-gradient-to-br from-green-500 to-emerald-600 shadow-md">
@@ -526,6 +611,33 @@
         <div>
           <h3 class="font-bold text-gray-800 text-sm">Sell Items</h3>
           <p class="text-xs text-gray-500">Become a seller</p>
+        </div>
+      </a>
+      <a href="/wishlist" class="quick-link no-underline">
+        <div class="quick-icon bg-gradient-to-br from-red-500 to-pink-600 shadow-md">
+          <span class="material-symbols-outlined text-xl text-white">favorite</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-gray-800 text-sm">My Wishlist</h3>
+          <p class="text-xs text-gray-500">Saved items</p>
+        </div>
+      </a>
+      <a href="/returns" class="quick-link no-underline">
+        <div class="quick-icon bg-gradient-to-br from-orange-300 to-orange-500 shadow-md">
+          <span class="material-symbols-outlined text-xl text-white">remove</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-gray-800 text-sm">Returns</h3>
+          <p class="text-xs text-gray-500">How to return</p>
+        </div>
+      </a>
+      <a href="/discovery" class="quick-link no-underline">
+        <div class="quick-icon bg-gradient-to-br from-amber-600 to-yellow-500 shadow-md">
+          <span class="material-symbols-outlined text-xl text-white">grid_view</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-gray-800 text-sm">View all</h3>
+          <p class="text-xs text-gray-500">Explore marketplace</p>
         </div>
       </a>
     </section>
@@ -595,6 +707,8 @@
       if (!query) return;
       window.location.href = '/discovery?search=' + encodeURIComponent(query);
     }
+    tryLoadProducts();
+
     document.addEventListener('DOMContentLoaded', () => {
       ['searchInputMobile', 'searchInputDesktop'].forEach(id => {
         const el = document.getElementById(id);
@@ -605,12 +719,18 @@
     // Hero Carousel
     let currentSlide = 0;
     const totalSlides = 3;
+    let carouselInterval;
     function goToSlide(index) {
       document.querySelectorAll('.hero-slide').forEach((s, i) => s.classList.toggle('active', i === index));
       document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === index));
       currentSlide = index;
     }
-    setInterval(() => goToSlide((currentSlide + 1) % totalSlides), 5000);
+    function startCarousel() {
+      carouselInterval = setInterval(() => goToSlide((currentSlide + 1) % totalSlides), 5000);
+    }
+    startCarousel();
+    document.querySelector('.hero-carousel').addEventListener('mouseenter', () => clearInterval(carouselInterval));
+    document.querySelector('.hero-carousel').addEventListener('mouseleave', startCarousel);
 
     // Countdown Timer
     function updateCountdown() {
@@ -624,8 +744,14 @@
       document.getElementById('minutes').textContent = m;
       document.getElementById('seconds').textContent = s;
     }
-    setInterval(updateCountdown, 1000);
+    let countdownTimer = setInterval(updateCountdown, 1000);
     updateCountdown();
+    // Pause countdown on mouseover/out
+    const countdownSection = document.querySelector('.flash-deals');
+    if (countdownSection) {
+      countdownSection.addEventListener('mouseenter', () => { clearInterval(countdownTimer); });
+      countdownSection.addEventListener('mouseleave', () => { countdownTimer = setInterval(updateCountdown, 1000); updateCountdown(); });
+    }
 
     // Render functions
     function renderProducts(items, containerId) {
@@ -637,25 +763,35 @@
         container.innerHTML = '<div class="col-span-full text-center py-8 text-gray-400">No products available</div>';
         return;
       }
-      const ratingHtml = () => {
-        const full = Math.floor(Math.random() * 2) + 4;
-        let html = '';
-        for (let i = 0; i < 5; i++) {
-          html += `<span class="material-symbols-outlined text-[12px] ${i < full ? 'text-amber-400' : 'text-gray-200'}" style="font-variation-settings:'FILL' ${i < full ? 1 : 0};">star</span>`;
-        }
-        return html;
-      };
       container.innerHTML = items.map((p, idx) => {
-        const reviews = Math.floor(Math.random() * 500) + 50;
-        const originalPrice = Math.round((p.price || 0) * 1.2);
+        const ratingHtml = () => {
+          const rating = p.rating !== undefined ? Math.max(1, Math.min(5, p.rating)) : 4.5;
+          const full = Math.floor(rating);
+          let half = rating % 1 >= 0.5 ? 1 : 0;
+          let html = '';
+          for (let i = 0; i < 5; i++) {
+            if (i < full) {
+              html += `<span class="material-symbols-outlined text-[12px] text-amber-400" style="font-variation-settings:'FILL' 1;">star</span>`;
+            } else if (i === full && half) {
+              html += `<span class="material-symbols-outlined text-[12px] text-amber-400/50" style="font-variation-settings:'FILL' 0.5;">star</span>`;
+            } else {
+              html += `<span class="material-symbols-outlined text-[12px] text-gray-200" style="font-variation-settings:'FILL' 0;">star</span>`;
+            }
+          }
+          return html;
+        };
+        const reviews = p.reviews !== undefined ? p.reviews : 87;
+        const originalPrice = p.originalPrice !== undefined ? p.originalPrice : Math.round((p.price || 0) * 1.15);
+        const delay = Math.min(idx, 12) * 0.04;
         return `
-        <a href="/product?id=${p.id}" class="product-card no-underline" style="animation: fadeIn 0.4s cubic-bezier(0.23,1,0.32,1) ${Math.min(idx, 12) * 0.04}s backwards;">
+        <a href="/product?id=${p.id}" class="product-card no-underline" style="animation: fadeIn 0.4s cubic-bezier(0.23,1,0.32,1) ${delay}s backwards, fadeInUp 0.5s cubic-bezier(0.34,1.56,0.64,1) ${delay + 0.1}s forwards;">
           <div class="relative aspect-square bg-gray-50 overflow-hidden">
-            <img src="${p.imageUrl || 'images/default-product.png'}" alt="${p.name}" loading="lazy" decoding="async"
+            <img src="${p.imageUrl || '/images/product-placeholder.svg'}" alt="${p.name}" loading="lazy" decoding="async"
               class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              onerror="this.onerror=null; this.src='images/default-product.png';">
+              onerror="this.onerror=null; this.src='/images/product-placeholder.svg';">
             <button onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('${p.id}', this)"
-              class="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-sm active:scale-90 transition-transform">
+              class="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-sm active:scale-90 transition-transform"
+              aria-label="Toggle wishlist">
               <span class="material-symbols-outlined text-base text-gray-400" style="font-variation-settings:'FILL' 0;">favorite</span>
             </button>
           </div>
@@ -688,9 +824,9 @@
         return `
         <a href="/product?id=${p.id}" class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition cursor-pointer">
           <div class="aspect-square bg-gray-50 relative overflow-hidden">
-            <img src="${p.imageUrl || 'images/default-product.png'}" alt="${p.name}"
+            <img src="${p.imageUrl || '/images/product-placeholder.svg'}" alt="${p.name}"
               class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              onerror="this.onerror=null; this.src='images/default-product.png';">
+              onerror="this.onerror=null; this.src='/images/product-placeholder.svg';">
             <span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">-${disc}%</span>
             <span class="absolute bottom-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">HOT</span>
           </div>
@@ -714,6 +850,7 @@
         price: item.price || 0,
         imageUrl: item.imageUrl || item.image_url || item.image || '',
         category: item.category || 'General',
+        isAvailable: item.isAvailable !== false,
         sellerId: item.sellerId || item.seller_id || item.restaurantId || item.restaurant_id || '',
         seller: item.seller || item.seller_name || item.restaurantName || item.restaurant_name || 'SmartSoko'
       };
@@ -723,49 +860,20 @@
       const svc = window.crossPlatformService;
       const db = window.db;
 
-      if (!svc && !db) { console.warn('No data service available'); return; }
+
 
       try {
-        let items = null;
-
-        // Try cross-platform service first (Firebase + Supabase with fallback)
-        if (svc && svc.isReady()) {
-          try {
-            items = await svc.list('menuItems', { limit: 12 });
-            console.log(`[CrossPlatform] menuItems: ${items.length} docs (${items[0]?._source || 'unknown'})`);
-          } catch (e) { console.log('[CrossPlatform] menuItems:', e.message); }
-          if (!items || items.length === 0) {
-            try {
-              items = await svc.list('products', { limit: 12 });
-              console.log(`[CrossPlatform] products: ${items.length} docs (${items[0]?._source || 'unknown'})`);
-            } catch (e) { console.log('[CrossPlatform] products:', e.message); }
-          }
-        }
-
-        // Fallback to direct Firebase access
-        if ((!items || items.length === 0) && db) {
-          console.log('[Products] Falling back to direct Firebase');
-          const { collection, query, getDocs, limit } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-          let snapshot = null;
-          try {
-            snapshot = await getDocs(query(collection(db, 'menuItems'), limit(12)));
-          } catch (e) { /* silent */ }
-          if (!snapshot || snapshot.empty) {
-            try {
-              snapshot = await getDocs(query(collection(db, 'products'), limit(12)));
-            } catch (e) { /* silent */ }
-          }
-          if (snapshot && !snapshot.empty) {
-            items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          }
-        }
+        const response = await fetch('/api/products?limit=100', { signal: AbortSignal.timeout(10000) });
+        const payload = await response.json();
+        if (!response.ok || !payload.success || !Array.isArray(payload.data)) throw new Error(payload.error || 'Catalog unavailable');
+        const items = payload.data;
 
         if (!items || items.length === 0) {
           document.getElementById('popularProducts').innerHTML = '<div class="col-span-full text-center py-8 text-gray-400"><span class="material-symbols-outlined text-5xl mb-2 block">inventory_2</span><p>No products available yet</p></div>';
           return;
         }
 
-        products = items.map(normalizeProduct);
+        products = items.map(normalizeProduct).filter(p => p.isAvailable !== false);
         renderProducts(products, 'popularProducts');
         renderProducts(products.length > 4 ? products.slice(4, 8) : [...products].reverse(), 'recommendedProducts');
         renderFlashDeals(products.slice(0, 6));
@@ -824,12 +932,12 @@
           const oldPrice = snapshot[p.id];
           const newPrice = parseFloat(p.price) || 0;
           if (oldPrice !== undefined && newPrice > 0 && newPrice < oldPrice) {
-            dropped.push(`${p.name}: TSh ${Number(oldPrice).toLocaleString()} â†’ ${newPrice.toLocaleString()}`);
+            dropped.push(`${p.name}: TSh ${Number(oldPrice).toLocaleString()} → ${newPrice.toLocaleString()}`);
           }
           snapshot[p.id] = newPrice;
         });
         localStorage.setItem('smartsoko_wishlist_prices', JSON.stringify(snapshot));
-        if (dropped.length) showToast('ðŸ“‰ Price drop: ' + dropped.join(' | '));
+        if (dropped.length) showToast('📉 Price drop: ' + dropped.join(' | '));
       } catch (e) { /* ignore */ }
     }
 
@@ -865,18 +973,34 @@
     }
 
     function tryLoadProducts() {
-      if (window.crossPlatformService?.isReady() || window.db) {
-        loadProducts();
-      }
+      loadProducts();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof SmartNav !== 'undefined' && typeof SmartNav.initPageTransition === 'function') SmartNav.initPageTransition();
       updateCartUI();
-      tryLoadProducts();
-      document.addEventListener('firebase-initialized', tryLoadProducts, { once: true });
-      document.addEventListener('data-service-ready', tryLoadProducts, { once: true });
+
     });
+
+    // Intersection Observer for lazy-loading images outside viewport
+    (function() {
+      if (!('IntersectionObserver' in window)) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            if (img.dataset.src) {
+              img.src = img.dataset.src;
+              img.removeAttribute('data-src');
+            }
+            if (img.classList.contains('lazy-hero')) {
+              observer.unobserve(img);
+            }
+          }
+        });
+      }, { rootMargin: '200px' });
+      document.querySelectorAll('img[lazy], .lazy-hero').forEach(img => observer.observe(img));
+    })();
 
     document.getElementById('searchInputMobile').addEventListener('input', e => syncSearch(e.target.value));
   </script>
@@ -928,8 +1052,37 @@
       <div class="border-t border-outline-variant pt-6 text-center text-body-sm text-on-surface-variant">
         <p>&copy; 2026 SmartSoko. All rights reserved.</p>
       </div>
+      <div id="darkModeToggle" class="ds-icon-btn absolute -top-2 -right-2 bg-black/20 rounded-full p-2 hover:bg-black/30 transition-colors" aria-label="Toggle dark mode" onclick="toggleDarkMode()" title="Toggle dark mode">
+        <span class="material-symbols-outlined" id="darkModeIcon">brightness_medium</span>
+      </div>
     </div>
   </footer>
 </body>
+<script>
+function toggleDarkMode() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  const icon = document.getElementById('darkModeIcon');
+  if (isDark) {
+    icon.innerHTML = 'brightness_medium';
+    html.classList.remove('dark');
+  } else {
+    icon.innerHTML = 'dark_mode';
+    html.classList.add('dark');
+  }
+}
+
+// On page load, check saved theme
+document.addEventListener('DOMContentLoaded', () => {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }
+});
+</script>
+</body>
 </html>
+
 

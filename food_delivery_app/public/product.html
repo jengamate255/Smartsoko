@@ -1266,31 +1266,17 @@
       loadInProgress = true;
 
       try {
-        const svc = window.crossPlatformService;
-        let data = null;
-
-        if (svc && svc.isReady()) {
-          try { data = await withTimeout(svc.get('menuItems', productId), 1500, 'load item'); } catch (e) { /* timeout/failure fall through */ }
-          if (!data) { try { data = await withTimeout(svc.get('products', productId), 1500, 'load product'); } catch (e) { /* fall through */ } }
-        }
-
-        if (!data) {
-          const cf = window.crossFirestore;
-          if (!cf) throw new Error('crossFirestore not initialized');
-          try {
-            let docSnap = await withTimeout(cf.getDoc(cf.doc('menuItems', productId)), 2500, 'db read');
-            if (!docSnap.exists()) docSnap = await withTimeout(cf.getDoc(cf.doc('products', productId)), 2500, 'db read');
-            if (docSnap.exists()) data = { id: docSnap.id, ...docSnap.data() };
-          } catch (e) {
-            console.warn('Product db fallback failed:', e.message);
-          }
-        }
+        const response = await fetch('/api/products/' + encodeURIComponent(productId), { signal: AbortSignal.timeout(10000) });
+        const payload = await response.json();
+        if (!response.ok || !payload.success) throw new Error(payload.error || 'Product unavailable');
+        const data = payload.data;
 
         if (data) {
           const imageUrls = data.imageUrls || (data.imageUrl || data.image ? [data.imageUrl || data.image] : []);
           // Parse variations: "Name=+500, Regular=+0" -> [{name: 'Extra Cheese', delta: 500}, ...]
           const parseVariations = (str) => {
             if (!str) return [];
+            if (Array.isArray(str)) return str;
             return str.split(',').map(v => {
               const parts = v.trim().split('=');
               const name = parts[0]?.trim() || '';
@@ -1311,7 +1297,7 @@
             imageUrls: imageUrls,
             category: data.category || 'General',
             isAvailable: data.isAvailable !== false,
-             sellerId: data.sellerId || data.restaurantId || '',
+             sellerId: data.sellerId || data.seller_id || data.restaurantId || '',
              seller: data.seller || data.restaurantName || 'SmartSoko',
              sellerRating: Number(data.sellerRating || 0),
             restaurantId: data.restaurantId || data.sellerId || '',
@@ -2234,10 +2220,12 @@
     // Mock data injection handled by serve-product.js for local preview.
     // In production, cross-platform-service.js handles data loading.
 
+    loadProduct();
+
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof SmartNav !== 'undefined' && typeof SmartNav.initPageTransition === 'function') SmartNav.initPageTransition();
       updateCartUI();
-      if (window.crossPlatformService?.isReady() || window.db) loadProduct();
+      loadProduct();
       document.addEventListener('data-service-ready', () => { if (!currentProduct) loadProduct(); }, { once: true });
 
       // Watchdog: guarantee the page loads even if init events never fire

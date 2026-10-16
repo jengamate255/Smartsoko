@@ -11,6 +11,7 @@ A production-ready web-based food delivery and local marketplace application wit
 - **Firebase Backend**: Firestore database and authentication
 - **PWA Ready**: Progressive Web App with offline support
 - **Responsive Design**: Works on mobile, tablet, and desktop
+- **AI Product Agent**: Extract product info from images, create drafts for merchant approval
 
 ## Tech Stack
 
@@ -19,7 +20,7 @@ A production-ready web-based food delivery and local marketplace application wit
 - **Database**: Firebase Firestore
 - **Authentication**: Firebase Auth
 - **Maps**: Google Maps API / Mapbox
-- **Payments**: M-Pesa API
+- **AI**: Google Gemini (vision)
 - **Icons**: Material Symbols
 
 ## Prerequisites
@@ -86,6 +87,58 @@ npm run dev
 ```
 
 Visit http://localhost:3000/login
+
+## AI Product Agent
+
+The SmartSoko AI Product Agent extends the marketplace with intelligent product extraction from images.
+
+### 5. Configure Gemini AI
+
+Copy the example environment file and fill in your Gemini API credentials:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your Gemini credentials:
+
+```env
+# Google Gemini AI Configuration (required for Product Agent)
+GEMINI_API_KEY=your_google_gemini_api_key_here
+GEMINI_MODEL=gemini-1.5-flash
+```
+
+### 6. Start the AI Agent Server
+
+The AI agent runs on the existing SmartSoko server:
+
+```bash
+npm run dev
+```
+
+The server will start with AI endpoints available at:
+
+- `GET http://localhost:3000/.well-known/agent-card.json` - A2A Agent Card
+- `POST http://localhost:3000/api/v1/ai/products/extract` - Extract product from image
+- `POST http://localhost:3000/api/v1/ai/products/draft` - Generate product draft
+- `POST http://localhost:3000/api/v1/ai/products/validate` - Validate product draft
+- `POST http://localhost:3000/api/v1/ai/products/{draft_id}/approve` - Approve draft
+- `POST http://localhost:3000/api/v1/ai/products/{draft_id}/reject` - Reject draft
+- `POST http://localhost:3000/api/v1/ai/products/detect-duplicate` - Check duplicates
+
+### 7. Access the Agent Card
+
+Visit `http://localhost:3000/.well-known/agent-card.json` to see the Product Agent's capabilities and discoverable skills for future AI agents.
+
+### 8. Testing the Product Agent
+
+Run the AI test suite:
+
+```bash
+npx vitest run test/ai/
+```
+
+All tests mock the Gemini API - no real API key required for unit tests.
 
 ## Production Deployment
 

@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,8 +22,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.smartsoko.merchant.data.model.AiExtraction
 import com.smartsoko.merchant.data.model.Product
 import com.smartsoko.merchant.ui.components.*
+import kotlinx.coroutines.launch
 
 private val CATEGORIES = listOf(
     "Fresh Produce", "Meat & Poultry", "Fish & Seafood", "Dairy & Eggs",
@@ -36,6 +39,7 @@ fun EditProductScreen(
     product: Product,
     isLoading: Boolean,
     onBack: () -> Unit,
+    onAiAssist: (Uri, (AiExtraction) -> Unit, (String) -> Unit) -> Unit,
     onSave: (
         productId: String,
         name: String,
@@ -61,11 +65,26 @@ fun EditProductScreen(
     var nameError by remember { mutableStateOf(false) }
     var priceError by remember { mutableStateOf(false) }
     var categoryError by remember { mutableStateOf(false) }
+    var aiAssisting by remember { mutableStateOf(false) }
+    var aiMessage by remember { mutableStateOf<String?>(null) }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         selectedImageUri = uri
+        aiMessage = null
+    }
+
+    fun applyAiExtraction(extraction: AiExtraction) {
+        extraction.name?.let { name = it; nameError = false }
+        extraction.description?.let { description = it }
+        extraction.sellingPrice?.let { price = it.toString(); priceError = false }
+        extraction.category?.let { category = it; categoryError = false }
+        extraction.unit?.let { unit = it }
+        aiMessage = "AI filled the fields from your photo. Review before saving."
     }
 
     Scaffold(
@@ -83,7 +102,8 @@ fun EditProductScreen(
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -124,6 +144,64 @@ fun EditProductScreen(
                             Text("Tap to change photo")
                         }
                     }
+                }
+            }
+
+            OutlinedButton(
+                onClick = {
+                    val uri = selectedImageUri
+                    if (uri != null) {
+                        aiAssisting = true
+                        aiMessage = null
+                        onAiAssist(
+                            uri,
+                            { extraction ->
+                                aiAssisting = false
+                                applyAiExtraction(extraction)
+                            },
+                            { error ->
+                                aiAssisting = false
+                                aiMessage = null
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("AI Assistant: $error")
+                                }
+                            }
+                        )
+                    } else {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Select a new photo first")
+                        }
+                    }
+                },
+                enabled = selectedImageUri != null && !isLoading && !aiAssisting,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (aiAssisting) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("AI is reading the photo…")
+                } else {
+                    Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("AI Assist — Auto-fill from photo")
+                }
+            }
+
+            aiMessage?.let { message ->
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = SmartRadiusSmall
+                ) {
+                    Text(
+                        text = message,
+                        modifier = Modifier.padding(12.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 }
             }
 

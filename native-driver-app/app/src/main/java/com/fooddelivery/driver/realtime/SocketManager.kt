@@ -10,11 +10,23 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import okhttp3.*
 import org.json.JSONObject
+import java.util.Timer
+import java.util.TimerTask
 import java.util.concurrent.TimeUnit
 
 /**
- * Manages the native WebSocket connection for real-time updates.
- * Compatible with the server's ws:// protocol (not Socket.IO).
+ * Manages the real-time connection for order updates using Supabase Realtime.
+ *
+ * The transport is a Phoenix WebSocket (https://www.phoenixframework.org) speaking
+ * to `wss://<project-ref>.supabase.co/realtime/v1/websocket?apikey=<anon-key>&vsn=1.0.0`.
+ * After joining the `realtime:orders` channel with a `postgres_changes` config, the
+ * server pushes a `postgres_changes` message for every INSERT/UPDATE/DELETE on the
+ * `orders` table that the connecting role is allowed to SELECT (RLS). We surface
+ * INSERT/UPDATE events through the same [OrderUpdate] LiveData the rest of the app
+ * already consumes, so no call sites change.
+ *
+ * Note: this socket is receive-only. The upstream is a database, so the emit* helpers
+ * are intentionally no-ops (kept so ViewModel/repository call sites compile unchanged).
  */
 class SocketManager(
     private val context: Context,
@@ -24,6 +36,9 @@ class SocketManager(
 
     companion object {
         private const val TAG = "SocketManager"
+        private const val CHANNEL_ORDERS = "realtime:orders"
+        private const val CHANNEL_LOCATIONS = "realtime:driver_locations"
+        private const val HEARTBEAT_INTERVAL_MS = 20000L
     }
 
     private var webSocket: WebSocket? = null
@@ -37,7 +52,10 @@ class SocketManager(
         .build()
 
     private var isConnected = false
-    private val messageQueue = mutableListOf<JSONObject>()
+    private var refCounter = 0
+    private var ordersJoinRef = ""
+    private var locationsJoinRef = ""
+    private var heartbeatTimer: Timer? = null
     private var reconnectAttempts = 0
     private val maxReconnectAttempts = 5
     private val reconnectDelayMs = 3000L
@@ -93,95 +111,36 @@ class SocketManager(
         }
 
         try {
-            val requestBuilder = Request.Builder()
-                .url("$serverUrl/ws?token=$authToken")
+            val request = Request.Builder()
+                .url(serverUrl)
 
-            webSocket = client.newWebSocket(requestBuilder.build(), object : WebSocketListener() {
+            webSocket = client.newWebSocket(request.build(), object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
-                    Log.d(TAG, "WebSocket connected")
+                    if (this@SocketManager.webSocket !== webSocket) {
+                        Log.d(TAG, "Ignoring open from stale socket")
+                        return
+                    }
+                    Log.d(TAG, "Realtime WebSocket connected")
                     isConnected = true
                     reconnectAttempts = 0
-
-                    // Send any queued messages
-                    synchronized(messageQueue) {
-                        messageQueue.forEach { msg ->
-                            webSocket.send(msg.toString())
-                        }
-                        messageQueue.clear()
-                    }
+                    sendPhoenixJoin()
+                    sendChannelJoins()
                 }
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
                     try {
-                        val data = JSONObject(text)
-                        val type = data.optString("type", "")
-
-                        when (type) {
-                            "order_update", "order_update_driver" -> {
-                                val orderId = data.optString("orderId", data.optJSONObject("data")?.optString("orderId", "") ?: "")
-                                val status = data.optString("status", data.optJSONObject("data")?.optString("status", "") ?: "")
-                                orderUpdates.postValue(OrderUpdate(
-                                    orderId = orderId,
-                                    status = status,
-                                    data = data.optJSONObject("data") ?: data
-                                ))
+                        val message = JSONObject(text)
+                        val event = message.optString("event", "")
+                        when (event) {
+                            "phx_reply" -> handlePhoenixReply(message)
+                            "system" -> {
+                                val payload = message.optJSONObject("payload")
+                                val status = payload?.optString("status", "") ?: ""
+                                val msg = payload?.optString("message", "") ?: ""
+                                Log.d(TAG, "Realtime system event: $status - $msg")
                             }
-
-                            "location_update" -> {
-                                val locationData = data.optJSONObject("data") ?: data
-                                locationUpdates.postValue(LocationUpdate(
-                                    driverId = locationData.optString("driverId", ""),
-                                    latitude = locationData.optDouble("latitude", 0.0),
-                                    longitude = locationData.optDouble("longitude", 0.0),
-                                    timestamp = locationData.optString("timestamp", "")
-                                ))
-                            }
-
-                            "chat_message" -> {
-                                val chatData = data.optJSONObject("data") ?: data
-                                chatMessages.postValue(ChatMessage(
-                                    orderId = chatData.optString("orderId", ""),
-                                    senderId = chatData.optString("senderId", ""),
-                                    senderName = chatData.optString("senderName", ""),
-                                    message = chatData.optString("message", ""),
-                                    timestamp = chatData.optString("timestamp", "")
-                                ))
-                            }
-
-                            "order_accepted" -> {
-                                val orderData = data.optJSONObject("data") ?: data
-                                val orderId = orderData.optString("orderId", orderData.optString("id", ""))
-                                val status = orderData.optString("status", "accepted")
-                                orderUpdates.postValue(OrderUpdate(
-                                    orderId = orderId,
-                                    status = status,
-                                    data = orderData
-                                ))
-                            }
-
-                            "rider_locations" -> {
-                                // Fleet location broadcast - can be used for tracking nearby drivers
-                                Log.d(TAG, "Received rider locations update")
-                            }
-
-                            "initial_data" -> {
-                                Log.d(TAG, "Received initial data from server")
-                            }
-
-                            "error" -> {
-                                val errorMsg = data.optString("error", "Unknown error")
-                                Log.e(TAG, "Server error: $errorMsg")
-                                if (errorMsg.contains("Unauthorized", ignoreCase = true) || errorMsg.contains("Forbidden", ignoreCase = true)) {
-                                    // Token invalid - stop auto-reconnecting and let the owner refresh the token
-                                    shouldConnect = false
-                                    reconnectAttempts = maxReconnectAttempts
-                                    onUnauthorized?.invoke()
-                                }
-                            }
-
-                            else -> {
-                                Log.d(TAG, "Received unknown message type: $type")
-                            }
+                            "postgres_changes" -> handlePostgresChange(message)
+                            else -> Log.d(TAG, "Received unknown Realtime event: $event")
                         }
                     } catch (e: Exception) {
                         Log.e(TAG, "Error parsing WebSocket message: ${text.take(200)}", e)
@@ -189,21 +148,36 @@ class SocketManager(
                 }
 
                 override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                    if (this@SocketManager.webSocket !== webSocket) {
+                        Log.d(TAG, "Ignoring close from stale socket")
+                        return
+                    }
                     Log.d(TAG, "WebSocket closing: $code - $reason")
                     isConnected = false
+                    stopHeartbeat()
                     webSocket.close(1000, null)
                     attemptReconnect()
                 }
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                    if (this@SocketManager.webSocket !== webSocket) {
+                        Log.d(TAG, "Ignoring closed from stale socket")
+                        return
+                    }
                     Log.d(TAG, "WebSocket closed: $code - $reason")
                     isConnected = false
+                    stopHeartbeat()
                     attemptReconnect()
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                    if (this@SocketManager.webSocket !== webSocket) {
+                        Log.d(TAG, "Ignoring failure from stale socket")
+                        return
+                    }
                     Log.e(TAG, "WebSocket failure", t)
                     isConnected = false
+                    stopHeartbeat()
                     attemptReconnect()
                 }
             })
@@ -212,6 +186,154 @@ class SocketManager(
             Log.e(TAG, "Failed to initialize WebSocket connection", e)
             attemptReconnect()
         }
+    }
+
+    private fun sendPhoenixJoin() {
+        val ref = ++refCounter
+        webSocket?.send(JSONObject().apply {
+            put("topic", "phoenix")
+            put("event", "phx_join")
+            put("payload", JSONObject())
+            put("ref", ref.toString())
+        }.toString())
+        Log.d(TAG, "Sent Phoenix socket join (ref $ref)")
+    }
+
+    private fun sendChannelJoins() {
+        ordersJoinRef = (++refCounter).toString()
+        webSocket?.send(JSONObject().apply {
+            put("topic", CHANNEL_ORDERS)
+            put("event", "phx_join")
+            put("payload", JSONObject().apply {
+                put("config", JSONObject().apply {
+                    put("postgres_changes", org.json.JSONArray().put(JSONObject().apply {
+                        put("event", "*")
+                        put("schema", "public")
+                        put("table", "orders")
+                    }))
+                })
+            })
+            put("ref", ordersJoinRef)
+        }.toString())
+        Log.d(TAG, "Sent channel join for $CHANNEL_ORDERS (ref $ordersJoinRef)")
+
+        locationsJoinRef = (++refCounter).toString()
+        webSocket?.send(JSONObject().apply {
+            put("topic", CHANNEL_LOCATIONS)
+            put("event", "phx_join")
+            put("payload", JSONObject().apply {
+                put("config", JSONObject().apply {
+                    put("postgres_changes", org.json.JSONArray().put(JSONObject().apply {
+                        put("event", "*")
+                        put("schema", "public")
+                        put("table", "driver_locations")
+                    }))
+                })
+            })
+            put("ref", locationsJoinRef)
+        }.toString())
+        Log.d(TAG, "Sent channel join for $CHANNEL_LOCATIONS (ref $locationsJoinRef)")
+    }
+
+    private fun handlePhoenixReply(message: JSONObject) {
+        val ref = message.optString("ref", "")
+        val payload = message.optJSONObject("payload")
+        val status = payload?.optString("status", "") ?: ""
+
+        if ((ref == ordersJoinRef || ref == locationsJoinRef) && status == "ok") {
+            startHeartbeat()
+            val ch = if (ref == ordersJoinRef) CHANNEL_ORDERS else CHANNEL_LOCATIONS
+            Log.d(TAG, "Channel joined: $ch")
+        } else if (status == "error") {
+            // The "phoenix" topic replies "unmatched topic" for the socket join and
+            // every heartbeat - that is expected, so keep those quiet.
+            val topic = message.optString("topic", "")
+            if (topic == "phoenix") return
+            val reason = payload?.optJSONObject("response")?.optString("reason", "") ?: ""
+            Log.e(TAG, "Realtime error on ref $ref: $reason")
+        }
+    }
+
+    private fun handlePostgresChange(message: JSONObject) {
+        val payload = message.optJSONObject("payload")
+        val data = payload?.optJSONObject("data") ?: return
+        val type = data.optString("type", "")
+        val table = data.optString("table", "")
+
+        if (table == "orders") {
+            when (type) {
+                "INSERT", "UPDATE" -> {
+                    val record = data.optJSONObject("record") ?: return
+                    val orderId = record.optString("id", "")
+                    if (orderId.isEmpty()) return
+                    val status = record.optString("status", "")
+                    orderUpdates.postValue(OrderUpdate(
+                        orderId = orderId,
+                        status = status,
+                        data = record
+                    ))
+                    Log.d(TAG, "Received order $type: id=$orderId status=$status")
+                }
+                "DELETE" -> {
+                    val oldRecord = data.optJSONObject("old_record")
+                    val orderId = oldRecord?.optString("id", "") ?: ""
+                    if (orderId.isNotEmpty()) {
+                        orderUpdates.postValue(OrderUpdate(
+                            orderId = orderId,
+                            status = "deleted",
+                            data = JSONObject()
+                        ))
+                        Log.d(TAG, "Received order DELETE: id=$orderId")
+                    }
+                }
+                else -> Log.d(TAG, "Unhandled orders change type: $type")
+            }
+        } else if (table == "driver_locations") {
+            when (type) {
+                "INSERT", "UPDATE" -> {
+                    val record = data.optJSONObject("record") ?: return
+                    val driverId = record.optString("driver_id", record.optString("driverId", ""))
+                    val latitude = record.optDouble("latitude", 0.0)
+                    val longitude = record.optDouble("longitude", 0.0)
+                    val timestamp = record.optString("timestamp", record.optString("created_at", ""))
+                    if (driverId.isNotEmpty()) {
+                        locationUpdates.postValue(LocationUpdate(
+                            driverId = driverId,
+                            latitude = latitude,
+                            longitude = longitude,
+                            timestamp = timestamp
+                        ))
+                        Log.d(TAG, "Received driver location $type: driver=$driverId lat=$latitude lng=$longitude")
+                    }
+                }
+                "DELETE" -> Log.d(TAG, "Driver location deleted (ignored)")
+                else -> Log.d(TAG, "Unhandled driver_locations change type: $type")
+            }
+        } else {
+            Log.d(TAG, "Postgres change on unhandled table: $table type=$type")
+        }
+    }
+
+    private fun startHeartbeat() {
+        stopHeartbeat()
+        heartbeatTimer = Timer("realtime-heartbeat", true).apply {
+            schedule(object : TimerTask() {
+                override fun run() {
+                    val ref = (++refCounter).toString()
+                    webSocket?.send(JSONObject().apply {
+                        put("topic", "phoenix")
+                        put("event", "phx_heartbeat")
+                        put("payload", JSONObject())
+                        put("ref", ref)
+                    }.toString())
+                }
+            }, HEARTBEAT_INTERVAL_MS, HEARTBEAT_INTERVAL_MS)
+        }
+    }
+
+    private fun stopHeartbeat() {
+        heartbeatTimer?.cancel()
+        heartbeatTimer = null
     }
 
     private fun attemptReconnect() {
@@ -233,82 +355,30 @@ class SocketManager(
         }
     }
 
-    /**
-     * Send a message via WebSocket. Queues if not connected.
-     */
-    private fun sendMessage(message: JSONObject) {
-        synchronized(messageQueue) {
-            if (isConnected) {
-                try {
-                    val sent = webSocket?.send(message.toString()) ?: false
-                    if (!sent) {
-                        messageQueue.add(message)
-                    } else {
-                        // sent successfully
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to send message", e)
-                    messageQueue.add(message)
-                }
-            } else {
-                messageQueue.add(message)
-            }
-        }
-    }
-
     fun emitLocationUpdate(latitude: Double, longitude: Double) {
-        val msg = JSONObject().apply {
-            put("type", "driver_location_update")
-            put("driverId", "driver_${authToken.take(8)}")
-            put("latitude", latitude)
-            put("longitude", longitude)
-            put("timestamp", System.currentTimeMillis())
-        }
-        sendMessage(msg)
-        Log.d(TAG, "Sent location update: lat=$latitude, lng=$longitude")
+        Log.d(TAG, "emitLocationUpdate ignored: Realtime transport is receive-only")
     }
 
     fun emitChatMessage(orderId: String, message: String) {
-        val msg = JSONObject().apply {
-            put("type", "send_chat_message")
-            put("orderId", orderId)
-            put("message", message)
-            put("timestamp", System.currentTimeMillis())
-        }
-        sendMessage(msg)
-        Log.d(TAG, "Sent chat message for order: $orderId")
+        Log.d(TAG, "emitChatMessage ignored: Realtime transport is receive-only")
     }
 
     fun emitOrderAccepted(orderId: String) {
-        val msg = JSONObject().apply {
-            put("type", "order_accepted")
-            put("orderId", orderId)
-            put("timestamp", System.currentTimeMillis())
-        }
-        sendMessage(msg)
-        Log.d(TAG, "Sent order accepted for: $orderId")
+        Log.d(TAG, "emitOrderAccepted ignored: Realtime transport is receive-only")
     }
 
     fun emitStatusUpdate(status: String) {
-        val msg = JSONObject().apply {
-            put("type", "driver_status_update")
-            put("status", status)
-            put("timestamp", System.currentTimeMillis())
-        }
-        sendMessage(msg)
-        Log.d(TAG, "Sent status update: $status")
+        Log.d(TAG, "emitStatusUpdate ignored: Realtime transport is receive-only")
     }
 
     fun disconnect() {
         shouldConnect = false
         reconnectAttempts = maxReconnectAttempts // Prevent reconnection
+        stopHeartbeat()
         webSocket?.close(1000, "Driver going offline")
         webSocket = null
         isConnected = false
-        synchronized(messageQueue) {
-            messageQueue.clear()
-        }
-        Log.d(TAG, "WebSocket disconnected")
+        Log.d(TAG, "Realtime disconnected")
     }
 
     fun updateAuthToken(newToken: String) {

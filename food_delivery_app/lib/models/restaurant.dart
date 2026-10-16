@@ -219,4 +219,32 @@ class MenuItem {
       'variants': variants.map((v) => v.toMap()).toList(),
     };
   }
+
+  /// JSON (de)serialization for the persistent cart (SharedPreferences).
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'restaurantId': restaurantId,
+        'name': name,
+        'description': description,
+        'price': price,
+        'imageUrl': imageUrl,
+        'category': category,
+        'isAvailable': isAvailable,
+        'variants': variants.map((v) => v.toMap()).toList(),
+      };
+
+  factory MenuItem.fromJson(Map<String, dynamic> json) => MenuItem(
+        id: json['id']?.toString() ?? '',
+        restaurantId: json['restaurantId'] ?? '',
+        name: json['name'] ?? '',
+        description: json['description'] ?? '',
+        price: ((json['price'] as num?) ?? 0).toDouble(),
+        imageUrl: json['imageUrl'] ?? '',
+        category: json['category'] ?? '',
+        isAvailable: json['isAvailable'] ?? true,
+        variants: (json['variants'] as List<dynamic>?)
+                ?.map((v) => MenuItemVariant.fromMap(v as Map<String, dynamic>))
+                .toList() ??
+            [],
+      );
 }

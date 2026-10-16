@@ -218,9 +218,9 @@ class UserRepositoryImpl @Inject constructor(
             apartment = apartment,
             city = city,
             postalCode = postalCode,
-            latitude = location.latitude,
-            longitude = location.longitude,
-            address = location.address,
+            latitude = location?.latitude ?: 0.0,
+            longitude = location?.longitude ?: 0.0,
+            address = location?.address ?: "",
             isDefault = isDefault,
             deliveryInstructions = deliveryInstructions
         )

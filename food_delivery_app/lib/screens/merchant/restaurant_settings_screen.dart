@@ -356,7 +356,7 @@ class _RestaurantSettingsScreenState extends State<RestaurantSettingsScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Delivery Fee *',
                       border: OutlineInputBorder(),
-                      prefixText: 'KSh ',
+                      prefixText: 'TSh ',
                     ),
                     keyboardType: TextInputType.number,
                     validator: (value) => Validators.validateRequired(value, 'Fee'),

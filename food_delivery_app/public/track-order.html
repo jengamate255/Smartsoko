@@ -17,42 +17,86 @@
   <script type="module" src="config/firebase-config.js?v=5"></script>
   <script type="module" src="config/cross-platform-service.js?v=4"></script>
   <script src="config/mapbox-config.js" defer></script>
-  <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js' defer></script>
-  <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+  <script src='https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.js' defer></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css' rel='stylesheet' />
+  <script type="module" src="js/order-confirmation.js"></script>
   <style>
+    :root {
+      --os-primary: #064E3B;
+      --os-primary-light: #10B981;
+      --os-bg: #F8FAF6;
+      --os-surface: #FFFFFF;
+      --os-text: #022D1D;
+      --os-text-dim: #64748B;
+      --os-radius: 20px;
+      --os-shadow: 0 12px 40px rgba(6, 78, 59, 0.08);
+      --os-glass: rgba(255, 255, 255, 0.8);
+      --os-radius-sm: 12px;
+      --os-radius-md: 16px;
+      --os-radius-lg: 20px;
+      --os-radius-full: 999px;
+      --os-primary-container-alpha-12: rgba(6, 78, 59, 0.12);
+      --os-primary-alpha-70: rgba(6, 78, 59, 0.7);
+    }
+
     .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display: inline-block; line-height: 1; vertical-align: middle; }
     .filled-icon { font-variation-settings: 'FILL' 1; }
     * { box-sizing: border-box; }
-    body { font-family: 'Inter','Montserrat',sans-serif; min-height: 100vh; background: #F8FAF6; }
-    h1,h2,h3,h4,h5,h6 { font-family: 'Montserrat',sans-serif; }
-    .gradient-bg { background: #064e3b; }
-    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; background: var(--os-bg); color: var(--os-text); }
+    h1,h2,h3,h4,h5,h6 { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .gradient-bg { background: var(--os-primary); }
+    .skeleton { background: linear-gradient(90deg, var(--os-bg) 25%, #e8e8e8 50%, var(--os-bg) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--os-radius-sm); }
     @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-    .track-card { background: white; border-radius: 14px; box-shadow: 0 2px 8px rgba(44,62,80,0.05); border: 1px solid #f0f0f0; }
-    .step-line { position: absolute; left: 15px; top: 30px; bottom: -20px; width: 2px; background: #e0e0e0; }
-    .step-line.active { background: #064e3b; }
+    .os-card { background: var(--os-surface); border-radius: var(--os-radius-md); box-shadow: 0 2px 12px rgba(6, 78, 59, 0.06); border: 1px solid rgba(0,0,0,0.03); }
+    .os-section-card { background: var(--os-surface); border-radius: var(--os-radius-md); box-shadow: 0 2px 12px rgba(6, 78, 59, 0.06); border: 1px solid rgba(0,0,0,0.03); }
+    .step-line { position: absolute; left: 15px; top: 30px; bottom: -20px; width: 2px; background: var(--os-border, #E5E7EB); }
+    .step-line.active { background: var(--os-primary); }
     .pulse-ring { animation: pulse-ring 2s infinite; }
     @keyframes pulse-ring { 0% { transform: scale(1); opacity: 1 } 100% { transform: scale(1.5); opacity: 0 } }
-    .driver-marker { width: 20px; height: 20px; background: #16a34a; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); position: relative; }
-    .driver-marker::after { content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px; border: 2px solid #16a34a; border-radius: 50%; animation: pulse-ring 2s infinite; }
-    .driver-online { background: #16a34a !important; animation: pulse-ring 2s infinite; }
-    .driver-offline { background: #9ca3af !important; animation: none; }
+    .driver-marker { width: 20px; height: 20px; background: var(--os-primary-light); border-radius: 50%; border: 3px solid var(--os-surface); box-shadow: 0 2px 8px rgba(0,0,0,0.3); position: relative; }
+    .driver-marker::after { content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px; border: 2px solid var(--os-primary-light); border-radius: 50%; animation: pulse-ring 2s infinite; }
+    .driver-online { background: var(--os-primary-light) !important; animation: pulse-ring 2s infinite; }
+    .driver-offline { background: var(--os-text-dim) !important; animation: none; }
+
+    .os-icon-circle { display: flex; align-items: center; justify-content: center; border-radius: var(--os-radius-full); flex-shrink: 0; }
+    .os-icon-circle-sm { width: 32px; height: 32px; }
+    .os-icon-circle-md { width: 40px; height: 40px; }
+    .os-icon-circle-lg { width: 48px; height: 48px; }
+    .os-icon-circle-xl { width: 80px; height: 80px; }
+
+    .os-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--os-primary); color: white; padding: 14px 24px; border-radius: var(--os-radius-full); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 14px rgba(6, 78, 59, 0.3); border: none; min-height: 48px; text-decoration: none; }
+    .os-btn-primary:hover:not(:disabled) { background: var(--os-primary-light); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
+    .os-btn-primary:active:not(:disabled) { transform: scale(0.98); }
+    .os-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .os-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--os-surface); color: var(--os-text); padding: 12px 20px; border-radius: var(--os-radius-full); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s ease; border: 1px solid var(--os-border, #E5E7EB); text-decoration: none; }
+    .os-btn-secondary:hover { background: var(--os-bg); }
+
+    .os-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: var(--os-radius-full); font-size: 12px; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .os-badge-pending { background: rgba(180, 83, 9, 0.1); color: #B45309; }
+    .os-badge-confirmed { background: rgba(59, 130, 246, 0.1); color: #3B82F6; }
+    .os-badge-preparing { background: rgba(168, 85, 247, 0.1); color: #A855F7; }
+    .os-badge-ready { background: rgba(16, 185, 129, 0.1); color: var(--os-primary); }
+    .os-badge-delivered { background: rgba(16, 185, 129, 0.1); color: var(--os-primary); }
+
+    .os-focus-ring:focus-visible { outline: 2px solid var(--os-primary); outline-offset: 2px; }
+    .os-transition { transition: all 0.2s ease; }
   </style>
 </head>
-<body class="bg-[#F8FAF6] text-gray-900 min-h-screen pt-20 animate-premium">
+<body class="bg-[var(--os-bg)] text-[var(--os-text)] min-h-screen pt-20 animate-premium">
 
   <!-- Top Header -->
-  <header class="bg-white/80 backdrop-blur-xl fixed top-0 w-full z-50 shadow-sm flex justify-between items-center px-4 md:px-12 h-16">
+  <header class="os-section-card fixed top-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-sm flex justify-between items-center px-4 md:px-12 h-16">
     <div class="flex items-center gap-2">
       <a href="/customer" class="flex items-center gap-2 text-white no-underline">
-        <div class="w-9 h-9 bg-green-700/15 rounded-lg flex items-center justify-center">
-          <span class="material-symbols-outlined text-green-700">shopping_basket</span>
+        <div class="os-icon-circle-md bg-primary-container/30 flex items-center justify-center">
+          <span class="material-symbols-outlined text-primary">shopping_basket</span>
         </div>
         <span class="text-lg font-bold hidden sm:block">SmartSoko</span>
       </a>
     </div>
     <div class="flex items-center gap-3">
-      <a href="/customer" class="relative p-2 text-green-700/80 hover:text-green-700 rounded-full">
+      <a href="/customer" class="os-btn-ghost text-primary p-2">
         <span class="material-symbols-outlined">arrow_back</span>
       </a>
     </div>
@@ -65,10 +109,10 @@
         <div class="flex items-center gap-3">
           <div>
             <h1 class="font-headline-md text-headline-md font-bold text-primary">Track Order</h1>
-            <p class="text-sm text-gray-500" id="orderIdDisplay">Order #---</p>
+            <p class="text-body-sm text-on-surface-variant" id="orderIdDisplay">Order #---</p>
           </div>
         </div>
-        <div id="statusBadge" class="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">Pending</div>
+        <div id="statusBadge" class="os-badge os-badge-pending">Pending</div>
       </div>
     </div>
 
@@ -76,27 +120,27 @@
       <!-- Left: Order Progress -->
       <div class="space-y-6">
         <!-- Estimated Delivery -->
-        <div class="track-card p-6">
+        <div class="os-section-card p-6">
           <div class="flex items-center gap-4">
-            <div class="w-16 h-16 bg-green-700/10 rounded-full flex items-center justify-center">
-              <span class="material-symbols-outlined text-3xl text-green-700">schedule</span>
+            <div class="w-16 h-16 bg-primary-container/30 rounded-full flex items-center justify-center">
+              <span class="material-symbols-outlined text-3xl text-primary">schedule</span>
             </div>
             <div>
               <p class="text-sm text-gray-500">Estimated Delivery</p>
-              <p class="text-2xl font-bold text-green-700" id="estimatedTime">--:--</p>
+              <p class="text-2xl font-bold text-primary" id="estimatedTime">--:--</p>
               <p class="text-sm text-gray-400" id="estimatedDate">...</p>
             </div>
           </div>
         </div>
 
         <!-- Delivery Progress -->
-        <div class="track-card p-6">
+        <div class="os-section-card p-6">
           <h2 class="font-bold text-lg mb-6 text-gray-900">Delivery Progress</h2>
           <div class="space-y-6" id="progressSteps">
             <!-- Step 1: Order Placed -->
             <div class="flex gap-4 relative">
               <div class="step-line active" id="line-1"></div>
-              <div class="w-8 h-8 rounded-full bg-green-700 text-white flex items-center justify-center flex-shrink-0 z-10" id="step-1">
+              <div class="os-icon-circle-sm bg-primary text-white flex items-center justify-center flex-shrink-0 z-10" id="step-1">
                 <span class="material-symbols-outlined text-sm">check</span>
               </div>
               <div>
@@ -108,7 +152,7 @@
             <!-- Step 2: Confirmed -->
             <div class="flex gap-4 relative">
               <div class="step-line" id="line-2"></div>
-              <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center flex-shrink-0 z-10" id="step-2">
+              <div class="os-icon-circle-sm bg-surface-container-high text-on-surface-variant flex items-center justify-center flex-shrink-0 z-10" id="step-2">
                 <span class="material-symbols-outlined text-sm">restaurant</span>
               </div>
               <div>
@@ -120,7 +164,7 @@
             <!-- Step 3: Preparing -->
             <div class="flex gap-4 relative">
               <div class="step-line" id="line-3"></div>
-              <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center flex-shrink-0 z-10" id="step-3">
+              <div class="os-icon-circle-sm bg-surface-container-high text-on-surface-variant flex items-center justify-center flex-shrink-0 z-10" id="step-3">
                 <span class="material-symbols-outlined text-sm">soup_kitchen</span>
               </div>
               <div>
@@ -132,7 +176,7 @@
             <!-- Step 4: Ready for Pickup -->
             <div class="flex gap-4 relative">
               <div class="step-line" id="line-4"></div>
-              <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center flex-shrink-0 z-10" id="step-4">
+              <div class="os-icon-circle-sm bg-surface-container-high text-on-surface-variant flex items-center justify-center flex-shrink-0 z-10" id="step-4">
                 <span class="material-symbols-outlined text-sm">package</span>
               </div>
               <div>
@@ -144,7 +188,7 @@
             <!-- Step 5: On the Way -->
             <div class="flex gap-4 relative">
               <div class="step-line" id="line-5"></div>
-              <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center flex-shrink-0 z-10" id="step-5">
+              <div class="os-icon-circle-sm bg-surface-container-high text-on-surface-variant flex items-center justify-center flex-shrink-0 z-10" id="step-5">
                 <span class="material-symbols-outlined text-sm">local_shipping</span>
               </div>
               <div>
@@ -164,7 +208,7 @@
 
             <!-- Step 6: Delivered -->
             <div class="flex gap-4">
-              <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center flex-shrink-0 z-10" id="step-6">
+              <div class="os-icon-circle-sm bg-surface-container-high text-on-surface-variant flex items-center justify-center flex-shrink-0 z-10" id="step-6">
                 <span class="material-symbols-outlined text-sm">home</span>
               </div>
               <div>
@@ -176,7 +220,7 @@
         </div>
 
         <!-- Order Summary -->
-        <div class="track-card p-6">
+        <div class="os-section-card p-6">
           <h2 class="font-bold text-lg mb-4 text-gray-900">Order Summary</h2>
           <div id="orderItems" class="space-y-2 mb-4">
             <div class="skeleton skeleton-text" style="width:100%"></div>
@@ -185,9 +229,9 @@
           <div class="border-t border-gray-100 pt-4 space-y-2">
             <div class="flex justify-between text-sm"><span class="text-gray-500">Subtotal</span><span id="subtotal" class="font-medium">TSh 0</span></div>
             <div class="flex justify-between text-sm"><span class="text-gray-500">Delivery Fee</span><span id="deliveryFee" class="font-medium">TSh 0</span></div>
-            <div class="flex justify-between font-bold text-lg pt-2 border-t border-gray-100"><span>Total</span><span class="text-green-700" id="total">TSh 0</span></div>
+            <div class="flex justify-between font-bold text-lg pt-2 border-t border-gray-100"><span>Total</span><span class="text-primary" id="total">TSh 0</span></div>
           </div>
-          <button onclick="buyAgain()" id="buyAgainBtn" class="hidden w-full mt-4 bg-white border-2 border-green-700 text-green-700 py-3 rounded-xl font-bold text-sm hover:bg-green-50 transition-all">
+          <button onclick="buyAgain()" id="buyAgainBtn" class="hidden w-full mt-4 os-btn-secondary">
             <span class="material-symbols-outlined text-[16px] align-middle mr-1">replay</span> Buy Again
           </button>
         </div>
@@ -196,17 +240,17 @@
       <!-- Right: Delivery Details -->
       <div class="space-y-6">
         <!-- Delivery Address Card -->
-        <div class="track-card overflow-hidden">
+        <div class="os-section-card overflow-hidden">
           <div class="p-4 border-b bg-green-50">
             <div class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-green-700 filled-icon">location_on</span>
+              <span class="material-symbols-outlined text-primary filled-icon">location_on</span>
               <h2 class="font-bold text-green-800">Delivery Location</h2>
             </div>
           </div>
           <div class="p-5">
             <div class="flex items-start gap-3 mb-3">
-              <div class="w-10 h-10 bg-green-700/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <span class="material-symbols-outlined text-green-700">home</span>
+              <div class="w-10 h-10 bg-primary-container/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-primary">home</span>
               </div>
               <div>
                 <p class="font-semibold text-gray-900" id="deliveryAddress">Loading...</p>
@@ -226,7 +270,7 @@
         </div>
 
         <!-- Order Items Confirmation -->
-        <div class="track-card overflow-hidden">
+        <div class="os-section-card overflow-hidden">
           <div class="p-4 border-b bg-green-50">
             <div class="flex items-center gap-2">
               <span class="material-symbols-outlined text-green-600 filled-icon">receipt_long</span>
@@ -242,7 +286,7 @@
               <div class="flex justify-between text-sm"><span class="text-gray-500">Subtotal</span><span id="subtotalRight">TSh 0</span></div>
               <div class="flex justify-between text-sm"><span class="text-gray-500">Delivery Fee</span><span id="deliveryFeeRight">TSh 0</span></div>
               <div class="flex justify-between text-sm"><span class="text-gray-500">Payment</span><span class="font-medium text-gray-800" id="paymentMethodDisplay">--</span></div>
-              <div class="flex justify-between font-bold text-lg pt-2 border-t"><span>Total</span><span class="text-green-700" id="totalRight">TSh 0</span></div>
+              <div class="flex justify-between font-bold text-lg pt-2 border-t"><span>Total</span><span class="text-primary" id="totalRight">TSh 0</span></div>
             </div>
           </div>
         </div>
@@ -252,13 +296,13 @@
           <span class="material-symbols-outlined text-4xl text-white mb-3 filled-icon">check_circle</span>
           <h2 class="font-headline-md text-lg font-bold text-white mb-1">Order Delivered?</h2>
           <p class="text-white/80 text-sm mb-4">Confirm that you have received your order</p>
-          <button onclick="confirmDelivery()" id="confirmDeliveryBtn" class="w-full bg-white text-green-700 py-4 rounded-xl font-bold text-base hover:bg-gray-100 transition-all active:scale-95 shadow-lg">
+          <button onclick="confirmDelivery()" id="confirmDeliveryBtn" class="os-btn-primary w-full">
             Confirm Delivery
           </button>
         </div>
 
         <!-- Live Map -->
-        <div class="track-card overflow-hidden">
+        <div class="os-section-card overflow-hidden">
           <div class="p-4 border-b flex justify-between items-center">
             <h2 class="font-bold text-gray-900">Live Location</h2>
             <div class="flex items-center gap-2">
@@ -282,15 +326,11 @@
         </div>
 
         <!-- Contact Driver -->
-        <div id="contactDriver" class="track-card p-5 hidden">
-          <h2 class="font-bold text-lg mb-4 text-gray-900">Contact Driver</h2>
+        <div id="contactDriver" class="os-section-card p-5 hidden">
+          <h2 class="font-bold text-lg mb-4 text-on-background">Contact Driver</h2>
           <div class="flex gap-3">
-            <a id="callDriver" href="#" class="flex-1 bg-green-600 text-white py-3 rounded-lg text-center font-medium hover:bg-green-700 transition">
-              <span class="material-symbols-outlined inline mr-2">phone</span>Call
-            </a>
-            <button onclick="chatWithDriver()" class="flex-1 bg-green-700 text-white py-3 rounded-lg font-medium hover:bg-green-800 transition">
-              <span class="material-symbols-outlined inline mr-2">chat</span>Chat
-            </button>
+            <a id="callDriver" href="#" class="flex-1 os-btn-primary">Call</a>
+            <button onclick="chatWithDriver()" class="flex-1 os-btn-secondary">Chat</button>
           </div>
         </div>
       </div>
@@ -298,15 +338,15 @@
 
     <!-- Delivery Confirmed Modal -->
     <div id="deliveryConfirmModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center">
-      <div class="bg-white rounded-2xl p-8 w-full max-w-sm mx-4 shadow-2xl text-center">
-        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span class="material-symbols-outlined text-5xl text-green-600 filled-icon">check_circle</span>
+      <div class="os-section-card p-8 w-full max-w-sm mx-4 shadow-2xl text-center">
+        <div class="os-icon-circle-xl bg-primary-container/30 mx-auto mb-4 flex items-center justify-center">
+          <span class="material-symbols-outlined text-5xl text-primary filled-icon">check_circle</span>
         </div>
-        <h2 class="font-headline-md text-xl font-bold text-gray-900 mb-2">Delivery Confirmed!</h2>
-        <p class="text-gray-500 mb-6">Thank you for your order. Enjoy your meal!</p>
+        <h2 class="font-headline-md text-xl font-bold text-on-background mb-2">Delivery Confirmed!</h2>
+        <p class="text-on-surface-variant mb-6">Thank you for your order. Enjoy your meal!</p>
         <div class="flex gap-3">
-          <a href="/customer" class="flex-1 gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90 transition-colors">Order More</a>
-          <a href="/orders" class="flex-1 bg-gray-100 text-gray-900 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors">My Orders</a>
+          <a href="/customer" class="flex-1 os-btn-primary">Order More</a>
+          <a href="/orders" class="flex-1 os-btn-secondary">My Orders</a>
         </div>
       </div>
     </div>
@@ -358,12 +398,13 @@
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
       initMap();
-      if (window.crossPlatformService?.isReady() || window.db) loadOrderDetails();
+      loadOrderDetails();
       document.addEventListener('data-service-ready', () => loadOrderDetails(), { once: true });
       document.addEventListener('firebase-initialized', () => loadOrderDetails(), { once: true });
     });
 
     function initMap() {
+      if (!document.getElementById('map') || typeof mapboxgl === 'undefined') return;
       mapboxgl.accessToken = MAPBOX_CONFIG.accessToken;
 
       map = new mapboxgl.Map({
@@ -385,53 +426,29 @@
 
     async function loadOrderDetails() {
       try {
-        const svc = window.crossPlatformService;
-        let data = null;
-
-        if (svc && svc.isReady()) {
-          try {
-            data = await svc.get('orders', orderId);
-          } catch (e) { /* fall through */ }
+        if (!orderId || orderId === 'demo-order') throw new Error('Choose an order from My Orders to see delivery updates.');
+        const headers = {};
+        const user = window.auth?.currentUser;
+        if (user) headers.Authorization = 'Bearer ' + await user.getIdToken();
+        const keys = JSON.parse(localStorage.getItem('smartsoko_order_access') || '{}');
+        if (keys[orderId]) headers['X-Order-Access-Token'] = keys[orderId];
+        const response = await fetch('/api/orders/' + encodeURIComponent(orderId), { headers, cache: 'no-store', signal: AbortSignal.timeout(15000) });
+        const payload = await response.json();
+        if (!response.ok || !payload.success) throw new Error(payload.error || 'Unable to load this order');
+        if (window.trackingTemplate) {
+          document.querySelector('main').innerHTML = window.trackingTemplate; window.trackingTemplate = null;
+          if (map) { map.remove(); map = null; }
+          initMap();
         }
-
-        if (!data) {
-          const db = window.db;
-          if (!db || !orderId) { console.warn('Firestore not initialized or no orderId; using demo data'); }
-          else {
-            try {
-              const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-              const orderDoc = await getDoc(doc(db, 'orders', orderId));
-              if (orderDoc.exists()) data = { id: orderDoc.id, ...orderDoc.data() };
-            } catch (e) {
-              console.warn('Could not load order from Firestore; using demo data:', e.message);
-            }
-          }
-        }
-
-        if (data) {
-          orderData = data;
-        } else {
-          // Demo data
-          orderData = {
-            id: orderId,
-            status: 'dispatched',
-            items: [
-              { name: 'Chicken Biryani', quantity: 2, price: 15000 },
-              { name: 'Soft Drink', quantity: 2, price: 2000 }
-            ],
-            subtotal: 34000,
-            deliveryFee: 3000,
-            total: 37000,
-            sellerName: 'Tasty Restaurant',
-            sellerLat: -6.7924,
-            sellerLng: 39.2083,
-            customerAddress: '123 Sample Street, Dar es Salaam',
-            deliveryNotes: 'Near the blue gate',
-            driverId: 'driver-1',
-            createdAt: new Date(Date.now() - 3600000),
-            estimatedDelivery: new Date(Date.now() + 1800000)
-          };
-        }
+        const data = payload.order;
+        orderData = { ...data,
+          customerName: data.customerName || data.customer_name,
+          customerPhone: data.customerPhone || data.customer_phone,
+          deliveryAddress: data.deliveryAddress || data.delivery_address,
+          deliveryFee: data.deliveryFee ?? data.delivery_fee ?? 0,
+          deliveryLat: data.deliveryLat ?? data.delivery_latitude,
+          deliveryLng: data.deliveryLng ?? data.delivery_longitude
+        };
 
         const deliveryLat = pickNumber(orderData.deliveryLat, orderData.customerLat, orderData.deliveryLocation?.lat, orderData.deliveryLocation?.latitude);
         const deliveryLng = pickNumber(orderData.deliveryLng, orderData.customerLng, orderData.deliveryLocation?.lng, orderData.deliveryLocation?.longitude);
@@ -453,8 +470,20 @@
 
         updateOrderDisplay();
         setupRealtimeTracking();
-        subscribeToOrderStatus();
-      } catch (error) { console.error('Error loading order:', error); }
+        // Order status is fetched through the ownership-checked API.
+        if (!window.orderStatusPoll) window.orderStatusPoll = setInterval(loadOrderDetails, 15000);
+      } catch (error) {
+        console.error('Error loading order:', error);
+        const main = document.querySelector('main');
+        if (main && !orderData) {
+          if (!window.trackingTemplate) window.trackingTemplate = main.innerHTML;
+          main.replaceChildren();
+          const title = document.createElement('h1'); title.textContent = 'Delivery updates'; title.className = 'text-2xl font-bold mb-4';
+          const message = document.createElement('p'); message.textContent = error.message;
+          const link = document.createElement('a'); link.href = '/customer-orders'; link.textContent = 'My Orders'; link.className = 'inline-block mt-6 text-green-800 underline';
+          main.append(title, message, link);
+        }
+      }
     }
 
     function updateOrderDisplay() {
@@ -473,14 +502,14 @@
       statusBadge.textContent = orderData.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
       const statusColors = {
-        pending: 'bg-yellow-100 text-yellow-800',
-        confirmed: 'bg-blue-100 text-blue-800',
-        preparing: 'bg-purple-100 text-purple-800',
-        ready_for_delivery: 'bg-green-100 text-green-800',
-        dispatched: 'bg-green-100 text-green-800',
-        delivered: 'bg-green-200 text-green-900'
+        pending: 'os-badge-pending',
+        confirmed: 'os-badge-confirmed',
+        preparing: 'os-badge-preparing',
+        ready_for_delivery: 'os-badge-ready',
+        dispatched: 'os-badge-ready',
+        delivered: 'os-badge-delivered'
       };
-      statusBadge.className = `px-3 py-1 rounded-full text-sm font-medium ${statusColors[orderData.status] || 'bg-gray-100 text-gray-800'}`;
+      statusBadge.className = `os-badge ${statusColors[orderData.status] || 'os-badge-pending'}`;
 
       // Update estimated time
       if (orderData.estimatedDelivery) {
@@ -490,7 +519,8 @@
       }
 
       // Update progress steps
-      const currentStatusIndex = statusFlow.indexOf(orderData.status);
+      const progressStatus = ({ picked_up: 'dispatched', pickedup: 'dispatched', in_transit: 'dispatched', completed: 'delivered', assigned: 'ready_for_delivery' })[orderData.status] || orderData.status;
+      const currentStatusIndex = statusFlow.indexOf(progressStatus);
       for (let i = 1; i <= 6; i++) {
         const stepEl = document.getElementById(`step-${i}`);
         const lineEl = document.getElementById(`line-${i}`);
@@ -499,9 +529,10 @@
 
         if (i <= currentStatusIndex + 1) {
           stepEl.classList.remove('bg-gray-200', 'text-gray-500');
-          stepEl.classList.add('bg-green-700', 'text-white');
+          stepEl.classList.add('bg-primary', 'text-white');
+          stepEl.classList.add('os-icon-circle-sm');
           if (lineEl) lineEl.classList.add('active');
-          if (textEl) textEl.classList.add('text-green-700');
+          if (textEl) textEl.classList.add('text-primary');
           if (timeEl && i <= currentStatusIndex + 1) {
             timeEl.textContent = 'Completed';
           }
@@ -511,8 +542,8 @@
       // Update order items (both columns)
       const itemsHtml = orderData.items ? orderData.items.map(item => `
         <div class="flex justify-between text-sm">
-          <span>${item.quantity}x ${item.name}</span>
-          <span class="font-medium">TSh ${(item.price * item.quantity).toLocaleString()}</span>
+          <span>${item.quantity}x ${String(item.name || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</span>
+          <span class="font-medium">TSh ${((item.price + (item.variationDelta || 0)) * item.quantity).toLocaleString()}</span>
         </div>
       `).join('') : '<p class="text-gray-500">No items</p>';
 
@@ -542,7 +573,7 @@
       const paymentLine = document.getElementById('paymentMethodDisplay');
       if (paymentLine) {
         const methodMap = {
-          mpesa: 'M-Pesa', tigo: 'Tigo Pesa', airtel: 'Airtel Money', halopesa: 'HaloPesa', cod: 'Cash on Delivery'
+          mpesa: 'M-Pesa', tigo: 'Tigo Pesa', airtel: 'Airtel Money', halopesa: 'HaloPesa', cod: 'Cash on Delivery', pesapal: 'Pay Online (PesaPal)', ntzs: 'nTZS Wallet'
         };
         const method = methodMap[orderData.paymentMethod] || 'Cash on Delivery';
         const masked = orderData.paymentNumber ? ' • ' + String(orderData.paymentNumber).replace(/(.{4}).*(.{2})$/, '$1••••$2') : '';
@@ -786,11 +817,6 @@
         }
         orderData.status = 'delivered';
         
-        // Show success modal
-        const modal = document.getElementById('deliveryConfirmModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        
         // Update progress steps
         for (let i = 1; i <= 6; i++) {
           const stepEl = document.getElementById(`step-${i}`);
@@ -800,13 +826,26 @@
           stepEl.classList.remove('bg-gray-200', 'text-gray-500');
           stepEl.classList.add('bg-green-600', 'text-white');
           if (lineEl) lineEl.classList.add('active');
-          if (textEl) textEl.classList.add('text-green-700');
+          if (textEl) textEl.classList.add('text-primary');
           if (timeEl) timeEl.textContent = 'Completed';
         }
         
         const statusBadge = document.getElementById('statusBadge');
         statusBadge.textContent = 'DELIVERED';
         statusBadge.className = 'px-3 py-1 rounded-full text-sm font-medium bg-green-200 text-green-900';
+        
+        // Show rich delivery confirmation modal
+        if (window.showDeliveryConfirmation) {
+          window.showDeliveryConfirmation(orderId, {
+            onTrack: () => window.location.href = '/orders.html',
+            onContinue: () => window.location.href = '/home.html'
+          });
+        } else {
+          // Fallback to existing modal
+          const modal = document.getElementById('deliveryConfirmModal');
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        }
       } catch (error) {
         console.error('Error confirming delivery:', error);
         showNotification('Error confirming delivery. Please try again.');
@@ -826,6 +865,7 @@
 
     // Cleanup on page unload
     window.addEventListener('beforeunload', () => {
+      if (window.orderStatusPoll) clearInterval(window.orderStatusPoll);
       if (locationUnsubscribe) {
         locationUnsubscribe();
       }
@@ -833,6 +873,11 @@
         statusUnsubscribe();
       }
     });
+  </script>
+  <script type="module">
+    import { auth } from '/config/firebase-config.js?v=5';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+    onAuthStateChanged(auth, () => loadOrderDetails());
   </script>
 </body>
 </html>

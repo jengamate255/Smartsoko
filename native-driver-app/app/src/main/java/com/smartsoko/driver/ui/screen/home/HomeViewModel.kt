@@ -7,9 +7,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.smartsoko.driver.data.local.AppDatabase
-import com.smartsoko.driver.data.remote.WebSocketManager
-import com.smartsoko.driver.data.remote.WsEvent
-import com.smartsoko.driver.data.remote.dto.OrderDto
 import com.smartsoko.driver.data.repository.DriverRepository
 import com.smartsoko.driver.data.repository.OrderRepository
 import com.smartsoko.driver.domain.model.Location
@@ -22,6 +19,7 @@ import com.smartsoko.driver.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -42,7 +40,6 @@ class HomeViewModel @Inject constructor(
     private val driverRepository: DriverRepository,
     private val orderRepository: OrderRepository,
     private val locationState: LocationState,
-    private val webSocketManager: WebSocketManager,
     private val db: AppDatabase
 ) : ViewModel() {
 
@@ -53,7 +50,36 @@ class HomeViewModel @Inject constructor(
         observeLocation()
         observeDriverPrefs()
         observeActiveOrder()
-        observeWebSocket()
+        pollAvailableOrders()
+    }
+
+    private fun pollAvailableOrders() {
+        viewModelScope.launch {
+            val seen = mutableSetOf<String>()
+            while (isActive) {
+                if (_state.value.isOnline) {
+                    val token = driverState.state.value.authToken
+                    if (token.isNotEmpty()) {
+                        when (val r = orderRepository.getAvailableOrders(token)) {
+                            is Resource.Success -> {
+                                val activeId = _state.value.activeOrder?.id
+                                r.data.forEach { order ->
+                                    if (order.id !in seen && order.id != activeId && _state.value.incomingOrder?.id != order.id) {
+                                        seen.add(order.id)
+                                        _state.value = _state.value.copy(incomingOrder = order, incomingTimer = 15)
+                                        driverState.setIncomingOrder(order)
+                                        startIncomingTimer()
+                                    }
+                                }
+                            }
+                            is Resource.Error -> { }
+                            is Resource.Loading -> { }
+                        }
+                    }
+                }
+                delay(POLL_INTERVAL_MS)
+            }
+        }
     }
 
     private fun observeLocation() {
@@ -84,31 +110,6 @@ class HomeViewModel @Inject constructor(
             orderRepository.getActiveOrderFlow().collect { order ->
                 _state.value = _state.value.copy(activeOrder = order)
                 driverState.setActiveOrder(order)
-            }
-        }
-    }
-
-    private fun observeWebSocket() {
-        viewModelScope.launch {
-            webSocketManager.events.collect { event ->
-                when (event) {
-                    is WsEvent.NewOrder -> {
-                        val order = event.order.toDomain()
-                        _state.value = _state.value.copy(incomingOrder = order, incomingTimer = 15)
-                        driverState.setIncomingOrder(order)
-                        startIncomingTimer()
-                    }
-                    is WsEvent.OrderAccepted -> {
-                        if (_state.value.incomingOrder?.id == event.orderId) {
-                            _state.value = _state.value.copy(incomingOrder = null)
-                            driverState.setIncomingOrder(null)
-                        }
-                    }
-                    is WsEvent.OrderStatusChanged -> {
-                        refreshActiveOrder()
-                    }
-                    else -> {}
-                }
             }
         }
     }
@@ -194,30 +195,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun refreshActiveOrder() {
-        viewModelScope.launch {
-            orderRepository.getActiveOrderFlow().first().let { order ->
-                _state.value = _state.value.copy(activeOrder = order)
-                driverState.setActiveOrder(order)
-            }
-        }
-    }
-
     fun clearError() {
         _state.value = _state.value.copy(error = null)
     }
-}
 
-private fun OrderDto.toDomain() = Order(
-    id = id, pickupName = pickupName, pickupAddress = pickupAddress,
-    pickupLat = pickupLat, pickupLng = pickupLng,
-    dropoffName = dropoffName, dropoffAddress = dropoffAddress,
-    dropoffLat = dropoffLat, dropoffLng = dropoffLng,
-    customerName = customerName, customerPhone = customerPhone,
-    items = items.map { com.smartsoko.driver.domain.model.OrderItem(it.name, it.quantity, it.price, it.notes) },
-    totalAmount = totalAmount, deliveryFee = deliveryFee,
-    status = try { OrderStatus.valueOf(status) } catch (_: Exception) { OrderStatus.PENDING },
-    estimatedDistance = estimatedDistance, estimatedDuration = estimatedDuration,
-    createdAt = createdAt, updatedAt = updatedAt,
-    deliveryInstructions = deliveryInstructions
-)
+    companion object {
+        private const val POLL_INTERVAL_MS = 12_000L
+    }
+}

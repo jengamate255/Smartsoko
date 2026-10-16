@@ -6,13 +6,27 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import java.util.concurrent.atomic.AtomicInteger
 
 class DriverMessagingService : FirebaseMessagingService() {
 
+    private val notificationIdCounter = AtomicInteger(0)
+
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        FirebaseFirestore.getInstance().collection("drivers").document(userId)
+            .update(
+                mapOf(
+                    "fcmToken" to token,
+                    "updatedAt" to FieldValue.serverTimestamp()
+                )
+            )
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
@@ -54,6 +68,6 @@ class DriverMessagingService : FirebaseMessagingService() {
             .setContentIntent(pendingIntent)
             .build()
 
-        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
+        notificationManager.notify(notificationIdCounter.incrementAndGet(), notification)
     }
 }

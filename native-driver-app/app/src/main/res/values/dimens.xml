@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Spacing (8dp grid) -->
+    <dimen name="spacing_xxs">2dp</dimen>
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">16dp</dimen>
+    <dimen name="spacing_lg">24dp</dimen>
+    <dimen name="spacing_xl">32dp</dimen>
+    <dimen name="spacing_xxl">48dp</dimen>
+    <dimen name="spacing_xxxl">64dp</dimen>
+    
+    <!-- Component spacing -->
+    <dimen name="component_padding_xs">4dp</dimen>
+    <dimen name="component_padding_sm">8dp</dimen>
+    <dimen name="component_padding_md">16dp</dimen>
+    <dimen name="component_padding_lg">24dp</dimen>
+    <dimen name="component_padding_xl">32dp</dimen>
+    
+    <dimen name="component_margin_xs">4dp</dimen>
+    <dimen name="component_margin_sm">8dp</dimen>
+    <dimen name="component_margin_md">16dp</dimen>
+    <dimen name="component_margin_lg">24dp</dimen>
+    <dimen name="component_margin_xl">32dp</dimen>
+    
+    <!-- Border radius -->
+    <dimen name="radius_xxs">2dp</dimen>
+    <dimen name="radius_xs">4dp</dimen>
+    <dimen name="radius_sm">8dp</dimen>
+    <dimen name="radius_md">12dp</dimen>
+    <dimen name="radius_lg">16dp</dimen>
+    <dimen name="radius_xl">24dp</dimen>
+    <dimen name="radius_xxl">28dp</dimen>
+    <dimen name="radius_full">9999dp</dimen>
+    
+    <!-- Elevation -->
+    <dimen name="elevation_level_0">0dp</dimen>
+    <dimen name="elevation_level_1">1dp</dimen>
+    <dimen name="elevation_level_2">3dp</dimen>
+    <dimen name="elevation_level_3">6dp</dimen>
+    <dimen name="elevation_level_4">8dp</dimen>
+    <dimen name="elevation_level_5">12dp</dimen>
+    <dimen name="elevation_fab">6dp</dimen>
+    <dimen name="elevation_fab_pressed">12dp</dimen>
+    <dimen name="elevation_card">2dp</dimen>
+    <dimen name="elevation_card_hover">8dp</dimen>
+    <dimen name="elevation_bottom_sheet">16dp</dimen>
+    <dimen name="elevation_dialog">24dp</dimen>
+    <dimen name="elevation_modal_bottom_sheet">16dp</dimen>
+    <dimen name="elevation_nav_bar">8dp</dimen>
+    <dimen name="elevation_app_bar">4dp</dimen>
+    <dimen name="elevation_fab_resting">6dp</dimen>
+    
+    <!-- Border width -->
+    <dimen name="border_width_thin">0.5dp</dimen>
+    <dimen name="border_width_normal">1dp</dimen>
+    <dimen name="border_width_thick">2dp</dimen>
+    <dimen name="border_width_focus">2dp</dimen>
+    
+    <!-- Icon sizes -->
+    <dimen name="icon_xxs">12dp</dimen>
+    <dimen name="icon_xs">16dp</dimen>
+    <dimen name="icon_sm">20dp</dimen>
+    <dimen name="icon_md">24dp</dimen>
+    <dimen name="icon_lg">32dp</dimen>
+    <dimen name="icon_xl">48dp</dimen>
+    <dimen name="icon_xxl">64dp</dimen>
+    <dimen name="icon_action_bar">24dp</dimen>
+    <dimen name="icon_notification">24dp</dimen>
+    <dimen name="icon_tab">24dp</dimen>
+    <dimen name="icon_fab">24dp</dimen>
+    <dimen name="icon_avatar_sm">32dp</dimen>
+    <dimen name="icon_avatar_md">48dp</dimen>
+    <dimen name="icon_avatar_lg">64dp</dimen>
+    <dimen name="icon_avatar_xl">96dp</dimen>
+    
+    <!-- Touch targets -->
+    <dimen name="touch_target_min">48dp</dimen>
+    <dimen name="touch_target_comfortable">56dp</dimen>
+    
+    <!-- Button heights -->
+    <dimen name="button_height_sm">36dp</dimen>
+    <dimen name="button_height_md">44dp</dimen>
+    <dimen name="button_height_lg">52dp</dimen>
+    <dimen name="button_height_xl">60dp</dimen>
+    <dimen name="fab_size">56dp</dimen>
+    <dimen name="fab_size_mini">40dp</dimen>
+    
+    <!-- Input field heights -->
+    <dimen name="input_height_sm">40dp</dimen>
+    <dimen name="input_height_md">48dp</dimen>
+    <dimen name="input_height_lg">56dp</dimen>
+    
+    <!-- Card dimensions -->
+    <dimen name="card_width_max">400dp</dimen>
+    <dimen name="card_height_min">120dp</dimen>
+    
+    <!-- Screen margins -->
+    <dimen name="screen_margin_horizontal">16dp</dimen>
+    <dimen name="screen_margin_vertical">16dp</dimen>
+    <dimen name="screen_margin_horizontal_lg">24dp</dimen>
+    <dimen name="screen_margin_vertical_lg">24dp</dimen>
+    
+    <!-- Bottom sheet -->
+    <dimen name="bottom_sheet_peek_height">100dp</dimen>
+    <dimen name="bottom_sheet_min_height">200dp</dimen>
+    <dimen name="bottom_sheet_max_height_ratio">0.9</dimen>
+    <dimen name="bottom_sheet_corner_radius">24dp</dimen>
+    
+    <!-- Dialog -->
+    <dimen name="dialog_width_max">560dp</dimen>
+    <dimen name="dialog_margin_horizontal">24dp</dimen>
+    <dimen name="dialog_corner_radius">28dp</dimen>
+    
+    <!-- Snackbar -->
+    <dimen name="snackbar_min_width">288dp</dimen>
+    <dimen name="snackbar_max_width">568dp</dimen>
+    <dimen name="snackbar_padding_horizontal">24dp</dimen>
+    <dimen name="snackbar_padding_vertical">14dp</dimen>
+    
+    <!-- Divider -->
+    <dimen name="divider_thickness">1dp</dimen>
+    <dimen name="divider_thickness_thick">2dp</dimen>
+    
+    <!-- Progress indicators -->
+    <dimen name="progress_indicator_size_sm">24dp</dimen>
+    <dimen name="progress_indicator_size_md">32dp</dimen>
+    <dimen name="progress_indicator_size_lg">48dp</dimen>
+    <dimen name="progress_indicator_stroke_width">4dp</dimen>
+    
+    <!-- Avatar -->
+    <dimen name="avatar_size_xs">24dp</dimen>
+    <dimen name="avatar_size_sm">32dp</dimen>
+    <dimen name="avatar_size_md">40dp</dimen>
+    <dimen name="avatar_size_lg">56dp</dimen>
+    <dimen name="avatar_size_xl">72dp</dimen>
+    
+    <!-- Chip -->
+    <dimen name="chip_height">32dp</dimen>
+    <dimen name="chip_padding_horizontal">12dp</dimen>
+    <dimen name="chip_icon_size">18dp</dimen>
+    
+    <!-- Badge -->
+    <dimen name="badge_min_size">18dp</dimen>
+    <dimen name="badge_padding_horizontal">5dp</dimen>
+    
+    <!-- Navigation -->
+    <dimen name="nav_bar_height">56dp</dimen>
+    <dimen name="nav_rail_width">72dp</dimen>
+    <dimen name="nav_rail_item_padding">8dp</dimen>
+    
+    <!-- Map -->
+    <dimen name="map_marker_size">48dp</dimen>
+    <dimen name="map_marker_anchor_x">24dp</dimen>
+    <dimen name="map_marker_anchor_y">48dp</dimen>
+    
+    <!-- Form -->
+    <dimen name="form_field_spacing">16dp</dimen>
+    <dimen name="form_section_spacing">24dp</dimen>
+    <dimen name="form_label_spacing">8dp</dimen>
+    <dimen name="form_helper_text_spacing">4dp</dimen>
+    
+    <!-- List -->
+    <dimen name="list_item_padding_horizontal">16dp</dimen>
+    <dimen name="list_item_padding_vertical">12dp</dimen>
+    <dimen name="list_item_min_height">56dp</dimen>
+    <dimen name="list_divider_inset_start">72dp</dimen>
+    
+    <!-- Grid -->
+    <dimen name="grid_spacing">12dp</dimen>
+    <dimen name="grid_column_width_min">160dp</dimen>
+    
+    <!-- Swipe -->
+    <dimen name="swipe_threshold">120dp</dimen>
+    <dimen name="swipe_action_width">80dp</dimen>
+    
+    <!-- Skeleton / placeholder -->
+    <dimen name="placeholder_corner_radius">8dp</dimen>
+    <dimen name="placeholder_animation_duration">1000</dimen>
+</resources>

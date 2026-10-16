@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/restaurant.dart';
 import '../../services/restaurant_service.dart';
-import '../../services/order_service.dart';
+import '../../services/cart_service.dart';
 import '../../utils/constants.dart';
 import 'cart_screen.dart';
 
@@ -16,12 +16,12 @@ class RestaurantScreen extends StatefulWidget {
 }
 
 class _RestaurantScreenState extends State<RestaurantScreen> {
-  final Map<String, int> _cartItems = {};
   String? _selectedCategory;
 
   @override
   Widget build(BuildContext context) {
     final restaurantService = context.read<RestaurantService>();
+    final cart = context.watch<CartService>();
 
     return Scaffold(
       body: CustomScrollView(
@@ -112,7 +112,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                     if (itemIndex >= filteredItems.length) return null;
 
                     final item = filteredItems[itemIndex];
-                    final quantity = _cartItems[item.id] ?? 0;
+                    final quantity = cart.quantityOf(item.id);
 
                     return ListTile(
                       leading: Container(
@@ -137,33 +137,17 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.remove_circle_outline),
-                                  onPressed: () {
-                                    setState(() {
-                                      if (_cartItems[item.id]! > 1) {
-                                        _cartItems[item.id] = _cartItems[item.id]! - 1;
-                                      } else {
-                                        _cartItems.remove(item.id);
-                                      }
-                                    });
-                                  },
+                                  onPressed: () => cart.decrement(item.id),
                                 ),
                                 Text('$quantity'),
                                 IconButton(
                                   icon: const Icon(Icons.add_circle_outline),
-                                  onPressed: () {
-                                    setState(() {
-                                      _cartItems[item.id] = (_cartItems[item.id] ?? 0) + 1;
-                                    });
-                                  },
+                                  onPressed: () => _addToCart(cart, item),
                                 ),
                               ],
                             )
                           : ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  _cartItems[item.id] = 1;
-                                });
-                              },
+                              onPressed: () => _addToCart(cart, item),
                               child: const Text('Add'),
                             ),
                     );
@@ -178,35 +162,116 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           const SliverPadding(padding: EdgeInsets.only(bottom: 80)),
         ],
       ),
-      bottomSheet: _cartItems.isNotEmpty
-          ? Container(
-              color: Colors.white,
-              padding: const EdgeInsets.all(16),
-              child: SafeArea(
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => CartScreen(
-                            restaurant: widget.restaurant,
-                            cartItems: Map.from(_cartItems),
-                          ),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
+      bottomSheet: cart.isEmpty
+          ? null
+          : _CartBar(
+              cart: cart,
+              sameRestaurant: cart.canAdd(widget.restaurant.id),
+              onViewCart: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CartScreen(
+                      restaurant: widget.restaurant,
+                      cartItems: {
+                        for (final line in cart.lines) line.item.id: line.quantity,
+                      },
                     ),
-                    child: Text('View Cart (${_cartItems.values.fold(0, (a, b) => a + b)} items)'),
                   ),
-                ),
+                );
+              },
+              onClearDifferentRestaurant: () {
+                cart.clearCart();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Previous restaurant cart cleared — add items from this restaurant')),
+                );
+              },
+            ),
+    );
+  }
+
+  void _addToCart(CartService cart, MenuItem item) {
+    if (!cart.canAdd(widget.restaurant.id)) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Start a new cart?'),
+          content: Text(
+              'Your cart has items from ${cart.restaurantName ?? 'another restaurant'}. '
+              'Clear it and add items from ${widget.restaurant.name}?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Keep old cart'),
+            ),
+            FilledButton(
+              onPressed: () {
+                cart.clearCart();
+                cart.addItem(widget.restaurant, item);
+                Navigator.pop(ctx);
+              },
+              child: const Text('Clear & add'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    cart.addItem(widget.restaurant, item);
+  }
+}
+
+class _CartBar extends StatelessWidget {
+  final CartService cart;
+  final bool sameRestaurant;
+  final VoidCallback onViewCart;
+  final VoidCallback onClearDifferentRestaurant;
+
+  const _CartBar({
+    required this.cart,
+    required this.sameRestaurant,
+    required this.onViewCart,
+    required this.onClearDifferentRestaurant,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!sameRestaurant) {
+      // Cart holds a different restaurant's items — offer to reset it.
+      return Container(
+        color: Colors.white,
+        padding: const EdgeInsets.all(16),
+        child: SafeArea(
+          child: SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onClearDifferentRestaurant,
+              icon: const Icon(Icons.refresh),
+              label: Text(
+                'Cart has items from ${cart.restaurantName ?? 'another restaurant'} — clear it?',
+                textAlign: TextAlign.center,
               ),
-            )
-          : null,
+            ),
+          ),
+        ),
+      );
+    }
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.all(16),
+      child: SafeArea(
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: onViewCart,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+            ),
+            child: Text('View Cart (${cart.itemCount} items · TZS ${cart.subtotal.toStringAsFixed(0)})'),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1,0 +1,109 @@
+{
+  "name": "SmartSoko Product Agent",
+  "description": "AI agent for extracting and generating product listings from images and documents",
+  "version": "1.0.0",
+  "type": "product-agent",
+
+  "vendor_url": "http://localhost:3000",
+  "capabilities": [
+    "extract_product_from_image",
+    "extract_products_from_document",
+    "generate_product_listing",
+    "validate_product",
+    "detect_duplicate_product",
+    "create_product_draft",
+    "update_product_listing"
+  ],
+
+  "skills": [
+    {
+      "id": "extract_from_image",
+      "name": "Extract Product from Image",
+      "description": "Extract product information from a product image using vision AI",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "imageBase64": {
+            "type": "string",
+            "description": "Base64-encoded image data"
+          },
+          "mimeType": {
+            "type": "string",
+            "description": "MIME type of the image",
+            "enum": ["image/jpeg", "image/png", "image/webp"]
+          }
+        },
+        "required": ["imageBase64", "mimeType"]
+      }
+    },
+    {
+      "id": "generate_product_draft",
+      "name": "Generate Product Draft",
+      "description": "Create a pending product draft from extracted data for merchant approval",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "extractedData": {
+            "type": "object",
+            "description": "Partial product data from extraction"
+          },
+          "merchantId": {
+            "type": "string",
+            "description": "Merchant ID for validation context"
+          }
+        },
+        "required": ["extractedData", "merchantId"]
+      }
+    },
+    {
+      "id": "validate_product",
+      "name": "Validate Product",
+      "description": "Validate a product draft against business rules",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "draft": {
+            "type": "object",
+            "description": "Product draft to validate"
+          },
+          "merchantId": {
+            "type": "string",
+            "description": "Merchant ID for validation context"
+          }
+        },
+        "required": ["draft", "merchantId"]
+      }
+    },
+    {
+      "id": "detect_duplicate",
+      "name": "Detect Duplicate Product",
+      "description": "Check if a product already exists in the SmartSoko catalogue",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "draft": {
+            "type": "object",
+            "description": "Product draft to check for duplicates"
+          },
+          "merchantId": {
+            "type": "string",
+            "description": "Merchant ID for merchant-scoped duplicate check"
+          }
+        },
+        "required": ["draft", "merchantId"]
+      }
+    }
+  ],
+
+  "agent_name": "product-agent",
+  "agent_type": "product",
+  "status": "ready",
+  "metadata": {
+    "vision_provider": "google-gemini",
+    "gemini_model": "${GEMINI_MODEL:-gemini-1.5-flash}",
+    "extraction_fields": [
+      "name", "brand", "category", "size", "barcode", "sku",
+      "selling_price", "color", "tags"
+    ]
+  }
+}

@@ -18,13 +18,10 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == sellerId;
     }
     
-    function isDriver(driverId) {
-      return isAuthenticated() && request.auth.uid == driverId;
-    }
-    
-    function isCustomer(customerId) {
-      return isAuthenticated() && request.auth.uid == customerId;
-    }
+    // NOTE: isDriver() and isCustomer() used to sit here. Both were unused (the
+    // deploy linter reported "Unused function" plus "Invalid variable name:
+    // request" for them), so they were removed to keep deploys warning-free.
+    // Re-add them from the driver/customer match blocks if ever needed.
     
     function isOrderParticipant(order) {
       return isAuthenticated() && (
@@ -33,29 +30,44 @@ service cloud.firestore {
         request.auth.uid == order.sellerId
       );
     }
-
+    
     // Users - users can read/write their own data
     match /users/{userId} {
       allow read, write: if isOwner(userId);
       allow read: if isAdmin();
     }
     
-    // Orders - users can create their own orders, read their own
+    // Authoritative prices, reservations and status changes go through the API.
+    // Admin SDK writes bypass these client rules.
     match /orders/{orderId} {
+      allow create: if false;
+      // Participants can read; drivers can also read orders that are open
+      // for delivery (ready_for_delivery) so they can see available jobs.
+      allow read: if isOrderParticipant(resource.data) || 
+        (isAuthenticated() && resource.data.status == 'ready_for_delivery');
+      allow update, delete: if false;
+    }
+    
+    // Drivers - owner manages their own profile/availability/location.
+    // Merchants/admins may flip availability fields when assigning jobs.
+    match /drivers/{driverId} {
+      allow read: if isAuthenticated();
       allow create: if isAuthenticated() && 
-        request.auth.uid == request.resource.data.customerId;
-      allow read: if isOrderParticipant(resource.data);
-      allow update: if isAuthenticated() && 
-        (request.auth.uid == resource.data.driverId || 
-         request.auth.uid == resource.data.sellerId ||
-         request.auth.token.admin == true);
+        request.resource.data.ownerId == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        request.resource.data.ownerId == request.auth.uid ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+          ['available', 'currentOrderId', 'updatedAt']
+        )
+      );
       allow delete: if isAdmin();
     }
     
     // Products - public read, sellers write their own
     match /products/{productId} {
       allow read: if true;
-      allow create, update, delete: if isSeller(resource.data.sellerId);
+      allow create: if isSeller(request.resource.data.sellerId);
+      allow update, delete: if isSeller(resource.data.sellerId);
     }
     
     // Carts - user owns their cart
@@ -91,11 +103,14 @@ service cloud.firestore {
       allow create: if isAuthenticated();
     }
     
-    // Reviews - users can read all, create their own
+    // Reviews - users can read all, create their own; sellers reply to their own
     match /reviews/{reviewId} {
       allow read: if true;
       allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
-      allow update, delete: if isAuthenticated() && 
+      allow update: if isAuthenticated() && 
+        (request.auth.uid == resource.data.userId || 
+         request.auth.uid == resource.data.sellerId || isAdmin());
+      allow delete: if isAuthenticated() && 
         (request.auth.uid == resource.data.userId || isAdmin());
     }
     
@@ -183,9 +198,48 @@ service cloud.firestore {
       allow read: if isAdmin();
     }
     
-    // Public read for authenticated users (fallback)
-    match /{document=**} {
+    // ── Collections the client reads that had NO rule of their own ───────
+    // These were only ever readable through the catch-all that used to sit at
+    // the bottom of this file (see the note below). Removing the catch-all
+    // without these blocks would break the customer storefront menu, checkout
+    // promo codes, chat/driver messages and the restaurant/staff pages —
+    // verified with scratch/audit-rules-coverage.cjs.
+    //
+    // They deliberately grant READ ONLY, exactly matching what the catch-all
+    // granted: writes to these collections are (and were) denied, because the
+    // catch-all never allowed writes either. Tightening chat/messages to their
+    // participants is a sensible follow-up but needs the document shapes first.
+    match /menuItems/{menuItemId} {
       allow read: if isAuthenticated();
     }
+    match /menu_items/{menuItemId} {
+      allow read: if isAuthenticated();
+    }
+    match /restaurants/{restaurantId} {
+      allow read: if isAuthenticated();
+    }
+    match /promotions/{promotionId} {
+      allow read: if isAuthenticated();
+    }
+    match /chats/{chatId} {
+      allow read: if isAuthenticated();
+    }
+    match /messages/{messageId} {
+      allow read: if isAuthenticated();
+    }
+    match /staff/{staffId} {
+      allow read: if isAuthenticated();
+    }
+    match /staffInvites/{inviteId} {
+      allow read: if isAuthenticated();
+    }
+
+    // REMOVED: a catch-all read rule used to live here:
+    //   match /{document=**} { allow read: if isAuthenticated(); }
+    // Firestore rules are additive (OR), so that wildcard granted EVERY
+    // signed-in user read access to every collection — orders, payments,
+    // wallets, user profiles and customer PII — regardless of the ownership
+    // rules above it. Its legitimate effects are enumerated above; do NOT
+    // re-add a wildcard read rule.
   }
 }

@@ -29,6 +29,23 @@
       SmartNav.init({ activePage: 'home', role: 'customer' });
       SmartNav.initPageTransition();
     });
+
+    // Business image preview (global — called from inline onchange in the form)
+    window.previewBusinessImage = function (input) {
+      const preview = document.getElementById('imagePreview');
+      const previewImg = document.getElementById('previewImg');
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          previewImg.src = e.target.result;
+          preview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(input.files[0]);
+      } else {
+        preview.classList.add('hidden');
+        previewImg.src = '';
+      }
+    };
   </script>
   <div class="h-16 md:h-20"></div>
 
@@ -301,22 +318,8 @@
       }
     });
 
-    function previewBusinessImage(input) {
-      const preview = document.getElementById('imagePreview');
-      const previewImg = document.getElementById('previewImg');
-      
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          previewImg.src = e.target.result;
-          preview.classList.remove('hidden');
-        };
-        reader.readAsDataURL(input.files[0]);
-      } else {
-        preview.classList.add('hidden');
-        previewImg.src = '';
-      }
-    }
+    // (previewBusinessImage moved to the classic script above for inline onchange access)
+
     document.addEventListener('DOMContentLoaded', () => {
       SmartNav.init({ activePage: 'home', role: 'customer', breadcrumbs: ['Home', 'Seller Registration'] });
       SmartNav.initPageTransition();

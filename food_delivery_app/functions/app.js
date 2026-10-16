@@ -498,6 +498,142 @@ app.post('/api/orders', asyncHandler(async (req, res) => {
   res.status(201).json({ id: docRef.id, ...orderData });
 }));
 
+// ============ DRIVER APP COMPATIBILITY ROUTES ============
+// These endpoints match the native driver app's ApiService contract.
+// They must be registered BEFORE /api/orders/:customerId so they win route matching.
+
+function serializeOrderForDriver(doc) {
+  const d = doc.data() || {};
+  const toIso = (v) => (v && typeof v.toDate === 'function' ? v.toDate().toISOString() : (v || ''));
+  return {
+    id: doc.id,
+    restaurantName: d.sellerName || 'Restaurant',
+    restaurantAddress: typeof d.deliveryAddress === 'string' ? d.deliveryAddress : (d.sellerAddress || ''),
+    restaurantLat: d.sellerLat ?? d.pickupLat ?? null,
+    restaurantLng: d.sellerLng ?? d.pickupLng ?? null,
+    customerName: d.customerName || null,
+    customerAddress: typeof d.customerAddress === 'string' ? d.customerAddress : (d.deliveryAddress || ''),
+    customerLat: d.customerLat ?? d.deliveryLat ?? 0,
+    customerLng: d.customerLng ?? d.deliveryLng ?? 0,
+    items: Array.isArray(d.items) ? d.items.map(it => ({
+      name: it.name || it.productName || 'Item',
+      quantity: it.quantity || it.qty || 1,
+      price: it.price || 0,
+      notes: it.notes || it.specialInstructions || null
+    })) : [],
+    totalAmount: d.total || d.totalAmount || 0,
+    status: d.status || 'pending',
+    createdAt: toIso(d.createdAt),
+    updatedAt: toIso(d.updatedAt),
+    deliveryInstructions: d.deliveryInstructions || null
+  };
+}
+
+// Driver: Get profile (Firebase auth token identifies the driver)
+app.get('/api/driver/profile', authMiddleware, asyncHandler(async (req, res) => {
+  if (!db) return res.status(503).json({ error: 'Database not connected' });
+  const uid = req.user.uid;
+  const driverDoc = await db.collection('drivers').doc(uid).get();
+  const userDoc = await db.collection('users').doc(uid).get();
+  const d = driverDoc.exists ? driverDoc.data() : {};
+  const u = userDoc.exists ? userDoc.data() : {};
+  res.json({
+    success: true,
+    driver: {
+      id: uid,
+      email: d.email || u.email || req.user.email || '',
+      full_name: d.name || d.fullName || u.fullName || u.name || 'Driver',
+      phone: d.phone || u.phone || '',
+      vehicle: d.vehicleNumber || d.vehicle || u.vehicle || '',
+      plate: d.plate || u.plate || '',
+      rating: d.rating || u.rating || 0,
+      total_deliveries: d.totalDeliveries || u.totalDeliveries || 0,
+      status: d.isOnline ? 'online' : (d.status || 'offline')
+    }
+  });
+}));
+
+// Driver: Available orders
+app.get('/api/orders/available', authMiddleware, asyncHandler(async (req, res) => {
+  if (!db) return res.status(503).json({ error: 'Database not connected' });
+  const limit = Math.min(parseInt(req.query.limit) || 10, 100);
+  const snapshot = await db.collection('orders')
+    .where('status', '==', 'ready_for_delivery')
+    .orderBy('createdAt', 'desc')
+    .limit(limit)
+    .get();
+  res.json({ success: true, orders: snapshot.docs.map(serializeOrderForDriver) });
+}));
+
+// Driver: Accept order
+app.post('/api/orders/:orderId/accept', authMiddleware, asyncHandler(async (req, res) => {
+  if (!db || !FieldValue) return res.status(503).json({ error: 'Database not connected' });
+  const orderRef = db.collection('orders').doc(req.params.orderId);
+  const orderDoc = await orderRef.get();
+  if (!orderDoc.exists) return res.status(404).json({ success: false, message: 'Order not found' });
+  const orderData = orderDoc.data();
+  if (orderData.status !== 'ready_for_delivery') {
+    return res.status(409).json({ success: false, message: `Order is not available (status: ${orderData.status})` });
+  }
+  if (orderData.driverId) {
+    return res.status(409).json({ success: false, message: 'Order already assigned to another driver' });
+  }
+  const uid = req.user.uid;
+  const driverDoc = await db.collection('drivers').doc(uid).get();
+  const driverName = driverDoc.exists ? (driverDoc.data().name || 'Driver') : 'Driver';
+  await orderRef.update({
+    driverId: uid,
+    driverName,
+    status: 'accepted',
+    acceptedAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp()
+  });
+  const updated = await orderRef.get();
+  res.json({ success: true, message: 'Order accepted', order: serializeOrderForDriver(updated) });
+}));
+
+// Driver: Update order status
+app.post('/api/orders/:orderId/status', authMiddleware, asyncHandler(async (req, res) => {
+  if (!db || !FieldValue) return res.status(503).json({ error: 'Database not connected' });
+  const { status } = req.body || {};
+  const validStatuses = ['accepted', 'picked_up', 'in_transit', 'delivered', 'cancelled'];
+  if (!status || !validStatuses.includes(status)) {
+    return res.status(400).json({ success: false, message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+  }
+  const orderRef = db.collection('orders').doc(req.params.orderId);
+  const orderDoc = await orderRef.get();
+  if (!orderDoc.exists) return res.status(404).json({ success: false, message: 'Order not found' });
+  const updateData = { status, updatedAt: FieldValue.serverTimestamp() };
+  if (status === 'delivered') updateData.deliveredAt = FieldValue.serverTimestamp();
+  await orderRef.update(updateData);
+  const updated = await orderRef.get();
+  res.json({ success: true, message: `Status updated to ${status}`, order: serializeOrderForDriver(updated) });
+}));
+
+// Driver: Order details by ID (falls back to customer order lookup)
+// Auth is optional here: this route doubles as the (formerly unauthenticated)
+// customer order-history endpoint, so the web app keeps working without a token.
+app.get('/api/orders/:orderId', asyncHandler(async (req, res) => {
+  if (!db) return res.status(503).json({ error: 'Database not connected' });
+  const doc = await db.collection('orders').doc(req.params.orderId).get();
+  if (doc.exists) {
+    return res.json({ success: true, order: serializeOrderForDriver(doc) });
+  }
+  const { limit, offset } = getPagination(req);
+  let query = db.collection('orders').where('customerId', '==', req.params.orderId);
+  if (req.query.status) query = query.where('status', '==', req.query.status);
+  const snapshot = await query.orderBy('createdAt', 'desc').limit(limit).get();
+  res.json({
+    data: snapshot.docs.map(d => ({ id: d.id, ...d.data() })),
+    pagination: { limit, offset, returned: snapshot.size, hasMore: snapshot.size === limit }
+  });
+}));
+
+// Driver: Sync local orders (acknowledges server as source of truth)
+app.post('/api/orders/sync', authMiddleware, asyncHandler(async (req, res) => {
+  res.json({ success: true, syncedOrders: [], errors: [] });
+}));
+
 // Get customer orders
 app.get('/api/orders/:customerId', asyncHandler(async (req, res) => {
   if (!db) return res.status(503).json({ error: 'Database not connected' });

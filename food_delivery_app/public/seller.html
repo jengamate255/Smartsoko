@@ -117,7 +117,7 @@
   <!-- Add Menu Item Modal (simplified) -->
   <div id="addMenuItemModal" style="display:none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000;">
     <div style="background: white; margin: 50px auto; padding: 30px; border-radius: 12px; max-width: 500px;">
-      <h3>Add Menu Item</h3>
+      <h3 id="addMenuItemTitle">Add Menu Item</h3>
       <div class="form-group">
         <label>Item Name</label>
         <input type="text" id="newItemName">
@@ -139,7 +139,7 @@
         <input type="number" id="newItemStock">
       </div>
       <div class="actions">
-        <button class="btn btn-primary" onclick="addMenuItem()">Add Item</button>
+        <button class="btn btn-primary" id="addMenuItemSaveBtn" onclick="addMenuItem()">Add Item</button>
         <button class="btn btn-secondary" onclick="hideAddMenuItem()">Cancel</button>
       </div>
     </div>
@@ -157,7 +157,7 @@
     function loadData() {
       db = window.db;
       auth = window.auth;
-      if (!db) { console.warn('Seller: db not ready'); return; }
+      if (!db || typeof db.collection !== 'function') { console.warn('Seller: db not ready'); return; }
       loadSellers();
       setupRealtimeListeners();
     }
@@ -411,6 +411,35 @@
 
     function hideAddMenuItem() {
       document.getElementById('addMenuItemModal').style.display = 'none';
+      // Reset edit mode state
+      editingItemId = null;
+      const modalTitle = document.getElementById('addMenuItemTitle');
+      if (modalTitle) modalTitle.textContent = 'Add Menu Item';
+      const saveBtn = document.getElementById('addMenuItemSaveBtn');
+      if (saveBtn) saveBtn.textContent = 'Add Item';
+    }
+
+    // Edit mode state
+    let editingItemId = null;
+
+    function editMenuItem(itemId) {
+      const item = menuItems.find(i => i.id === itemId);
+      if (!item) { showNotification('Item not found'); return; }
+
+      editingItemId = itemId;
+      document.getElementById('newItemName').value = item.name || '';
+      document.getElementById('newItemDesc').value = item.description || '';
+      document.getElementById('newItemPrice').value = item.price || '';
+      document.getElementById('newItemCategory').value = item.category || 'General';
+      document.getElementById('newItemStock').value = item.stock || 0;
+
+      const modalTitle = document.getElementById('addMenuItemTitle');
+      if (modalTitle) modalTitle.textContent = 'Edit Menu Item';
+      const saveBtn = document.getElementById('addMenuItemSaveBtn');
+      if (saveBtn) saveBtn.textContent = 'Save Changes';
+
+      document.getElementById('addMenuItemModal').style.display = 'block';
+      showAddProduct();
     }
 
     async function addMenuItem() {
@@ -426,7 +455,7 @@
         return;
       }
 
-      const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+      const { collection, addDoc, doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
       const data = {
         restaurantId: currentRestaurant.id,
         name: name,
@@ -435,13 +464,25 @@
         category: category || 'General',
         stock: stock,
         isAvailable: true,
-        createdAt: serverTimestamp()
+        updatedAt: serverTimestamp()
       };
 
-      if (svc && svc.isReady()) {
-        try { await svc.create('menu_items', data); } catch(e) { /* silent */ }
+      // Update existing item (edit mode) or create new
+      if (editingItemId) {
+        if (svc && svc.isReady()) {
+          try { await svc.update('menu_items', editingItemId, data); } catch (e) { /* silent */ }
+        } else {
+          await updateDoc(doc(db, 'menu_items', editingItemId), data);
+        }
+        showNotification('Item updated');
       } else {
-        await addDoc(collection(db, 'menu_items'), data);
+        data.createdAt = serverTimestamp();
+        if (svc && svc.isReady()) {
+          try { await svc.create('menu_items', data); } catch(e) { /* silent */ }
+        } else {
+          await addDoc(collection(db, 'menu_items'), data);
+        }
+        showNotification('Item added');
       }
 
       hideAddMenuItem();
@@ -451,6 +492,8 @@
       document.getElementById('newItemPrice').value = '';
       document.getElementById('newItemCategory').value = '';
       document.getElementById('newItemStock').value = '';
+      // Refresh list
+      loadMenuItems();
     }
 
     function showNotification(message) {

@@ -111,28 +111,6 @@ async function seedTestData() {
     }
     console.log(`✅ Created ${menuItems.length} menu items`);
 
-    // 4. Create Test Driver
-    const driverRef = db.collection('drivers').doc('test-driver-001');
-    await driverRef.set({
-      name: "John Dereva",
-      phone: "+255 723 456 789",
-      email: "john.dereva@example.com",
-      vehicleType: "motorcycle",
-      licensePlate: "T123 ABC",
-      isActive: true,
-      isOnline: true,
-      currentLocation: {
-        lat: -6.7924,
-        lng: 39.2083,
-        address: "Posta, Dar es Salaam"
-      },
-      totalDeliveries: 89,
-      rating: 4.7,
-      earnings: 456000,
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
-    });
-    console.log('✅ Created test driver: John Dereva');
-
     // 5. Create Test Customer
     const customerRef = db.collection('customers').doc('test-customer-001');
     await customerRef.set({
@@ -264,8 +242,8 @@ async function seedTestData() {
         total: 18000,
         paymentMethod: 'mpesa',
         paymentStatus: 'paid',
-        driverId: 'test-driver-001',
-        driverName: 'John Dereva',
+        driverId: null,
+        driverName: null,
         createdAt: admin.firestore.Timestamp.fromDate(new Date(Date.now() - 45 * 60000)),
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       }
@@ -276,12 +254,11 @@ async function seedTestData() {
     }
     console.log(`✅ Created ${orders.length} test orders`);
     console.log('   - 2 orders ready for delivery (for driver testing)');
-    console.log('   - 1 order accepted by driver');
+    console.log('   - 1 order accepted (driver not assigned)');
 
     console.log('\n🎉 Test data seeded successfully!');
     console.log('\nTest Accounts:');
     console.log('  Restaurant: Mama Ntilie\'s Kitchen (ID: test-restaurant-001)');
-    console.log('  Driver: John Dereva (ID: test-driver-001)');
     console.log('  Customer: Ashura Mteja (ID: test-customer-001)');
     console.log('\nYou can now test:');
     console.log('  - Seller: http://localhost:3000/merchant.html');

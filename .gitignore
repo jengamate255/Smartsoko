@@ -94,6 +94,10 @@ APK-Builds*/
 build/
 .gradle/
 local.properties
+keystore/
+native-driver-app/keystore/
+*.jks
+*.keystore
 *.iml
 .idea/
 captures/

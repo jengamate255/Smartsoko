@@ -80,10 +80,32 @@ class DriverViewModel : ViewModel() {
     }
 
     fun acceptOrder(orderId: String) {
-        val driver = _uiState.value.driver ?: return
+        val driver = _uiState.value.driver
+        if (driver == null) {
+            _uiState.update { it.copy(error = "Profile not loaded yet. Please wait a moment and try again.") }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             repository.acceptOrder(orderId, driver.id, driver.name)
+                .onSuccess {
+                    _uiState.update { it.copy(isLoading = false) }
+                }
+                .onFailure { error ->
+                    _uiState.update { it.copy(isLoading = false, error = error.message) }
+                }
+        }
+    }
+
+    fun declineOrder(orderId: String) {
+        val driver = _uiState.value.driver
+        if (driver == null) {
+            _uiState.update { it.copy(error = "Profile not loaded yet. Please wait a moment and try again.") }
+            return
+        }
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            repository.declineOrder(orderId, driver.id)
                 .onSuccess {
                     _uiState.update { it.copy(isLoading = false) }
                 }
@@ -149,8 +171,47 @@ class DriverViewModel : ViewModel() {
         }
     }
 
+    fun updateProfile(
+        name: String,
+        phone: String,
+        vehicleType: String,
+        vehiclePlate: String,
+        onDone: (Boolean) -> Unit = {}
+    ) {
+        val driver = _uiState.value.driver
+        if (driver == null) {
+            onDone(false)
+            return
+        }
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            repository.updateDriverProfile(driver.id, name, phone, vehicleType, vehiclePlate)
+                .onSuccess {
+                    // Snapshot listener will push the fresh doc; optimistically mirror it
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            driver = it.driver?.copy(
+                                name = name, phone = phone,
+                                vehicleType = vehicleType, vehiclePlate = vehiclePlate
+                            )
+                        )
+                    }
+                    onDone(true)
+                }
+                .onFailure { error ->
+                    _uiState.update { it.copy(isLoading = false, error = error.message) }
+                    onDone(false)
+                }
+        }
+    }
+
     fun clearError() {
         _uiState.update { it.copy(error = null) }
+    }
+
+    fun setError(message: String) {
+        _uiState.update { it.copy(error = message) }
     }
 
     fun signIn(email: String, password: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
@@ -226,10 +287,10 @@ class DriverViewModel : ViewModel() {
         onError: (String) -> Unit
     ) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(isLoading = true, passwordResetSent = false) }
             repository.resetPassword(email)
                 .onSuccess {
-                    _uiState.update { it.copy(isLoading = false) }
+                    _uiState.update { it.copy(isLoading = false, passwordResetSent = true) }
                     onSuccess()
                 }
                 .onFailure { error ->
@@ -247,7 +308,8 @@ data class DriverUiState(
     val availableOrders: List<Order> = emptyList(),
     val assignedOrders: List<Order> = emptyList(),
     val currentFilter: DriverOrderFilter = DriverOrderFilter.ALL,
-    val error: String? = null
+    val error: String? = null,
+    val passwordResetSent: Boolean = false
 )
 
 enum class DriverOrderFilter {

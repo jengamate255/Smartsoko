@@ -4,6 +4,9 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.fooddelivery.driver.data.OrderEntityConverters
 import com.fooddelivery.driver.network.Order as NetworkOrder
+import com.fooddelivery.driver.data.model.Order as DataModelOrder
+import com.fooddelivery.driver.data.model.OrderItem as DataModelOrderItem
+import com.fooddelivery.driver.data.model.LocationData
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -29,13 +32,13 @@ data class OrderEntity(
     val deliveryInstructions: String? = null,
     val isSynced: Boolean = false // Flag to indicate if this order has been synced with the server
 ) {
-    fun toOrder(): NetworkOrder {
-        val itemsList = mutableListOf<OrderItem>()
+    fun toOrder(): DataModelOrder {
+        val itemsList = mutableListOf<DataModelOrderItem>()
         try {
             val jsonArray = JSONArray(items)
             for (i in 0 until jsonArray.length()) {
                 val itemObj = jsonArray.getJSONObject(i)
-                itemsList.add(OrderItem(
+                itemsList.add(DataModelOrderItem(
                     name = itemObj.optString("name", ""),
                     quantity = itemObj.optInt("quantity", 1),
                     price = itemObj.optDouble("price", 0.0),
@@ -44,16 +47,14 @@ data class OrderEntity(
             }
         } catch (_: Exception) { }
         
-        return NetworkOrder(
+        return DataModelOrder(
             id = id,
             restaurantName = restaurantName,
             restaurantAddress = restaurantAddress,
-            restaurantLat = restaurantLat,
-            restaurantLng = restaurantLng,
+            restaurantLocation = LocationData(restaurantLat, restaurantLng),
             customerName = customerName,
             customerAddress = customerAddress,
-            customerLat = customerLat,
-            customerLng = customerLng,
+            customerLocation = LocationData(customerLat, customerLng),
             items = itemsList,
             totalAmount = totalAmount,
             status = status,
@@ -85,6 +86,37 @@ data class OrderEntity(
                 customerAddress = order.customerAddress,
                 customerLat = order.customerLat,
                 customerLng = order.customerLng,
+                items = itemsJson,
+                totalAmount = order.totalAmount,
+                status = order.status,
+                createdAt = order.createdAt,
+                updatedAt = order.updatedAt,
+                deliveryInstructions = order.deliveryInstructions,
+                isSynced = isSynced
+            )
+        }
+        
+        fun from(order: DataModelOrder, isSynced: Boolean = true): OrderEntity {
+            val itemsJson = JSONArray().apply {
+                order.items.forEach { item ->
+                    put(JSONObject().apply {
+                        put("name", item.name)
+                        put("quantity", item.quantity)
+                        put("price", item.price)
+                        put("specialInstructions", item.notes)
+                    })
+                }
+            }.toString()
+            return OrderEntity(
+                id = order.id,
+                restaurantName = order.restaurantName,
+                restaurantAddress = order.restaurantAddress,
+                restaurantLat = order.restaurantLocation.lat,
+                restaurantLng = order.restaurantLocation.lng,
+                customerName = order.customerName,
+                customerAddress = order.customerAddress,
+                customerLat = order.customerLocation.lat,
+                customerLng = order.customerLocation.lng,
                 items = itemsJson,
                 totalAmount = order.totalAmount,
                 status = order.status,

@@ -151,10 +151,17 @@ const MOCK_DATA = {
 // Helper to simulate network delay
 const delay = (ms = 500) => new Promise(resolve => setTimeout(resolve, ms));
 
+let _dbInstance = null;
+
 const DataService = {
+  /** Initialize DataService with an explicit database instance */
+  init(dbInstance) {
+    _dbInstance = dbInstance;
+  },
+
   // Get Firestore db reference
   get db() {
-    return window.db || null;
+    return _dbInstance || window.db || null;
   },
 
   // Try cross-platform service, fall back to Firestore
@@ -234,7 +241,7 @@ const DataService = {
      // Return mock data if enabled
      if (USE_MOCK_API) {
        await delay(300); // Simulate network delay
-       return { ...MOCK_DATA.categories };
+        return { categories: MOCK_DATA.categories };
      }
 
      const CATEGORIES = ['food', 'dairy', 'fruits', 'groceries', 'bakery'];

@@ -24,7 +24,13 @@
     .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display: inline-block; line-height: 1; vertical-align: middle; }
     .filled-icon { font-variation-settings: 'FILL' 1; }
     * { box-sizing: border-box; }
-    body { font-family: 'Inter','Montserrat',sans-serif; min-height: max(884px,100dvh); }
+    body { font-family: 'Inter','Montserrat',sans-serif; min-height: max(884px,100dvh); font-size: 14px; }
+    /* Minimum font size for accessibility */
+    p, span, a, li, td, th, label, div, button, input, select, textarea { min-font-size: 12px; }
+    @media (max-width: 768px) {
+      html { font-size: 14px; }
+      p, span, a, li, td, th, label, div, button, input, select, textarea { font-size: max(12px, 1rem); }
+    }
     h1,h2,h3,h4,h5,h6 { font-family: 'Montserrat',sans-serif; }
     .gradient-bg { background: #064e3b; }
     .product-card-shadow { box-shadow: 0px 2px 8px rgba(44, 62, 80, 0.05); }
@@ -74,7 +80,7 @@
         <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-variant p-2 rounded-full transition-colors duration-200">notifications</span>
         <a href="/cart" class="relative p-2 text-on-surface-variant hover:text-primary rounded-full">
           <span class="material-symbols-outlined">shopping_cart</span>
-          <span id="headerCartBadge" class="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+          <span id="headerCartBadge" class="absolute -top-0.5 -right-0.5 bg-orange-500 text-white text-[12px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
         </a>
       </div>
     </nav>
@@ -145,7 +151,7 @@
             </div>
             <div class="space-y-2" id="paymentMethods">
               <div data-payment="mpesa" onclick="selectPayment('mpesa')" class="payment-option flex items-center gap-3 p-3 rounded-xl border-2 border-green-500 bg-green-50 cursor-pointer transition-all">
-                <input type="radio" name="paymentMethod" value="mpesa" checked class="accent-green-600">
+                <input type="radio" name="paymentMethod" value="mpesa" checked class="accent-green-600" aria-label="M-Pesa">
                 <span class="w-8 h-8 rounded-full bg-green-500 text-white text-[10px] font-bold flex items-center justify-center">M-P</span>
                 <div class="flex-1">
                   <p class="text-sm font-semibold text-gray-900">M-Pesa</p>
@@ -153,7 +159,7 @@
                 </div>
               </div>
               <div data-payment="tigo" onclick="selectPayment('tigo')" class="payment-option flex items-center gap-3 p-3 rounded-xl border-2 border-gray-200 cursor-pointer transition-all">
-                <input type="radio" name="paymentMethod" value="tigo" class="accent-blue-600">
+                <input type="radio" name="paymentMethod" value="tigo" class="accent-blue-600" aria-label="Tigo Pesa">
                 <span class="w-8 h-8 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center">Tg</span>
                 <div class="flex-1">
                   <p class="text-sm font-semibold text-gray-900">Tigo Pesa</p>
@@ -161,7 +167,7 @@
                 </div>
               </div>
               <div data-payment="airtel" onclick="selectPayment('airtel')" class="payment-option flex items-center gap-3 p-3 rounded-xl border-2 border-gray-200 cursor-pointer transition-all">
-                <input type="radio" name="paymentMethod" value="airtel" class="accent-red-600">
+                <input type="radio" name="paymentMethod" value="airtel" class="accent-red-600" aria-label="Airtel Money">
                 <span class="w-8 h-8 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">AM</span>
                 <div class="flex-1">
                   <p class="text-sm font-semibold text-gray-900">Airtel Money</p>
@@ -169,7 +175,7 @@
                 </div>
               </div>
               <div data-payment="halopesa" onclick="selectPayment('halopesa')" class="payment-option flex items-center gap-3 p-3 rounded-xl border-2 border-gray-200 cursor-pointer transition-all">
-                <input type="radio" name="paymentMethod" value="halopesa" class="accent-gray-700">
+                <input type="radio" name="paymentMethod" value="halopesa" class="accent-gray-700" aria-label="HaloPesa">
                 <span class="w-8 h-8 rounded-full bg-gray-800 text-white text-[10px] font-bold flex items-center justify-center">Hl</span>
                 <div class="flex-1">
                   <p class="text-sm font-semibold text-gray-900">HaloPesa</p>
@@ -177,15 +183,15 @@
                 </div>
               </div>
               <div data-payment="ntzs" onclick="selectPayment('ntzs')" class="payment-option flex items-center gap-3 p-3 rounded-xl border-2 border-gray-200 cursor-pointer transition-all">
-                <input type="radio" name="paymentMethod" value="ntzs" class="accent-purple-600">
-                <span class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-white text-[10px] font-bold flex items-center justify-center">nT</span>
+                <input type="radio" name="paymentMethod" value="ntzs" class="accent-purple-600" aria-label="nTZS Wallet">
+                <span class="w-8 h-8 rounded-full bg-[#7c3aed] text-white text-[10px] font-bold flex items-center justify-center">nT</span>
                 <div class="flex-1">
                   <p class="text-sm font-semibold text-gray-900">nTZS Wallet</p>
-                  <p class="text-xs text-gray-500">Pay from your nTZS digital wallet (instant, on-chain)</p>
+                  <p class="text-xs text-gray-500">Pay with TZS stablecoin balance</p>
                 </div>
               </div>
               <div data-payment="cod" onclick="selectPayment('cod')" class="payment-option flex items-center gap-3 p-3 rounded-xl border-2 border-gray-200 cursor-pointer transition-all">
-                <input type="radio" name="paymentMethod" value="cod" class="accent-gray-600">
+                <input type="radio" name="paymentMethod" value="cod" class="accent-gray-600" aria-label="Cash on Delivery">
                 <span class="w-8 h-8 rounded-full bg-gray-400 text-white text-[10px] font-bold flex items-center justify-center">$</span>
                 <div class="flex-1">
                   <p class="text-sm font-semibold text-gray-900">Cash on Delivery</p>
@@ -260,6 +266,7 @@
             </div>
 
             <div class="mb-4">
+              <label for="promoCodeInput" class="block text-xs font-medium text-gray-500 mb-1">Promo Code</label>
               <div class="flex gap-2">
                 <input type="text" id="promoCodeInput" placeholder="Promo code (e.g. KARIBU10)"
                   class="flex-1 px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500/50 uppercase"
@@ -301,15 +308,15 @@
       </div>
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-500 mb-1">Address</label>
+          <label for="addressInput" class="block text-sm font-medium text-gray-500 mb-1">Address</label>
           <input type="text" id="addressInput" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-green-500/50" placeholder="Enter your delivery address...">
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-500 mb-1">Phone Number</label>
+          <label for="phoneInput" class="block text-sm font-medium text-gray-500 mb-1">Phone Number</label>
           <input type="tel" id="phoneInput" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-green-500/50" placeholder="Enter your phone number" required>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-500 mb-1">Name</label>
+          <label for="nameInput" class="block text-sm font-medium text-gray-500 mb-1">Name</label>
           <input type="text" id="nameInput" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-green-500/50" placeholder="Enter your full name" required>
         </div>
       </div>
@@ -328,19 +335,19 @@
   <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe border-t border-gray-200 bg-white shadow-[0_-4px_12px_rgba(0,0,0,0.06)] z-50">
     <a href="/home" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1">
       <span class="material-symbols-outlined">home</span>
-      <span class="text-[10px] font-semibold">Home</span>
+      <span class="text-sm font-semibold">Home</span>
     </a>
     <a href="/discovery" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1">
       <span class="material-symbols-outlined">search</span>
-      <span class="text-[10px] font-semibold">Search</span>
+      <span class="text-sm font-semibold">Search</span>
     </a>
     <a href="/cart" class="flex flex-col items-center justify-center bg-green-100 text-green-700 rounded-full px-3 py-1">
       <span class="material-symbols-outlined filled-icon">shopping_cart</span>
-      <span class="text-[10px] font-semibold">Cart</span>
+      <span class="text-sm font-semibold">Cart</span>
     </a>
     <a href="/profile" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1">
       <span class="material-symbols-outlined">person</span>
-      <span class="text-[10px] font-semibold">Profile</span>
+      <span class="text-sm font-semibold">Profile</span>
     </a>
   </nav>
 
@@ -847,6 +854,14 @@
       const totalAmount = Math.max(0, subtotalAmount + deliveryFee + taxAmount - discountAmount);
       const primaryItem = cart[0] || {};
 
+      // Validate sellerId is present and valid
+      const sellerId = primaryItem.sellerId || primaryItem.merchantId;
+      if (!sellerId || typeof sellerId !== 'string' || sellerId.trim() === '') {
+        showNotification('Unable to identify seller for this order. Please try adding items from a valid seller.', 'error');
+        console.error('Missing sellerId in cart item:', primaryItem);
+        return;
+      }
+
       // Mobile money selection
       const mmPhoneInput = document.getElementById('mmPhoneInput');
       const mmPhone = mmPhoneInput ? mmPhoneInput.value.trim() : '';
@@ -890,9 +905,9 @@
         customerAddress: addressText,
         deliveryAddress: addressText,
         customerId: (window.auth && window.auth.currentUser && window.auth.currentUser.uid) || `guest-${generateGuestId()}`,
-        merchantId: primaryItem.merchantId || primaryItem.sellerId || null,
-        sellerId: primaryItem.sellerId || primaryItem.merchantId || null,
-        sellerName: primaryItem.sellerName || primaryItem.sellerName || 'Seller',
+        merchantId: sellerId,
+        sellerId: sellerId,
+        sellerName: primaryItem.sellerName || 'Seller',
         items: sanitizedItems,
         subtotal: subtotalAmount,
         deliveryFee: deliveryFee,
@@ -906,9 +921,9 @@
         customerLng: resolvedDeliveryCoords?.lng ?? null,
         status: 'pending',
         paymentMethod: selectedPayment.method,
-        paymentNumber: (selectedPayment.method === 'cod' || selectedPayment.method === 'ntzs') ? null : mmPhone,
+        paymentNumber: selectedPayment.method === 'cod' ? null : mmPhone,
         paymentStatus: selectedPayment.method === 'cod' ? 'cod' : 'pending_confirmation',
-        paymentRef: selectedPayment.method === 'cod' ? null : (selectedPayment.method === 'ntzs' ? 'NTZ' : 'MM') + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 900 + 100),
+        paymentRef: selectedPayment.method === 'cod' ? null : 'MM' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 900 + 100),
         createdAt: new Date().toISOString()
       };
 
@@ -917,82 +932,87 @@
       btn.innerHTML = '<span class="material-symbols-outlined animate-spin inline-block mr-2 align-middle">progress_activity</span> Placing Order...';
 
       try {
-        const useApi = typeof API_ROUTES !== 'undefined' && API_ROUTES.BASE_URL !== null;
-        
-        if (useApi) {
-          try {
-            let orderId;
-          
-          if (useApi) {
-            try {
-              const response = await apiHelpers.post(API_ROUTES.CUSTOMER.ORDERS, orderData);
-              if (response?.id) {
-                orderId = response.id;
-              }
-            } catch (apiError) {
-              console.log('API failed, falling back to Firestore:', apiError);
-            }
-          }
-          
-          if (!orderId) {
-            const svc = window.crossPlatformService;
-            if (svc && svc.isReady()) {
-              const result = await svc.create('orders', {
-                ...orderData,
-                createdAt: new Date().toISOString()
-              });
-              orderId = result.id;
-            } else {
-              const { addDoc, collection, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-              const db = window.db;
-              if (!db) throw new Error('Database not initialized');
-              const docRef = await addDoc(collection(db, 'orders'), {
-                ...orderData,
-                createdAt: serverTimestamp()
-              });
-              orderId = docRef.id;
-            }
-          }
-          
-          if (!orderId) throw new Error('Failed to create order');
-          
-          // For nTZS, initiate deposit after order creation
+        const orderId = await submitOrder(orderData);
+
+        // nTZS: initiate deposit AFTER order creation, then hand off to wallet status page
         if (selectedPayment.method === 'ntzs') {
+          try {
+            let token = null;
             try {
-              const ntzsResponse = await fetch('/api/payments/ntzs/deposit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  profileId: orderData.customerId,
-                  amountTzs: totalAmount,
-                  phoneNumber: mmPhone,
-                  paymentMethod: 'mobile_money'
-                })
-              });
-              const ntzsData = await ntzsResponse.json();
-              if (ntzsData.success && ntzsData.paymentUrl) {
-                // Redirect to nTZS payment page
-                window.location.href = ntzsData.paymentUrl;
-                return;
-              } else if (ntzsData.success && ntzsData.instructions) {
-                // For mobile money, show instructions and redirect to wallet page
-                window.location.href = `/wallet.html?ntzs=deposit&depositId=${ntzsData.depositId}&orderId=${orderId}`;
-                return;
+              if (window.auth && window.auth.currentUser) {
+                token = await window.auth.currentUser.getIdToken();
+              } else if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+                token = await firebase.auth().currentUser.getIdToken();
               }
-            } catch (ntzsError) {
-              console.error('nTZS deposit initiation failed:', ntzsError);
-              // Fall through to normal completion
+            } catch (e) {}
+            if (!token) {
+              showNotification('Sign in to use nTZS Wallet. Redirecting to login...');
+              setTimeout(() => { window.location.href = '/login?reason=ntzs_auth_required'; }, 1500);
+              return;
             }
+            const ntzsRes = await fetch('/api/payments/ntzs/deposit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+              body: JSON.stringify({
+                profileId: orderData.customerId,
+                amountTzs: Math.round(totalAmount),
+                phoneNumber: mmPhone,
+                paymentMethod: 'mobile_money'
+              })
+            });
+            const ntzsData = await ntzsRes.json();
+            if (ntzsData.success && ntzsData.paymentUrl) {
+              window.location.href = ntzsData.paymentUrl;
+              return;
+            }
+            if (ntzsData.success && ntzsData.depositId) {
+              window.CartService?.clearCart?.();
+              localStorage.removeItem('smartsoko_cart');
+              window.location.href = `/wallet.html?ntzs=deposit&depositId=${encodeURIComponent(ntzsData.depositId)}&orderId=${encodeURIComponent(orderId)}`;
+              return;
+            }
+            console.warn('nTZS deposit init failed:', ntzsData);
+            showNotification('nTZS deposit could not start. Pay via wallet or try another method.');
+          } catch (ntzsError) {
+            console.error('nTZS deposit error:', ntzsError);
+            showNotification('nTZS deposit failed: ' + ntzsError.message);
           }
-          
-          completeOrder(orderId);
-        
+        }
+
+        completeOrder(orderId);
       } catch (error) {
-        console.error('Error placing order:', error);
+
         showNotification('Error placing order. Please try again.');
         btn.disabled = false;
         btn.textContent = 'Place Order';
       }
+    }
+
+    async function submitOrder(orderData) {
+      const useApi = typeof API_ROUTES !== 'undefined' && API_ROUTES.BASE_URL !== null;
+
+      if (useApi) {
+        try {
+          const response = await apiHelpers.post(API_ROUTES.CUSTOMER.ORDERS, orderData);
+          if (response?.id) return response.id;
+        } catch (apiError) {
+          console.log('API failed, falling back to Firestore:', apiError);
+        }
+      }
+
+      const svc = window.crossPlatformService;
+      if (svc && svc.isReady()) {
+        const result = await svc.create('orders', orderData);
+        return result.id;
+      }
+      const { addDoc, collection, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+      const db = window.db;
+      if (!db) throw new Error('Database not initialized');
+      const docRef = await addDoc(collection(db, 'orders'), {
+        ...orderData,
+        createdAt: serverTimestamp()
+      });
+      return docRef.id;
     }
 
     async function geocodeAddress(address) {
@@ -1026,18 +1046,15 @@
     }
 
     function completeOrder(orderId) {
-      if (!orderId) {
-        showNotification('Order creation failed');
-        return;
-      }
       if (window.CartService) CartService.clearCart();
       else localStorage.removeItem('smartsoko_cart');
       if (selectedPayment.method === 'cod') {
         showNotification('Order placed successfully!');
       } else if (selectedPayment.method === 'ntzs') {
-        showNotification('Redirecting to nTZS payment...');
+        showNotification('Order placed. Complete payment in your nTZS wallet.');
       } else {
-        showNotification('Payment prompt sent to ' + (selectedPayment.method === 'mpesa' ? 'M-Pesa' : selectedPayment.method === 'tigo' ? 'Tigo Pesa' : selectedPayment.method === 'airtel' ? 'Airtel Money' : 'HaloPesa'));
+        const methodName = selectedPayment.method === 'mpesa' ? 'M-Pesa' : selectedPayment.method === 'tigo' ? 'Tigo Pesa' : selectedPayment.method === 'airtel' ? 'Airtel Money' : selectedPayment.method === 'halopesa' ? 'HaloPesa' : selectedPayment.method.toUpperCase();
+        showNotification('Payment prompt sent to ' + methodName);
       }
       window.location.href = `/track-order?orderId=${encodeURIComponent(orderId)}`;
     }
@@ -1055,8 +1072,7 @@
         if (radio) radio.checked = active;
       });
       const mmBlock = document.getElementById('mmPhoneBlock');
-      const isMobileMoney = ['mpesa', 'tigo', 'airtel', 'halopesa', 'ntzs'].includes(method);
-      if (mmBlock) mmBlock.classList.toggle('hidden', method === 'cod' || !isMobileMoney);
+      if (mmBlock) mmBlock.classList.toggle('hidden', method === 'cod');
       const codHint = document.getElementById('codHint');
       if (codHint) codHint.classList.toggle('hidden', method !== 'cod');
     };

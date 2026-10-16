@@ -400,7 +400,7 @@
       if (showInfo && totalItems > 0) {
         html += `
           <span class="pagination-info" aria-live="polite">
-            Showing ${startItem}â€“${endItem} of ${totalItems.toLocaleString()}
+            Showing ${startItem}–${endItem} of ${totalItems.toLocaleString()}
           </span>
         `;
       }
@@ -442,7 +442,7 @@
       // Page numbers
       pages.forEach(page => {
         if (page === '...') {
-          html += '<span class="pagination-ellipsis" aria-hidden="true">â€¦</span>';
+          html += '<span class="pagination-ellipsis" aria-hidden="true">…</span>';
         } else {
           const isActive = page === currentPage;
           html += `

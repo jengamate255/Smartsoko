@@ -248,7 +248,7 @@ class _RestaurantCard extends StatelessWidget {
                     children: [
                       _buildInfoTag(Icons.access_time_filled, '${restaurant.deliveryTimeMinutes} min', const Color(0xFF064E3B)),
                       const SizedBox(width: 12),
-                      _buildInfoTag(Icons.delivery_dining, 'KSh ${restaurant.deliveryFee.toStringAsFixed(0)}', const Color(0xFF059669)),
+                      _buildInfoTag(Icons.delivery_dining, 'TSh ${restaurant.deliveryFee.toStringAsFixed(0)}', const Color(0xFF059669)),
                     ],
                   ),
                 ],

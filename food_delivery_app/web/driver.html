@@ -14,8 +14,11 @@
   <link rel="stylesheet" href="design-system.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script type="module">
-    import { doc, getDoc, setDoc, updateDoc, query, where, orderBy, limit, onSnapshot, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-    window.firestore = { doc, getDoc, setDoc, updateDoc, query, where, orderBy, limit, onSnapshot, collection, addDoc, serverTimestamp };
+    import { doc, getDoc, setDoc, updateDoc, query, where, orderBy, limit, onSnapshot, collection, addDoc, serverTimestamp, runTransaction } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+    import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+    window.firestore = { doc, getDoc, setDoc, updateDoc, query, where, orderBy, limit, onSnapshot, collection, addDoc, serverTimestamp, runTransaction };
+    window.doc = doc; window.getDoc = getDoc; window.setDoc = setDoc; window.updateDoc = updateDoc; window.query = query; window.where = where; window.orderBy = orderBy; window.limit = limit; window.onSnapshot = onSnapshot; window.collection = collection; window.addDoc = addDoc; window.serverTimestamp = serverTimestamp; window.runTransaction = runTransaction;
+    window.signInWithEmailAndPassword = signInWithEmailAndPassword; window.createUserWithEmailAndPassword = createUserWithEmailAndPassword; window.signOut = signOut;
   </script>
   <script type="module" src="config/firebase-config.js?v=5"></script>
   <script type="module" src="config/cross-platform-service.js?v=4"></script>
@@ -81,7 +84,7 @@
         <p class="text-gray-500">Driver Partner Portal</p>
       </div>
 
-      <div class="bg-white rounded-="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div id="loginForm">
           <h2 class="font-bold text-lg text-gray-900 mb-6">Welcome back</h2>
           <div class="space-y-4">
@@ -93,7 +96,7 @@
               <label class="block text-sm font-semibold text-gray-700 mb-1">Secure Password</label>
               <input type="password" aria-label="Password" id="passwordInput" class="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-green-700/20 focus:border-green-700 outline-none" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
             </div>
-            <button class="w-full gradient-bg text-white py-3.5 rounded-xl font-bold hover:opacity-90 transition-all" onclick="handleAuth('signIn')">
+            <button class="w-full gradient-bg text-white py-3.5 rounded-xl font-bold hover:opacity-90 transition-all" onclick="handleAuth('signIn', event)">
               <span id="signInText">Authenticate</span>
             </button>
             <p class="text-center text-sm text-gray-500 mt-4">
@@ -115,7 +118,7 @@
               <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
               <input type="password" aria-label="Password" id="regPass" class="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-green-700/20 focus:border-green-700 outline-none" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
             </div>
-            <button class="w-full gradient-bg text-white py-3.5 rounded-xl font-bold hover:opacity-90 transition-all" onclick="handleAuth('signUp')">
+            <button class="w-full gradient-bg text-white py-3.5 rounded-xl font-bold hover:opacity-90 transition-all" onclick="handleAuth('signUp', event)">
               <span>Start Partnership</span>
             </button>
             <p class="text-center text-sm text-gray-500">
@@ -165,8 +168,8 @@
 
           <!-- Tabs -->
           <div class="flex gap-2 mb-4 overflow-x-auto hide-scrollbar">
-            <button class="tab-btn active px-4 py-2 rounded-xl font-semibold text-sm whitespace-nowrap bg-green-700 text-white" data-tab="available">Available Orders</button>
-            <button class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200" data-tab="active">My Active Orders</button>
+            <button class="tab-btn active px-4 py-2 rounded-xl font-semibold text-sm whitespace-nowrap bg-green-700 text-white" data-tab="available" onclick="switchTab('available')">Available Orders</button>
+            <button class="tab-btn px-4 py-2 rounded-xl font-semibold text-sm whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200" data-tab="active" onclick="switchTab('active')">My Active Orders</button>
           </div>
 
           <!-- Orders List -->
@@ -211,13 +214,30 @@
               <div class="text-sm font-semibold text-gray-500">This Month</div>
               <div class="text-2xl font-bold text-gray-900" id="earnMonth">TSh 0</div>
             </div>
+          </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-              <h3 class="font-bold text-gray-900 mb-4">Payout History</div>
-              <div id="payoutList" class="space-y-3">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-                  <p class="text-gray-500">No payouts yet</p>
-                </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6 flex items-center justify-between">
+            <div>
+              <div class="text-sm font-semibold text-gray-500">Wallet Balance</div>
+              <div class="text-2xl font-bold text-green-700" id="walletBalance">TSh 0</div>
+            </div>
+            <span class="material-symbols-outlined text-3xl text-green-600">account_balance_wallet</span>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
+            <h3 class="font-bold text-gray-900 mb-4">Payout History</h3>
+            <div id="payoutList" class="space-y-3">
+              <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
+                <p class="text-gray-500">No payouts yet</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <h3 class="font-bold text-gray-900 mb-4">Delivery History</h3>
+            <div id="historyList" class="space-y-3">
+              <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
+                <p class="text-gray-500">No completed deliveries yet</p>
               </div>
             </div>
           </div>
@@ -229,6 +249,21 @@
             <div class="w-24 h-24 rounded-full bg-green-700 flex items-center justify-center text-white font-bold text-2xl mb-4" id="profileInitial">D</div>
             <h2 class="font-bold text-2xl text-gray-900" id="profileName">Driver Name</h2>
             <p class="text-gray-500" id="profileEmail">driver@smartsoko.com</p>
+            <div class="flex items-center gap-2 mt-2">
+              <span class="text-xs bg-green-50 text-green-700 border border-green-100 rounded-full px-3 py-1 font-semibold" id="profileStatusBadge">OFFLINE</span>
+              <span class="text-xs bg-gray-50 text-gray-600 border border-gray-100 rounded-full px-3 py-1 font-semibold" id="profileRating">Rating --</span>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+            <div class="p-5 border-b border-gray-100">
+              <h4 class="font-semibold text-gray-900 mb-3">Vehicle & Contact</h4>
+              <div class="space-y-3 text-sm">
+                <div class="flex justify-between"><span class="text-gray-500">Phone</span><span class="font-medium" id="profilePhone">--</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Vehicle</span><span class="font-medium" id="profileVehicle">--</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Completed deliveries</span><span class="font-medium" id="profileDeliveries">0</span></div>
+              </div>
+            </div>
           </div>
 
           <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -253,546 +288,26 @@
 
     <!-- Bottom Nav -->
     <nav class="fixed bottom-0 left-0 right-0 flex justify-around items-center h-20 px-2 pb-safe bg-white border-t border-gray-200 md:hidden z-50">
-      <button class="nav-item active flex flex-col items-center justify-center gap-1 bg-green-100 text-green-700 rounded-xl px-3 py-1" data-screen="home">
+      <button class="nav-item active flex flex-col items-center justify-center gap-1 bg-green-100 text-green-700 rounded-xl px-3 py-1" data-screen="home" onclick="switchScreen('home')">
         <span class="material-symbols-outlined filled-icon">local_shipping</span>
         <span class="text-[10px] font-semibold">Home</span>
       </button>
-      <button class="nav-item flex flex-col items-center justify-center gap-1 text-gray-500 px-3 py-1" data-screen="active">
+      <button class="nav-item flex flex-col items-center justify-center gap-1 text-gray-500 px-3 py-1" data-screen="active" onclick="switchScreen('active')">
         <span class="material-symbols-outlined">receipt_long</span>
         <span class="text-[10px] font-semibold">Orders</span>
       </button>
-      <button class="nav-item flex flex-col items-center justify-center gap-1 text-gray-500 px-3 py-1" data-screen="earnings">
+      <button class="nav-item flex flex-col items-center justify-center gap-1 text-gray-500 px-3 py-1" data-screen="earnings" onclick="switchScreen('earnings')">
         <span class="material-symbols-outlined">account_balance_wallet</span>
         <span class="text-[10px] font-semibold">Earnings</span>
       </button>
-      <button class="nav-item flex flex-col items-center justify-center gap-1 text-gray-500 px-3 py-1" data-screen="profile">
+      <button class="nav-item flex flex-col items-center justify-center gap-1 text-gray-500 px-3 py-1" data-screen="profile" onclick="switchScreen('profile')">
         <span class="material-symbols-outlined">person</span>
         <span class="text-[10px] font-semibold">Account</span>
       </button>
     </nav>
   </div>
 
-  <script>
-    let state = {
-      user: null,
-      isOnline: true,
-      currentTab: 'available',
-      currentScreen: 'home',
-      orders: [],
-      earnings: { today: 0, week: 0, month: 0 }
-    };
+    <script src="js/driver-app.js?v=1" defer></script>
 
-    function formatCurrency(amount) {
-      return 'TSh ' + (amount || 0).toLocaleString();
-    }
-
-    function showToast(message) {
-      if (typeof SmartNav !== 'undefined' && SmartNav.showToast) { SmartNav.showToast(message, 'info'); return; }
-      const el = document.createElement('div');
-      el.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;background:#16a34a;color:white;padding:12px 20px;border-radius:14px;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,0.12)';
-      el.textContent = message;
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 3000);
-    }
-
-    function toggleAuthForm(form) {
-      document.getElementById('loginForm').classList.toggle('hidden', form === 'signup');
-      document.getElementById('signupForm').classList.toggle('hidden', form === 'login');
-    }
-
-    async function handleAuth(type) {
-      const btn = event.target.closest('button');
-      const originalText = btn.innerHTML;
-      
-      if (type === 'signIn') {
-        const email = document.getElementById('emailInput').value;
-        const password = document.getElementById('passwordInput').value;
-        if (!email || !password) { showToast('Please fill all fields'); return; }
-        btn.disabled = true; btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Signing in...';
-      } else {
-        const name = document.getElementById('regName').value;
-        const email = document.getElementById('regEmail').value;
-        const password = document.getElementById('regPass').value;
-        if (!name || !email || !password) { showToast('Please fill all fields'); return; }
-        btn.disabled = true; btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Joining...';
-      }
-
-      try {
-        const { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
-        const auth = window.auth || getAuth();
-        const svc = window.crossPlatformService;
-
-        if (type === 'signIn') {
-          await signInWithEmailAndPassword(auth, email, password);
-        } else {
-          await createUserWithEmailAndPassword(auth, email, password);
-          const user = auth.currentUser;
-          const userData = {
-            fullName: name, email, role: 'driver', status: 'offline',
-            createdAt: new Date().toISOString(), onboardingComplete: false
-          };
-          if (svc && svc.isReady()) {
-            await svc.create('users', user.uid, userData);
-          } else {
-            const { doc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-            const db = window.db;
-            userData.createdAt = serverTimestamp();
-            await setDoc(doc(db, 'users', user.uid), userData);
-          }
-        }
-
-        // Load driver data
-        let userDoc = null;
-        const user = auth.currentUser;
-        if (svc && svc.isReady()) {
-          userDoc = await svc.get('users', user.uid);
-        }
-        if (!userDoc) {
-          const { doc, getDoc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-          const db = window.db;
-          const docSnap = await getDoc(doc(db, 'users', user.uid));
-          if (!docSnap.exists()) {
-            await setDoc(doc(db, 'users', user.uid), { role: 'driver', status: 'offline', createdAt: serverTimestamp() }, { merge: true });
-          }
-        }
-
-        loadDashboard();
-      } catch (error) {
-        console.error('Auth error:', error);
-        showToast('Authentication failed. Please try again.');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-      }
-    }
-
-    function handleStatusToggle() {
-      state.isOnline = document.getElementById('statusToggle').checked;
-      const indicator = document.getElementById('indicatorDot');
-      indicator.classList.toggle('active', state.isOnline);
-      indicator.classList.toggle('offline', !state.isOnline);
-      document.getElementById('statusText').textContent = state.isOnline ? 'Active & Online' : 'Offline';
-      
-      // Update Firestore
-      const uid = window.auth?.currentUser?.uid;
-      if (uid) {
-        const svc = window.crossPlatformService;
-        if (svc && svc.isReady()) {
-          svc.update('users', uid, { status: state.isOnline ? 'online' : 'offline' });
-        } else if (window.db) {
-          import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js').then(({ doc, updateDoc }) => {
-            updateDoc(doc(window.db, 'users', uid), { status: state.isOnline ? 'online' : 'offline' });
-          });
-        }
-      }
-      if (state.isOnline) {
-        startLocationSharing();
-      } else {
-        stopLocationSharing();
-      }
-      showToast(state.isOnline ? 'You are now online' : 'You are now offline');
-    }
-
-    // ── Live location sharing ──────────────────────────────────
-    let locWatcher = null;
-    let lastLocSent = 0;
-    let lastLocPos = null;
-    let locWarned = false;
-
-    function startLocationSharing() {
-      if (locWatcher !== null) return;
-      if (!navigator.geolocation) {
-        if (!locWarned) { locWarned = true; showToast('Geolocation not supported on this device'); }
-        return;
-      }
-      locWatcher = navigator.geolocation.watchPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          const now = Date.now();
-          const moved = !lastLocPos ||
-            Math.abs(latitude - lastLocPos.lat) > 0.0002 ||
-            Math.abs(longitude - lastLocPos.lng) > 0.0002;
-          if (!moved || now - lastLocSent < 10000) return;
-          lastLocSent = now;
-          lastLocPos = { lat: latitude, lng: longitude };
-          publishLocation(latitude, longitude);
-        },
-        (err) => {
-          if (!locWarned) {
-            locWarned = true;
-            showToast('Location access denied - customers cannot see you live');
-          }
-          console.warn('Geolocation error:', err.code, err.message);
-        },
-        { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 }
-      );
-    }
-
-    function stopLocationSharing() {
-      if (locWatcher !== null) {
-        navigator.geolocation.clearWatch(locWatcher);
-        locWatcher = null;
-      }
-    }
-
-    function publishLocation(latitude, longitude) {
-      const uid = window.auth?.currentUser?.uid;
-      if (!uid) return;
-      const payload = {
-        latitude,
-        longitude,
-        isOnline: true,
-        lastLocationUpdate: new Date().toISOString()
-      };
-      const svc = window.crossPlatformService;
-      if (svc && svc.isReady()) {
-        import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js').then(({ doc, setDoc, updateDoc, serverTimestamp }) => {
-          const ref = doc(window.db, 'drivers', uid);
-          const data = { ...payload, lastLocationUpdate: serverTimestamp() };
-          setDoc(ref, { ownerId: uid, ...data }, { merge: true }).catch(() => {});
-        });
-      } else if (window.db) {
-        import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js').then(({ doc, setDoc, serverTimestamp }) => {
-          setDoc(doc(window.db, 'drivers', uid), {
-            ownerId: uid,
-            latitude,
-            longitude,
-            isOnline: true,
-            lastLocationUpdate: serverTimestamp()
-          }, { merge: true }).catch(() => {});
-        });
-      }
-    }
-
-    async function loadDashboard() {
-      document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('mainApp').classList.remove('hidden');
-      
-      const auth = window.auth;
-      if (!auth?.currentUser) return;
-      
-      const { doc, getDoc, onSnapshot, collection, query, where, orderBy, limit } = import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-      const db = window.db;
-      
-      // Load driver profile
-      const svc = window.crossPlatformService;
-      const uid = window.auth.currentUser.uid;
-      if (svc && svc.isReady()) {
-        const profile = await svc.get('users', uid);
-        if (profile) {
-          document.getElementById('driverNameDisplay').textContent = profile.fullName || 'Driver';
-          document.getElementById('driverInitial').textContent = (profile.fullName || 'D')[0].toUpperCase();
-          document.getElementById('statusToggle').checked = profile.status === 'online';
-          handleStatusToggle();
-        }
-      } else if (window.db) {
-        import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js').then(({ doc, getDoc }) => {
-          getDoc(doc(window.db, 'users', uid)).then(docSnap => {
-            if (docSnap.exists()) {
-              const data = docSnap.data();
-              document.getElementById('driverNameDisplay').textContent = data.fullName || 'Driver';
-              document.getElementById('driverInitial').textContent = (data.fullName || 'D')[0].toUpperCase();
-              document.getElementById('statusToggle').checked = data.status === 'online';
-              handleStatusToggle();
-            }
-          });
-        });
-      }
-
-      // Load earnings
-      loadEarnings();
-      
-      // Load available orders
-      loadAvailableOrders();
-      
-      // Subscribe to real-time orders
-      subscribeToOrders();
-    }
-
-    async function loadEarnings() {
-      try {
-        const db = window.db;
-        const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-        
-        const today = new Date().toDateString();
-        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-        
-        // Demo data
-        document.getElementById('todayEarnings').textContent = 'TSh 28,500';
-        document.getElementById('todayDeliveries').textContent = '8';
-        document.getElementById('earnToday').textContent = 'TSh 28,500';
-        document.getElementById('earnWeek').textContent = 'TSh 199,500';
-        document.getElementById('earnMonth').textContent = 'TSh 650,000';
-      } catch (e) { console.error('Earnings load error:', e); }
-    }
-
-    function subscribeToOrders() {
-      if (!window.db) return;
-      import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js').then(({ collection, query, where, onSnapshot }) => {
-        const q = query(collection(window.db, 'orders'), where('status', '==', 'pending'));
-        if (window.__ordersUnsub) { window.__ordersUnsub(); }
-        window.__ordersUnsub = onSnapshot(q, (snap) => {
-          const list = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => {
-            const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
-            const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
-            return tb - ta;
-          });
-          const container = document.getElementById('ordersList');
-          if (!container) return;
-          if (list.length === 0) {
-            container.innerHTML = `
-              <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span class="material-symbols-outlined text-2xl text-green-700">local_shipping</span>
-                </div>
-                <p class="text-gray-900 font-medium mb-1">No orders available</p>
-                <p class="text-sm text-gray-500">Orders will appear here when ready</p>
-              </div>`;
-            return;
-          }
-          container.innerHTML = list.map(order => `
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4" onclick="acceptOrder('${order.id}')">
-              <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-green-600">restaurant</span>
-                  <span class="font-medium text-gray-900">${order.sellerName || 'Restaurant'}</span>
-                </div>
-                <span class="status-badge status-pending">Pending</span>
-              </div>
-              <div class="flex justify-between items-center mb-3">
-                <div class="text-sm font-semibold text-gray-900">${order.customerName || 'Customer'}</div>
-                <div class="text-lg font-bold text-green-700">TSh ${(order.total || 0).toLocaleString()}</div>
-              </div>
-              <div class="flex items-center gap-3 text-sm text-gray-500">
-                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">location_on</span> ${(order.customerAddress || '...').substring(0, 30)}</span>
-                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span> ${order.estimatedTime || '25-35 min'}</span>
-              </div>
-              <button class="w-full mt-3 gradient-bg text-white py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-all" onclick="event.stopPropagation(); acceptOrder('${order.id}')">
-                <span class="material-symbols-outlined text-sm">add_task</span> Accept Order
-              </button>
-            </div>
-          `).join('');
-        }, () => { loadAvailableOrders(); });
-      }).catch(() => { /* realtime unavailable */ });
-    }
-
-    async function loadAvailableOrders() {
-      try {
-        const svc = window.crossPlatformService;
-        let orders = null;
-        if (svc && svc.isReady()) {
-          try { orders = await svc.list('orders', { where: [['status', '==', 'pending']], orderBy: { field: 'createdAt', direction: 'desc' }, limit: 10 }); } catch (e) { /* silent */ }
-        }
-        if (!orders && window.db) {
-          const { collection, query, where, getDocs, limit } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-          const ordersQuery = query(collection(window.db, 'orders'), where('status', '==', 'pending'), limit(10));
-          const snapshot = await getDocs(ordersQuery);
-          orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-            .sort((a, b) => {
-              const da = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
-              const dbd = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
-              return dbd - da;
-            });
-        }
-        
-        const container = document.getElementById('ordersList');
-        if (!orders || orders.length === 0) {
-          container.innerHTML = `
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-              <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span class="material-symbols-outlined text-2xl text-green-700">local_shipping</span>
-              </div>
-              <p class="text-gray-900 font-medium mb-1">No orders available</p>
-              <p class="text-sm text-gray-500">Orders will appear here when ready</p>
-            </div>`;
-          return;
-        }
-        
-        container.innerHTML = orders.map(order => `
-          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4" onclick="acceptOrder('${order.id}')">
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-green-600">restaurant</span>
-                <span class="font-medium text-gray-900">${order.sellerName || 'Restaurant'}</span>
-              </div>
-              <span class="status-badge status-pending">Pending</span>
-            </div>
-            <div class="flex justify-between items-center mb-3">
-              <div class="text-sm font-semibold text-gray-900">${order.customerName || 'Customer'}</div>
-              <div class="text-lg font-bold text-green-700">TSh ${(order.total || 0).toLocaleString()}</div>
-            </div>
-            <div class="flex items-center gap-3 text-sm text-gray-500">
-              <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">location_on</span> ${order.customerAddress?.substring(0, 30) || '...'}</span>
-              <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span> ${order.estimatedTime || '25-35 min'}</span>
-            </div>
-            <button class="w-full mt-3 gradient-bg text-white py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-all" onclick="event.stopPropagation(); acceptOrder('${order.id}')">
-              <span class="material-symbols-outlined text-sm">add_task</span> Accept Order
-            </button>
-          </div>
-        `).join('');
-      } catch (error) { console.error('Load orders error:', error); }
-    }
-
-    async function acceptOrder(orderId) {
-      try {
-        const svc = window.crossPlatformService;
-        if (svc && svc.isReady()) {
-          await svc.update('orders', orderId, {
-            status: 'assigned',
-            driverId: window.auth.currentUser.uid,
-            assignedAt: new Date().toISOString()
-          });
-        } else if (window.db) {
-          const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-          await updateDoc(doc(window.db, 'orders', orderId), {
-            status: 'assigned',
-            driverId: window.auth.currentUser.uid,
-            assignedAt: serverTimestamp()
-          });
-        }
-        
-        showToast('Order accepted!');
-        loadAvailableOrders();
-        loadActiveOrders();
-        switchScreen('active');
-      } catch (error) {
-        console.error('Accept order error:', error);
-        showToast('Failed to accept order');
-      }
-    }
-
-    async function loadActiveOrders() {
-      try {
-        const svc = window.crossPlatformService;
-        let orders = null;
-        if (svc && svc.isReady()) {
-          try { orders = await svc.list('orders', { where: [['driverId', '==', window.auth.currentUser.uid], ['status', 'in', ['assigned', 'picked_up', 'on_the_way']]], orderBy: { field: 'createdAt', direction: 'desc' } }); } catch (e) { /* silent */ }
-        }
-        if (!orders && window.db) {
-          const { collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
-          const ordersQuery = query(collection(window.db, 'orders'), where('driverId', '==', window.auth.currentUser.uid), where('status', 'in', ['assigned', 'picked_up', 'on_the_way']));
-          const snapshot = await getDocs(ordersQuery);
-          orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-            .sort((a, b) => {
-              const da = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
-              const dbd = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
-              return dbd - da;
-            });
-        }
-        
-        const container = document.getElementById('activeOrdersList');
-        if (!orders || orders.length === 0) {
-          container.innerHTML = `
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-              <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span class="material-symbols-outlined text-2xl text-blue-600">receipt_long</span>
-              </div>
-              <p class="text-gray-900 font-medium mb-1">No active orders</p>
-              <p class="text-sm text-gray-500">Accepted orders will appear here</p>
-            </div>`;
-          return;
-        }
-        
-        container.innerHTML = orders.map(order => `
-          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-blue-600">receipt_long</span>
-                <span class="font-medium text-gray-900">Order #${order.id.substring(0, 8)}</span>
-              </div>
-              <span class="status-badge status-${order.status.replace('_', '-')}">${order.status.replace('_', ' ')}</span>
-            </div>
-            <div class="flex justify-between items-center mb-3">
-              <div class="text-sm font-semibold text-gray-900">${order.customerName || 'Customer'}</div>
-              <div class="text-lg font-bold text-green-700">TSh ${(order.total || 0).toLocaleString()}</div>
-            </div>
-            <div class="flex items-center gap-3 text-sm text-gray-500 mb-3">
-              <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">location_on</span> ${order.customerAddress?.substring(0, 30) || '...'}</span>
-            </div>
-            <div class="flex gap-2">
-              <button class="flex-1 bg-white border border-gray-200 py-2.5 rounded-xl font-semibold text-gray-700 hover:bg-gray-50" onclick="updateOrderStatus('${order.id}')">Update Status</button>
-              <button class="flex-1 bg-blue-600 text-white py-2.5 rounded-xl font-semibold" onclick="openOrderChat('${order.id}')">Chat</button>
-            </div>
-          </div>
-        `).join('');
-      } catch (error) { console.error('Load active orders error:', error); }
-    }
-
-    function switchScreen(screen) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-      document.getElementById(screen + 'Screen').classList.remove('hidden');
-      document.querySelectorAll('[data-screen]').forEach(b => {
-        b.classList.toggle('active', b.dataset.screen === screen);
-        b.classList.toggle('bg-green-100', b.dataset.screen === screen);
-        b.classList.toggle('text-green-700', b.dataset.screen === screen);
-        b.classList.toggle('bg-gray-100', b.dataset.screen !== screen);
-        b.classList.toggle('text-gray-500', b.dataset.screen !== screen);
-      });
-      state.currentScreen = screen;
-      
-      if (screen === 'active') loadActiveOrders();
-      if (screen === 'earnings') loadEarnings();
-    }
-
-    function switchTab(tab) {
-      state.currentTab = tab;
-      document.querySelectorAll('[data-tab]').forEach(b => {
-        b.classList.toggle('active', b.dataset.tab === tab);
-        b.classList.toggle('bg-green-700', b.dataset.tab === tab);
-        b.classList.toggle('text-white', b.dataset.tab === tab);
-        b.classList.toggle('bg-gray-100', b.dataset.tab !== tab);
-        b.classList.toggle('text-gray-700', b.dataset.tab !== tab);
-      });
-      if (tab === 'available') loadAvailableOrders();
-      if (tab === 'active') loadActiveOrders();
-    }
-
-    function startNavigation(orderId) {
-      showToast('Opening navigation...');
-      // Would integrate with Google Maps or Mapbox
-    }
-
-    function openOrderChat(orderId) {
-      window.location.href = `/chat?orderId=${encodeURIComponent(orderId)}&role=driver`;
-    }
-
-    function logout() {
-      stopLocationSharing();
-      if (window.auth) window.auth.signOut();
-      localStorage.removeItem('smartsoko_user');
-      window.location.href = '/login';
-    }
-
-    function showToast(message) {
-      if (typeof SmartNav !== 'undefined' && SmartNav.showToast) { SmartNav.showToast(message, 'info'); return; }
-      const el = document.createElement('div');
-      el.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:9999;background:#16a34a;color:white;padding:12px 20px;border-radius:14px;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,0.12)';
-      el.textContent = message;
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 3000);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      if (typeof SmartNav !== 'undefined') {
-        SmartNav.init({ activePage: 'dashboard', role: 'driver', skipTopbar: true });
-        if (typeof SmartNav.initPageTransition === 'function') SmartNav.initPageTransition();
-      }
-      
-      // Check auth state
-      if (typeof window.auth !== 'undefined') {
-        window.auth.onAuthStateChanged(user => {
-          if (user) {
-            loadDashboard();
-          } else {
-            document.getElementById('authScreen').classList.remove('hidden');
-            document.getElementById('mainApp').classList.add('hidden');
-          }
-        });
-      } else {
-        document.getElementById('authScreen').classList.remove('hidden');
-      }
-    });
-  </script>
 </body>
 </html>

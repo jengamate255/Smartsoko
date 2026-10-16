@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.smartsoko.driver.data.local.AppDatabase
 import com.smartsoko.driver.data.local.entity.DriverPrefsEntity
-import com.smartsoko.driver.data.remote.WebSocketManager
 import com.smartsoko.driver.data.repository.DriverRepository
 import com.smartsoko.driver.domain.model.Driver
 import com.smartsoko.driver.service.LocationTrackingService
@@ -26,7 +25,6 @@ data class ProfileUiState(
 class ProfileViewModel @Inject constructor(
     private val driverState: DriverState,
     private val driverRepository: DriverRepository,
-    private val webSocketManager: WebSocketManager,
     private val db: AppDatabase,
     private val application: Application
 ) : ViewModel() {
@@ -43,7 +41,6 @@ class ProfileViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
-            webSocketManager.disconnect()
             LocationTrackingService.stop(application)
             driverState.reset()
             db.driverPrefsDao().upsert(DriverPrefsEntity(id = 1, isOnline = false))

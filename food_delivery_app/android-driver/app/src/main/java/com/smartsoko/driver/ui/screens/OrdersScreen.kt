@@ -92,7 +92,7 @@ fun DriverOrderCard(
     onAccept: () -> Unit
 ) {
     val dateFormat = remember { SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()) }
-    val isPending = order.status == OrderStatus.PENDING
+    val isPending = order.status == OrderStatus.PENDING || order.status == OrderStatus.READY
 
     Card(
         modifier = Modifier

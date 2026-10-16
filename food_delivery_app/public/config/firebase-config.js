@@ -101,8 +101,8 @@ if (typeof API_ROUTES === 'undefined') {
       if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
         return '/api';
       }
-      // Server runs on port 3001 by default (from .env)
-      const port = window.location.port || '3001';
+      // Server runs on port 3000 by default
+      const port = window.location.port || '3000';
       return `http://localhost:${port}/api`;
     },
 

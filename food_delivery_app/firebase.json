@@ -39,7 +39,7 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
-      "server.js",
+      "server-dev.js",
       "package.json",
       "package-lock.json",
       "**/*.md",
@@ -47,7 +47,7 @@
       "test-*.html"
     ],
     "rewrites": [
-      { "source": "/", "destination": "/home.html" },
+      { "source": "/", "destination": "/index.html" },
       { "source": "/register", "destination": "/signup.html" },
       { "source": "/dashboard", "destination": "/merchant.html" },
       { "source": "/forgot-password", "destination": "/check-user.html" }

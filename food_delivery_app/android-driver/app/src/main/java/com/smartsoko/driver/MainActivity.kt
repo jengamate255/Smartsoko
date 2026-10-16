@@ -1,9 +1,13 @@
 package com.smartsoko.driver
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,12 +23,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.smartsoko.driver.data.model.Order
+import com.smartsoko.driver.location.DriverLocationService
 import com.smartsoko.driver.ui.screens.EarningsScreen
 import com.smartsoko.driver.ui.screens.ForgotPasswordScreen
 import com.smartsoko.driver.ui.screens.LoginScreen
 import com.smartsoko.driver.ui.screens.OrderDetailScreen
+import com.smartsoko.driver.ui.screens.OrderMapScreen
 import com.smartsoko.driver.ui.screens.OrdersScreen
 import com.smartsoko.driver.ui.screens.ProfileScreen
 import com.smartsoko.driver.ui.screens.SignUpScreen
@@ -34,6 +41,40 @@ import com.smartsoko.driver.ui.viewmodel.DriverUiState
 
 class MainActivity : ComponentActivity() {
     private val viewModel: DriverViewModel by viewModels()
+
+    /** Pending online-toggle that needs the location permission first. */
+    private var pendingOnline: Boolean? = null
+
+    private val locationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
+            val fineGranted = grants[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                grants[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+            val pending = pendingOnline
+            pendingOnline = null
+            if (pending != null) {
+                if (fineGranted) {
+                    viewModel.toggleOnline(pending)
+                    handleLocationService(pending)
+                } else {
+                    viewModel.setError("Location permission is required to go online — customers track your delivery")
+                }
+            }
+        }
+
+    private fun requestLocationPermission(goOnline: Boolean) {
+        pendingOnline = goOnline
+        val perms = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            perms.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        locationPermissionLauncher.launch(perms.toTypedArray())
+    }
+
+    private fun handleLocationService(goOnline: Boolean) {
+        val driverId = viewModel.uiState.value.driver?.id ?: return
+        if (goOnline) DriverLocationService.start(this, driverId)
+        else DriverLocationService.stop(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +92,7 @@ class MainActivity : ComponentActivity() {
                 var isSigningUp by remember { mutableStateOf(false) }
                 var isResettingPassword by remember { mutableStateOf(false) }
                 var selectedOrder by remember { mutableStateOf<Order?>(null) }
+                var showMapFor by remember { mutableStateOf<Order?>(null) }
 
                 if (!uiState.isAuthenticated) {
                     if (isSigningUp) {
@@ -76,11 +118,12 @@ class MainActivity : ComponentActivity() {
                         ForgotPasswordScreen(
                             isLoading = uiState.isLoading,
                             error = uiState.error,
+                            resetSent = uiState.passwordResetSent,
                             onResetPassword = { email ->
                                 viewModel.resetPassword(
                                     email = email,
                                     onSuccess = {},
-                                    onError = {}
+                                    onError = { error -> viewModel.setError(error) }
                                 )
                             },
                             onBack = { isResettingPassword = false },
@@ -104,27 +147,69 @@ class MainActivity : ComponentActivity() {
                             onClearError = { viewModel.clearError() }
                         )
                     }
+                } else if (showMapFor != null) {
+                    // Live order from the assigned-orders stream keeps the map
+                    // screen fresh (status changes reflected without reopening).
+                    val liveMapOrder = uiState.assignedOrders.firstOrNull { it.id == showMapFor!!.id }
+                        ?: showMapFor
+                    OrderMapScreen(
+                        order = liveMapOrder!!,
+                        onBack = { showMapFor = null }
+                    )
                 } else if (selectedOrder != null) {
+                    // Always render the freshest copy of the order so status
+                    // changes (accept → picked_up → delivered) update the UI.
+                    val liveOrder = (uiState.assignedOrders + uiState.availableOrders)
+                        .firstOrNull { it.id == selectedOrder!!.id }
+                        ?: selectedOrder
                     OrderDetailScreen(
-                        order = selectedOrder!!,
+                        order = liveOrder!!,
                         onBack = { selectedOrder = null },
                         onAcceptOrder = { viewModel.acceptOrder(it); selectedOrder = null },
+                        onDeclineOrder = { viewModel.declineOrder(it); selectedOrder = null },
                         onMarkPickedUp = { viewModel.markPickedUp(it); selectedOrder = null },
-                        onMarkDelivered = { viewModel.markDelivered(it); selectedOrder = null }
+                        onMarkDelivered = { viewModel.markDelivered(it); selectedOrder = null },
+                        onOpenMap = { order -> showMapFor = order }
                     )
                 } else {
                     DriverApp(
                         uiState = uiState,
                         onOrderClick = { selectedOrder = it },
-                        onAcceptOrder = { viewModel.acceptOrder(it) },
+                        onAcceptOrder = { orderId ->
+                            viewModel.acceptOrder(orderId)
+                            // Navigate to the accepted order's detail page
+                            val state = viewModel.uiState.value
+                            selectedOrder = (state.availableOrders + state.assignedOrders)
+                                .firstOrNull { it.id == orderId }
+                        },
+                        onDeclineOrder = { viewModel.declineOrder(it) },
                         onRefreshOrders = { viewModel.refreshOrders() },
-                        onToggleOnline = { viewModel.toggleOnline(it) },
-                        onSignOut = { viewModel.signOut() }
+                        onToggleOnline = { goOnline ->
+                            val needsPermission = goOnline && !hasLocationPermission()
+                            if (needsPermission) requestLocationPermission(goOnline)
+                            else {
+                                viewModel.toggleOnline(goOnline)
+                                handleLocationService(goOnline)
+                            }
+                        },
+                        onUpdateProfile = { name, phone, vehicleType, vehiclePlate, onDone ->
+                            viewModel.updateProfile(name, phone, vehicleType, vehiclePlate, onDone)
+                        },
+                        onSignOut = {
+                            DriverLocationService.stop(this@MainActivity)
+                            viewModel.signOut()
+                        }
                     )
                 }
             }
         }
     }
+
+    private fun hasLocationPermission(): Boolean =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -133,8 +218,10 @@ fun DriverApp(
     uiState: DriverUiState,
     onOrderClick: (Order) -> Unit,
     onAcceptOrder: (String) -> Unit,
+    onDeclineOrder: (String) -> Unit,
     onRefreshOrders: () -> Unit,
     onToggleOnline: (Boolean) -> Unit,
+    onUpdateProfile: (String, String, String, String, (Boolean) -> Unit) -> Unit,
     onSignOut: () -> Unit
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -210,7 +297,9 @@ fun DriverApp(
                 2 -> EarningsScreen(assignedOrders = uiState.assignedOrders)
                 3 -> ProfileScreen(
                     driver = uiState.driver,
+                    isLoading = uiState.isLoading,
                     onToggleOnline = onToggleOnline,
+                    onUpdateProfile = onUpdateProfile,
                     onSignOut = onSignOut
                 )
             }

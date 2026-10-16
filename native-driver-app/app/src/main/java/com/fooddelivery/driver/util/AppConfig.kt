@@ -37,17 +37,15 @@ object AppConfig {
     val API_BASE_URL = BuildConfig.API_BASE_URL
     
     // ====================
-    // WEBSOCKET CONFIG
-    // ====================
-    // Injected via buildConfigField in app/build.gradle.kts (per build type)
-    val WEBSOCKET_URL = BuildConfig.WEBSOCKET_URL
-    
-    // ====================
     // APP SETTINGS
     // ====================
     const val APP_NAME = "SmartSoko Driver"
     const val PACKAGE_NAME = "com.fooddelivery.driver"
     
+    // Currency settings
+    const val CURRENCY_SYMBOL = "TSh "
+    const val CURRENCY_CODE = "TZS"
+
     // Location settings
     const val LOCATION_UPDATE_INTERVAL_MS = 5000L // 5 seconds
     const val LOCATION_FASTEST_INTERVAL_MS = 3000L // 3 seconds

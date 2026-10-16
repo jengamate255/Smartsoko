@@ -9,6 +9,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Browse Products - SMARTSOKO</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,9 +20,9 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   
   <!-- Design System -->
-  <link rel="stylesheet" href="smartsoko-design-system.css">
+  <link rel="stylesheet" href="design-system.css">
   
-  <style> .filters-sidebar {background-color: var(--color-white);border-radius: var(--radius-lg);padding: var(--spacing-md);box-shadow: var(--shadow-sm);height: fit-content;position: sticky;top: 80px} .filter-section {margin-bottom: var(--spacing-lg)} .filter-title {font-family: var(--font-accent);font-weight: 600;font-size: var(--text-body);margin-bottom: var(--spacing-sm);color: var(--color-charcoal)} .filter-options {display: flex;flex-direction: column;gap: var(--spacing-xs)} .filter-option {display: flex;align-items: center;gap: var(--spacing-xs);cursor: pointer;padding: 4px 0} .filter-option input[type="checkbox"] {width: 18px;height: 18px;accent-color: var(--color-gold)} .filter-option label {cursor: pointer;font-size: var(--text-small);color: var(--color-charcoal)} .price-range {display: flex;gap: var(--spacing-xs);align-items: center} .price-input {width: 80px;padding: 8px;border: 1px solid var(--color-taupe);border-radius: var(--radius-md);font-size: var(--text-small)} .products-header {display: flex;justify-content: space-between;align-items: center;margin-bottom: var(--spacing-md);flex-wrap: wrap;gap: var(--spacing-sm)} .results-count {font-size: var(--text-body);color: var(--color-gray)} .sort-dropdown {display: flex;align-items: center;gap: var(--spacing-xs)} .sort-select {padding: 8px 12px;border: 1px solid var(--color-taupe);border-radius: var(--radius-md);font-family: var(--font-body);font-size: var(--text-small);background-color: var(--color-white)} .products-grid {display: grid;grid-template-columns: repeat(auto-fill,minmax(280px,1fr));gap: var(--spacing-md)} .product-badge {position: absolute;top: var(--spacing-sm);right: var(--spacing-sm);background-color: var(--color-gold);color: var(--color-charcoal);padding: 4px 8px;border-radius: var(--radius-md);font-size: var(--text-caption);font-weight: 600} .product-out-of-stock {position: absolute;top: 0;left: 0;right: 0;bottom: 0;background-color: rgba(44,44,44,0.8);display: flex;align-items: center;justify-content: center;color: var(--color-white);font-weight: 600;border-radius: var(--radius-lg)} .mobile-filter-toggle {display: none;position: fixed;bottom: 80px;right: var(--spacing-md);z-index: var(--z-dropdown)} .filter-modal {display: none;position: fixed;top: 0;left: 0;right: 0;bottom: 0;background-color: rgba(0,0,0,0.5);z-index: var(--z-modal);padding: var(--spacing-md)} .filter-modal-content {background-color: var(--color-white);border-radius: var(--radius-lg);padding: var(--spacing-md);max-height: 80vh;overflow-y: auto;margin-top: auto} @media (max-width: 1024px) {.main-content {grid-template-columns: 1fr} .filters-sidebar {display: none} .mobile-filter-toggle {display: block} .filter-modal.active {display: block} } .loading-skeleton {animation: pulse 1.2s ease-in-out infinite} @keyframes pulse {0%,100% {opacity: 0.6} 50% {opacity: 1} } </style>
+  <style> .filters-sidebar {background-color: var(--color-white);border-radius: var(--radius-lg);padding: var(--spacing-md);box-shadow: var(--shadow-sm);height: fit-content;position: sticky;top: 80px} .filter-section {margin-bottom: var(--spacing-lg)} .filter-title {font-family: var(--font-accent);font-weight: 600;font-size: var(--text-body);margin-bottom: var(--spacing-sm);color: var(--color-charcoal)} .filter-options {display: flex;flex-direction: column;gap: var(--spacing-xs)} .filter-option {display: flex;align-items: center;gap: var(--spacing-xs);cursor: pointer;padding: 4px 0} .filter-option input[type="checkbox"] {width: 18px;height: 18px;accent-color: var(--color-gold)} .filter-option label {cursor: pointer;font-size: var(--text-small);color: var(--color-charcoal)} .price-range {display: flex;gap: var(--spacing-xs);align-items: center} .price-input {width: 80px;padding: 8px;border: 1px solid var(--color-taupe);border-radius: var(--radius-md);font-size: var(--text-small)} .products-header {display: flex;justify-content: space-between;align-items: center;margin-bottom: var(--spacing-md);flex-wrap: wrap;gap: var(--spacing-sm)} .results-count {font-size: var(--text-body);color: var(--color-gray)} .sort-dropdown {display: flex;align-items: center;gap: var(--spacing-xs)} .sort-select {padding: 8px 12px;border: 1px solid var(--color-taupe);border-radius: var(--radius-md);font-family: var(--font-body);font-size: var(--text-small);background-color: var(--color-white)} .products-grid {display: grid;grid-template-columns: repeat(auto-fill,minmax(280px,1fr));gap: var(--spacing-md)} .product-badge {position: absolute;top: var(--spacing-sm);right: var(--spacing-sm);background-color: var(--color-gold);color: var(--color-charcoal);padding: 4px 8px;border-radius: var(--radius-md);font-size: var(--text-caption);font-weight: 600} .product-out-of-stock {position: absolute;top: 0;left: 0;right: 0;bottom: 0;background-color: rgba(44,44,44,0.8);display: flex;align-items: center;justify-content: center;color: var(--color-white);font-weight: 600;border-radius: var(--radius-lg)} .mobile-filter-toggle {display: none;position: fixed;bottom: 80px;right: var(--spacing-md);z-index: var(--z-dropdown)} .filter-modal {display: none;position: fixed;top: 0;left: 0;right: 0;bottom: 0;background-color: rgba(0,0,0,0.5);z-index: var(--z-modal);padding: var(--spacing-md)} .filter-modal-content {background-color: var(--color-white);border-radius: var(--radius-lg);padding: var(--spacing-md);max-height: 80vh;overflow-y: auto;margin-top: auto} @media (max-width: 1024px) {.main-content {grid-template-columns: 1fr} .filters-sidebar {display: none} .mobile-filter-toggle {display: block} .filter-modal.active {display: block} } .loading-skeleton {animation: pulse 1.2s ease-in-out infinite} @keyframes pulse {0%,100% {opacity: 0.6} 50% {opacity: 1} }  .quantity-selector {display: flex;align-items: center;gap: var(--spacing-xs);border: 1px solid var(--color-taupe);border-radius: var(--radius-md);padding: 2px} .quantity-btn {width: 36px;height: 36px;border: none;background-color: transparent;border-radius: var(--radius-sm);display: flex;align-items: center;justify-content: center;cursor: pointer;transition: background-color var(--transition-fast)} .quantity-btn:hover {background-color: var(--color-cream)} .quantity-value {min-width: 32px;text-align: center;font-weight: 600;font-size: var(--text-small)}</style>
 </head>
 <body>
   <!-- Top Navigation -->
@@ -423,7 +424,7 @@
       <span class="material-icons nav-icon">shopping_cart</span>
       <span class="nav-label">Cart</span>
     </a>
-    <a href="customer.html" class="nav-item">
+    <a href="cart.html" class="nav-item">
       <span class="material-icons nav-icon">receipt_long</span>
       <span class="nav-label">Orders</span>
     </a>
@@ -492,7 +493,7 @@
       button.disabled = true;
       button.innerHTML = '<span class="material-icons">check</span> Added';
       
-      showToast(`Added ${quantity} Ã— ${productName} to cart`, 'success');
+      showToast(`Added ${quantity} â€”â€” ${productName} to cart`, 'success');
       
       // Update cart count
       setTimeout(() => {
@@ -548,3 +549,4 @@
   </script>
 </body>
 </html>
+

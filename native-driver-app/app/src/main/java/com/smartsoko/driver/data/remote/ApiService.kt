@@ -23,6 +23,12 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<ApiResponse<AuthResponseDto>>
 
+    @POST("driver/location")
+    suspend fun postLocation(
+        @Header("Authorization") token: String,
+        @Body body: LocationPingDto
+    ): Response<ApiResponse<Any>>
+
     @GET("orders/available")
     suspend fun getAvailableOrders(
         @Header("Authorization") token: String
@@ -58,6 +64,14 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<ApiResponse<EarningsDto>>
 }
+
+data class LocationPingDto(
+    val lat: Double,
+    val lng: Double,
+    val heading: Float = 0f,
+    val speed: Float = 0f,
+    val accuracy: Float = 0f
+)
 
 data class EarningsDto(
     val today_amount: Double,

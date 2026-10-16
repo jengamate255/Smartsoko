@@ -5,7 +5,7 @@
 const { createServer } = require('http');
 
 // Import the Express app from the main server
-const { app } = require('../server-production.js');
+const { app } = require('../server/server-production.js');
 
 // Vercel serverless function handler
 module.exports = async (req, res) => {

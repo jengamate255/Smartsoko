@@ -20,7 +20,8 @@ const SmartNav = (() => {
   const NAV_ITEMS = [
     { id: 'home',      label: 'Home',      icon: 'home',           href: 'main.html' },
     { id: 'discover',  label: 'Discover',   icon: 'explore',        href: 'discovery.html' },
-    { id: 'cart',      label: 'Cart',       icon: 'shopping_cart',  href: 'customer.html' },
+    { id: 'cart',      label: 'Cart',       icon: 'shopping_cart',  href: 'cart.html' },
+    { id: 'sell',      label: 'Sell',       icon: 'storefront',     href: '/merchant' },
     { id: 'profile',   label: 'Profile',    icon: 'person',         href: 'profile.html' },
   ];
 
@@ -56,76 +57,7 @@ const MERCHANT_NAV = [
     { label: 'Admin Panel',   href: 'admin.html',  icon: 'admin_panel_settings' },
   ];
 
-  let config = {};
-  let cartCount = 0;
-
-  // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  function init(opts = {}) {
-    config = {
-      activePage: opts.activePage || 'home',
-      showMegaMenu: opts.showMegaMenu !== false,
-      showCart: opts.showCart !== false,
-      showSearch: opts.showSearch !== false,
-      skipTopbar: opts.skipTopbar === true,
-      role: opts.role || 'customer',
-      breadcrumbs: opts.breadcrumbs || null,
-      title: opts.title || 'SmartSoko',
-      ...opts,
-    };
-
-    cartCount = getCartCount();
-    if (!config.skipTopbar) renderTopBar();
-    renderBottomNav();
-    initScrollBehavior();
-    initKeyboardNav();
-    registerServiceWorker();
-  }
-
-  // â”€â”€ Service Worker Registration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  function registerServiceWorker() {
-    if ('serviceWorker' in navigator) {
-      const swPath = '/pwa/sw.js';
-      // Only register if not already registered
-      navigator.serviceWorker.getRegistration(swPath).then(reg => {
-        if (!reg) {
-          navigator.serviceWorker.register(swPath, { scope: '/pwa/' }).catch(() => {
-            // Silent fail â€” SW is a progressive enhancement
-          });
-        }
-      });
-    }
-  }
-
-  // â”€â”€ Cart helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  function getCartCount() {
-    // Try CartService first, fallback to localStorage
-    if (window.CartService && window.CartService.getItemCount) {
-      return window.CartService.getItemCount();
-    }
-    // Fallback with support for both quantity and qty
-    try {
-      const cart = JSON.parse(localStorage.getItem('smartsoko_cart') || '[]');
-      return cart.reduce((sum, item) => sum + (item.quantity || item.qty || 1), 0);
-    } catch { return 0; }
-  }
-
-  function updateCartBadge() {
-    cartCount = getCartCount();
-    document.querySelectorAll('.cart-badge-count').forEach(el => {
-      el.textContent = cartCount;
-      el.style.display = cartCount > 0 ? 'flex' : 'none';
-    });
-  }
-
-  // â”€â”€ Top Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  function renderTopBar() {
-    let existing = document.getElementById('smartnav-topbar');
-    if (existing) existing.remove();
-
-    const bar = document.createElement('header');
-    bar.id = 'smartnav-topbar';
-    bar.innerHTML = `
-      <style>
+  const SHARED_STYLES = `
         #smartnav-topbar {
           position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
           background: rgba(255,255,255,0.85); backdrop-filter: blur(16px);
@@ -291,7 +223,9 @@ const MERCHANT_NAV = [
         .sn-bottom-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
 
          @media (max-width: 768px) {
-           .sn-bottom-nav { display: flex; }
+           .sn-bottom-nav { display: flex; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; -ms-overflow-style: none; scrollbar-width: none; }
+           .sn-bottom-nav::-webkit-scrollbar { display: none; }
+           .sn-bottom-item { flex-shrink: 0; }
            .sn-hamburger { display: flex; }
           .sn-search { display: none; }
           .sn-btn span.sn-btn-label { display: none; }
@@ -299,7 +233,87 @@ const MERCHANT_NAV = [
           .sn-mega-dropdown.open { animation: none; }
           .sn-mega-grid { grid-template-columns: repeat(3, 1fr); }
         }
-      </style>
+      `;
+
+  function injectSharedStyles() {
+    let existing = document.getElementById('smartnav-shared-styles');
+    if (existing) existing.remove();
+    const style = document.createElement('style');
+    style.id = 'smartnav-shared-styles';
+    style.textContent = SHARED_STYLES;
+    document.head.appendChild(style);
+  }
+
+  let config = {};
+  let cartCount = 0;
+
+  // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  function init(opts = {}) {
+    config = {
+      activePage: opts.activePage || 'home',
+      showMegaMenu: opts.showMegaMenu !== false,
+      showCart: opts.showCart !== false,
+      showSearch: opts.showSearch !== false,
+      skipTopbar: opts.skipTopbar === true,
+      role: opts.role || 'customer',
+      breadcrumbs: opts.breadcrumbs || null,
+      title: opts.title || 'SmartSoko',
+      ...opts,
+    };
+
+    cartCount = getCartCount();
+    injectSharedStyles();
+    if (!config.skipTopbar) renderTopBar();
+    renderBottomNav();
+    initScrollBehavior();
+    initKeyboardNav();
+    registerServiceWorker();
+  }
+
+  // â”€â”€ Service Worker Registration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      const swPath = '/pwa/sw.js';
+      // Only register if not already registered
+      navigator.serviceWorker.getRegistration(swPath).then(reg => {
+        if (!reg) {
+          navigator.serviceWorker.register(swPath, { scope: '/pwa/' }).catch(() => {
+            // Silent fail â€” SW is a progressive enhancement
+          });
+        }
+      });
+    }
+  }
+
+  // â”€â”€ Cart helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  function getCartCount() {
+    // Try CartService first, fallback to localStorage
+    if (window.CartService && window.CartService.getItemCount) {
+      return window.CartService.getItemCount();
+    }
+    // Fallback with support for both quantity and qty
+    try {
+      const cart = JSON.parse(localStorage.getItem('smartsoko_cart') || '[]');
+      return cart.reduce((sum, item) => sum + (item.quantity || item.qty || 1), 0);
+    } catch { return 0; }
+  }
+
+  function updateCartBadge() {
+    cartCount = getCartCount();
+    document.querySelectorAll('.cart-badge-count').forEach(el => {
+      el.textContent = cartCount;
+      el.style.display = cartCount > 0 ? 'flex' : 'none';
+    });
+  }
+
+  // â”€â”€ Top Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  function renderTopBar() {
+    let existing = document.getElementById('smartnav-topbar');
+    if (existing) existing.remove();
+
+    const bar = document.createElement('header');
+    bar.id = 'smartnav-topbar';
+    bar.innerHTML = `
 
       <div class="sn-topbar-inner">
         <div style="display:flex;align-items:center;gap:0.75rem;">
@@ -325,8 +339,13 @@ const MERCHANT_NAV = [
 
         <div class="sn-actions">
 
+          <a href="/merchant" class="sn-btn" style="background:#f97316;color:#fff;box-shadow:0 2px 8px rgba(249,115,22,0.35);" title="Open Seller Dashboard">
+            <span class="material-symbols-outlined" style="font-size:1.15rem;font-variation-settings:'FILL' 1;">storefront</span>
+            <span class="sn-btn-label">Sell</span>
+          </a>
+
           ${config.showCart ? `
-          <a href="customer.html" class="sn-btn sn-btn-ghost cart-icon" style="position:relative;">
+          <a href="cart.html" class="sn-btn sn-btn-ghost cart-icon" style="position:relative;">
             <span class="material-symbols-outlined" style="font-size:1.15rem;">shopping_cart</span>
             <span class="sn-btn-label">Cart</span>
             <span class="cart-badge-count" style="display:${cartCount > 0 ? 'flex' : 'none'}; background-color: #B91C1C; color: white;">${cartCount}</span>
@@ -401,6 +420,16 @@ const MERCHANT_NAV = [
               ${item.label}
             </a>
           `).join('')}
+          ${['merchant', 'admin', 'driver'].includes(config.role) ? `
+            <a href="javascript:void(0)" onclick="try{ (window.logout ? window.logout() : window.location.replace('login.html?role=${config.role}')) }catch(e){ window.location.replace('login.html?role=${config.role}') }" class="sn-drawer-link" style="color:#dc2626;">
+              <span class="material-symbols-outlined">logout</span>
+              Sign Out
+            </a>` : ''}
+          <div class="sn-drawer-divider"></div>
+          <a href="/merchant" class="sn-drawer-link" style="background:#fff7ed;margin:0.25rem 1rem 0.5rem;color:#ea580c;font-weight:700;">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">storefront</span>
+            Sell on SmartSoko
+          </a>
           <div class="sn-drawer-divider"></div>
           <div class="sn-drawer-section">Quick Links</div>
           ${QUICK_LINKS.map(link => `

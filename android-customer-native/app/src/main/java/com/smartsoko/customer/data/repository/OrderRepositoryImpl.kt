@@ -16,13 +16,17 @@ import com.smartsoko.customer.domain.repository.AuthRepository
 import com.smartsoko.customer.domain.repository.OrderRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import android.content.Context
+import android.util.Log
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class OrderRepositoryImpl @Inject constructor(
     private val orderDao: OrderDao,
     private val apiService: SmartsokoApiService,
     private val gson: Gson,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    @ApplicationContext private val context: Context
 ) : OrderRepository {
     
     private val currentUserId: String
@@ -84,17 +88,29 @@ class OrderRepositoryImpl @Inject constructor(
                 notes = notes
             )
             val response = apiService.createOrder(request)
-            if (response.isSuccessful && response.body()?.success == true) {
-                val orderDto = response.body()?.data
+            val body = response.body()
+            if (response.isSuccessful && body?.success == true) {
+                val orderDto = body.data
                 if (orderDto != null) {
                     val entity = orderDto.toEntity()
                     orderDao.insertOrder(entity)
+                    // PesaPal hosted checkout (web-parity flow): open in browser
+                    body.paymentUrl?.let { url ->
+                        try {
+                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url)).apply {
+                                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            Log.w("OrderRepo", "Could not open payment URL", e)
+                        }
+                    }
                     Result.success(entity.toDomainModel())
                 } else {
-                    Result.failure(Exception("Failed to create order"))
+                    Result.failure(Exception(body.message ?: "Failed to create order"))
                 }
             } else {
-                Result.failure(Exception(response.message()))
+                Result.failure(Exception(body?.error ?: response.message()))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -168,7 +184,7 @@ class OrderRepositoryImpl @Inject constructor(
             id = id,
             userId = userId,
             items = itemsList.map { it.toDomainModel() },
-            status = OrderStatus.valueOf(status),
+            status = try { OrderStatus.valueOf(status) } catch (e: Exception) { OrderStatus.PENDING },
             deliveryAddress = addressDto?.toDomainModel() ?: Address("", "", "", "", "", "", null, "", null, Location(0.0, 0.0, null), false, null),
             paymentMethod = paymentDto?.toDomainModel() ?: PaymentMethod("", PaymentType.CASH_ON_DELIVERY, "Cash", false, null, null),
             subtotal = subtotal,
@@ -205,7 +221,11 @@ class OrderRepositoryImpl @Inject constructor(
             apartment = apartment,
             city = city,
             postalCode = postalCode,
-            location = Location(location.latitude, location.longitude, location.address),
+            location = Location(
+                latitude = location?.latitude ?: 0.0,
+                longitude = location?.longitude ?: 0.0,
+                address = location?.address
+            ),
             isDefault = isDefault,
             deliveryInstructions = deliveryInstructions
         )
@@ -214,7 +234,7 @@ class OrderRepositoryImpl @Inject constructor(
     private fun com.smartsoko.customer.data.remote.dto.PaymentMethodDto.toDomainModel(): PaymentMethod {
         return PaymentMethod(
             id = id,
-            type = PaymentType.valueOf(type),
+            type = runCatching { PaymentType.valueOf(type) }.getOrDefault(PaymentType.CASH_ON_DELIVERY),
             displayName = displayName,
             isDefault = isDefault,
             lastFourDigits = lastFourDigits,

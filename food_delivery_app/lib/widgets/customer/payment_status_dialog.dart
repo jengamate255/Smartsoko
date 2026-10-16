@@ -4,6 +4,30 @@ import '../../models/order.dart';
 
 enum PaymentDialogStatus { success, failed, timeout }
 
+/// Color and icon mapping for payment statuses - centralizes styling
+final Map<PaymentDialogStatus, PaymentStatusStyle> _paymentStatusStyles = {
+  PaymentDialogStatus.success:
+      const PaymentStatusStyle(icon: Icons.check_circle, color: Colors.green, title: 'Payment Successful!', message: 'Your payment has been processed successfully. Your order is being processed.'),
+  PaymentDialogStatus.failed:
+      const PaymentStatusStyle(icon: Icons.error, color: Colors.red, title: 'Payment Failed', message: 'The payment could not be completed. Please try again.'),
+  PaymentDialogStatus.timeout:
+      const PaymentStatusStyle(icon: Icons.access_time, color: Colors.orange, title: 'Payment Timeout', message: 'The payment request timed out. Please check your phone and try again.'),
+};
+
+class PaymentStatusStyle {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String message;
+
+  const PaymentStatusStyle({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.message,
+  });
+}
+
 class PaymentStatusDialog extends StatefulWidget {
   final String orderId;
   final String? transactionId;
@@ -63,7 +87,7 @@ class PaymentStatusDialog extends StatefulWidget {
     VoidCallback? onRetry,
   }) async {
     Timer? timeoutTimer;
-    
+
     // Start 60 second timeout
     timeoutTimer = Timer(const Duration(seconds: 60), () {
       onTimeout();
@@ -85,6 +109,9 @@ class PaymentStatusDialog extends StatefulWidget {
 class _PaymentStatusDialogState extends State<PaymentStatusDialog> {
   @override
   Widget build(BuildContext context) {
+    final style = _paymentStatusStyles[widget.status]!;
+    final canRetry = widget.onRetry != null && widget.retryCount < widget.maxRetries;
+
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -92,101 +119,50 @@ class _PaymentStatusDialogState extends State<PaymentStatusDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildIcon(),
+          _buildIcon(style),
           const SizedBox(height: 16),
-          _buildTitle(),
+          _buildTitle(style),
           const SizedBox(height: 8),
-          _buildMessage(),
+          _buildMessage(style),
           if (widget.status == PaymentDialogStatus.success && widget.transactionId != null) ...[
             const SizedBox(height: 12),
             _buildTransactionId(),
           ],
         ],
       ),
-      actions: _buildActions(),
+      actions: _buildActions(canRetry),
     );
   }
 
-  Widget _buildIcon() {
-    IconData iconData;
-    Color color;
-
-    switch (widget.status) {
-      case PaymentDialogStatus.success:
-        iconData = Icons.check_circle;
-        color = Colors.green;
-        break;
-      case PaymentDialogStatus.failed:
-        iconData = Icons.error;
-        color = Colors.red;
-        break;
-      case PaymentDialogStatus.timeout:
-        iconData = Icons.access_time;
-        color = Colors.orange;
-        break;
-    }
-
+  Widget _buildIcon(PaymentStatusStyle style) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: style.color.withOpacity(0.1),
         shape: BoxShape.circle,
       ),
       child: Icon(
-        iconData,
+        style.icon,
         size: 48,
-        color: color,
+        color: style.color,
       ),
     );
   }
 
-  Widget _buildTitle() {
-    String title;
-    Color color;
-
-    switch (widget.status) {
-      case PaymentDialogStatus.success:
-        title = 'Payment Successful!';
-        color = Colors.green;
-        break;
-      case PaymentDialogStatus.failed:
-        title = 'Payment Failed';
-        color = Colors.red;
-        break;
-      case PaymentDialogStatus.timeout:
-        title = 'Payment Timeout';
-        color = Colors.orange;
-        break;
-    }
-
+  Widget _buildTitle(PaymentStatusStyle style) {
     return Text(
-      title,
-      style: TextStyle(
+      style.title,
+      style: const TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        color: color,
       ),
       textAlign: TextAlign.center,
     );
   }
 
-  Widget _buildMessage() {
-    String message;
-
-    switch (widget.status) {
-      case PaymentDialogStatus.success:
-        message = 'Your payment has been processed successfully. Your order is being prepared.';
-        break;
-      case PaymentDialogStatus.failed:
-        message = widget.errorMessage ?? 'The payment could not be completed. Please try again.';
-        break;
-      case PaymentDialogStatus.timeout:
-        message = 'The payment request timed out. Please check your phone and try again.';
-        break;
-    }
-
+  Widget _buildMessage(PaymentStatusStyle style) {
     return Text(
-      message,
+      style.message,
       style: const TextStyle(
         fontSize: 14,
         color: Colors.grey,
@@ -224,58 +200,31 @@ class _PaymentStatusDialogState extends State<PaymentStatusDialog> {
     );
   }
 
-  List<Widget> _buildActions() {
-    final canRetry = widget.onRetry != null && widget.retryCount < widget.maxRetries;
-    
-    switch (widget.status) {
-      case PaymentDialogStatus.success:
-        return [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              widget.onClose?.call();
-            },
-            child: const Text(
-              'View Order',
-              style: TextStyle(
-                color: Colors.green,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+  List<Widget> _buildActions(bool canRetry) {
+    return [
+      TextButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+          widget.onClose?.call();
+        },
+        child: const Text(
+          'View Order',
+          style: TextStyle(
+            color: Colors.green,
+            fontWeight: FontWeight.bold,
           ),
-        ];
-      case PaymentDialogStatus.failed:
-      case PaymentDialogStatus.timeout:
-        return [
-          if (widget.onRetry != null)
-            TextButton(
-              onPressed: canRetry
-                  ? () {
-                      Navigator.of(context).pop();
-                      widget.onRetry?.call();
-                    }
-                  : null,
-              child: Text(
-                canRetry
-                    ? 'Retry (${widget.maxRetries - widget.retryCount} left)'
-                    : 'Max retries reached',
-                style: TextStyle(
-                  color: canRetry ? Colors.orange : Colors.grey,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              widget.onClose?.call();
-            },
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-        ];
-    }
+        ),
+      ),
+      TextButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+          widget.onClose?.call();
+        },
+        child: const Text(
+          'Cancel',
+          style: TextStyle(color: Colors.grey),
+        ),
+      ),
+    ];
   }
 }

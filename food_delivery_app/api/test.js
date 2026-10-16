@@ -1,7 +1,7 @@
 // Vercel Serverless Test Endpoint
 // Test endpoint to verify API routing works
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json');
   res.status(200).json({
     success: true,
@@ -12,4 +12,4 @@ export default async function handler(req, res) {
     headers: req.headers,
     query: req.query
   });
-}
+};

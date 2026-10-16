@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.smartsoko.driver.data.local.DebugSeed
 import com.smartsoko.driver.ui.navigation.AppNavigation
 import com.smartsoko.driver.ui.theme.SmartSokoDriverTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -15,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        DebugSeed.seedIfRequested(this)
         enableEdgeToEdge()
         setContent {
             SmartSokoDriverTheme {

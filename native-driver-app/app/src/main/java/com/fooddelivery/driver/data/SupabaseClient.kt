@@ -1,7 +1,7 @@
 package com.fooddelivery.driver.data
 
 import android.util.Log
-import com.fooddelivery.driver.util.Resource
+import com.smartsoko.driver.util.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -33,7 +33,8 @@ class SupabaseClient(
                 connection.doOutput = body != null
                 connection.setRequestProperty("Content-Type", "application/json")
                 connection.setRequestProperty("apikey", supabaseAnonKey)
-                connection.setRequestProperty("Authorization", "Bearer $firebaseToken")
+                connection.setRequestProperty("x-firebase-token", firebaseToken)
+                connection.setRequestProperty("Authorization", "Bearer $supabaseAnonKey")
 
                 if (body != null) {
                     connection.outputStream.use { it.write(body.toString().toByteArray()) }
@@ -49,14 +50,14 @@ class SupabaseClient(
 
                 if (responseCode in 200..299) {
                     val response = JSONObject(responseBody)
-                    Resource.success(response)
+                    Resource.success<JSONObject>(response)
                 } else {
                     Log.e(TAG, "Edge function failed: $responseCode - $responseBody")
-                    Resource.error("Request failed: $responseBody")
+                    Resource.error<JSONObject>("Request failed: $responseBody")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Edge function exception", e)
-                Resource.error("Error: ${e.message}")
+                Resource.error<JSONObject>("Error: ${e.message}")
             }
         }
     }

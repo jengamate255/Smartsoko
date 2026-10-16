@@ -1,9 +1,18 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.dagger.hilt.android")
     id("kotlin-kapt")
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
+}
+
+val keystoreProperties = Properties().apply {
+    val f = rootProject.file("keystore/keystore.properties")
+    if (f.exists()) FileInputStream(f).use { load(it) }
 }
 
 android {
@@ -14,15 +23,14 @@ android {
         applicationId = "com.fooddelivery.driver"
         minSdk = 24
         targetSdk = 34
-        versionCode = 2
+        versionCode = 3
         versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Backend URLs. Debug uses localhost + adb reverse (tcp:3000 -> tcp:3000).
-        buildConfigField("String", "API_BASE_URL", "\"http://localhost:3000/\"")
-        buildConfigField("String", "WEBSOCKET_URL", "\"http://localhost:3000\"")
-        // Mapbox public token (same value as res/values/strings.xml mapbox_access_token)
+        // Backend URLs. Supabase Edge Function (free tier) hosts the SmartSoko API.
+        buildConfigField("String", "API_BASE_URL", "\"https://vonkqyiczeqhuqhahsxm.supabase.co/functions/v1/api/\"")
+                // Mapbox public token (same value as res/values/strings.xml mapbox_access_token)
         buildConfigField(
             "String",
             "MAPBOX_ACCESS_TOKEN",
@@ -40,7 +48,7 @@ android {
         kotlinCompilerExtensionVersion = "1.5.10"
     }
 
-    kotlinOptions {
+kotlinOptions {
         jvmTarget = "17"
     }
 
@@ -56,18 +64,18 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "API_BASE_URL", "\"https://your-domain.com/\"")
-            buildConfigField("String", "WEBSOCKET_URL", "\"https://your-domain.com\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://vonkqyiczeqhuqhahsxm.supabase.co/functions/v1/api/\"")
+                        signingConfig = if (keystoreProperties.containsKey("storeFile")) {
+                signingConfigs.create("release") {
+                    storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                    storePassword = keystoreProperties.getProperty("storePassword")
+                    keyAlias = keystoreProperties.getProperty("keyAlias")
+                    keyPassword = keystoreProperties.getProperty("keyPassword")
+                }
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
     }
 
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
@@ -124,6 +132,10 @@ dependencies {
     
     // Timber for logging
     implementation("com.jakewharton.timber:timber:5.0.1")
+    
+    // Firebase Crashlytics
+    implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
     
     // Google Play Services
     implementation("com.google.android.gms:play-services-location:21.2.0")

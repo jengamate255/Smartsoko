@@ -22,6 +22,7 @@ import com.fooddelivery.driver.R
 import com.fooddelivery.driver.data.model.Order
 import com.fooddelivery.driver.ui.state.AppViewModel
 import com.fooddelivery.driver.ui.theme.SmartSokoDriverTheme
+import com.fooddelivery.driver.util.AppConfig
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -191,7 +192,7 @@ private fun OrderHistoryItem(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "₦${"%,.2f".format(order.totalAmount)}",
+                        text = "${AppConfig.CURRENCY_SYMBOL}${"%,.2f".format(order.totalAmount)}",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary
                     )

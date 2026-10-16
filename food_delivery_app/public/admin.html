@@ -19,12 +19,12 @@
   <link rel="preload" href="dist/tailwind.css" as="style">
   <link rel="stylesheet" href="dist/tailwind.css">
   <link rel="stylesheet" href="design-system.css">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <!-- Chart.js & Mapbox -->
-  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js" defer></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.js" defer></script>
   <!-- Supabase Realtime (for live order updates) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.js" defer></script>
   <!-- Firebase Modular SDK -->
   <script type="module" src="config/firebase-config.js?v=5"></script>
   <script type="module" src="config/cross-platform-service.js?v=4"></script>
@@ -35,9 +35,21 @@
   <style>
     .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display: inline-block; line-height: 1; vertical-align: middle; }
     .filled-icon { font-variation-settings: 'FILL' 1; }
+    /* ── Design tokens (aligned with DESIGN.md merchant system) ────────── */
+    :root {
+      --os-primary: #064E3B; --os-primary-light: #10B981; --os-primary-hover: #059669;
+      --os-surface: #FFFFFF; --os-bg: #F8FAF6; --os-text: #022D1D;
+      --os-text-sec: #475569; --os-text-muted: #94A3B8; --os-border: #E2E8F0;
+      --os-radius: 8px; --os-success: #10B981; --os-warning: #F59E0B;
+      --os-error: #EF4444; --os-info: #3B82F6;
+    }
     * { box-sizing: border-box; }
-    body { font-family: 'Inter','Montserrat',sans-serif; min-height: 100vh; }
-    h1,h2,h3,h4,h5,h6 { font-family: 'Montserrat',sans-serif; }
+    body { font-family: 'Plus Jakarta Sans','Inter',sans-serif; min-height: 100vh; color: var(--os-text); }
+    h1,h2,h3,h4,h5,h6 { font-family: 'Plus Jakarta Sans','Montserrat',sans-serif; }
+    .sticky-thead thead th { position: sticky; top: 0; background: #f9fafb; z-index: 1; box-shadow: 0 1px 0 #f0f0f0; }
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    /* Accessibility: visible focus ring */
+    .tab-btn:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--os-primary); outline-offset: 2px; }
     .gradient-bg { background: #064e3b; }
     .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
     @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
@@ -99,7 +111,7 @@
       <div class="flex items-center gap-3 flex-wrap">
         <div class="hidden md:flex relative group">
           <span class="material-symbols-outlined text-on-surface-variant absolute left-3 top-1/2 -translate-y-1/2 text-sm">search</span>
-          <input type="text" placeholder="Quick search..." class="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-700/20 focus:border-green-700 transition-all w-48 focus:w-64 outline-none">
+          <input type="text" placeholder="Quick search..." class="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-700/20 focus:border-green-700 transition-all w-48 focus:w-64 outline-none" aria-label="Quick search">
         </div>
         <button onclick="refreshAll()" class="w-10 h-10 bg-white border border-gray-200 flex items-center justify-center rounded-xl hover:bg-gray-50 transition-all shadow-sm">
           <span class="material-symbols-outlined text-gray-500">refresh</span>
@@ -107,30 +119,41 @@
       </div>
     </div>
 
-    <!-- Tab Navigation -->
-    <div class="bg-white border-b border-gray-100 px-6 flex gap-4 overflow-x-auto hide-scrollbar -mx-6 px-6 pb-2">
-      <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn active"><span class="material-symbols-outlined">dashboard</span> Overview</button>
-      <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn"><span class="material-symbols-outlined">receipt_long</span> Orders</button>
-      <button onclick="switchTab('sellers')" id="tab-sellers" class="tab-btn"><span class="material-symbols-outlined">storefront</span> Sellers</button>
-      <button onclick="switchTab('users')" id="tab-users" class="tab-btn"><span class="material-symbols-outlined">people</span> Users</button>
-      <button onclick="switchTab('marketing')" id="tab-marketing" class="tab-btn"><span class="material-symbols-outlined">campaign</span> Marketing</button>
-      <button onclick="switchTab('logistics')" id="tab-logistics" class="tab-btn"><span class="material-symbols-outlined">local_shipping</span> Logistics</button>
-      <button onclick="switchTab('verification')" id="tab-verification" class="tab-btn"><span class="material-symbols-outlined">verified</span> Verification</button>
-      <button onclick="switchTab('finance')" id="tab-finance" class="tab-btn"><span class="material-symbols-outlined">account_balance_wallet</span> Finance</button>
-      <button onclick="switchTab('support')" id="tab-support" class="tab-btn"><span class="material-symbols-outlined">support_agent</span> Support</button>
-      <button onclick="switchTab('analytics')" id="tab-analytics" class="tab-btn"><span class="material-symbols-outlined">analytics</span> Analytics</button>
-      <button onclick="switchTab('server')" id="tab-server" class="tab-btn"><span class="material-symbols-outlined">dns</span> Server</button>
-      <button onclick="switchTab('audit')" id="tab-audit" class="tab-btn"><span class="material-symbols-outlined">history</span> Audit Logs</button>
-      <button onclick="switchTab('settings')" id="tab-settings" class="tab-btn"><span class="material-symbols-outlined">settings</span> Settings</button>
-      <button onclick="switchTab('risk')" id="tab-risk" class="tab-btn"><span class="material-symbols-outlined">shield</span> Risk Scoring</button>
-      <button onclick="switchTab('rbac')" id="tab-rbac" class="tab-btn"><span class="material-symbols-outlined">admin_panel_settings</span> Roles</button>
-      <button onclick="switchTab('webhooks')" id="tab-webhooks" class="tab-btn"><span class="material-symbols-outlined">webhook</span> Webhooks</button>
-      <button onclick="switchTab('apikeys')" id="tab-apikeys" class="tab-btn"><span class="material-symbols-outlined">key</span> API Keys</button>
-      <button onclick="switchTab('notifications')" id="tab-notifications" class="tab-btn"><span class="material-symbols-outlined">notifications</span> Notifications</button>
-      <button onclick="switchTab('products')" id="tab-products" class="tab-btn"><span class="material-symbols-outlined">inventory_2</span> Products</button>
-      <button onclick="switchTab('reviews')" id="tab-reviews" class="tab-btn"><span class="material-symbols-outlined">rate_review</span> Reviews</button>
-      <button onclick="switchTab('cms')" id="tab-cms" class="tab-btn"><span class="material-symbols-outlined">article</span> CMS</button>
-    </div>
+    <!-- Tab Navigation (grouped for scannability + wrapping on mobile) -->
+    <nav class="bg-white border-b border-gray-100 px-6 py-3" aria-label="Admin sections">
+      <div class="flex flex-wrap items-center gap-1.5">
+        <span class="text-[10px] uppercase font-bold text-gray-400 mr-1 hidden sm:inline">General</span>
+        <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn active"><span class="material-symbols-outlined">dashboard</span> Overview</button>
+        <span class="w-px h-5 bg-gray-200 mx-1 hidden sm:block"></span>
+        <span class="text-[10px] uppercase font-bold text-gray-400 mr-1 hidden sm:inline">Operations</span>
+        <button onclick="switchTab('orders')" id="tab-orders" class="tab-btn"><span class="material-symbols-outlined">receipt_long</span> Orders</button>
+        <button onclick="switchTab('sellers')" id="tab-sellers" class="tab-btn"><span class="material-symbols-outlined">storefront</span> Sellers</button>
+        <button onclick="switchTab('users')" id="tab-users" class="tab-btn"><span class="material-symbols-outlined">people</span> Users</button>
+        <button onclick="switchTab('products')" id="tab-products" class="tab-btn"><span class="material-symbols-outlined">inventory_2</span> Products</button>
+        <button onclick="switchTab('logistics')" id="tab-logistics" class="tab-btn"><span class="material-symbols-outlined">local_shipping</span> Logistics</button>
+        <button onclick="switchTab('verification')" id="tab-verification" class="tab-btn"><span class="material-symbols-outlined">verified</span> Verification</button>
+        <button onclick="switchTab('reviews')" id="tab-reviews" class="tab-btn"><span class="material-symbols-outlined">rate_review</span> Reviews</button>
+        <span class="w-px h-5 bg-gray-200 mx-1 hidden sm:block"></span>
+        <span class="text-[10px] uppercase font-bold text-gray-400 mr-1 hidden sm:inline">Commerce</span>
+        <button onclick="switchTab('marketing')" id="tab-marketing" class="tab-btn"><span class="material-symbols-outlined">campaign</span> Marketing</button>
+        <button onclick="switchTab('finance')" id="tab-finance" class="tab-btn"><span class="material-symbols-outlined">account_balance_wallet</span> Finance</button>
+        <button onclick="switchTab('notifications')" id="tab-notifications" class="tab-btn"><span class="material-symbols-outlined">notifications</span> Notifications</button>
+        <button onclick="switchTab('cms')" id="tab-cms" class="tab-btn"><span class="material-symbols-outlined">article</span> CMS</button>
+        <span class="w-px h-5 bg-gray-200 mx-1 hidden sm:block"></span>
+        <span class="text-[10px] uppercase font-bold text-gray-400 mr-1 hidden sm:inline">Platform</span>
+        <button onclick="switchTab('support')" id="tab-support" class="tab-btn"><span class="material-symbols-outlined">support_agent</span> Support</button>
+        <button onclick="switchTab('analytics')" id="tab-analytics" class="tab-btn"><span class="material-symbols-outlined">analytics</span> Analytics</button>
+        <button onclick="switchTab('server')" id="tab-server" class="tab-btn"><span class="material-symbols-outlined">dns</span> Server</button>
+        <button onclick="switchTab('audit')" id="tab-audit" class="tab-btn"><span class="material-symbols-outlined">history</span> Audit Logs</button>
+        <button onclick="switchTab('settings')" id="tab-settings" class="tab-btn"><span class="material-symbols-outlined">settings</span> Settings</button>
+        <button onclick="switchTab('risk')" id="tab-risk" class="tab-btn"><span class="material-symbols-outlined">shield</span> Risk Scoring</button>
+        <span class="w-px h-5 bg-gray-200 mx-1 hidden sm:block"></span>
+        <span class="text-[10px] uppercase font-bold text-gray-400 mr-1 hidden sm:inline">Access</span>
+        <button onclick="switchTab('rbac')" id="tab-rbac" class="tab-btn"><span class="material-symbols-outlined">admin_panel_settings</span> Roles</button>
+        <button onclick="switchTab('webhooks')" id="tab-webhooks" class="tab-btn"><span class="material-symbols-outlined">webhook</span> Webhooks</button>
+        <button onclick="switchTab('apikeys')" id="tab-apikeys" class="tab-btn"><span class="material-symbols-outlined">key</span> API Keys</button>
+      </div>
+    </nav>
 
     <!-- Content Area -->
     <div class="p-6 pt-8">
@@ -194,7 +217,7 @@
                 <button onclick="switchTab('orders')" class="text-green-700 text-sm hover:underline">View All</button>
               </div>
             </div>
-            <table class="w-full">
+            <div class="table-scroll"><table class="w-full">
               <thead class="bg-gray-50">
                 <tr>
                   <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Order ID</th>
@@ -207,7 +230,7 @@
               <tbody id="ordersTable" class="divide-y divide-gray-100">
                 <tr><td colspan="5" class="px-6 py-8 text-center text-gray-500"><span class="material-symbols-outlined text-4xl mb-2 block">inbox</span>Loading...</td></tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
           <div class="space-y-6">
             <div class="admin-card p-6">
@@ -220,7 +243,7 @@
                 <button onclick="exportData('all')" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left"><span class="material-symbols-outlined text-green-700">download</span><span class="text-sm text-gray-700">Export All Data</span></button>
               </div>
             </div>
-            <div class="admin-card p-6 bg-green-700 text-white shadow-lg shadow-green-700/20">
+            <div class="admin-card p-6 bg-green-700 text-white shadow-lg shadow-green-700/20" style="background:#15803d">
               <h3 class="font-bold mb-2">Platform Status</h3>
               <div class="flex items-center gap-2 mb-4"><span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span><span class="text-sm">All Systems Operational</span></div>
               <p class="text-sm opacity-90">Firebase: Connected</p>
@@ -235,6 +258,10 @@
           <div class="p-6 border-b flex items-center justify-between">
             <h2 class="font-bold text-gray-900">All Orders</h2>
             <div class="flex gap-3 flex-wrap">
+              <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
+                <span class="material-symbols-outlined text-gray-500 text-sm">search</span>
+                <input id="orderSearchInput" type="text" placeholder="Search orders..." class="bg-transparent text-sm text-gray-700 focus:outline-none w-40" aria-label="Search orders" oninput="var v=this.value;clearTimeout(this._t);this._t=setTimeout(filterOrders,250)">
+              </div>
               <select id="orderStatusFilter" class="border border-gray-200 rounded-lg px-4 py-2" onchange="filterOrders()">
                 <option value="">All Status</option>
                 <option value="pending">Pending</option>
@@ -248,7 +275,8 @@
               <button onclick="exportData('orders')" class="px-4 py-2 gradient-bg text-white rounded-lg flex items-center gap-2 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-sm">download</span> Export CSV</button>
             </div>
           </div>
-          <table class="w-full">
+          <div id="ordersTruncateNotice" class="hidden mx-6 mt-4 px-4 py-2 bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-lg"></div>
+          <div class="table-scroll"><table class="w-full">
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Order ID</th>
@@ -262,7 +290,7 @@
               </tr>
             </thead>
             <tbody id="ordersTableBody" class="divide-y divide-gray-100"><tr><td colspan="8" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody>
-          </table>
+          </table></div>
         </div>
       </div>
 
@@ -273,7 +301,7 @@
             <h2 class="font-bold text-gray-900">All Sellers</h2>
             <button onclick="exportData('sellers')" class="px-4 py-2 gradient-bg text-white rounded-lg flex items-center gap-2 hover:opacity-90 transition-all"><span class="material-symbols-outlined text-sm">download</span> Export CSV</button>
           </div>
-          <table class="w-full">
+          <div class="table-scroll"><table class="w-full">
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Seller</th>
@@ -285,7 +313,7 @@
               </tr>
             </thead>
             <tbody id="sellersTable" class="divide-y divide-gray-100"><tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody>
-          </table>
+          </table></div>
         </div>
       </div>
 
@@ -300,7 +328,7 @@
             <div class="flex items-center gap-3 flex-wrap">
               <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
                 <span class="material-symbols-outlined text-gray-500 text-sm">search</span>
-                <input id="userSearchInput" oninput="searchUsers()" placeholder="Search users..." class="bg-transparent text-sm text-gray-700 focus:outline-none w-36">
+                <input id="userSearchInput" oninput="var v=this.value;clearTimeout(this._t);this._t=setTimeout(searchUsers,250)" placeholder="Search users..." class="bg-transparent text-sm text-gray-700 focus:outline-none w-36">
               </div>
               <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
                 <span class="material-symbols-outlined text-gray-500 text-sm">filter_list</span>
@@ -319,7 +347,7 @@
           </div>
           <div id="userStats"></div>
           <div class="overflow-x-auto">
-            <table class="w-full">
+            <div class="table-scroll"><table class="w-full">
               <thead class="bg-gray-50">
                 <tr>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase"><input type="checkbox" class="rounded border-gray-300" onchange="toggleSelectAllUsers(this)"></th>
@@ -334,7 +362,7 @@
               <tbody id="usersTable" class="divide-y divide-gray-100">
                 <tr><td colspan="7" class="px-6 py-8 text-center text-gray-500">Loading users...</td></tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
         </div>
 
@@ -358,8 +386,9 @@
               <label class="block text-sm font-semibold text-gray-700 mb-3">Phone</label>
               <input id="modalUserPhone" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Phone number">
               <label class="block text-sm font-semibold text-gray-700 mb-3">Role</label>
-              <div class="grid grid-cols-2 gap-3">
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <button onclick="selectRole('customer')" id="role-customer" class="role-option p-4 border-2 border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-green-700 hover:bg-green-50 transition-all"><span class="material-symbols-outlined text-2xl text-gray-600">shopping_cart</span><span class="font-medium text-sm">Customer</span></button>
+                <button onclick="selectRole('merchant')" id="role-merchant" class="role-option p-4 border-2 border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-green-700 hover:bg-green-50 transition-all"><span class="material-symbols-outlined text-2xl text-gray-600">storefront</span><span class="font-medium text-sm">Merchant</span></button>
                 <button onclick="selectRole('seller')" id="role-seller" class="role-option p-4 border-2 border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-green-700 hover:bg-green-50 transition-all"><span class="material-symbols-outlined text-2xl text-gray-600">store</span><span class="font-medium text-sm">Seller</span></button>
                 <button onclick="selectRole('driver')" id="role-driver" class="role-option p-4 border-2 border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-green-700 hover:bg-green-50 transition-all"><span class="material-symbols-outlined text-2xl text-gray-600">local_shipping</span><span class="font-medium text-sm">Driver</span></button>
                 <button onclick="selectRole('admin')" id="role-admin" class="role-option p-4 border-2 border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-green-700 hover:bg-green-50 transition-all"><span class="material-symbols-outlined text-2xl text-gray-600">admin_panel_settings</span><span class="font-medium text-sm">Admin</span></button>
@@ -380,9 +409,9 @@
               <button onclick="document.getElementById('createUserModal').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button>
             </div>
             <div class="space-y-4">
-              <div><label class="block text-sm font-semibold text-gray-700 mb-1">Full Name *</label><input id="createUserName" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="John Doe"></div>
-              <div><label class="block text-sm font-semibold text-gray-700 mb-1">Email *</label><input id="createUserEmail" type="email" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="john@example.com"></div>
-              <div><label class="block text-sm font-semibold text-gray-700 mb-1">Phone</label><input id="createUserPhone" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="+255 123 456 789"></div>
+<div><label class="block text-sm font-semibold text-gray-700 mb-1">Full Name *</label><input id="createUserName" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="John Doe" required aria-describedby="createUserNameError"></div>
+<div><label class="block text-sm font-semibold text-gray-700 mb-1">Email *</label><input id="createUserEmail" type="email" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="john@example.com" required aria-describedby="createUserEmailError"></div>
+<div><label class="block text-sm font-semibold text-gray-700 mb-1">Phone</label><input id="createUserPhone" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="+255 123 456 789" aria-describedby="createUserPhoneError"></div>
               <div><label class="block text-sm font-semibold text-gray-700 mb-1">Role</label>
                 <select id="createUserRole" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
                   <option value="customer">Customer</option>
@@ -503,6 +532,65 @@
           </div>
         </div>
 
+        <!-- Coupon Modal -->
+        <div id="couponModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+          <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h3 id="couponModalTitle" class="text-lg font-bold text-gray-900">New Coupon</h3>
+              <button onclick="closeCouponModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button>
+            </div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Code</label>
+            <input id="couponCode" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-4 uppercase focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="e.g. WELCOME10">
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Type</label>
+                <select id="couponType" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500"><option value="percent">Percent (%)</option><option value="fixed">Fixed (TSh)</option></select>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Value</label>
+                <input id="couponValue" type="number" min="0" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="10">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Min order (TSh)</label>
+                <input id="couponMinOrder" type="number" min="0" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="0">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Max redemptions</label>
+                <input id="couponMaxRedemptions" type="number" min="0" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="0 = unlimited">
+              </div>
+            </div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Expires at</label>
+            <input id="couponExpiresAt" type="date" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-green-500">
+            <label class="flex items-center gap-2 mb-6"><input id="couponActive" type="checkbox" checked class="rounded border-gray-300"> <span class="text-sm text-gray-700">Active</span></label>
+            <div class="flex gap-3">
+              <button onclick="closeCouponModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+              <button onclick="saveCoupon()" class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium hover:opacity-90">Save Coupon</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Banner Modal -->
+        <div id="bannerModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+          <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h3 id="bannerModalTitle" class="text-lg font-bold text-gray-900">Add Banner</h3>
+              <button onclick="closeBannerModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button>
+            </div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Title</label>
+            <input id="bannerTitle" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Banner title">
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Image URL</label>
+            <input id="bannerImageUrl" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="https://...">
+            <div id="bannerPreviewWrap" class="hidden mb-4"><img id="bannerPreview" class="w-full h-32 object-cover rounded-xl" alt="Banner preview"></div>
+            <label class="flex items-center gap-2 mb-6"><input id="bannerActive" type="checkbox" checked class="rounded border-gray-300"> <span class="text-sm text-gray-700">Active</span></label>
+            <div class="flex gap-3">
+              <button onclick="closeBannerModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+              <button onclick="saveBanner()" class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium hover:opacity-90">Save Banner</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Send Notification Modal -->
         <div id="sendNotificationModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
           <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
@@ -560,12 +648,12 @@
               <h2 class="font-bold text-gray-900">Active Coupons</h2>
               <button onclick="openCouponModal()" class="gradient-bg text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:opacity-90"><span class="material-symbols-outlined text-sm">add</span> New Coupon</button>
             </div>
-            <div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wider"><tr><th class="px-6 py-3">Code</th><th class="px-6 py-3">Discount</th><th class="px-6 py-3">Status</th><th class="px-6 py-3">Actions</th></tr></thead><tbody id="couponsTable" class="divide-y divide-gray-100"><tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">Loading coupons...</td></tr></tbody></table></div>
+            <div class="overflow-x-auto"><div class="table-scroll"><table class="w-full text-left"><thead class="bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wider"><tr><th class="px-6 py-3">Code</th><th class="px-6 py-3">Discount</th><th class="px-6 py-3">Status</th><th class="px-6 py-3">Actions</th></tr></thead><tbody id="couponsTable" class="divide-y divide-gray-100"><tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">Loading coupons...</td></tr></tbody></table></div></div>
           </div>
           <div class="admin-card p-6">
             <h2 class="font-bold text-gray-900 mb-6">Homepage Banners</h2>
             <div id="bannersList" class="space-y-4"><div class="p-8 text-center text-gray-400 border border-dashed rounded-xl">Loading banners...</div></div>
-            <button class="w-full mt-6 py-3 border-2 border-dashed border-gray-200 rounded-xl text-gray-500 hover:border-green-700 hover:text-green-700 transition-all flex items-center justify-center gap-2"><span class="material-symbols-outlined">add_photo_alternate</span> Add Banner</button>
+            <button onclick="openBannerModal()" class="w-full mt-6 py-3 border-2 border-dashed border-gray-200 rounded-xl text-gray-500 hover:border-green-700 hover:text-green-700 transition-all flex items-center justify-center gap-2"><span class="material-symbols-outlined">add_photo_alternate</span> Add Banner</button>
           </div>
         </div>
       </div>
@@ -590,7 +678,7 @@
 
       <!-- Verification Tab -->
       <div id="content-verification" class="tab-content hidden">
-        <div class="admin-card overflow-hidden"><div class="p-6 border-b border-gray-100 flex justify-between items-center"><h2 class="font-bold text-gray-900">Seller Verification Queue</h2><span class="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold" id="verificationCount">Loading...</span></div><div class="overflow-x-auto"><table class="w-full text-left border-collapse"><thead><tr class="bg-gray-50 text-[10px] uppercase tracking-wider font-bold text-gray-500"><th class="px-6 py-4">Seller Info</th><th class="px-6 py-4">Documents</th><th class="px-6 py-4">Applied Date</th><th class="px-6 py-4">Actions</th></tr></thead><tbody id="verificationQueue" class="divide-y divide-gray-100"><tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table></div></div>
+        <div class="admin-card overflow-hidden"><div class="p-6 border-b border-gray-100 flex justify-between items-center"><h2 class="font-bold text-gray-900">Seller Verification Queue</h2><span class="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold" id="verificationCount">Loading...</span></div><div class="overflow-x-auto"><div class="table-scroll"><table class="w-full text-left border-collapse"><thead><tr class="bg-gray-50 text-[10px] uppercase tracking-wider font-bold text-gray-500"><th class="px-6 py-4">Seller Info</th><th class="px-6 py-4">Documents</th><th class="px-6 py-4">Applied Date</th><th class="px-6 py-4">Actions</th></tr></thead><tbody id="verificationQueue" class="divide-y divide-gray-100"><tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table></div></div></div>
       </div>
 
       <!-- Finance Tab -->
@@ -638,7 +726,7 @@
 
       <!-- Audit Tab -->
       <div id="content-audit" class="tab-content hidden">
-        <div class="admin-card overflow-hidden"><div class="p-6 border-b border-gray-100 flex justify-between items-center"><h2 class="font-bold text-gray-900">System Audit Logs</h2><span class="flex gap-2"><button onclick="loadAuditLogs()" class="px-3 py-1 gradient-bg text-white rounded text-xs hover:opacity-90 flex items-center gap-1"><span class="material-symbols-outlined text-sm">refresh</span> Refresh</button></span></div><div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-gray-50 text-[10px] uppercase font-bold text-gray-500"><tr><th class="px-6 py-4">Timestamp</th><th class="px-6 py-4">User</th><th class="px-6 py-4">Action</th><th class="px-6 py-4">IP Address</th></tr></thead><tbody id="auditLogs" class="divide-y divide-gray-100 text-sm"><tr><td colspan="4" class="px-6 py-12 text-center text-gray-400">Loading audit logs...</td></tr></tbody></table></div></div>
+        <div class="admin-card overflow-hidden"><div class="p-6 border-b border-gray-100 flex justify-between items-center"><h2 class="font-bold text-gray-900">System Audit Logs</h2><span class="flex gap-2"><button onclick="loadAuditLogs()" class="px-3 py-1 gradient-bg text-white rounded text-xs hover:opacity-90 flex items-center gap-1"><span class="material-symbols-outlined text-sm">refresh</span> Refresh</button></span></div><div class="overflow-x-auto"><div class="table-scroll"><table class="w-full text-left"><thead class="bg-gray-50 text-[10px] uppercase font-bold text-gray-500"><tr><th class="px-6 py-4">Timestamp</th><th class="px-6 py-4">User</th><th class="px-6 py-4">Action</th><th class="px-6 py-4">IP Address</th></tr></thead><tbody id="auditLogs" class="divide-y divide-gray-100 text-sm"><tr><td colspan="4" class="px-6 py-12 text-center text-gray-400">Loading audit logs...</td></tr></tbody></table></div></div></div>
       </div>
 
       <!-- Settings Tab -->
@@ -681,7 +769,7 @@
               <button onclick="loadRiskData()" class="px-4 py-2 gradient-bg text-white rounded-lg text-sm font-medium hover:opacity-90">Refresh</button>
             </div>
           </div>
-          <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-6 py-3 text-left">Entity Type</th><th class="px-6 py-3 text-left">ID</th><th class="px-6 py-3 text-left">Risk Score</th><th class="px-6 py-3 text-left">Flags</th><th class="px-6 py-3 text-left">Actions</th></tr></thead><tbody id="riskAssessmentsTable" class="divide-y divide-gray-100"><tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table></div>
+          <div class="overflow-x-auto"><div class="table-scroll"><table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-6 py-3 text-left">Entity Type</th><th class="px-6 py-3 text-left">ID</th><th class="px-6 py-3 text-left">Risk Score</th><th class="px-6 py-3 text-left">Flags</th><th class="px-6 py-3 text-left">Actions</th></tr></thead><tbody id="riskAssessmentsTable" class="divide-y divide-gray-100"><tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table></div></div>
         </div>
       </div>
 
@@ -703,7 +791,7 @@
       <div id="content-webhooks" class="tab-content hidden">
         <div class="flex justify-between items-center mb-6"><h2 class="font-bold text-gray-900 text-lg">Webhook Endpoints</h2><button onclick="openCreateWebhookModal()" class="px-4 py-2 gradient-bg text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:opacity-90"><span class="material-symbols-outlined text-sm">add</span> Add Webhook</button></div>
         <div class="admin-card overflow-hidden">
-          <table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-6 py-3 text-left">Name</th><th class="px-6 py-3 text-left">URL</th><th class="px-6 py-3 text-left">Events</th><th class="px-6 py-3 text-left">Status</th><th class="px-6 py-3 text-left">Actions</th></tr></thead><tbody id="webhooksTable" class="divide-y divide-gray-100"><tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table>
+          <div class="table-scroll"><table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-6 py-3 text-left">Name</th><th class="px-6 py-3 text-left">URL</th><th class="px-6 py-3 text-left">Events</th><th class="px-6 py-3 text-left">Status</th><th class="px-6 py-3 text-left">Actions</th></tr></thead><tbody id="webhooksTable" class="divide-y divide-gray-100"><tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table></div>
         </div>
       </div>
 
@@ -711,7 +799,7 @@
       <div id="content-apikeys" class="tab-content hidden">
         <div class="flex justify-between items-center mb-6"><h2 class="font-bold text-gray-900 text-lg">API Keys</h2><button onclick="openCreateApiKeyModal()" class="px-4 py-2 gradient-bg text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:opacity-90"><span class="material-symbols-outlined text-sm">add</span> Generate Key</button></div>
         <div class="admin-card overflow-hidden">
-          <table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-6 py-3 text-left">Name</th><th class="px-6 py-3 text-left">Key</th><th class="px-6 py-3 text-left">Permissions</th><th class="px-6 py-3 text-left">Status</th><th class="px-6 py-3 text-left">Created</th><th class="px-6 py-3 text-left">Actions</th></tr></thead><tbody id="apiKeysTable" class="divide-y divide-gray-100"><tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table>
+          <div class="table-scroll"><table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-6 py-3 text-left">Name</th><th class="px-6 py-3 text-left">Key</th><th class="px-6 py-3 text-left">Permissions</th><th class="px-6 py-3 text-left">Status</th><th class="px-6 py-3 text-left">Created</th><th class="px-6 py-3 text-left">Actions</th></tr></thead><tbody id="apiKeysTable" class="divide-y divide-gray-100"><tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table></div>
         </div>
       </div>
 
@@ -719,12 +807,12 @@
       <div id="content-notifications" class="tab-content hidden">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div class="admin-card p-6 border-l-4 border-blue-500"><p class="text-xs text-gray-500 uppercase font-bold mb-1">Total Sent</p><p class="text-2xl font-bold text-gray-900" id="notifTotalCount">-</p></div>
-          <div class="admin-card p-6 border-l-4 border-green-500"><p class="text-xs text-gray-500 uppercase font-bold mb-1">Active</p><p class="text-2xl font-bold text-green-600" id="notifActiveCount">-</p></div>
+          <div class="admin-card p-6 border-l-4 border-green-500"><p class="text-xs text-gray-500 uppercase font-bold mb-1">Unread</p><p class="text-2xl font-bold text-green-600" id="notifActiveCount">-</p></div>
           <div class="admin-card p-6"><p class="text-xs text-gray-500 uppercase font-bold mb-1">Delivery Rate</p><p class="text-2xl font-bold text-gray-900" id="notifDeliveryRate">-</p></div>
         </div>
         <div class="admin-card overflow-hidden">
           <div class="p-6 border-b flex justify-between items-center"><h2 class="font-bold text-gray-900">Notification History</h2><button onclick="openSendNotificationModal()" class="px-4 py-2 gradient-bg text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:opacity-90"><span class="material-symbols-outlined text-sm">campaign</span> Broadcast</button></div>
-          <table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-6 py-3 text-left">Title</th><th class="px-6 py-3 text-left">Message</th><th class="px-6 py-3 text-left">Type</th><th class="px-6 py-3 text-left">Target</th><th class="px-6 py-3 text-left">Sent</th><th class="px-6 py-3 text-left">Actions</th></tr></thead><tbody id="notificationsTable" class="divide-y divide-gray-100"><tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table>
+          <div class="table-scroll"><table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-6 py-3 text-left">Title</th><th class="px-6 py-3 text-left">Message</th><th class="px-6 py-3 text-left">Type</th><th class="px-6 py-3 text-left">Target</th><th class="px-6 py-3 text-left">Sent</th><th class="px-6 py-3 text-left">Actions</th></tr></thead><tbody id="notificationsTable" class="divide-y divide-gray-100"><tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table></div>
         </div>
       </div>
 
@@ -733,13 +821,13 @@
         <div class="flex items-center justify-between mb-6">
           <div><h2 class="font-bold text-xl text-gray-900">Product Catalog</h2><p class="text-sm text-gray-500">Manage all products across the platform</p></div>
           <div class="flex gap-3">
-            <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg"><span class="material-symbols-outlined text-gray-500 text-sm">search</span><input id="productSearch" oninput="loadProducts()" placeholder="Search products..." class="bg-transparent text-sm focus:outline-none w-36"></div>
+            <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg"><span class="material-symbols-outlined text-gray-500 text-sm">search</span><input id="productSearch" oninput="var v=this.value;clearTimeout(this._t);this._t=setTimeout(loadProducts,250)" placeholder="Search products..." class="bg-transparent text-sm focus:outline-none w-36"></div>
             <select id="productCategoryFilter" onchange="loadProducts()" class="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"><option value="all">All Categories</option></select>
             <button onclick="openProductModal()" class="px-4 py-2 gradient-bg text-white rounded-lg flex items-center gap-2 text-sm font-medium"><span class="material-symbols-outlined text-sm">add</span> Add Product</button>
           </div>
         </div>
         <div class="admin-card overflow-hidden">
-          <table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-6 py-3 text-left">Product</th><th class="px-6 py-3 text-left">Category</th><th class="px-6 py-3 text-left">Price</th><th class="px-6 py-3 text-left">Stock</th><th class="px-6 py-3 text-left">Status</th><th class="px-6 py-3 text-left">Actions</th></tr></thead><tbody id="productsTable" class="divide-y divide-gray-100"><tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table>
+          <div class="table-scroll"><table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-6 py-3 text-left">Product</th><th class="px-6 py-3 text-left">Category</th><th class="px-6 py-3 text-left">Price</th><th class="px-6 py-3 text-left">Stock</th><th class="px-6 py-3 text-left">Status</th><th class="px-6 py-3 text-left">Actions</th></tr></thead><tbody id="productsTable" class="divide-y divide-gray-100"><tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table></div>
         </div>
         <!-- Product Modal -->
         <div id="productModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -767,7 +855,7 @@
           </div>
         </div>
         <div class="admin-card overflow-hidden">
-          <table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-6 py-3 text-left">Product</th><th class="px-6 py-3 text-left">Customer</th><th class="px-6 py-3 text-left">Rating</th><th class="px-6 py-3 text-left">Review</th><th class="px-6 py-3 text-left">Date</th><th class="px-6 py-3 text-left">Actions</th></tr></thead><tbody id="reviewsTable" class="divide-y divide-gray-100"><tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table>
+          <div class="table-scroll"><table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-6 py-3 text-left">Product</th><th class="px-6 py-3 text-left">Customer</th><th class="px-6 py-3 text-left">Rating</th><th class="px-6 py-3 text-left">Review</th><th class="px-6 py-3 text-left">Date</th><th class="px-6 py-3 text-left">Actions</th></tr></thead><tbody id="reviewsTable" class="divide-y divide-gray-100"><tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table></div>
         </div>
       </div>
 
@@ -781,7 +869,7 @@
           </div>
         </div>
         <div class="admin-card overflow-hidden">
-          <table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-6 py-3 text-left">Title</th><th class="px-6 py-3 text-left">Type</th><th class="px-6 py-3 text-left">Key</th><th class="px-6 py-3 text-left">Status</th><th class="px-6 py-3 text-left">Updated</th><th class="px-6 py-3 text-left">Actions</th></tr></thead><tbody id="cmsTable" class="divide-y divide-gray-100"><tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table>
+          <div class="table-scroll"><table class="w-full"><thead class="bg-gray-50 text-xs uppercase text-gray-500"><tr><th class="px-6 py-3 text-left">Title</th><th class="px-6 py-3 text-left">Type</th><th class="px-6 py-3 text-left">Key</th><th class="px-6 py-3 text-left">Status</th><th class="px-6 py-3 text-left">Updated</th><th class="px-6 py-3 text-left">Actions</th></tr></thead><tbody id="cmsTable" class="divide-y divide-gray-100"><tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Loading...</td></tr></tbody></table></div>
         </div>
         <!-- CMS Modal -->
         <div id="cmsModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -962,8 +1050,11 @@
           }, 2000);
         }
         function doSend(headers, last) {
-          var logUrl = (typeof API_ROUTES !== 'undefined' && API_ROUTES.ADMIN_API && API_ROUTES.ADMIN_API.LOG) ?
-            API_ROUTES.ADMIN_API.LOG : '/api/admin/log';
+          // Ship to the server log endpoint — always the full /api path.
+          // API_ROUTES.ADMIN_API.LOG is relative ('/admin/log') and fetch()
+          // does not go through apiHelpers (which would prefix /api), so a
+          // raw fetch to it 404s on the page route.
+          var logUrl = '/api/admin/log';
           fetch(logUrl, {
             method: 'POST',
             headers: headers,
@@ -1074,21 +1165,6 @@
         if (timeout === undefined) timeout = 2000;
         return requestIdle(function() { try { fn(); } catch (e) { L.warn('perf', 'Deferred task error', { message: e.message }); } }, { timeout: timeout });
       };
-
-      // ─── Lazy-load Chart.js ───────────────────────────────────────
-      var chartJsPromise = null;
-      function loadChartJs() {
-        if (chartJsPromise) return chartJsPromise;
-        chartJsPromise = new Promise(function(resolve, reject) {
-          if (typeof Chart !== 'undefined') return resolve(Chart);
-          var script = document.createElement('script');
-          script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
-          script.onload = function() { resolve(Chart); };
-          script.onerror = function() { reject(new Error('Chart.js failed to load')); };
-          document.head.appendChild(script);
-        });
-        return chartJsPromise;
-      }
     })();
 
     // ── Debug Panel (Ctrl+Shift+L) ────────────────────────────────────
@@ -1166,32 +1242,7 @@
       LOG.info('debug', 'Debug panel: Ctrl+Shift+L', null);
     })();
 
-    // ── Error/Toast utilities ────────────────────────────────────────
-    function showErrorToast(message, detail) {
-      LOG.error('toast', message, detail || null);
-      if (typeof SmartNav !== 'undefined' && SmartNav.showToast) {
-        SmartNav.showToast(message, 'error');
-        return;
-      }
-      var el = document.createElement('div');
-      el.style.cssText = 'position:fixed;top:16px;right:16px;z-index:99999;background:#B91C1C;color:white;padding:12px 20px;border-radius:14px;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,0.12);max-width:360px;';
-      el.textContent = message;
-      document.body.appendChild(el);
-      setTimeout(function() { el.remove(); }, 5000);
-    }
-
-    function showSuccessToast(message) {
-      LOG.info('toast', message, null);
-      if (typeof SmartNav !== 'undefined' && SmartNav.showToast) {
-        SmartNav.showToast(message, 'success');
-        return;
-      }
-      var el = document.createElement('div');
-      el.style.cssText = 'position:fixed;top:16px;right:16px;z-index:99999;background:#16a34a;color:white;padding:12px 20px;border-radius:14px;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,0.12);';
-      el.textContent = message;
-      document.body.appendChild(el);
-      setTimeout(function() { el.remove(); }, 4000);
-    }
+    // ── Toast utilities (single impl defined below — see showToast) ────
 
     // Wraps an async API call with logging, toast on failure, optional retry
     async function safeApiCall(label, fn, retries) {
@@ -1230,19 +1281,64 @@
       setTimeout(function() { waitForAuth(callback, retries - 1); }, 500);
     }
 
+    // ── Shared helpers: money, Supabase config, modal a11y ─────────────
+    let PLATFORM_CURRENCY = 'TSh';
+    function formatMoney(v, cur) {
+      var num = Number(v) || 0;
+      return (cur || PLATFORM_CURRENCY) + ' ' + num.toLocaleString();
+    }
+
+    // Supabase URL/key pulled from the shared cross-platform config when
+    // available (avoids duplicating secrets in this page).
+    const SUPABASE_URL = window.__SUPABASE_URL || 'https://vonkqyiczeqhuqhahsxm.supabase.co';
+    const SUPABASE_ANON_KEY = window.__SUPABASE_ANON_KEY ||
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvbmtxeWljemVxaHVxaGFoc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjIzNDksImV4cCI6MjA5MDM5ODM0OX0.UKAT3re6P_oAB3E1svwCFdqTQWZL6yulJ1ZX4nAgJJ8';
+
+    // Modal accessibility: mark overlay modals as dialogs, close on ESC.
+    function initModalAccessibility() {
+      document.querySelectorAll('.fixed.inset-0').forEach(function(m) {
+        if (!m.getAttribute('role')) { m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); }
+        if (m.id && !m.getAttribute('aria-label')) m.setAttribute('aria-label', m.id);
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key !== 'Escape') return;
+        var open = document.querySelector('.fixed.inset-0:not(.hidden)');
+        if (open) { open.classList.add('hidden'); open.classList.remove('flex'); LOG.info('ui', 'Closed modal via ESC'); }
+      });
+    }
+
+    // ── Single toast implementation ────────────────────────────────────
+    function showToast(message, type) {
+      var isError = type === 'error';
+      var isWarning = type === 'warning';
+      var color = isError ? '#B91C1C' : (isWarning ? '#B45309' : '#16a34a');
+      LOG[isError ? 'error' : (isWarning ? 'warn' : 'info')]('toast', message, null);
+      if (typeof SmartNav !== 'undefined' && SmartNav.showToast) {
+        SmartNav.showToast(message, isError ? 'error' : 'success');
+        return;
+      }
+      var el = document.createElement('div');
+      el.setAttribute('role', 'alert');
+      el.style.cssText = 'position:fixed;top:16px;right:16px;z-index:99999;background:' + color + ';color:white;padding:12px 20px;border-radius:14px;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,0.12);max-width:360px;';
+      el.textContent = message;
+      document.body.appendChild(el);
+      setTimeout(function() { el.remove(); }, isError ? 5000 : 4000);
+    }
+    function showErrorToast(message, detail) { showToast(message, 'error'); }
+    function showSuccessToast(message) { showToast(message, 'success'); }
+
     document.addEventListener('DOMContentLoaded', function() {
       LOG.info('init', 'DOMContentLoaded', null);
       if (typeof SmartNav !== 'undefined' && typeof SmartNav.initPageTransition === 'function') {
         SmartNav.initPageTransition();
       }
-      // Initialize AdminDataService for Firestore direct access
-      if (typeof AdminDataService !== 'undefined') {
-        window.adminData = new AdminDataService();
-      }
+      // Initialize the tab UI + ESC-to-close for modals (a11y)
+      initModalAccessibility();
       // Wait for Firebase auth to restore session before loading data
       waitForAuth(function() { loadOrders(); });
     });
     var allOrders = [];
+    var ordersTruncated = false;
     var filteredOrders = [];
     var currentPage = 1;
     var ordersPerPage = 10;
@@ -1316,6 +1412,8 @@
       if (tab === 'products') { loadProducts(); loadInventoryAlerts(); loadCategoryFilter(); }
       if (tab === 'reviews') loadReviews();
       if (tab === 'cms') loadCMS();
+      if (tab === 'marketing') loadMarketing();
+      if (tab === 'logistics') initLogisticsMap();
     }
 
     async function loadOrders() {
@@ -1325,9 +1423,18 @@
         tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-12"><div class="flex flex-col gap-4"><div class="skeleton-line"><div class="skeleton skeleton-thumbnail"></div><div style="flex:1"><div class="skeleton skeleton-text" style="width:40%"></div><div class="skeleton skeleton-text-sm"></div></div></div><div class="skeleton-line"><div class="skeleton skeleton-thumbnail"></div><div style="flex:1"><div class="skeleton skeleton-text" style="width:50%"></div><div class="skeleton skeleton-text-sm"></div></div></div><div class="skeleton-line"><div class="skeleton skeleton-thumbnail"></div><div style="flex:1"><div class="skeleton skeleton-text" style="width:35%"></div><div class="skeleton skeleton-text-sm"></div></div></div></div></td></tr>';
       }
       try {
-        const data = await safeApiCall('Load orders', function() { return apiHelpers.get(API_ROUTES.ADMIN_API.ORDERS); }, 2);
+        const data = await safeApiCall('Load orders', function() { return apiHelpers.get(API_ROUTES.ADMIN_API.ORDERS + '?limit=1000'); }, 2);
         allOrders = data.orders || [];
         filteredOrders = [...allOrders];
+        var notice = document.getElementById('ordersTruncateNotice');
+        if (notice) {
+          if ((data.total || 0) > allOrders.length) {
+            notice.textContent = 'Showing latest ' + allOrders.length + ' of ' + data.total + ' orders. Use filters to narrow down, or export CSV for the full set.';
+            notice.classList.remove('hidden');
+          } else {
+            notice.classList.add('hidden');
+          }
+        }
         updateStats();
         renderOrders();
       } catch (error) {
@@ -1345,10 +1452,10 @@
     function initOrdersRealtime() {
       if (supabaseRealtime) return; // already initialized
       try {
-        var sb = window.supabase || (window.supabase = window.supabase.createClient(
-          'https://vonkqyiczeqhuqhahsxm.supabase.co',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvbmtxeWljemVxaHVxaGFoc3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjIzNDksImV4cCI6MjA5MDM5ODM0OX0.UKAT3re6P_oAB3E1svwCFdqTQWZL6yulJ1ZX4nAgJJ8'
-        ));
+        var sb = (window.supabase && window.supabase.createClient)
+          ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+          : null;
+        if (!sb) throw new Error('Supabase client unavailable');
         supabaseRealtime = sb;
         ordersChannel = sb.channel('admin-orders')
           .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, function(payload) {
@@ -1356,7 +1463,7 @@
             loadOrders();
           })
           .subscribe(function(status) {
-            LOG.info('realtime', 'Supabase channel status', { status: status });
+            LOG.info('realtime', 'Supabase channel status', { status: String(status) });
           });
       } catch (e) {
         LOG.warn('realtime', 'Failed to init Supabase Realtime', { message: e.message });
@@ -1389,7 +1496,7 @@
       setStat('preparingCount', stats.preparing);
       setStat('deliveredCount', stats.delivered);
       setStat('totalOrders', stats.total);
-      setStat('totalRevenue', 'TSh ' + stats.revenue.toLocaleString());
+      setStat('totalRevenue', formatMoney(stats.revenue));
 
       // Load seller and user counts for overview cards (parallel, resilient)
       Promise.allSettled([
@@ -1447,7 +1554,7 @@ apiHelpers.get(API_ROUTES.ADMIN_API.USERS)
         charts.revenue = new Chart(revenueCtx, {
           type: 'line',
           data: { labels: dayLabels, datasets: [{ label: 'Revenue (TSh)', data: dayData, borderColor: '#012d1d', backgroundColor: 'rgba(1,45,29,0.1)', fill: true, tension: 0.4 }] },
-          options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return 'TSh ' + v.toLocaleString(); } } } } }
+          options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return formatMoney(v); } } } } }
         });
       }
 
@@ -1470,9 +1577,9 @@ apiHelpers.get(API_ROUTES.ADMIN_API.USERS)
     }
 
     function filterOrders() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const status = document.getElementById('statusFilter').value;
-      const dateRange = document.getElementById('dateFilter').value;
+      const search = (document.getElementById('orderSearchInput') ? document.getElementById('orderSearchInput').value : '').toLowerCase();
+      const status = document.getElementById('orderStatusFilter') ? document.getElementById('orderStatusFilter').value : '';
+      const dateRange = document.getElementById('orderDateFilter') ? document.getElementById('orderDateFilter').value : 'all';
 
       filteredOrders = allOrders.filter(order => {
         const matchesSearch = !search || 
@@ -1521,7 +1628,7 @@ apiHelpers.get(API_ROUTES.ADMIN_API.USERS)
                 </td>
                 <td class="px-6 py-4">${order.sellerName || 'N/A'}</td>
                 <td class="px-6 py-4">${items} items</td>
-                <td class="px-6 py-4 font-semibold">TSh ${(order.total || 0).toLocaleString()}</td>
+                <td class="px-6 py-4 font-semibold">${formatMoney((order.total || 0))}</td>
                 <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusClass}">${order.status || 'pending'}</span></td>
                 <td class="px-6 py-4 text-gray-600 text-sm">${date}</td>
                 <td class="px-6 py-4">
@@ -1547,7 +1654,7 @@ apiHelpers.get(API_ROUTES.ADMIN_API.USERS)
               <tr class="hover:bg-gray-50">
                 <td class="px-6 py-4 font-medium">#${order.id.substring(0, 8)}</td>
                 <td class="px-6 py-4">${order.customerName || 'N/A'}</td>
-                <td class="px-6 py-4 font-semibold">TSh ${(order.total || 0).toLocaleString()}</td>
+                <td class="px-6 py-4 font-semibold">${formatMoney((order.total || 0))}</td>
                 <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusClass}">${order.status || 'pending'}</span></td>
                 <td class="px-6 py-4 text-green-700 text-sm">${date}</td>
               </tr>
@@ -1591,7 +1698,7 @@ apiHelpers.get(API_ROUTES.ADMIN_API.USERS)
             <p class="font-medium">${item.name || 'Item'}</p>
             <p class="text-sm text-gray-500">Qty: ${item.quantity || 1}</p>
           </div>
-          <p class="font-semibold">TSh ${(item.price * (item.quantity || 1) || 0).toLocaleString()}</p>
+          <p class="font-semibold">${formatMoney((item.price * (item.quantity || 1) || 0))}</p>
         </div>
       `).join('') || '<p class="text-gray-500">No items</p>';
       document.getElementById('modalItems').innerHTML = itemsHtml;
@@ -1599,9 +1706,9 @@ apiHelpers.get(API_ROUTES.ADMIN_API.USERS)
       const subtotal = order.subtotal || order.total || 0;
       const deliveryFee = order.deliveryFee || 0;
       const total = order.total || 0;
-      document.getElementById('modalSubtotal').textContent = 'TSh ' + subtotal.toLocaleString();
-      document.getElementById('modalDeliveryFee').textContent = 'TSh ' + deliveryFee.toLocaleString();
-      document.getElementById('modalTotal').textContent = 'TSh ' + total.toLocaleString();
+      document.getElementById('modalSubtotal').textContent = formatMoney(subtotal);
+      document.getElementById('modalDeliveryFee').textContent = formatMoney(deliveryFee);
+      document.getElementById('modalTotal').textContent = formatMoney(total);
 
       const timeline = [];
       if (order.createdAt) timeline.push({ date: safeToDate(order.createdAt), text: 'Order placed' });
@@ -1693,11 +1800,6 @@ apiHelpers.get(API_ROUTES.ADMIN_API.USERS)
       showSuccessToast('Refreshed ' + tabId);
     }
 
-    function showToast(message, type) {
-      if (type === 'error') { showErrorToast(message); return; }
-      showSuccessToast(message);
-    }
-
     function closeOrderModal() { closeModal(); }
 
     async function loadSellers() {
@@ -1705,15 +1807,9 @@ apiHelpers.get(API_ROUTES.ADMIN_API.USERS)
       const tbody = document.getElementById('sellersTable');
       if (!tbody) return;
       try {
-        // Use AdminDataService for direct Firestore access
-        let sellers = [];
-        if (window.adminData && typeof window.adminData.getSellers === 'function') {
-          sellers = await window.adminData.getSellers();
-        } else {
-          // Use Supabase Edge Function
-          const res = await apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS);
-          sellers = res.data || [];
-        }
+        // Always use the real admin API (AdminDataService was a stub returning [])
+        const res = await apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS);
+        const sellers = res.data || [];
         if (!sellers.length) {
           tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">No sellers found</td></tr>';
         } else {
@@ -1793,8 +1889,8 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
         var revenue = (reports.orders && reports.orders.totalRevenue) || financeOrders.reduce(function(s, o) { return s + (o.total || 0); }, 0);
         var fee = Math.round(revenue * 0.1);
         var setText = function(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
-        setText('financeTotalPayouts', 'TSh ' + (revenue - fee).toLocaleString());
-        setText('financePlatformFee', 'TSh ' + fee.toLocaleString());
+        setText('financeTotalPayouts', formatMoney((revenue - fee)));
+        setText('financePlatformFee', formatMoney(fee));
 
         // Calculate settlements per seller
         var sellers = sellersRes.data || [];
@@ -1805,7 +1901,7 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
           return { id: s.id, name: s.name || 'Unknown', phone: s.phone || '', category: s.category || '', orders: sellerOrders.length, revenue: sellerRevenue, fee: sellerFee, payout: sellerRevenue - sellerFee };
         });
         var totalPending = settlements.reduce(function(sum, s) { return sum + s.payout; }, 0);
-        setText('financePending', 'TSh ' + totalPending.toLocaleString());
+        setText('financePending', formatMoney(totalPending));
         renderSettlements(settlements);
       } catch (error) {
         LOG.error('finance', 'Error loading finance', { message: error.message });
@@ -1820,11 +1916,11 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
         container.innerHTML = '<div class="p-8 text-center text-gray-400">No settlement data available</div>';
         return;
       }
-      var html = '<table class="w-full text-left"><thead class="bg-gray-50 text-[10px] uppercase tracking-wider font-bold text-gray-500"><tr><th class="px-4 py-3">Seller</th><th class="px-4 py-3">Category</th><th class="px-4 py-3">Orders</th><th class="px-4 py-3">Revenue</th><th class="px-4 py-3">Platform Fee (10%)</th><th class="px-4 py-3">Net Payout</th></tr></thead><tbody class="divide-y divide-gray-100">';
+      var html = '<div class="table-scroll"><table class="w-full text-left"><thead class="bg-gray-50 text-[10px] uppercase tracking-wider font-bold text-gray-500"><tr><th class="px-4 py-3">Seller</th><th class="px-4 py-3">Category</th><th class="px-4 py-3">Orders</th><th class="px-4 py-3">Revenue</th><th class="px-4 py-3">Platform Fee (10%)</th><th class="px-4 py-3">Net Payout</th></tr></thead><tbody class="divide-y divide-gray-100">';
       html += settlements.map(function(s) {
         return '<tr class="hover:bg-gray-50"><td class="px-4 py-3"><p class="font-medium text-sm">' + escapeHtml(s.name) + '</p><p class="text-xs text-gray-500">' + escapeHtml(s.phone) + '</p></td><td class="px-4 py-3 text-sm text-gray-600">' + escapeHtml(s.category) + '</td><td class="px-4 py-3 text-sm">' + s.orders + '</td><td class="px-4 py-3 text-sm font-medium">TSh ' + s.revenue.toLocaleString() + '</td><td class="px-4 py-3 text-sm text-red-600">TSh ' + s.fee.toLocaleString() + '</td><td class="px-4 py-3 text-sm font-bold text-green-700">TSh ' + s.payout.toLocaleString() + '</td></tr>';
       }).join('');
-      html += '</tbody></table>';
+      html += '</tbody></table></div>';
       container.innerHTML = html;
     }
 
@@ -1887,7 +1983,7 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
             return '<tr class="hover:bg-gray-50">' +
               '<td class="px-6 py-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden">' + (p.imageUrl ? '<img src="' + escapeHtml(p.imageUrl) + '" class="w-full h-full object-cover">' : '<span class="material-symbols-outlined flex items-center justify-center w-full h-full text-gray-400">inventory_2</span>') + '</div><div><p class="font-medium text-sm">' + escapeHtml(p.name || 'N/A') + '</p><p class="text-xs text-gray-500">' + escapeHtml((p.description || '').substring(0, 60)) + '</p></div></div></td>' +
               '<td class="px-6 py-4 text-sm">' + escapeHtml(p.category || 'general') + '</td>' +
-              '<td class="px-6 py-4 text-sm font-medium">TSh ' + (p.price ? p.price.toLocaleString() : '0') + '</td>' +
+              '<td class="px-6 py-4 text-sm font-medium">' + formatMoney(p.price || 0) + '</td>' +
               '<td class="px-6 py-4 text-sm">' + (p.stock !== undefined && p.stock !== null ? p.stock : '—') + ' ' + escapeHtml(p.unit || '') + '</td>' +
               '<td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ' + (p.isAvailable !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600') + '">' + (p.isAvailable !== false ? 'Active' : 'Hidden') + '</span></td>' +
               '<td class="px-6 py-4 text-sm"><button onclick="openProductModal(\'' + p.id + '\')" class="text-blue-600 hover:underline mr-2">Edit</button><button onclick="deleteProduct(\'' + p.id + '\')" class="text-red-600 hover:underline">Delete</button></td>' +
@@ -2424,7 +2520,7 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
       { name: 'Orders', path: '/admin/orders' },
       { name: 'Users', path: '/admin/users' },
       { name: 'Drivers', path: '/admin/drivers' },
-      { name: 'Dashboard', path: '/dashboard/stats' },
+      { name: 'Dashboard', path: '/admin/dashboard' },
       { name: 'Logs', path: '/admin/system/logs' }
     ];
 
@@ -2494,7 +2590,8 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
     }
 
     function updateCurrencyDisplay(currency) {
-      document.querySelectorAll('[id^="settingsCurrencySymbol"]').forEach(function(el) { el.textContent = currency; });
+      PLATFORM_CURRENCY = currency || 'TSh';
+      document.querySelectorAll('[id^="settingsCurrencySymbol"]').forEach(function(el) { el.textContent = PLATFORM_CURRENCY; });
     }
 
     document.addEventListener('submit', function(e) {
@@ -2580,21 +2677,23 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
 
     function initLogisticsMap() {
       LOG.info('logistics', 'Initializing map...', null);
-      if (logisticsMap) { logisticsMap.resize(); return; }
+      if (logisticsMap) { logisticsMap.resize(); loadLogisticsData(); return; }
       if (typeof initMapbox !== 'function') {
         LOG.error('logistics', 'Mapbox not loaded', null);
         document.getElementById('logisticsMap').innerHTML = '<div class="flex items-center justify-center h-full text-gray-400"><span class="material-symbols-outlined text-4xl mr-2">map</span> Map library not loaded</div>';
+        loadLogisticsData(); // still populate lists even without the map
         return;
       }
       try {
         logisticsMap = initMapbox('logisticsMap');
         if (logisticsMap) {
           document.getElementById('logisticsLastUpdate').textContent = new Date().toLocaleTimeString();
-          loadLogisticsData();
         }
       } catch (e) {
         LOG.error('logistics', 'Map init failed', { message: e.message });
       }
+      // Always refresh the drivers/pending-orders panels, map or not.
+      loadLogisticsData();
     }
 
     async function loadLogisticsData() {
@@ -2715,15 +2814,10 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
       const tbody = document.getElementById('usersTable');
       if (!tbody) return;
       try {
-        // Use AdminDataService for direct Firestore access
-        let users = [];
-        if (window.adminData && typeof window.adminData.getUsers === 'function') {
-          users = await window.adminData.getUsers();
-        } else {
-          // Use Supabase Edge Function
-          const res = await apiHelpers.get(API_ROUTES.ADMIN_API.USERS);
-          users = res.data || [];
-        }
+        // ALWAYS use the real admin API (AdminDataService was a stub returning []
+        // and made role changes appear to "not save")
+        const res = await apiHelpers.get(API_ROUTES.ADMIN_API.USERS);
+        const users = res.data || [];
         allUsers = users;
         renderUsers(users);
       } catch (error) {
@@ -2751,7 +2845,7 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
           const isDeleted = u.status === 'deleted';
           const name = u.name || u.fullName || 'N/A';
           return '<tr class="hover:bg-gray-50 ' + (isDeleted ? 'opacity-50' : '') + '">' +
-            '<td class="px-4 py-4"><input type="checkbox" class="user-checkbox rounded border-gray-300" value="' + u.id + '" onchange="updateBulkActionCount()"></td>' +
+            '<td class="px-4 py-4"><input type="checkbox" class="user-checkbox rounded border-gray-300" data-user-id="' + u.id + '" onchange="updateBulkActionBtn()"></td>' +
             '<td class="px-6 py-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-sm">' + escapeHtml(name[0]) + '</div><div><p class="font-medium">' + escapeHtml(name) + '</p><p class="text-sm text-gray-500">' + escapeHtml(u.email || '') + '</p></div></div></td>' +
             '<td class="px-6 py-4 text-sm">' + escapeHtml(u.phone || '—') + '</td>' +
             '<td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ' + roleBadgeClass(u.role) + '">' + escapeHtml(u.role || 'customer') + '</span></td>' +
@@ -2775,6 +2869,7 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
 
     function roleBadgeClass(role) {
       if (role === 'admin') return 'bg-purple-100 text-purple-700';
+      if (role === 'merchant') return 'bg-emerald-100 text-emerald-700';
       if (role === 'seller') return 'bg-blue-100 text-blue-700';
       if (role === 'driver') return 'bg-amber-100 text-amber-700';
       return 'bg-gray-100 text-gray-700';
@@ -3021,7 +3116,7 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
           content.innerHTML = '<div class="text-center py-12 text-gray-500">No orders found for this user</div>';
           return;
         }
-        content.innerHTML = '<div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50"><tr>' +
+        content.innerHTML = '<div class="overflow-x-auto"><div class="table-scroll"><table class="w-full"><thead class="bg-gray-50"><tr>' +
           '<th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Order ID</th>' +
           '<th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>' +
           '<th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Total</th>' +
@@ -3041,7 +3136,7 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
             '<td class="px-4 py-3 text-sm text-gray-500">' + itemCount + ' item(s)</td>' +
           '</tr>';
         }).join('') +
-        '</tbody></table></div>';
+        '</tbody></table></div></div>';
       }).catch(function() {
         content.innerHTML = '<div class="p-8 text-center text-red-500">Failed to load orders</div>';
       });
@@ -3081,7 +3176,7 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
           '</div>' +
           '<div>' +
             '<h4 class="font-semibold text-gray-900 mb-4">Recent Transactions</h4>' +
-            (transactions.length ? '<div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50"><tr>' +
+            (transactions.length ? '<div class="overflow-x-auto"><div class="table-scroll"><table class="w-full"><thead class="bg-gray-50"><tr>' +
               '<th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>' +
               '<th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>' +
               '<th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Amount</th>' +
@@ -3096,12 +3191,12 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
               return '<tr>' +
                 '<td class="px-4 py-3 text-sm text-gray-500">' + (t.createdAt ? new Date(t.createdAt).toLocaleString() : '—') + '</td>' +
                 '<td class="px-4 py-3 text-sm">' + escapeHtml(t.type || '—') + '</td>' +
-                '<td class="px-4 py-3 font-medium ' + amountClass + '">' + amountPrefix + 'TSh ' + Math.abs(t.amount || 0).toLocaleString() + '</td>' +
+                '<td class="px-4 py-3 font-medium ' + amountClass + '">' + amountPrefix + formatMoney(Math.abs(t.amount || 0)) + '</td>' +
                 '<td class="px-4 py-3"><span class="px-2 py-1 text-xs font-medium rounded-full ' + statusClass + '">' + escapeHtml(t.status || '—') + '</span></td>' +
                 '<td class="px-4 py-3 text-sm font-mono text-gray-500">' + escapeHtml(t.reference || '—') + '</td>' +
               '</tr>';
             }).join('') +
-            '</tbody></table></div>' : '<p class="text-gray-500 py-4">No transactions found</p>') +
+            '</tbody></table></div></div>' : '<p class="text-gray-500 py-4">No transactions found</p>') +
           '</div>' +
         '</div>';
       }).catch(function() {
@@ -3355,7 +3450,211 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
       }
     }
 
-    function openCouponModal() { showSuccessToast('Coupon creation coming soon'); }
+    // ─── Marketing: Coupons ────────────────────────────────────────
+    var editingCouponId = null;
+    var editingBannerId = null;
+
+    function loadMarketing() { loadCoupons(); loadBanners(); }
+
+    function couponDiscountLabel(c) {
+      if (c.type === 'fixed') return formatMoney(c.value || 0) + ' off';
+      return (c.value || 0) + '% off';
+    }
+
+    async function loadCoupons() {
+      const tbody = document.getElementById('couponsTable');
+      if (!tbody) return;
+      try {
+        const res = await safeApiCall('Load coupons', function() { return apiHelpers.get(API_ROUTES.ADMIN_API.MARKETING + '/coupons'); }, 2);
+        const coupons = res.data || [];
+        if (!coupons.length) {
+          tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">No coupons yet. Create your first one!</td></tr>';
+          return;
+        }
+        tbody.innerHTML = coupons.map(function(c) {
+          const exp = c.expiresAt ? new Date(c.expiresAt) : null;
+          const expired = exp && exp < new Date();
+          return '<tr class="hover:bg-gray-50">' +
+            '<td class="px-6 py-4 font-mono font-semibold">' + escapeHtml(c.code || '') + '</td>' +
+            '<td class="px-6 py-4 text-sm">' + couponDiscountLabel(c) + (c.minOrder ? '<span class="text-gray-400 ml-1">min ' + formatMoney(c.minOrder) + '</span>' : '') + '</td>' +
+            '<td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ' + (!c.active ? 'bg-gray-100 text-gray-500' : expired ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700') + '">' + (!c.active ? 'inactive' : expired ? 'expired' : 'active') + '</span></td>' +
+            '<td class="px-6 py-4 text-sm"><div class="flex items-center gap-2">' +
+              '<button onclick="openCouponModal(\'' + c.id + '\')" class="text-blue-600 hover:underline">Edit</button>' +
+              '<button onclick="toggleCoupon(\'' + c.id + '\',' + (!c.active) + ')" class="text-amber-600 hover:underline">' + (!c.active ? 'Enable' : 'Disable') + '</button>' +
+              '<button onclick="deleteCoupon(\'' + c.id + '\')" class="text-red-600 hover:underline">Delete</button>' +
+            '</div></td></tr>';
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-red-500">Failed to load coupons. <button onclick="loadCoupons()" class="underline">Retry</button></td></tr>';
+      }
+    }
+
+    function openCouponModal(id) {
+      editingCouponId = id || null;
+      document.getElementById('couponModalTitle').textContent = id ? 'Edit Coupon' : 'New Coupon';
+      document.getElementById('couponCode').value = '';
+      document.getElementById('couponType').value = 'percent';
+      document.getElementById('couponValue').value = '';
+      document.getElementById('couponMinOrder').value = '';
+      document.getElementById('couponMaxRedemptions').value = '';
+      document.getElementById('couponExpiresAt').value = '';
+      document.getElementById('couponActive').checked = true;
+      var modal = document.getElementById('couponModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (id) {
+        apiHelpers.get(API_ROUTES.ADMIN_API.MARKETING + '/coupons').then(function(res) {
+          const c = (res.data || []).find(function(x) { return x.id === id; });
+          if (!c) return;
+          document.getElementById('couponCode').value = c.code || '';
+          document.getElementById('couponType').value = c.type || 'percent';
+          document.getElementById('couponValue').value = c.value != null ? c.value : '';
+          document.getElementById('couponMinOrder').value = c.minOrder || '';
+          document.getElementById('couponMaxRedemptions').value = c.maxRedemptions || '';
+          document.getElementById('couponExpiresAt').value = c.expiresAt ? String(c.expiresAt).slice(0, 10) : '';
+          document.getElementById('couponActive').checked = !!c.active;
+        });
+      }
+    }
+
+    function closeCouponModal() {
+      var el = document.getElementById('couponModal');
+      if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
+      editingCouponId = null;
+    }
+
+    async function saveCoupon() {
+      const body = {
+        code: document.getElementById('couponCode').value.trim(),
+        type: document.getElementById('couponType').value,
+        value: Number(document.getElementById('couponValue').value) || 0,
+        minOrder: Number(document.getElementById('couponMinOrder').value) || 0,
+        maxRedemptions: Number(document.getElementById('couponMaxRedemptions').value) || 0,
+        expiresAt: document.getElementById('couponExpiresAt').value || null,
+        active: document.getElementById('couponActive').checked,
+      };
+      if (!body.code || !body.value) { showErrorToast('Code and value are required'); return; }
+      try {
+        if (editingCouponId) {
+          await apiHelpers.put(API_ROUTES.ADMIN_API.MARKETING + '/coupons/' + editingCouponId, body);
+          showSuccessToast('Coupon updated');
+        } else {
+          await apiHelpers.post(API_ROUTES.ADMIN_API.MARKETING + '/coupons', body);
+          showSuccessToast('Coupon created');
+        }
+        closeCouponModal();
+        loadCoupons();
+      } catch (err) { showErrorToast(err.message || 'Save failed'); }
+    }
+
+    function toggleCoupon(id, active) {
+      apiHelpers.put(API_ROUTES.ADMIN_API.MARKETING + '/coupons/' + id, { active: active }).then(function() {
+        showSuccessToast(active ? 'Coupon enabled' : 'Coupon disabled');
+        loadCoupons();
+      }).catch(function(err) { showErrorToast(err.message || 'Update failed'); });
+    }
+
+    function deleteCoupon(id) {
+      if (!confirm('Delete this coupon?')) return;
+      apiHelpers.delete(API_ROUTES.ADMIN_API.MARKETING + '/coupons/' + id).then(function() {
+        showSuccessToast('Coupon deleted');
+        loadCoupons();
+      }).catch(function(err) { showErrorToast(err.message || 'Delete failed'); });
+    }
+
+    // ─── Marketing: Banners ────────────────────────────────────────
+    async function loadBanners() {
+      const list = document.getElementById('bannersList');
+      if (!list) return;
+      try {
+        const res = await safeApiCall('Load banners', function() { return apiHelpers.get(API_ROUTES.ADMIN_API.MARKETING + '/banners'); }, 2);
+        const banners = res.data || [];
+        if (!banners.length) {
+          list.innerHTML = '<div class="p-8 text-center text-gray-400 border border-dashed rounded-xl">No banners yet. Add your first one below!</div>';
+          return;
+        }
+        list.innerHTML = banners.map(function(b) {
+          return '<div class="flex items-center gap-4 p-3 border border-gray-100 rounded-xl hover:border-gray-200 transition-all">' +
+            '<img src="' + escapeHtml(b.imageUrl || '') + '" onerror="this.style.opacity=0.3" class="w-20 h-12 object-cover rounded-lg bg-gray-100" alt="">' +
+            '<div class="flex-1 min-w-0"><p class="font-medium text-sm truncate">' + escapeHtml(b.title || 'Untitled') + '</p>' +
+            '<span class="px-2 py-0.5 text-xs font-medium rounded-full ' + (b.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500') + '">' + (b.active ? 'active' : 'hidden') + '</span></div>' +
+            '<div class="flex items-center gap-2">' +
+              '<button onclick="openBannerModal(\'' + b.id + '\')" class="text-blue-600 hover:underline text-sm">Edit</button>' +
+              '<button onclick="toggleBanner(\'' + b.id + '\',' + (!b.active) + ')" class="text-amber-600 hover:underline text-sm">' + (b.active ? 'Hide' : 'Show') + '</button>' +
+              '<button onclick="deleteBanner(\'' + b.id + '\')" class="text-red-600 hover:underline text-sm">Delete</button>' +
+            '</div></div>';
+        }).join('');
+      } catch (err) {
+        list.innerHTML = '<div class="p-8 text-center text-red-500 border border-dashed rounded-xl">Failed to load banners. <button onclick="loadBanners()" class="underline">Retry</button></div>';
+      }
+    }
+
+    function openBannerModal(id) {
+      editingBannerId = id || null;
+      document.getElementById('bannerModalTitle').textContent = id ? 'Edit Banner' : 'Add Banner';
+      document.getElementById('bannerTitle').value = '';
+      document.getElementById('bannerImageUrl').value = '';
+      document.getElementById('bannerActive').checked = true;
+      document.getElementById('bannerPreviewWrap').classList.add('hidden');
+      var modal = document.getElementById('bannerModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (id) {
+        apiHelpers.get(API_ROUTES.ADMIN_API.MARKETING + '/banners').then(function(res) {
+          const b = (res.data || []).find(function(x) { return x.id === id; });
+          if (!b) return;
+          document.getElementById('bannerTitle').value = b.title || '';
+          document.getElementById('bannerImageUrl').value = b.imageUrl || '';
+          document.getElementById('bannerActive').checked = !!b.active;
+          if (b.imageUrl) {
+            document.getElementById('bannerPreview').src = b.imageUrl;
+            document.getElementById('bannerPreviewWrap').classList.remove('hidden');
+          }
+        });
+      }
+    }
+
+    function closeBannerModal() {
+      var el = document.getElementById('bannerModal');
+      if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
+      editingBannerId = null;
+    }
+
+    async function saveBanner() {
+      const body = {
+        title: document.getElementById('bannerTitle').value.trim(),
+        imageUrl: document.getElementById('bannerImageUrl').value.trim(),
+        active: document.getElementById('bannerActive').checked,
+      };
+      if (!body.title || !body.imageUrl) { showErrorToast('Title and image URL are required'); return; }
+      try {
+        if (editingBannerId) {
+          await apiHelpers.put(API_ROUTES.ADMIN_API.MARKETING + '/banners/' + editingBannerId, body);
+          showSuccessToast('Banner updated');
+        } else {
+          await apiHelpers.post(API_ROUTES.ADMIN_API.MARKETING + '/banners', body);
+          showSuccessToast('Banner added');
+        }
+        closeBannerModal();
+        loadBanners();
+      } catch (err) { showErrorToast(err.message || 'Save failed'); }
+    }
+
+    function toggleBanner(id, active) {
+      apiHelpers.put(API_ROUTES.ADMIN_API.MARKETING + '/banners/' + id, { active: active }).then(function() {
+        showSuccessToast(active ? 'Banner shown' : 'Banner hidden');
+        loadBanners();
+      }).catch(function(err) { showErrorToast(err.message || 'Update failed'); });
+    }
+
+    function deleteBanner(id) {
+      if (!confirm('Delete this banner?')) return;
+      apiHelpers.delete(API_ROUTES.ADMIN_API.MARKETING + '/banners/' + id).then(function() {
+        showSuccessToast('Banner deleted');
+        loadBanners();
+      }).catch(function(err) { showErrorToast(err.message || 'Delete failed'); });
+    }
+
     function filterLogistics() {
       LOG.info('logistics', 'Filter changed', null);
       loadLogisticsData();
@@ -3506,8 +3805,8 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
     // ── Payouts ──────────────────────────────────────────────────────
     async function loadPayouts() {
       try { var res = await apiHelpers.get('/admin/payouts'); var d = res.data || []; var totalPending = res.totalPending || 0; var totalPaid = res.totalPaid || 0; var el = document.getElementById('payoutsTableBody'); if (!el) return;
-        document.getElementById('payoutTotalPending').textContent = 'TSh ' + Number(totalPending).toLocaleString();
-        document.getElementById('payoutTotalPaid').textContent = 'TSh ' + Number(totalPaid).toLocaleString();
+        document.getElementById('payoutTotalPending').textContent = formatMoney(Number(totalPending));
+        document.getElementById('payoutTotalPaid').textContent = formatMoney(Number(totalPaid));
         if (!d.length) { el.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">No payouts yet</td></tr>'; return; }
         el.innerHTML = d.map(function(p) {
           var statusClass = p.status === 'paid' ? 'bg-green-100 text-green-700' : p.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700';
@@ -3543,10 +3842,10 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
     // ── Revenue Report ──────────────────────────────────────────────
     async function loadRevenueReport() {
       try { var res = await apiHelpers.get('/admin/analytics/revenue?period=daily'); var d = res.data || {};
-        document.getElementById('reportTotalRevenue').textContent = 'TSh ' + Number(d.totalRevenue || 0).toLocaleString();
-        document.getElementById('reportTotalCommission').textContent = 'TSh ' + Number(d.totalCommission || 0).toLocaleString();
+        document.getElementById('reportTotalRevenue').textContent = formatMoney(Number(d.totalRevenue || 0));
+        document.getElementById('reportTotalCommission').textContent = formatMoney(Number(d.totalCommission || 0));
         document.getElementById('reportTotalOrders').textContent = d.totalOrders || 0;
-        document.getElementById('reportAvgOrder').textContent = 'TSh ' + Number(d.avgOrderValue || 0).toLocaleString();
+        document.getElementById('reportAvgOrder').textContent = formatMoney(Number(d.avgOrderValue || 0));
         var daily = d.daily || [];
         var tbody = document.getElementById('revenueDailyTable');
         if (tbody) {
@@ -3659,11 +3958,28 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
         var data = res.data || [];
         if (!data.length) { cont.innerHTML = '<div class="p-6 text-center text-gray-400">No role assignments</div>'; return; }
         cont.innerHTML = data.map(function(ur) {
-          return '<div class="p-4 border-b border-gray-100 flex justify-between items-center hover:bg-gray-50"><div><p class="font-medium text-sm">' + escapeHtml(ur.email || ur.userId) + '</p><p class="text-xs text-gray-500">Role: ' + escapeHtml(ur.roleId) + '</p></div><button onclick="revokeRoleAssignment(\'' + ur.id + '\')" class="text-red-600 hover:underline text-xs">Revoke</button></div>';
+          var display = ur.userName || ur.email || ur.userId || '?';
+          var roleLabel = ur.roleName || ur.roleId || '?';
+          return '<div class="p-4 border-b border-gray-100 flex justify-between items-center hover:bg-gray-50">' +
+            '<div><p class="font-medium text-sm">' + escapeHtml(display) + '</p>' +
+            '<p class="text-xs text-gray-500">Role: <span class="px-1.5 py-0.5 bg-green-50 text-green-700 rounded text-[10px] font-semibold">' + escapeHtml(roleLabel) + '</span></p></div>' +
+            '<div class="flex gap-3">' +
+              '<button onclick="editRoleAssignment(\'' + ur.id + '\',\'' + (ur.roleId || '').replace(/'/g, "\\'") + '\')" class="text-blue-600 hover:underline text-xs">Edit</button>' +
+              '<button onclick="revokeRoleAssignment(\'' + ur.id + '\')" class="text-red-600 hover:underline text-xs">Revoke</button>' +
+            '</div></div>';
         }).join('');
       } catch (e) {
         LOG.error('rbac', 'Error loading user roles', { message: e.message });
       }
+    }
+
+    function editRoleAssignment(assignmentId, currentRoleId) {
+      var newRole = prompt('New role ID (current: ' + (currentRoleId || '?') + '):');
+      if (!newRole) return;
+      if (newRole === currentRoleId) { showErrorToast('Role unchanged'); return; }
+      apiHelpers.put('/admin/rbac/user-roles/' + assignmentId, { roleId: newRole })
+        .then(function(r) { showSuccessToast(r.message || 'Role updated'); loadUserRoles(); })
+        .catch(function(e) { showErrorToast('Update failed: ' + (e.message || e)); });
     }
 
     function openCreateRoleModal() {
@@ -3678,7 +3994,7 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
 
     function openAssignRoleModal() {
       var userId = prompt('User ID or Email:'); if (!userId) return;
-      var roleId = prompt('Role ID (e.g., admin, moderator, support, finance):'); if (!roleId) return;
+      var roleId = prompt('Role ID (e.g., customer, merchant, seller, driver, admin, support, finance):'); if (!roleId) return;
       apiHelpers.post('/admin/rbac/user-roles', { userId: userId, roleId: roleId, email: userId })
         .then(function(r) { showSuccessToast(r.message || 'Role assigned'); loadUserRoles(); })
         .catch(function(e) { showErrorToast(e.message); });
@@ -3769,14 +4085,16 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
         var res = await apiHelpers.get('/admin/notifications');
         var data = res.data || [];
         document.getElementById('notifTotalCount').textContent = data.length;
-        document.getElementById('notifActiveCount').textContent = data.filter(function(n) { return n.status === 'active'; }).length;
-        document.getElementById('notifDeliveryRate').textContent = data.length ? Math.round(data.filter(function(n) { return n.deliveryCount > 0; }).length / data.length * 100) + '%' : '-';
+        document.getElementById('notifActiveCount').textContent = data.filter(function(n) { return !(n.isRead); }).length;
+        document.getElementById('notifDeliveryRate').textContent = data.length ? Math.round(data.filter(function(n) { return n.isRead; }).length / data.length * 100) + '%' : '-';
         var tbody = document.getElementById('notificationsTable');
         if (!tbody) return;
         if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-gray-400">No notifications sent</td></tr>'; return; }
-        var typeIcons = { info: 'info', warning: 'warning', emergency: 'emergency', promotion: 'campaign' };
+        var typeIcons = { info: 'info', warning: 'warning', emergency: 'emergency', promotion: 'campaign', broadcast: 'notifications' };
         tbody.innerHTML = data.map(function(n) {
-          return '<tr class="hover:bg-gray-50"><td class="px-6 py-4"><p class="font-medium text-sm">' + escapeHtml(n.title) + '</p></td><td class="px-6 py-4 text-sm text-gray-600">' + escapeHtml((n.message || '').substring(0, 60)) + '</td><td class="px-6 py-4"><span class="material-symbols-outlined text-sm">' + (typeIcons[n.type] || 'notifications') + '</span> ' + escapeHtml(n.type) + '</td><td class="px-6 py-4 text-sm">' + escapeHtml(n.targetRole || 'all') + '</td><td class="px-6 py-4 text-sm text-gray-500">' + (n.sentAt ? new Date(n.sentAt.seconds * 1000 || n.sentAt).toLocaleString() : '-') + '</td><td class="px-6 py-4"><button onclick="deleteNotification(\'' + n.id + '\')" class="text-red-600 hover:underline text-sm">Delete</button></td></tr>';
+          var ts = n.sentAt || n.createdAt || n.created_at;
+          var when = ts ? new Date(typeof ts === 'object' && ts.seconds ? ts.seconds * 1000 : ts).toLocaleString() : '—';
+          return '<tr class="hover:bg-gray-50"><td class="px-6 py-4"><p class="font-medium text-sm">' + escapeHtml(n.title) + '</p></td><td class="px-6 py-4 text-sm text-gray-600">' + escapeHtml((n.message || '').substring(0, 60)) + '</td><td class="px-6 py-4"><span class="material-symbols-outlined text-sm">' + (typeIcons[n.type] || 'notifications') + '</span> ' + escapeHtml(n.type || 'broadcast') + '</td><td class="px-6 py-4 text-sm">' + escapeHtml(n.targetRole || 'all') + '</td><td class="px-6 py-4 text-sm text-gray-500">' + when + '</td><td class="px-6 py-4"><button onclick="deleteNotification(\'' + n.id + '\')" class="text-red-600 hover:underline text-sm">Delete</button></td></tr>';
         }).join('');
       } catch (e) {
         LOG.error('notifications', 'Error loading notifications', { message: e.message });
@@ -3801,3 +4119,4 @@ apiHelpers.get(API_ROUTES.ADMIN_API.SELLERS),
   </script>
 </body>
 </html>
+

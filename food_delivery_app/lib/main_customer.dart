@@ -14,6 +14,8 @@ import 'services/restaurant_service.dart';
 import 'services/connectivity_service.dart';
 import 'services/analytics_service.dart';
 import 'services/nestjs_api_service.dart';
+import 'services/supabase_service.dart';
+import 'services/cart_service.dart';
 import 'screens/customer/login_screen.dart';
 import 'screens/customer/main_screen.dart';
 import 'utils/logger.dart';
@@ -31,6 +33,9 @@ void main() async {
     } catch (e) {
       AppLogger.warning('Environment file not loaded, using default config');
     }
+    
+    // Initialize Supabase (must be before Firebase for auth fallback)
+    await SupabaseService().initialize();
     
     // Initialize Firebase
     await Firebase.initializeApp(
@@ -70,14 +75,17 @@ class CustomerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-providers: [
+      providers: [
         Provider(create: (_) => AuthService()),
         Provider(create: (_) => OrderService()),
         Provider(create: (_) => PaymentService()),
-Provider(create: (_) => LocationService()),
+        Provider(create: (_) => LocationService()),
         Provider(create: (_) => RestaurantService()),
         Provider(create: (_) => ConnectivityService()),
         Provider(create: (_) => AnalyticsService()),
+        ChangeNotifierProvider(
+          create: (_) => CartService()..loadSavedCart(),
+        ),
         ProxyProvider<AuthService, NestJSApiService>(
           update: (_, authService, __) => NestJSApiService(authService),
         ),

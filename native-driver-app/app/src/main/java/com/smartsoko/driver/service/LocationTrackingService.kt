@@ -13,13 +13,15 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
-import com.smartsoko.driver.R
-import com.smartsoko.driver.SmartSokoDriverApp
+import com.fooddelivery.driver.R
+import com.fooddelivery.driver.SmartSokoDriverApp
 import com.smartsoko.driver.data.local.AppDatabase
 import com.smartsoko.driver.data.local.entity.LocationQueueEntity
-import com.smartsoko.driver.data.remote.WebSocketManager
+import com.smartsoko.driver.data.remote.ApiService
+import com.smartsoko.driver.data.remote.LocationPingDto
 import com.smartsoko.driver.domain.model.Location
-import com.smartsoko.driver.ui.MainActivity
+import com.smartsoko.driver.ui.state.DriverState
+import com.fooddelivery.driver.ui.MainActivity
 import com.smartsoko.driver.util.AppConfig
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -32,7 +34,8 @@ class LocationTrackingService : Service() {
 
     @Inject lateinit var fusedLocationClient: FusedLocationProviderClient
     @Inject lateinit var locationState: LocationState
-    @Inject lateinit var webSocketManager: WebSocketManager
+    @Inject lateinit var api: ApiService
+    @Inject lateinit var driverState: DriverState
     @Inject lateinit var database: AppDatabase
 
     private val locationCallback = object : LocationCallback() {
@@ -54,9 +57,20 @@ class LocationTrackingService : Service() {
                         bearing = location.bearing, speed = location.speed,
                         timestamp = location.timestamp
                     ))
+                    val token = driverState.state.value.authToken
+                    if (token.isNotEmpty()) {
+                        runCatching {
+                            api.postLocation(
+                                "Bearer $token",
+                                LocationPingDto(
+                                    lat = location.lat, lng = location.lng,
+                                    heading = location.bearing, speed = location.speed,
+                                    accuracy = location.accuracy
+                                )
+                            )
+                        }
+                    }
                 }
-
-                webSocketManager.sendLocationUpdate(location)
             }
         }
     }
