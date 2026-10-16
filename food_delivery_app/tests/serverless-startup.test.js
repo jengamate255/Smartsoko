@@ -12,6 +12,11 @@ function handler(load) {
 function response() { return { statusCode:200,setHeader(){},status(n){this.statusCode=n;return this},json(body){this.body=body;return this} }; }
 afterEach(()=>vi.unstubAllEnvs());
 describe('serverless startup',()=>{
+  it('loads the AI routes from repository-owned dependencies without the sibling workspace',()=>{
+    vi.stubEnv('GEMINI_API_KEY','');
+    expect(()=>require('../server/src/routes/ai/product-agent')).not.toThrow();
+    expect(require('../server/src/services/gemini-vision-provider').GeminiVisionProvider).toBeTypeOf('function');
+  });
   it('includes shared API modules and public artwork in the deployment',()=>{
     const ignored=require('ignore')().add(fs.readFileSync(new URL('../.vercelignore',import.meta.url),'utf8'));
     for(const p of ['server/src/middleware/auth.js','server/src/middleware/rate-limiter.js','lib/server-db.js','public/images/products/example.png']) expect(ignored.ignores(p),p).toBe(false);

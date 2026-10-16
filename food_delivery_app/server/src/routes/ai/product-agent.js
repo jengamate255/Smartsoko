@@ -10,7 +10,7 @@
  */
 
 const { Router } = require('express');
-const { GeminiVisionProvider } = require('../../../../../../ai-product-agent/vision/gemini-vision-provider.js');
+const { GeminiVisionProvider } = require('../../services/gemini-vision-provider.js');
 const { randomUUID: uuidv4 } = require('crypto');
 
 // Initialize Vision Provider
