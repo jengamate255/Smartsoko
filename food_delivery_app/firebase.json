@@ -32,7 +32,7 @@
   },
   "hosting": {
     "site": "fooddelievry-dce15",
-    "public": "web",
+    "public": "public",
     "cleanUrls": true,
     "trailingSlash": false,
     "ignore": [
@@ -44,13 +44,18 @@
       "package-lock.json",
       "**/*.md",
       "**/*.backup",
-      "test-*.html"
+      "test-*.html",
+      "seed-merchant.html",
+      "server.js",
+      "_mock-server.js"
     ],
     "rewrites": [
       { "source": "/", "destination": "/index.html" },
       { "source": "/register", "destination": "/signup.html" },
       { "source": "/dashboard", "destination": "/merchant.html" },
-      { "source": "/forgot-password", "destination": "/check-user.html" }
+      { "source": "/forgot-password", "destination": "/check-user.html" },
+      { "source": "/customer", "destination": "/customer-orders.html" },
+      { "source": "/customer-orders", "destination": "/customer-orders.html" }
     ],
     "headers": [
       {

@@ -29,7 +29,8 @@ docs/
 functions/
 # server/ — kept for api/index.js imports (server/server-production.js)
 server-dev.js
-lib/
+lib/*
+!lib/server-db.js
 linux/
 macos/
 middleware/
@@ -69,10 +70,10 @@ list-tools.js
 run-audit.js
 
 # Screenshots / images at root
-*.png
-*.jpg
-*.jpeg
-*.gif
+/*.png
+/*.jpg
+/*.jpeg
+/*.gif
 
 # Puppeteer / playwright reports
 puppeteer-report/
@@ -122,3 +123,13 @@ google-services*.json
 nul
 tmp/
 temp/
+
+# Local browser sessions and generated test data
+.playwright-cli/
+.runtime/
+output/
+test-results/
+scratch/
+public/seed-merchant.html
+public/server.js
+public/_mock-server.js
