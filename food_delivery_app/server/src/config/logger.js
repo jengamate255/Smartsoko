@@ -40,7 +40,7 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({
+    ...(process.env.VERCEL ? [] : [new winston.transports.File({
       filename: path.join(__dirname, '..', '..', 'logs', 'error.log'),
       level: 'error',
       maxsize: 5242880,
@@ -50,7 +50,7 @@ const logger = winston.createLogger({
       filename: path.join(__dirname, '..', '..', 'logs', 'combined.log'),
       maxsize: 5242880,
       maxFiles: 5
-    }),
+    })]),
     new MemoryTransport()
   ]
 });

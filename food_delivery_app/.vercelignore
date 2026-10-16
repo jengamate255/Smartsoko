@@ -33,7 +33,7 @@ lib/*
 !lib/server-db.js
 linux/
 macos/
-middleware/
+/middleware/
 archived/
 
 # Logs

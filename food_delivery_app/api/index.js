@@ -2,10 +2,7 @@
 // This exports the Express app as a serverless function for Vercel
 // Handles routing properly for Vercel serverless functions
 
-const { createServer } = require('http');
-
-// Import the Express app from the main server
-const { app } = require('../server/server-production.js');
+let app;
 
 // Vercel serverless function handler
 module.exports = async (req, res) => {
@@ -14,14 +11,16 @@ module.exports = async (req, res) => {
            `req_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 9)}`;
   res.setHeader('X-Request-ID', req.id);
   
-  // Vercel passes the full path including /api prefix
-  // The Express app routes are defined with /api/ prefix
-  // So we need to ensure the path is correct
-  const originalUrl = req.url;
-  
-  // Handle the request with the Express app
-  return app(req, res);
+  try {
+    // Keep initialization inside the handler so startup failures return a
+    // controlled response and are recorded in the provider's runtime logs.
+    app ||= require('../server/server-production.js').app;
+    return app(req, res);
+  } catch (error) {
+    console.error('SmartSoko API startup failed:', error);
+    const missing = error.code === 'MODULE_NOT_FOUND'
+      ? /^Cannot find module '([@a-zA-Z0-9_./-]+)'/.exec(error.message)?.[1]
+      : undefined;
+    return res.status(503).json({ success: false, error: 'API is temporarily unavailable', code: error.code || 'STARTUP_FAILED', ...(missing ? { dependency: missing } : {}) });
+  }
 };
-
-// Export the Express app for Vercel
-module.exports.default = app;
