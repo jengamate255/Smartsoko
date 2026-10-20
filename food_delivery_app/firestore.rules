@@ -14,21 +14,36 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.token.admin == true;
     }
     
-    function isSeller(sellerId) {
-      return isAuthenticated() && request.auth.uid == sellerId;
-    }
-    
     // NOTE: isDriver() and isCustomer() used to sit here. Both were unused (the
     // deploy linter reported "Unused function" plus "Invalid variable name:
     // request" for them), so they were removed to keep deploys warning-free.
     // Re-add them from the driver/customer match blocks if ever needed.
+    // isSeller() was retired the same way once the products rules moved to
+    // ownsSeller(), which resolves the store doc's ownerId.
     
     function isOrderParticipant(order) {
       return isAuthenticated() && (
-        request.auth.uid == order.customerId ||
-        request.auth.uid == order.driverId ||
-        request.auth.uid == order.sellerId
+        request.auth.uid == order.get('customerId', '') ||
+        request.auth.uid == order.get('driverId', '') ||
+        request.auth.uid == order.get('sellerId', '') ||
+        ownsCustomer(order.get('customerId', '')) ||
+        ownsSeller(order.get('sellerId', ''))
       );
+    }
+
+    // Native apps reference sellers/customers by DOCUMENT ID, not by Firebase
+    // uid, so participation must be resolved through the linked document's
+    // ownerId field. exists() guards get() from throwing on deleted docs.
+    function ownsCustomer(customerId) {
+      return customerId != '' &&
+        exists(/databases/$(database)/documents/customers/$(customerId)) &&
+        get(/databases/$(database)/documents/customers/$(customerId)).data.get('ownerId', '') == request.auth.uid;
+    }
+
+    function ownsSeller(sellerId) {
+      return sellerId != '' &&
+        exists(/databases/$(database)/documents/sellers/$(sellerId)) &&
+        get(/databases/$(database)/documents/sellers/$(sellerId)).data.get('ownerId', '') == request.auth.uid;
     }
     
     // Users - users can read/write their own data
@@ -37,25 +52,57 @@ service cloud.firestore {
       allow read: if isAdmin();
     }
     
+    // Customers - native customer app stores profiles under auto-issued doc
+    // ids with an ownerId field; owner has full access to their own profile.
+    match /customers/{customerId} {
+      allow read: if isAuthenticated() &&
+        (isOwner(customerId) || resource.data.get('ownerId', '') == request.auth.uid);
+      allow create: if isAuthenticated() &&
+        request.resource.data.get('ownerId', '') == request.auth.uid;
+      allow update: if isAuthenticated() &&
+        (isOwner(customerId) || resource.data.get('ownerId', '') == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+    
     // Authoritative prices, reservations and status changes go through the API.
     // Admin SDK writes bypass these client rules.
     match /orders/{orderId} {
-      allow create: if false;
+      // Customer app creates its own orders directly (no Admin SDK available
+      // in Supabase-only mode); customerId must resolve to the caller.
+      allow create: if isAuthenticated() &&
+        ownsCustomer(request.resource.data.get('customerId', ''));
       // Participants can read; drivers can also read orders that are open
       // for delivery (ready_for_delivery) so they can see available jobs.
       allow read: if isOrderParticipant(resource.data) || 
-        (isAuthenticated() && resource.data.status == 'ready_for_delivery');
-      allow update, delete: if false;
+        (isAuthenticated() && resource.data.get('status', '') == 'ready_for_delivery');
+      allow update: if isAuthenticated() && (
+        // customer manages own order (cancel, rating)
+        ownsCustomer(resource.data.get('customerId', '')) ||
+        // merchant manages orders of own store (accept, ready)
+        ownsSeller(resource.data.get('sellerId', '')) ||
+        // assigned driver progresses the delivery
+        request.auth.uid == resource.data.get('driverId', '') ||
+        // driver claims an open job, touching only claim fields
+        (resource.data.get('status', '') == 'ready_for_delivery' &&
+          request.resource.data.get('driverId', '') == request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+            ['driverId', 'driverName', 'driverPhone', 'status', 'assignedAt', 'acceptedAt', 'updatedAt', 'pickedUpAt']
+          ))
+      );
+      allow delete: if false;
     }
     
     // Drivers - owner manages their own profile/availability/location.
     // Merchants/admins may flip availability fields when assigning jobs.
+    // Canonical layout is drivers/{uid}; web-created docs sometimes lack an
+    // explicit ownerId, so the document id itself is an ownership fallback.
     match /drivers/{driverId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && 
         request.resource.data.ownerId == request.auth.uid;
       allow update: if isAuthenticated() && (
-        request.resource.data.ownerId == request.auth.uid ||
+        driverId == request.auth.uid ||
+        request.resource.data.get('ownerId', '') == request.auth.uid ||
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(
           ['available', 'currentOrderId', 'updatedAt']
         )
@@ -63,11 +110,20 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
-    // Products - public read, sellers write their own
+    // Products - public read, sellers write their own.
+    // The native merchant app stores the store's document id in "merchantId";
+    // legacy/web rows used "sellerId" equal to the owner uid. Accept both.
     match /products/{productId} {
       allow read: if true;
-      allow create: if isSeller(request.resource.data.sellerId);
-      allow update, delete: if isSeller(resource.data.sellerId);
+      allow create: if isAuthenticated() && (
+        request.resource.data.get('sellerId', '') == request.auth.uid ||
+        ownsSeller(request.resource.data.get('merchantId', ''))
+      );
+      allow update, delete: if isAuthenticated() && (
+        resource.data.get('sellerId', '') == request.auth.uid ||
+        ownsSeller(resource.data.get('sellerId', '')) ||
+        ownsSeller(resource.data.get('merchantId', ''))
+      );
     }
     
     // Carts - user owns their cart
