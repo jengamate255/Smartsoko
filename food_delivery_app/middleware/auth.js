@@ -60,7 +60,7 @@ async function verifyToken(req, res, next) {
     // Try Supabase JWT
     if (!supabaseClient) {
       const supabaseUrl = process.env.SUPABASE_URL;
-      const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
       if (supabaseUrl && supabaseKey) {
         supabaseClient = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
       }

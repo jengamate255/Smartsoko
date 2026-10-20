@@ -38,8 +38,16 @@ function ensureAdminForAuth() {
     adminInitPromise = (async () => {
       const serviceAccount = loadServiceAccount();
       if (!serviceAccount) {
-        console.error('auth: no Firebase credentials found (FIREBASE_SERVICE_ACCOUNT_BASE64 or serviceAccountKey.json) — token verification will fail');
-        return false;
+        const projectId = process.env.FIREBASE_PROJECT_ID;
+        if (!projectId) {
+          console.error('auth: set FIREBASE_PROJECT_ID for ID-token verification');
+          adminInitPromise = null;
+          return false;
+        }
+        // ID-token verification uses Google's public signing keys. Private
+        // service-account credentials are only needed for administrative APIs.
+        admin.initializeApp({ projectId });
+        return true;
       }
       admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
       console.log('auth: Firebase admin app initialized (auth-only) for ID token verification');
@@ -144,6 +152,7 @@ async function resolveLegacyRole(sb, uid, email) {
     }
   } catch (_) { /* best-effort */ }
 
+  if (process.env.SKIP_FIREBASE === 'true') return null;
   // b) Firestore legacy collections (sellers/<uid>, drivers/<uid>) — uses the
   //    auth-only admin app when the server runs Supabase-only mode.
   try {
@@ -177,6 +186,13 @@ let _supabaseTokenCache = new Map(); // token → { user, expires }
 const SUPABASE_TOKEN_CACHE_TTL_MS = 60 * 1000;
 
 async function verifySupabaseToken(token) {
+  // This only selects a verifier; neither the payload nor its claims are
+  // trusted until getUser/verifyIdToken has cryptographically verified it.
+  try {
+    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8'));
+    const issuer = (process.env.SUPABASE_URL || 'https://vonkqyiczeqhuqhahsxm.supabase.co') + '/auth/v1';
+    if (payload.iss !== issuer) return null;
+  } catch (_) { return null; }
   const cached = _supabaseTokenCache.get(token);
   if (cached && cached.expires > Date.now()) return cached.user;
 
@@ -223,6 +239,7 @@ async function verifySupabaseToken(token) {
       email: u.email || '',
       name: (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || '',
       provider: 'supabase',
+      emailVerified: !!u.email_confirmed_at,
     };
     _supabaseTokenCache.set(token, { user, expires: Date.now() + SUPABASE_TOKEN_CACHE_TTL_MS });
     return user;
@@ -247,6 +264,7 @@ const verifyToken = async (req, res, next) => {
         uid: supaUser.uid,
         email: supaUser.email,
         name: supaUser.name,
+        emailVerified: supaUser.emailVerified,
         roles: ['customer'],
       };
       req.user.role = 'customer';
@@ -267,6 +285,7 @@ const verifyToken = async (req, res, next) => {
       email: decoded.email,
       name: decoded.name,
       picture: decoded.picture,
+      emailVerified: decoded.email_verified === true,
       roles: decoded.roles || [],
       customClaims: decoded.customClaims || {},
     };
