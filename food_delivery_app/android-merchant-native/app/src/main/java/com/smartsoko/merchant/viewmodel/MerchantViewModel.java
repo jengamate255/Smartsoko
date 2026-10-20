@@ -29,7 +29,7 @@ public class MerchantViewModel extends ViewModel {
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<DocumentSnapshot> sellerData = new MutableLiveData<>();
 
-    private FirebaseUser currentUser;
+    private String currentUid;
     private ListenerRegistration ordersListener;
     private ListenerRegistration sellerListener;
 
@@ -38,18 +38,18 @@ public class MerchantViewModel extends ViewModel {
         firestore = FirebaseFirestore.getInstance();
     }
 
-    public void setCurrentUser(FirebaseUser user) {
-        this.currentUser = user;
+    public void setCurrentUser(String uid) {
+        this.currentUid = uid;
         loadSellerData();
     }
 
     private void loadSellerData() {
-        if (currentUser == null) return;
+        if (currentUid == null) return;
 
         isLoading.setValue(true);
 
         firestore.collection("sellers")
-                .whereEqualTo("ownerId", currentUser.getUid())
+                .whereEqualTo("ownerId", currentUid)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     isLoading.setValue(false);
@@ -91,11 +91,7 @@ public class MerchantViewModel extends ViewModel {
                     if (snapshot != null) {
                         List<Order> orderList = new ArrayList<>();
                         for (DocumentSnapshot doc : snapshot.getDocuments()) {
-                            Order order = doc.toObject(Order.class);
-                            if (order != null) {
-                                order.setId(doc.getId());
-                                orderList.add(order);
-                            }
+                            orderList.add(com.smartsoko.merchant.data.repository.DocumentMappers.toOrder(doc));
                         }
                         orders.setValue(orderList);
                     }
@@ -145,7 +141,7 @@ public class MerchantViewModel extends ViewModel {
     }
 
     public void markOrderReady(String orderId) {
-        updateOrderStatus(orderId, "ready");
+        updateOrderStatus(orderId, "ready_for_delivery");
     }
 
     public void markOrderDelivered(String orderId) {
@@ -216,6 +212,11 @@ public class MerchantViewModel extends ViewModel {
                 if (product.getPrice() > 0) {
                     // Price extracted - can be used directly or displayed for review
                 }
+            }
+
+            @Override
+            public void onError(String error) {
+                errorMessage.setValue(error);
             }
         });
     }

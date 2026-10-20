@@ -5,6 +5,7 @@
     <color name="primary_dark">#059669</color>
     <color name="primary_light">#34D399</color>
     <color name="accent">#F59E0B</color>
+    <color name="secondary">#6B7280</color>
 
     <!-- Semantic Colors -->
     <color name="success">#10B981</color>

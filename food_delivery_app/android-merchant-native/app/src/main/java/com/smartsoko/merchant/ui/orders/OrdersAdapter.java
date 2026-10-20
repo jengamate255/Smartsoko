@@ -105,9 +105,9 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
             tvItems.setText(order.getFormattedItems());
 
             if (order.getTotalAmount() != null) {
-                tvTotal.setText(String.format("KSh %.2f", order.getTotalAmount()));
+                tvTotal.setText(String.format("TSh %.2f", order.getTotalAmount()));
             } else {
-                tvTotal.setText("KSh 0.00");
+                tvTotal.setText("TSh 0.00");
             }
 
             tvStatus.setText(order.getStatusDisplayName());
@@ -150,6 +150,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
                     break;
 
                 case "ready":
+                case "ready_for_delivery":
                     actionsReady.setVisibility(View.VISIBLE);
                     btnDelivered.setOnClickListener(v -> listener.onMarkDelivered(order));
                     break;

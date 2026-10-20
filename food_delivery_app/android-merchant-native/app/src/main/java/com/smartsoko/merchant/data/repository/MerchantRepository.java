@@ -6,6 +6,10 @@ import com.google.firebase.firestore.SetOptions;
 import com.smartsoko.merchant.data.model.Order;
 import com.smartsoko.merchant.data.model.Product;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,11 +34,7 @@ public class MerchantRepository {
                 .addOnSuccessListener(querySnapshot -> {
                     List<Product> products = new ArrayList<>();
                     for (var doc : querySnapshot.getDocuments()) {
-                        Product product = doc.toObject(Product.class);
-                        if (product != null) {
-                            product.setId(doc.getId());
-                            products.add(product);
-                        }
+                        products.add(DocumentMappers.toProduct(doc));
                     }
                     listener.onProductsLoaded(products);
                 })
@@ -97,7 +97,7 @@ public class MerchantRepository {
                     int completedOrders = 0;
 
                     for (var doc : querySnapshot.getDocuments()) {
-                        Order order = doc.toObject(Order.class);
+                        Order order = DocumentMappers.toOrder(doc);
                         if (order != null) {
                             Double amount = order.getTotalAmount();
                             if (amount != null) {
@@ -180,7 +180,14 @@ public class MerchantRepository {
                     extractedProduct.setDescription(json.optString("description", ""));
                     extractedProduct.setPrice(json.optDouble("price", 0.0));
                     extractedProduct.setCategory(json.optString("category", ""));
-                    extractedProduct.setTags(json.optJSONArray("tags") != null ? new ArrayList<>(json.optJSONArray("tags")) : new ArrayList<>());
+                    ArrayList<String> tags = new ArrayList<>();
+                    JSONArray tagsArray = json.optJSONArray("tags");
+                    if (tagsArray != null) {
+                        for (int i = 0; i < tagsArray.length(); i++) {
+                            tags.add(tagsArray.optString(i));
+                        }
+                    }
+                    extractedProduct.setTags(tags);
                     listener.onProductExtracted(extractedProduct, null);
                 } else {
                     listener.onError("AI extraction failed: HTTP " + responseCode);
@@ -193,6 +200,7 @@ public class MerchantRepository {
 
     public interface OnProductExtractedListener {
         void onProductExtracted(Product product, String error);
+        void onError(String error);
     }
 
     // Interfaces

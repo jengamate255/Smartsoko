@@ -12,7 +12,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.smartsoko.merchant.R;
+import com.smartsoko.merchant.data.model.Order;
 import com.smartsoko.merchant.viewmodel.MerchantViewModel;
+
+import java.util.List;
+import java.util.Locale;
 
 public class AnalyticsFragment extends Fragment {
 
@@ -41,15 +45,29 @@ public class AnalyticsFragment extends Fragment {
         tvPendingOrders = view.findViewById(R.id.tv_pending_orders);
         tvCompletedOrders = view.findViewById(R.id.tv_completed_orders);
 
-        viewModel.getOrders().observe(getViewLifecycleOwner(), orders -> {
-            updateStats(orders != null ? orders.size() : 0);
-        });
+        viewModel.getOrders().observe(getViewLifecycleOwner(), this::updateStats);
     }
 
-    private void updateStats(int totalOrders) {
-        tvTotalOrders.setText(String.valueOf(totalOrders));
-        tvTotalRevenue.setText("KSh 0.00");
-        tvPendingOrders.setText("0");
-        tvCompletedOrders.setText("0");
+    private void updateStats(List<Order> orders) {
+        double revenue = 0;
+        int pending = 0;
+        int completed = 0;
+        if (orders != null) {
+            for (Order order : orders) {
+                String status = order.getStatus() == null ? "" : order.getStatus().toLowerCase();
+                if ("delivered".equals(status) || "completed".equals(status)) {
+                    if (order.getTotalAmount() != null) {
+                        revenue += order.getTotalAmount();
+                    }
+                    completed++;
+                } else if ("pending".equals(status)) {
+                    pending++;
+                }
+            }
+        }
+        tvTotalOrders.setText(String.valueOf(orders == null ? 0 : orders.size()));
+        tvTotalRevenue.setText(String.format(Locale.US, "TSh %.2f", revenue));
+        tvPendingOrders.setText(String.valueOf(pending));
+        tvCompletedOrders.setText(String.valueOf(completed));
     }
 }

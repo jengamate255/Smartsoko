@@ -54,7 +54,7 @@ public class OrderDetailsDialog extends DialogFragment {
             tvCustomerPhone.setText(order.getCustomerPhone());
             tvAddress.setText(order.getDeliveryAddress());
             tvItems.setText(order.getFormattedItems());
-            tvTotal.setText(String.format("KSh %.2f", order.getTotalAmount() != null ? order.getTotalAmount() : 0));
+            tvTotal.setText(String.format("TSh %.2f", order.getTotalAmount() != null ? order.getTotalAmount() : 0));
             tvStatus.setText(order.getStatusDisplayName());
             tvStatus.setTextColor(order.getStatusColor());
             tvPaymentMethod.setText(order.getPaymentMethod() != null ? order.getPaymentMethod() : "N/A");

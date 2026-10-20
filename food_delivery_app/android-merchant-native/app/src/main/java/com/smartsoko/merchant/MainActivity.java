@@ -1,5 +1,6 @@
 package com.smartsoko.merchant;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,7 +17,10 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.smartsoko.merchant.ui.analytics.AnalyticsFragment;
+import com.smartsoko.merchant.ui.login.LoginActivity;
 import com.smartsoko.merchant.ui.orders.OrdersFragment;
 import com.smartsoko.merchant.ui.products.ProductsFragment;
 import com.smartsoko.merchant.ui.settings.SettingsFragment;
@@ -28,24 +32,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NavigationView navigationView;
     private BottomNavigationView bottomNavigationView;
     private MerchantViewModel viewModel;
-    private MockAuth mockAuth;
+    private FirebaseUser currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mockAuth = MockAuth.getInstance();
-        MockUser currentUser = mockAuth.getCurrentUser();
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         if (currentUser == null) {
-            Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
         }
 
         viewModel = new ViewModelProvider(this).get(MerchantViewModel.class);
-        viewModel.setCurrentUser(currentUser);
+        viewModel.setCurrentUser(currentUser.getUid());
 
         initViews();
         setupNavigation();
@@ -80,9 +83,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         TextView tvUserEmail = headerView.findViewById(R.id.tv_user_email);
         TextView tvStoreName = headerView.findViewById(R.id.tv_store_name);
 
-        MockUser user = mockAuth.getCurrentUser();
-        if (user != null) {
-            tvUserEmail.setText(user.getEmail());
+        if (currentUser.getEmail() != null) {
+            tvUserEmail.setText(currentUser.getEmail());
         }
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -157,8 +159,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void logout() {
-        mockAuth.signOut();
+        FirebaseAuth.getInstance().signOut();
         Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
 

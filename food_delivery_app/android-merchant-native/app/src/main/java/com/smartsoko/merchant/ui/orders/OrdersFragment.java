@@ -196,7 +196,7 @@ public class OrdersFragment extends Fragment {
                     }
                     break;
                 case "active":
-                    if ("accepted".equals(status) || "ready".equals(status)) {
+                    if ("accepted".equals(status) || "ready".equals(status) || "ready_for_delivery".equals(status)) {
                         filteredOrders.add(order);
                     }
                     break;

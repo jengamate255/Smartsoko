@@ -1,81 +1,45 @@
 package com.smartsoko.merchant.ui.products;
 
-import android.Manifest;
 import android.os.Bundle;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.smartsoko.merchant.R;
 import com.smartsoko.merchant.data.model.Product;
 import com.smartsoko.merchant.viewmodel.MerchantViewModel;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ProductsFragment extends Fragment {
 
-    private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private FloatingActionButton fabAddProduct;
+    private static final int FILTER_ALL = 0;
+    private static final int FILTER_AVAILABLE = 1;
+    private static final int FILTER_OUT_OF_STOCK = 2;
+
     private MerchantViewModel viewModel;
+    private ProductsAdapter adapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private View emptyState;
+    private EditText searchInput;
 
-    // Image picker result launcher
-    private ActivityResultLauncher<Intent> imagePickerLauncher;
-
-    // UI components for AI product entry
-    private ImageView ivProductImage;
-    private EditText etProductName;
-    private EditText etProductPrice;
-    private EditText etProductDescription;
-    private ProgressBar aiProgressBar;
-    private Button btnUseAI;
-    private TextView tvAIStatus;
-
-    public ProductsFragment() {
-        // Initialize image picker launcher
-        imagePickerLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
-                        // Get the selected image URI and load it
-                        Uri imageUri = result.getData().getData();
-                        // Load image into UI - placeholder for now
-                        if (ivProductImage != null) {
-                            // ivProductImage.setImageURI(imageUri); // TODO: load image
-                        }
-                        // Run AI extraction on the selected image
-                        if (aiProgressBar != null) {
-                            aiProgressBar.setVisibility(View.VISIBLE);
-                        }
-                        if (btnUseAI != null) {
-                            btnUseAI.setEnabled(false);
-                        }
-                        // TODO: Convert URI to bytes and call viewModel.detectProductFromImage()
-                    }
-                });
-    }
+    private List<Product> allProducts = new ArrayList<>();
+    private int filterMode = FILTER_ALL;
+    private String query = "";
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -94,35 +58,93 @@ public class ProductsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        recyclerView = view.findViewById(R.id.recycler_products);
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_products);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh);
-        fabAddProduct = view.findViewById(R.id.fab_add_product);
+        emptyState = view.findViewById(R.id.empty_state);
+        searchInput = view.findViewById(R.id.et_search);
+        ChipGroup chipGroup = view.findViewById(R.id.chip_group_filter);
+        ExtendedFloatingActionButton fab = view.findViewById(R.id.fab_add_product);
 
-        // TODO: Initialize AI product entry UI components
-        // ivProductImage = view.findViewById(R.id.iv_product_image);
-        // etProductName = view.findViewById(R.id.et_product_name);
-        // etProductPrice = view.findViewById(R.id.et_product_price);
-        // etProductDescription = view.findViewById(R.id.et_product_description);
-        // aiProgressBar = view.findViewById(R.id.ai_progress_bar);
-        // btnUseAI = view.findViewById(R.id.btn_use_ai);
-        // tvAIStatus = view.findViewById(R.id.tv_ai_status);
+        adapter = new ProductsAdapter(product -> ProductEditorDialog.show(
+                requireContext(), product, new ProductEditorDialog.Callbacks() {
+                    @Override
+                    public void onSave(Product p) {
+                        viewModel.saveProduct(p);
+                    }
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            viewModel.loadProducts();
-            swipeRefreshLayout.setRefreshing(false);
+                    @Override
+                    public void onDelete(Product p) {
+                        viewModel.deleteProduct(p.getId());
+                    }
+                }));
+        recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+        recyclerView.setAdapter(adapter);
+
+        swipeRefreshLayout.setOnRefreshListener(() -> viewModel.loadProducts());
+
+        view.findViewById(R.id.chip_all).setOnClickListener(v -> setFilter(FILTER_ALL));
+        view.findViewById(R.id.chip_available).setOnClickListener(v -> setFilter(FILTER_AVAILABLE));
+        view.findViewById(R.id.chip_out_of_stock).setOnClickListener(v -> setFilter(FILTER_OUT_OF_STOCK));
+
+        searchInput.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                query = s.toString().toLowerCase().trim();
+                applyFilters();
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
         });
 
-        fabAddProduct.setOnClickListener(v -> {
-            // Open image picker for AI product detection
-            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            imagePickerLauncher.launch(intent);
-        });
+        fab.setOnClickListener(v -> ProductEditorDialog.show(
+                requireContext(), null, new ProductEditorDialog.Callbacks() {
+                    @Override
+                    public void onSave(Product p) {
+                        viewModel.saveProduct(p);
+                    }
+
+                    @Override
+                    public void onDelete(Product p) {}
+                }));
 
         viewModel.getProducts().observe(getViewLifecycleOwner(), products -> {
-            // Update adapter with products
+            allProducts = products != null ? products : new ArrayList<>();
+            swipeRefreshLayout.setRefreshing(false);
+            applyFilters();
+        });
+
+        viewModel.getErrorMessage().observe(getViewLifecycleOwner(), message -> {
+            if (!TextUtils.isEmpty(message)) {
+                swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+            }
         });
 
         viewModel.loadProducts();
+    }
+
+    private void setFilter(int mode) {
+        filterMode = mode;
+        applyFilters();
+    }
+
+    private void applyFilters() {
+        List<Product> filtered = new ArrayList<>();
+        for (Product p : allProducts) {
+            if (filterMode == FILTER_AVAILABLE && (!p.isAvailable() || p.getStockQuantity() == 0)) continue;
+            if (filterMode == FILTER_OUT_OF_STOCK && p.isAvailable() && p.getStockQuantity() > 0) continue;
+            if (!query.isEmpty()) {
+                String name = p.getName() == null ? "" : p.getName().toLowerCase();
+                String cat = p.getCategory() == null ? "" : p.getCategory().toLowerCase();
+                if (!name.contains(query) && !cat.contains(query)) continue;
+            }
+            filtered.add(p);
+        }
+        adapter.submit(filtered);
+        emptyState.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
     }
 }

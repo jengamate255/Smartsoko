@@ -21,11 +21,11 @@ public class Order implements java.io.Serializable {
     private String deliveryNotes;
     private String driverId;
     private String driverName;
-    private Date createdAt;
-    private Date updatedAt;
-    private Date acceptedAt;
-    private Date readyAt;
-    private Date deliveredAt;
+    private Object createdAt;
+    private Object updatedAt;
+    private Object acceptedAt;
+    private Object readyAt;
+    private Object deliveredAt;
     private Double rating;
     private String review;
 
@@ -80,20 +80,20 @@ public class Order implements java.io.Serializable {
     public String getDriverName() { return driverName; }
     public void setDriverName(String driverName) { this.driverName = driverName; }
 
-    public Date getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+    public Date getCreatedAt() { return DateUtils.toDate(createdAt); }
+    public void setCreatedAt(Object createdAt) { this.createdAt = createdAt; }
 
-    public Date getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Date updatedAt) { this.updatedAt = updatedAt; }
+    public Date getUpdatedAt() { return DateUtils.toDate(updatedAt); }
+    public void setUpdatedAt(Object updatedAt) { this.updatedAt = updatedAt; }
 
-    public Date getAcceptedAt() { return acceptedAt; }
-    public void setAcceptedAt(Date acceptedAt) { this.acceptedAt = acceptedAt; }
+    public Date getAcceptedAt() { return DateUtils.toDate(acceptedAt); }
+    public void setAcceptedAt(Object acceptedAt) { this.acceptedAt = acceptedAt; }
 
-    public Date getReadyAt() { return readyAt; }
-    public void setReadyAt(Date readyAt) { this.readyAt = readyAt; }
+    public Date getReadyAt() { return DateUtils.toDate(readyAt); }
+    public void setReadyAt(Object readyAt) { this.readyAt = readyAt; }
 
-    public Date getDeliveredAt() { return deliveredAt; }
-    public void setDeliveredAt(Date deliveredAt) { this.deliveredAt = deliveredAt; }
+    public Date getDeliveredAt() { return DateUtils.toDate(deliveredAt); }
+    public void setDeliveredAt(Object deliveredAt) { this.deliveredAt = deliveredAt; }
 
     public Double getRating() { return rating; }
     public void setRating(Double rating) { this.rating = rating; }
@@ -108,10 +108,12 @@ public class Order implements java.io.Serializable {
         for (int i = 0; i < items.size(); i++) {
             Map<String, Object> item = items.get(i);
             String name = (String) item.get("name");
-            Long quantity = ((Number) item.getOrDefault("quantity", 1)).longValue();
+            Object q = item.getOrDefault("quantity", 1);
+            String qty = q instanceof Number ? String.valueOf(((Number) q).longValue()) : String.valueOf(q);
+            if (name == null) name = "item";
 
             if (i > 0) sb.append(", ");
-            sb.append(quantity).append("x ").append(name);
+            sb.append(qty).append("x ").append(name);
         }
         return sb.toString();
     }

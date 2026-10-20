@@ -20,8 +20,8 @@ public class Product {
     private List<String> tags;
     private Double rating;
     private int reviewCount;
-    private Date createdAt;
-    private Date updatedAt;
+    private Object createdAt;
+    private Object updatedAt;
 
     public Product() {}
 
@@ -74,14 +74,14 @@ public class Product {
     public int getReviewCount() { return reviewCount; }
     public void setReviewCount(int reviewCount) { this.reviewCount = reviewCount; }
 
-    public Date getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+    public Date getCreatedAt() { return DateUtils.toDate(createdAt); }
+    public void setCreatedAt(Object createdAt) { this.createdAt = createdAt; }
 
-    public Date getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Date updatedAt) { this.updatedAt = updatedAt; }
+    public Date getUpdatedAt() { return DateUtils.toDate(updatedAt); }
+    public void setUpdatedAt(Object updatedAt) { this.updatedAt = updatedAt; }
 
     public String getFormattedPrice() {
-        return String.format("KSh %.2f", getPrice());
+        return String.format("TSh %.2f", getPrice());
     }
 
     public String getDisplayImageUrl() {
