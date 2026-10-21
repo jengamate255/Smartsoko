@@ -108,10 +108,11 @@ class DriverRepository {
     fun getAvailableOrders(): Flow<List<Order>> = callbackFlow {
         val job = CoroutineScope(Dispatchers.IO).launch {
             while (true) {
+                val merged = LinkedHashMap<String, Order>()
                 try {
                     val token = auth.currentUser?.getIdToken(false)?.await()
                     val idToken = token?.token ?: ""
-                    val url = java.net.URL("http://192.168.1.24:3000/api/driver/available-orders")
+                    val url = java.net.URL(com.smartsoko.driver.BuildConfig.API_BASE_URL + "driver/available-orders")
                     val conn = url.openConnection() as java.net.HttpURLConnection
                     conn.setRequestProperty("Authorization", "Bearer $idToken")
                     conn.connectTimeout = 5000
@@ -120,25 +121,24 @@ class DriverRepository {
                         val body = conn.inputStream.bufferedReader().readText()
                         val json = org.json.JSONObject(body)
                         val data = json.optJSONArray("data") ?: json.optJSONArray("orders") ?: org.json.JSONArray()
-                        val orders = mutableListOf<Order>()
                         for (i in 0 until data.length()) {
                             val item = data.getJSONObject(i)
                             val o = parseOrderFromJson(item)
-                            if (o != null && o.driverId.isBlank()) orders.add(o)
+                            if (o != null && o.driverId.isBlank()) merged[o.id] = o
                         }
-                        trySend(orders.sortedByDescending { it.createdAt })
                     }
-                } catch (_: Exception) {
-                    try {
-                        val snap = firestore.collection("orders")
-                            .whereEqualTo("status", "ready_for_delivery")
-                            .get().await()
-                        val orders = snap.documents.mapNotNull { parseOrder(it) }
-                            .filter { it.driverId.isBlank() }
-                            .sortedByDescending { it.createdAt }
-                        trySend(orders)
-                    } catch (_: Exception) {}
-                }
+                } catch (_: Exception) {}
+                // Native apps write orders straight to Firestore, which the HTTP
+                // API (Supabase) never sees — merge both so nothing is missed.
+                try {
+                    val snap = firestore.collection("orders")
+                        .whereEqualTo("status", "ready_for_delivery")
+                        .get().await()
+                    snap.documents.mapNotNull { parseOrder(it) }
+                        .filter { it.driverId.isBlank() }
+                        .forEach { merged.putIfAbsent(it.id, it) }
+                } catch (_: Exception) {}
+                trySend(merged.values.sortedByDescending { it.createdAt })
                 delay(15_000)
             }
         }

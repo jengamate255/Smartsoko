@@ -14,6 +14,9 @@ android {
         targetSdk = 36
         versionCode = 2
         versionName = "2.0-native"
+        val apiBaseUrl = providers.gradleProperty("apiBaseUrl")
+            .orElse("http://10.0.2.2:3000/api/").get().trimEnd('/') + "/"
+        buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
     }
 
     buildTypes {
