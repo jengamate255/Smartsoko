@@ -207,6 +207,13 @@
   background: var(--ak-primary-soft); color: var(--ak-primary);
   display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800;
 }
+.ak-avatar--lg { width: 42px; height: 42px; font-size: 15px; }
+.ak-avatar--lg .material-symbols-outlined { font-size: 21px; }
+.ak-warn-badge {
+  width: 42px; height: 42px; border-radius: 999px; flex: 0 0 auto; background: #FEF2F2; color: var(--ak-danger);
+  display: flex; align-items: center; justify-content: center;
+}
+.ak-warn-badge .material-symbols-outlined { font-size: 21px; }
 .ak-avatar--muted { background: #F1F5F9; color: var(--ak-text-muted); }
 
 /* Thumbnail cell for catalogued items (products, CMS media). */
@@ -263,7 +270,7 @@
 .ak-grid--halves { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (max-width: 1279px) { .ak-grid--halves { grid-template-columns: minmax(0, 1fr); } }
 .ak-grid--side { grid-template-columns: minmax(0, 2.2fr) minmax(280px, 1fr); align-items: start; }
-@media (max-width: 1279px) { .ak-grid--side { grid-template-columns: 1fr; } }
+@media (max-width: 1279px) { .ak-grid--side { grid-template-columns: minmax(0, 1fr); } }
 /* Cards in the same row must not stack their sibling margin on top of the gap. */
 .ak-grid .ak-card + .ak-card { margin-top: 0; }
 .ak-col { display: flex; flex-direction: column; gap: 20px; }
@@ -279,7 +286,7 @@
 
 /* ── Live lists (logistics side panels) ───────────────────────────────── */
 .ak-logistics-grid { display: grid; grid-template-columns: minmax(0, 2.4fr) minmax(280px, 1fr); gap: 20px; align-items: start; }
-@media (max-width: 1279px) { .ak-logistics-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1279px) { .ak-logistics-grid { grid-template-columns: minmax(0, 1fr); } }
 .ak-logistics-map { display: flex; flex-direction: column; min-height: 560px; }
 .ak-map-host { flex: 1 1 auto; min-height: 460px; margin: 0 12px 12px; border-radius: 12px; overflow: hidden; background: #F1F5F9; }
 .ak-logistics-side { display: flex; flex-direction: column; gap: 20px; }
@@ -415,6 +422,43 @@
   display: flex; align-items: center; justify-content: flex-end; gap: 8px;
   padding: 16px 22px; border-top: 1px solid var(--ak-border);
 }
+
+/* ── Legacy modal shells on the kit ────────────────────────────── */
+/* The 23 admin dialogs still show and hide through their own Tailwind
+   hidden/flex toggles, so the overlay deliberately sets no display value:
+   adding one would win the cascade against `.hidden` and pin every dialog
+   open. */
+.ak-overlay {
+  position: fixed; inset: 0; z-index: 90;
+  align-items: center; justify-content: center; padding: 20px;
+  background: rgba(2, 44, 29, .45);
+}
+.ak-modal--legacy { padding: 18px 22px 20px; }
+.ak-modal--legacy .ak-modal-head { padding: 0 0 14px; margin-bottom: 16px; border-bottom: 1px solid var(--ak-border); }
+.ak-modal--legacy .ak-modal-head--lead { justify-content: flex-start; padding-bottom: 0; margin-bottom: 14px; border-bottom: 0; }
+.ak-modal--legacy .ak-modal-foot { padding: 16px 0 0; margin-top: 18px; border-top: 1px solid var(--ak-border); }
+.ak-modal--panel { display: flex; flex-direction: column; max-height: 88vh; overflow: hidden; padding: 0; }
+.ak-modal--panel .ak-modal-body { flex: 1 1 auto; overflow-y: auto; }
+.ak-form-row { display: flex; gap: 12px; }
+.ak-modal-subhead { display: block; margin: 16px 0 7px; font-size: 11px; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ak-text-muted); }
+.ak-note { padding: 12px 14px; border-radius: 11px; background: #F6F8F7;
+  border: 1px solid var(--ak-border); font-size: 12.5px; color: var(--ak-text-sec); }
+.ak-choice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 8px; margin-top: 6px; }
+.ak-form .ak-choice {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px;
+  border: 1px solid var(--ak-border); border-radius: 11px; background: var(--ak-surface);
+  font-size: 12px; font-weight: 700; color: var(--ak-text-sec); cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.ak-form .ak-choice:hover { border-color: var(--ak-accent); color: var(--ak-text); }
+.ak-form .ak-choice--on { border-color: var(--ak-primary); background: var(--ak-primary-soft); color: var(--ak-primary); }
+.ak-form .ak-choice .material-symbols-outlined { font-size: 22px; }
+.ak-choice .material-symbols-outlined { color: inherit; }
+.ak-check input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--ak-primary); }
+.ak-spin { width: 26px; height: 26px; flex: none; border-radius: 50%; border: 2px solid #E3E9E7;
+  border-top-color: var(--ak-primary); animation: ak-spin .7s linear infinite; }
+@keyframes ak-spin { to { transform: rotate(360deg); } }
 
 /* ── Toast ────────────────────────────────────────────────────────────── */
 .ak-toasts { position: fixed; right: 18px; bottom: 18px; z-index: 95; display: flex; flex-direction: column; gap: 8px; }

@@ -357,21 +357,21 @@
       </div>
 
       <!-- Seller Edit Modal -->
-      <div id="sellerModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 max-h-[85vh] overflow-y-auto">
-          <div class="flex items-center justify-between mb-6"><h3 id="sellerModalTitle" class="font-bold text-xl text-gray-900">Edit Seller</h3><button onclick="closeSellerModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
+      <div id="sellerModal" class="ak-overlay hidden flex">
+        <div class="ak-modal ak-modal--legacy ak-form">
+          <div class="ak-modal-head"><h3 id="sellerModalTitle" class="ak-modal-title">Edit Seller</h3><button onclick="closeSellerModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
           <input id="sellerId" type="hidden">
-          <div class="space-y-4">
-            <div><label class="block text-sm font-semibold mb-1">Name</label><input id="sellerName" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm"></div>
-            <div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-semibold mb-1">Category</label><input id="sellerCategory" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm"></div><div><label class="block text-sm font-semibold mb-1">Phone</label><input id="sellerPhone" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm"></div></div>
-            <div><label class="block text-sm font-semibold mb-1">Address</label><input id="sellerAddress" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm"></div>
+          <div>
+            <div><label>Name</label><input id="sellerName" class="ak-input"></div>
+            <div class="grid grid-cols-2 gap-4"><div><label>Category</label><input id="sellerCategory" class="ak-input"></div><div><label>Phone</label><input id="sellerPhone" class="ak-input"></div></div>
+            <div><label>Address</label><input id="sellerAddress" class="ak-input"></div>
             <div class="flex gap-6">
-              <label class="flex items-center gap-2 text-sm text-gray-700"><input id="sellerIsOpen" type="checkbox" class="rounded border-gray-300"> Store open</label>
-              <label class="flex items-center gap-2 text-sm text-gray-700"><input id="sellerIsVerified" type="checkbox" class="rounded border-gray-300"> Verified</label>
+              <label class="ak-check"><input id="sellerIsOpen" type="checkbox"> Store open</label>
+              <label class="ak-check"><input id="sellerIsVerified" type="checkbox"> Verified</label>
             </div>
             <div id="sellerStatusBadge" class="text-sm text-gray-500"></div>
           </div>
-          <div class="flex gap-3 mt-6"><button onclick="closeSellerModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button id="saveSellerBtn" onclick="saveSeller()" class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium hover:opacity-90">Save Changes</button></div>
+          <div class="ak-modal-foot"><button onclick="closeSellerModal()" class="ak-btn flex-1">Cancel</button><button id="saveSellerBtn" onclick="saveSeller()" class="ak-btn ak-btn--primary flex-1">Save Changes</button></div>
         </div>
       </div>
 
@@ -405,53 +405,53 @@
         </div>
 
         <!-- User Role/Edit Modal -->
-        <div id="userRoleModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div class="flex items-center justify-between mb-6">
-              <h3 id="userModalTitle" class="font-bold text-xl text-gray-900">Edit User</h3>
-              <button onclick="closeUserRoleModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"><span class="material-symbols-outlined text-gray-500">close</span></button>
+        <div id="userRoleModal" class="ak-overlay hidden">
+          <div class="ak-modal ak-modal--legacy ak-form">
+            <div class="ak-modal-head">
+              <h3 id="userModalTitle" class="ak-modal-title">Edit User</h3>
+              <button onclick="closeUserRoleModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button>
             </div>
             <div class="mb-6">
-              <div class="flex items-center gap-3 mb-4 p-4 bg-gray-50 rounded-xl">
-                <div id="modalUserAvatar" class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-lg"><span class="material-symbols-outlined">person</span></div>
+              <div class="ak-note flex items-center gap-3 mb-4">
+                <div id="modalUserAvatar" class="ak-avatar ak-avatar--lg"><span class="material-symbols-outlined">person</span></div>
                 <div>
                   <p id="modalUserName" class="font-semibold text-gray-900">User Name</p>
                   <p id="modalUserEmail" class="text-sm text-gray-500">user@email.com</p>
                 </div>
               </div>
-              <label class="block text-sm font-semibold text-gray-700 mb-3">Display Name</label>
-              <input id="modalUserDisplayName" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Full name">
-              <label class="block text-sm font-semibold text-gray-700 mb-3">Phone</label>
-              <input id="modalUserPhone" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Phone number">
-              <label class="block text-sm font-semibold text-gray-700 mb-3">Role</label>
-              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <button onclick="selectRole('customer')" id="role-customer" class="role-option p-4 border-2 border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-green-700 hover:bg-green-50 transition-all"><span class="material-symbols-outlined text-2xl text-gray-600">shopping_cart</span><span class="font-medium text-sm">Customer</span></button>
-                <button onclick="selectRole('merchant')" id="role-merchant" class="role-option p-4 border-2 border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-green-700 hover:bg-green-50 transition-all"><span class="material-symbols-outlined text-2xl text-gray-600">storefront</span><span class="font-medium text-sm">Merchant</span></button>
-                <button onclick="selectRole('seller')" id="role-seller" class="role-option p-4 border-2 border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-green-700 hover:bg-green-50 transition-all"><span class="material-symbols-outlined text-2xl text-gray-600">store</span><span class="font-medium text-sm">Seller</span></button>
-                <button onclick="selectRole('driver')" id="role-driver" class="role-option p-4 border-2 border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-green-700 hover:bg-green-50 transition-all"><span class="material-symbols-outlined text-2xl text-gray-600">local_shipping</span><span class="font-medium text-sm">Driver</span></button>
-                <button onclick="selectRole('admin')" id="role-admin" class="role-option p-4 border-2 border-gray-200 rounded-xl flex flex-col items-center gap-2 hover:border-green-700 hover:bg-green-50 transition-all"><span class="material-symbols-outlined text-2xl text-gray-600">admin_panel_settings</span><span class="font-medium text-sm">Admin</span></button>
+              <label>Display Name</label>
+              <input id="modalUserDisplayName" class="ak-input mb-4" placeholder="Full name">
+              <label>Phone</label>
+              <input id="modalUserPhone" class="ak-input mb-4" placeholder="Phone number">
+              <label>Role</label>
+              <div class="ak-choice-grid">
+                <button onclick="selectRole('customer')" id="role-customer" class="role-option ak-choice"><span class="material-symbols-outlined">shopping_cart</span><span class="font-medium text-sm">Customer</span></button>
+                <button onclick="selectRole('merchant')" id="role-merchant" class="role-option ak-choice"><span class="material-symbols-outlined">storefront</span><span class="font-medium text-sm">Merchant</span></button>
+                <button onclick="selectRole('seller')" id="role-seller" class="role-option ak-choice"><span class="material-symbols-outlined">store</span><span class="font-medium text-sm">Seller</span></button>
+                <button onclick="selectRole('driver')" id="role-driver" class="role-option ak-choice"><span class="material-symbols-outlined">local_shipping</span><span class="font-medium text-sm">Driver</span></button>
+                <button onclick="selectRole('admin')" id="role-admin" class="role-option ak-choice"><span class="material-symbols-outlined">admin_panel_settings</span><span class="font-medium text-sm">Admin</span></button>
               </div>
             </div>
-            <div class="flex gap-3">
-              <button onclick="closeUserRoleModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
-              <button id="saveUserRoleBtn" onclick="saveUserRole()" class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium hover:opacity-90 transition-all">Save Changes</button>
+            <div class="ak-modal-foot">
+              <button onclick="closeUserRoleModal()" class="ak-btn flex-1">Cancel</button>
+              <button id="saveUserRoleBtn" onclick="saveUserRole()" class="ak-btn ak-btn--primary flex-1">Save Changes</button>
             </div>
           </div>
         </div>
 
         <!-- Create User Modal -->
-        <div id="createUserModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div class="flex items-center justify-between mb-6">
-              <h3 class="font-bold text-xl text-gray-900">Create User</h3>
-              <button onclick="document.getElementById('createUserModal').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button>
+        <div id="createUserModal" class="ak-overlay hidden">
+          <div class="ak-modal ak-modal--legacy ak-form">
+            <div class="ak-modal-head">
+              <h3 class="ak-modal-title">Create User</h3>
+              <button onclick="document.getElementById('createUserModal').classList.add('hidden')" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button>
             </div>
-            <div class="space-y-4">
-<div><label class="block text-sm font-semibold text-gray-700 mb-1">Full Name *</label><input id="createUserName" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="John Doe" required aria-describedby="createUserNameError"></div>
-<div><label class="block text-sm font-semibold text-gray-700 mb-1">Email *</label><input id="createUserEmail" type="email" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="john@example.com" required aria-describedby="createUserEmailError"></div>
-<div><label class="block text-sm font-semibold text-gray-700 mb-1">Phone</label><input id="createUserPhone" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="+255 123 456 789" aria-describedby="createUserPhoneError"></div>
-              <div><label class="block text-sm font-semibold text-gray-700 mb-1">Role</label>
-                <select id="createUserRole" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+            <div>
+<div><label>Full Name *</label><input id="createUserName" class="ak-input" placeholder="John Doe" required aria-describedby="createUserNameError"></div>
+<div><label>Email *</label><input id="createUserEmail" type="email" class="ak-input" placeholder="john@example.com" required aria-describedby="createUserEmailError"></div>
+<div><label>Phone</label><input id="createUserPhone" class="ak-input" placeholder="+255 123 456 789" aria-describedby="createUserPhoneError"></div>
+              <div><label>Role</label>
+                <select id="createUserRole" class="ak-select">
                   <option value="customer">Customer</option>
                   <option value="seller">Seller</option>
                   <option value="driver">Driver</option>
@@ -459,90 +459,90 @@
                 </select>
               </div>
             </div>
-            <div class="flex gap-3 mt-6">
-              <button onclick="document.getElementById('createUserModal').classList.add('hidden')" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-              <button onclick="createUser()" class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium hover:opacity-90">Create User</button>
+            <div class="ak-modal-foot">
+              <button onclick="document.getElementById('createUserModal').classList.add('hidden')" class="ak-btn flex-1">Cancel</button>
+              <button onclick="createUser()" class="ak-btn ak-btn--primary flex-1">Create User</button>
             </div>
           </div>
         </div>
 
         <!-- User Detail Modal -->
-        <div id="userDetailModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
-            <div class="flex items-center justify-between mb-6">
-              <h3 class="font-bold text-xl text-gray-900">User Details</h3>
-              <button onclick="document.getElementById('userDetailModal').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button>
+        <div id="userDetailModal" class="ak-overlay hidden">
+          <div class="ak-modal ak-modal--legacy ak-modal--wide ak-form">
+            <div class="ak-modal-head">
+              <h3 class="ak-modal-title">User Details</h3>
+              <button onclick="document.getElementById('userDetailModal').classList.add('hidden')" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button>
             </div>
             <div id="userDetailContent" class="space-y-4">
-              <div class="flex items-center justify-center py-8"><div class="animate-spin w-8 h-8 border-4 border-green-700 border-t-transparent rounded-full"></div></div>
+              <div class="flex items-center justify-center py-8"><div class="ak-spin"></div></div>
             </div>
           </div>
         </div>
       
         <!-- User Activity Modal -->
-        <div id="userActivityModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-            <div class="p-6 border-b flex justify-between items-center">
-              <h3 class="font-bold text-xl text-gray-900">User Activity Log</h3>
-              <button onclick="closeUserActivityModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button>
+        <div id="userActivityModal" class="ak-overlay hidden">
+          <div class="ak-modal ak-modal--panel ak-modal--wide ak-form">
+            <div class="ak-modal-head">
+              <h3 class="ak-modal-title">User Activity Log</h3>
+              <button onclick="closeUserActivityModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button>
             </div>
-            <div class="flex-1 overflow-y-auto p-6" id="userActivityContent">
-              <div class="flex items-center justify-center py-12"><div class="animate-spin w-8 h-8 border-4 border-green-700 border-t-transparent rounded-full"></div></div>
+            <div class="ak-modal-body" id="userActivityContent">
+              <div class="flex items-center justify-center py-12"><div class="ak-spin"></div></div>
             </div>
           </div>
         </div>
 
         <!-- User Orders Modal -->
-        <div id="userOrdersModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-            <div class="p-6 border-b flex justify-between items-center">
-              <h3 class="font-bold text-xl text-gray-900">User Orders</h3>
-              <button onclick="closeUserOrdersModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button>
+        <div id="userOrdersModal" class="ak-overlay hidden">
+          <div class="ak-modal ak-modal--panel ak-modal--wide ak-form">
+            <div class="ak-modal-head">
+              <h3 class="ak-modal-title">User Orders</h3>
+              <button onclick="closeUserOrdersModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button>
             </div>
-            <div class="flex-1 overflow-y-auto p-6" id="userOrdersContent">
-              <div class="flex items-center justify-center py-12"><div class="animate-spin w-8 h-8 border-4 border-green-700 border-t-transparent rounded-full"></div></div>
+            <div class="ak-modal-body" id="userOrdersContent">
+              <div class="flex items-center justify-center py-12"><div class="ak-spin"></div></div>
             </div>
           </div>
         </div>
 
         <!-- User Payments Modal -->
-        <div id="userPaymentsModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-            <div class="p-6 border-b flex justify-between items-center">
-              <h3 class="font-bold text-xl text-gray-900">Payment Methods & Transactions</h3>
-              <button onclick="closeUserPaymentsModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button>
+        <div id="userPaymentsModal" class="ak-overlay hidden">
+          <div class="ak-modal ak-modal--panel ak-modal--wide ak-form">
+            <div class="ak-modal-head">
+              <h3 class="ak-modal-title">Payment Methods & Transactions</h3>
+              <button onclick="closeUserPaymentsModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button>
             </div>
-            <div class="flex-1 overflow-y-auto p-6" id="userPaymentsContent">
-              <div class="flex items-center justify-center py-12"><div class="animate-spin w-8 h-8 border-4 border-green-700 border-t-transparent rounded-full"></div></div>
+            <div class="ak-modal-body" id="userPaymentsContent">
+              <div class="flex items-center justify-center py-12"><div class="ak-spin"></div></div>
             </div>
           </div>
         </div>
 
         <!-- User Referrals Modal -->
-        <div id="userReferralsModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-            <div class="p-6 border-b flex justify-between items-center">
-              <h3 class="font-bold text-xl text-gray-900">Referral Program</h3>
-              <button onclick="closeUserReferralsModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button>
+        <div id="userReferralsModal" class="ak-overlay hidden">
+          <div class="ak-modal ak-modal--panel ak-modal--wide ak-form">
+            <div class="ak-modal-head">
+              <h3 class="ak-modal-title">Referral Program</h3>
+              <button onclick="closeUserReferralsModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button>
             </div>
-            <div class="flex-1 overflow-y-auto p-6" id="userReferralsContent">
-              <div class="flex items-center justify-center py-12"><div class="animate-spin w-8 h-8 border-4 border-green-700 border-t-transparent rounded-full"></div></div>
+            <div class="ak-modal-body" id="userReferralsContent">
+              <div class="flex items-center justify-center py-12"><div class="ak-spin"></div></div>
             </div>
           </div>
         </div>
 
         <!-- Bulk Action Modal -->
-        <div id="bulkActionModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div class="flex items-center justify-between mb-6">
-              <h3 class="font-bold text-xl text-gray-900">Bulk Action</h3>
-              <button onclick="closeBulkActionModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button>
+        <div id="bulkActionModal" class="ak-overlay hidden">
+          <div class="ak-modal ak-modal--legacy ak-form">
+            <div class="ak-modal-head">
+              <h3 class="ak-modal-title">Bulk Action</h3>
+              <button onclick="closeBulkActionModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button>
             </div>
-            <div class="space-y-4">
+            <div>
               <p class="text-gray-600">Apply action to <strong id="bulkActionCount" class="text-gray-900">0</strong> selected users</p>
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Action</label>
-                <select id="bulkActionSelect" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" onchange="toggleBulkActionFields()">
+                <label>Action</label>
+                <select id="bulkActionSelect" class="ak-select" onchange="toggleBulkActionFields()">
                   <option value="suspend">Suspend</option>
                   <option value="activate">Activate</option>
                   <option value="delete">Delete</option>
@@ -550,8 +550,8 @@
                 </select>
               </div>
               <div id="bulkActionRoleField" class="hidden">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">New Role</label>
-                <select id="bulkActionRole" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                <label>New Role</label>
+                <select id="bulkActionRole" class="ak-select">
                   <option value="customer">Customer</option>
                   <option value="seller">Seller</option>
                   <option value="driver">Driver</option>
@@ -559,95 +559,95 @@
                 </select>
               </div>
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Reason (optional)</label>
-                <textarea id="bulkActionReason" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" rows="3" placeholder="Reason for this action..."></textarea>
+                <label>Reason (optional)</label>
+                <textarea id="bulkActionReason" class="ak-input" rows="3" placeholder="Reason for this action..."></textarea>
               </div>
             </div>
-            <div class="flex gap-3 mt-6">
-              <button onclick="closeBulkActionModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-              <button onclick="executeBulkAction()" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700">Apply</button>
+            <div class="ak-modal-foot">
+              <button onclick="closeBulkActionModal()" class="ak-btn flex-1">Cancel</button>
+              <button onclick="executeBulkAction()" class="ak-btn ak-btn--danger flex-1">Apply</button>
             </div>
           </div>
         </div>
 
         <!-- Coupon Modal -->
-        <div id="couponModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div class="flex items-center justify-between mb-6">
-              <h3 id="couponModalTitle" class="text-lg font-bold text-gray-900">New Coupon</h3>
-              <button onclick="closeCouponModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button>
+        <div id="couponModal" class="ak-overlay hidden">
+          <div class="ak-modal ak-modal--legacy ak-form">
+            <div class="ak-modal-head">
+              <h3 id="couponModalTitle" class="ak-modal-title">New Coupon</h3>
+              <button onclick="closeCouponModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button>
             </div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1">Code</label>
-            <input id="couponCode" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-4 uppercase focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="e.g. WELCOME10">
+            <label>Code</label>
+            <input id="couponCode" class="ak-input mb-4 uppercase" placeholder="e.g. WELCOME10">
             <div class="grid grid-cols-2 gap-3 mb-4">
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Type</label>
-                <select id="couponType" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500"><option value="percent">Percent (%)</option><option value="fixed">Fixed (TSh)</option></select>
+                <label>Type</label>
+                <select id="couponType" class="ak-select"><option value="percent">Percent (%)</option><option value="fixed">Fixed (TSh)</option></select>
               </div>
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Value</label>
-                <input id="couponValue" type="number" min="0" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="10">
+                <label>Value</label>
+                <input id="couponValue" type="number" min="0" class="ak-input" placeholder="10">
               </div>
             </div>
             <div class="grid grid-cols-2 gap-3 mb-4">
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Min order (TSh)</label>
-                <input id="couponMinOrder" type="number" min="0" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="0">
+                <label>Min order (TSh)</label>
+                <input id="couponMinOrder" type="number" min="0" class="ak-input" placeholder="0">
               </div>
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Max redemptions</label>
-                <input id="couponMaxRedemptions" type="number" min="0" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="0 = unlimited">
+                <label>Max redemptions</label>
+                <input id="couponMaxRedemptions" type="number" min="0" class="ak-input" placeholder="0 = unlimited">
               </div>
             </div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1">Expires at</label>
-            <input id="couponExpiresAt" type="date" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-green-500">
-            <label class="flex items-center gap-2 mb-6"><input id="couponActive" type="checkbox" checked class="rounded border-gray-300"> <span class="text-sm text-gray-700">Active</span></label>
-            <div class="flex gap-3">
-              <button onclick="closeCouponModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-              <button onclick="saveCoupon()" class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium hover:opacity-90">Save Coupon</button>
+            <label>Expires at</label>
+            <input id="couponExpiresAt" type="date" class="ak-input mb-4">
+            <label class="ak-check"><input id="couponActive" type="checkbox" checked> Active</label>
+            <div class="ak-modal-foot">
+              <button onclick="closeCouponModal()" class="ak-btn flex-1">Cancel</button>
+              <button onclick="saveCoupon()" class="ak-btn ak-btn--primary flex-1">Save Coupon</button>
             </div>
           </div>
         </div>
 
         <!-- Banner Modal -->
-        <div id="bannerModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div class="flex items-center justify-between mb-6">
-              <h3 id="bannerModalTitle" class="text-lg font-bold text-gray-900">Add Banner</h3>
-              <button onclick="closeBannerModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button>
+        <div id="bannerModal" class="ak-overlay hidden">
+          <div class="ak-modal ak-modal--legacy ak-form">
+            <div class="ak-modal-head">
+              <h3 id="bannerModalTitle" class="ak-modal-title">Add Banner</h3>
+              <button onclick="closeBannerModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button>
             </div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1">Title</label>
-            <input id="bannerTitle" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Banner title">
-            <label class="block text-sm font-semibold text-gray-700 mb-1">Image URL</label>
-            <input id="bannerImageUrl" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="https://...">
+            <label>Title</label>
+            <input id="bannerTitle" class="ak-input mb-4" placeholder="Banner title">
+            <label>Image URL</label>
+            <input id="bannerImageUrl" class="ak-input mb-4" placeholder="https://...">
             <div id="bannerPreviewWrap" class="hidden mb-4"><img id="bannerPreview" class="w-full h-32 object-cover rounded-xl" alt="Banner preview"></div>
-            <label class="flex items-center gap-2 mb-6"><input id="bannerActive" type="checkbox" checked class="rounded border-gray-300"> <span class="text-sm text-gray-700">Active</span></label>
-            <div class="flex gap-3">
-              <button onclick="closeBannerModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-              <button onclick="saveBanner()" class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium hover:opacity-90">Save Banner</button>
+            <label class="ak-check"><input id="bannerActive" type="checkbox" checked> Active</label>
+            <div class="ak-modal-foot">
+              <button onclick="closeBannerModal()" class="ak-btn flex-1">Cancel</button>
+              <button onclick="saveBanner()" class="ak-btn ak-btn--primary flex-1">Save Banner</button>
             </div>
           </div>
         </div>
 
         <!-- Send Notification Modal -->
-        <div id="sendNotificationModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div class="flex items-center justify-between mb-6">
-              <h3 class="font-bold text-xl text-gray-900">Send Notification</h3>
-              <button onclick="closeSendNotificationModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button>
+        <div id="sendNotificationModal" class="ak-overlay hidden">
+          <div class="ak-modal ak-modal--legacy ak-form">
+            <div class="ak-modal-head">
+              <h3 class="ak-modal-title">Send Notification</h3>
+              <button onclick="closeSendNotificationModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button>
             </div>
-            <div class="space-y-4">
+            <div>
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Title *</label>
-                <input id="notifTitle" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Notification title">
+                <label>Title *</label>
+                <input id="notifTitle" class="ak-input" placeholder="Notification title">
               </div>
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Message *</label>
-                <textarea id="notifBody" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" rows="3" placeholder="Notification message..."></textarea>
+                <label>Message *</label>
+                <textarea id="notifBody" class="ak-input" rows="3" placeholder="Notification message..."></textarea>
               </div>
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Type</label>
-                <select id="notifType" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                <label>Type</label>
+                <select id="notifType" class="ak-select">
                   <option value="admin">Admin Message</option>
                   <option value="promo">Promotion</option>
                   <option value="update">Platform Update</option>
@@ -655,31 +655,36 @@
                 </select>
               </div>
             </div>
-            <div class="flex gap-3 mt-6">
-              <button onclick="closeSendNotificationModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-              <button onclick="sendUserNotification()" class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium hover:opacity-90">Send</button>
+            <div class="ak-modal-foot">
+              <button onclick="closeSendNotificationModal()" class="ak-btn flex-1">Cancel</button>
+              <button onclick="sendUserNotification()" class="ak-btn ak-btn--primary flex-1">Send</button>
             </div>
           </div>
         </div>
 
         <!-- Delete User Modal -->
-        <div id="deleteUserModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div class="flex items-center gap-4 mb-6">
-              <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-red-600"><span class="material-symbols-outlined text-2xl">warning</span></div>
+        <div id="deleteUserModal" class="ak-overlay hidden">
+          <div class="ak-modal ak-modal--legacy ak-form">
+            <div class="ak-modal-head ak-modal-head--lead">
+              <div class="ak-warn-badge"><span class="material-symbols-outlined">warning</span></div>
               <div>
-                <h3 class="font-bold text-xl text-gray-900">Delete User</h3>
+                <h3 class="ak-modal-title">Delete User</h3>
                 <p class="text-sm text-gray-500">This action cannot be undone</p>
               </div>
             </div>
-            <div class="mb-6 p-4 bg-gray-50 rounded-xl"><p class="text-gray-700">Are you sure you want to delete <strong id="deleteUserName" class="font-semibold text-gray-900">this user</strong>?</p><p class="text-sm text-gray-500 mt-2">Their account will be deactivated and all sessions invalidated.</p></div>
-            <div class="flex gap-3"><button onclick="closeDeleteUserModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button><button id="confirmDeleteBtn" onclick="deleteUser()" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors">Delete User</button></div>
+            <div class="ak-note mb-6"><p class="text-gray-700">Are you sure you want to delete <strong id="deleteUserName" class="font-semibold text-gray-900">this user</strong>?</p><p class="text-sm text-gray-500 mt-2">Their account will be deactivated and all sessions invalidated.</p></div>
+            <div class="ak-modal-foot"><button onclick="closeDeleteUserModal()" class="ak-btn flex-1">Cancel</button><button id="confirmDeleteBtn" onclick="deleteUser()" class="ak-btn ak-btn--danger flex-1">Delete User</button></div>
           </div>
         </div>
       </div>
 
       <!-- Marketing Tab -->
       <div id="content-marketing" class="tab-content hidden">
+        <div class="ak-card" style="margin-bottom:20px;padding:20px">
+          <div class="ak-card-title">SmartSoko Marketing Agent</div>
+          <p>Plan and review Facebook, Instagram and X campaigns.</p>
+          <a class="ak-btn ak-btn--primary" href="/marketing-agent.html">Open marketing workspace</a>
+        </div>
         <div class="ak-grid ak-grid--halves" style="align-items:start">
           <div class="ak-card">
             <div class="ak-card-head">
@@ -1183,17 +1188,17 @@
           <div id="inventoryAlerts"></div>
         </div>
         <!-- Product Modal -->
-        <div id="productModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 max-h-[80vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-6"><h3 id="productModalTitle" class="font-bold text-xl text-gray-900">Add Product</h3><button onclick="closeProductModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
+        <div id="productModal" class="ak-overlay hidden flex">
+          <div class="ak-modal ak-modal--legacy ak-form">
+            <div class="ak-modal-head"><h3 id="productModalTitle" class="ak-modal-title">Add Product</h3><button onclick="closeProductModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
             <input id="productId" type="hidden">
-            <div class="space-y-4">
-              <div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-semibold mb-1">Name *</label><input id="productName" class="w-full px-3 py-2 border rounded-xl text-sm"></div><div><label class="block text-sm font-semibold mb-1">Price *</label><input id="productPrice" type="number" step="0.01" class="w-full px-3 py-2 border rounded-xl text-sm"></div></div>
-              <div><label class="block text-sm font-semibold mb-1">Description</label><textarea id="productDescription" rows="2" class="w-full px-3 py-2 border rounded-xl text-sm"></textarea></div>
-              <div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-semibold mb-1">Category</label><select id="productCategory" class="w-full px-3 py-2 border rounded-xl text-sm bg-white"></select></div><div><label class="block text-sm font-semibold mb-1">Stock</label><input id="productStock" type="number" class="w-full px-3 py-2 border rounded-xl text-sm"></div></div>
-              <div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-semibold mb-1">Unit</label><input id="productUnit" class="w-full px-3 py-2 border rounded-xl text-sm" placeholder="piece, kg, bunch"></div><div><label class="block text-sm font-semibold mb-1">Image URL</label><input id="productImageUrl" class="w-full px-3 py-2 border rounded-xl text-sm"></div></div>
+            <div>
+              <div class="grid grid-cols-2 gap-4"><div><label>Name *</label><input id="productName" class="ak-input"></div><div><label>Price *</label><input id="productPrice" type="number" step="0.01" class="ak-input"></div></div>
+              <div><label>Description</label><textarea id="productDescription" rows="2" class="ak-input"></textarea></div>
+              <div class="grid grid-cols-2 gap-4"><div><label>Category</label><select id="productCategory" class="ak-select"></select></div><div><label>Stock</label><input id="productStock" type="number" class="ak-input"></div></div>
+              <div class="grid grid-cols-2 gap-4"><div><label>Unit</label><input id="productUnit" class="ak-input" placeholder="piece, kg, bunch"></div><div><label>Image URL</label><input id="productImageUrl" class="ak-input"></div></div>
             </div>
-            <div class="flex gap-3 mt-6"><button onclick="closeProductModal()" class="flex-1 py-3 border rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button id="saveProductBtn" onclick="saveProduct()" class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium hover:opacity-90">Create Product</button></div>
+            <div class="ak-modal-foot"><button onclick="closeProductModal()" class="ak-btn flex-1">Cancel</button><button id="saveProductBtn" onclick="saveProduct()" class="ak-btn ak-btn--primary flex-1">Create Product</button></div>
           </div>
         </div>
       </div>
@@ -1247,17 +1252,17 @@
           <div id="cmsTableHost"></div>
         </div>
         <!-- CMS Modal -->
-        <div id="cmsModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6">
-            <div class="flex items-center justify-between mb-6"><h3 id="cmsModalTitle" class="font-bold text-xl text-gray-900">Add Content</h3><button onclick="closeCMSModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
+        <div id="cmsModal" class="ak-overlay hidden flex">
+          <div class="ak-modal ak-modal--legacy ak-form">
+            <div class="ak-modal-head"><h3 id="cmsModalTitle" class="ak-modal-title">Add Content</h3><button onclick="closeCMSModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
             <input id="cmsId" type="hidden">
-            <div class="space-y-4">
-              <div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-semibold mb-1">Type</label><select id="cmsType" class="w-full px-3 py-2 border rounded-xl text-sm bg-white"><option value="page">Page</option></select></div><div><label class="block text-sm font-semibold mb-1">Slug *</label><input id="cmsKey" class="w-full px-3 py-2 border rounded-xl text-sm" placeholder="about-us"></div></div>
-              <div><label class="block text-sm font-semibold mb-1">Title *</label><input id="cmsTitle" class="w-full px-3 py-2 border rounded-xl text-sm"></div>
-              <div><label class="block text-sm font-semibold mb-1">Content</label><textarea id="cmsContent" rows="5" class="w-full px-3 py-2 border rounded-xl text-sm"></textarea></div>
-              <label class="flex items-center gap-2 text-sm text-gray-700"><input id="cmsIsPublished" type="checkbox" class="rounded border-gray-300"> Published</label>
+            <div>
+              <div class="grid grid-cols-2 gap-4"><div><label>Type</label><select id="cmsType" class="ak-select"><option value="page">Page</option></select></div><div><label>Slug *</label><input id="cmsKey" class="ak-input" placeholder="about-us"></div></div>
+              <div><label>Title *</label><input id="cmsTitle" class="ak-input"></div>
+              <div><label>Content</label><textarea id="cmsContent" rows="5" class="ak-input"></textarea></div>
+              <label class="ak-check"><input id="cmsIsPublished" type="checkbox"> Published</label>
             </div>
-            <div class="flex gap-3 mt-6"><button onclick="closeCMSModal()" class="flex-1 py-3 border rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button id="saveCMSBtn" onclick="saveCMS()" class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium hover:opacity-90">Save</button></div>
+            <div class="ak-modal-foot"><button onclick="closeCMSModal()" class="ak-btn flex-1">Cancel</button><button id="saveCMSBtn" onclick="saveCMS()" class="ak-btn ak-btn--primary flex-1">Save</button></div>
           </div>
         </div>
       </div>
@@ -1265,49 +1270,49 @@
   </div>
 
   <!-- Order Actions Modal -->
-  <div id="orderModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto">
-      <div class="flex items-start justify-between mb-4">
-        <h3 class="font-bold text-lg">Order #<span id="modalOrderId"></span></h3>
-        <button onclick="closeOrderModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button>
+  <div id="orderModal" class="ak-overlay hidden flex">
+    <div class="ak-modal ak-modal--legacy ak-modal--wide ak-form">
+      <div class="ak-modal-head">
+        <h3 class="ak-modal-title">Order #<span id="modalOrderId"></span></h3>
+        <button onclick="closeOrderModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div class="bg-gray-50 rounded-xl p-4">
-          <p class="text-xs font-bold uppercase text-gray-500 mb-2">Customer</p>
+        <div class="ak-note">
+          <p class="ak-modal-subhead">Customer</p>
           <p id="modalCustomerName" class="font-medium text-gray-900">N/A</p>
           <p id="modalCustomerPhone" class="text-sm text-gray-600">N/A</p>
           <p id="modalCustomerEmail" class="text-sm text-gray-600">-</p>
         </div>
-        <div class="bg-gray-50 rounded-xl p-4">
-          <p class="text-xs font-bold uppercase text-gray-500 mb-2">Seller</p>
+        <div class="ak-note">
+          <p class="ak-modal-subhead">Seller</p>
           <p id="modalSellerName" class="font-medium text-gray-900">N/A</p>
           <p id="modalSellerPhone" class="text-sm text-gray-600">-</p>
-          <p class="text-xs font-bold uppercase text-gray-500 mt-3 mb-1">Delivery address</p>
+          <p class="ak-modal-subhead">Delivery address</p>
           <p id="modalDeliveryAddress" class="text-sm text-gray-700">N/A</p>
         </div>
       </div>
 
       <div class="mb-4">
-        <p class="text-xs font-bold uppercase text-gray-500 mb-2">Items</p>
+        <p class="ak-modal-subhead">Items</p>
         <div id="modalItems" class="text-sm"></div>
       </div>
 
-      <div class="bg-gray-50 rounded-xl p-4 mb-4 space-y-1 text-sm">
+      <div class="ak-note mb-4 space-y-1 text-sm">
         <div class="flex justify-between"><span class="text-gray-600">Subtotal</span><span id="modalSubtotal" class="font-medium">-</span></div>
         <div class="flex justify-between"><span class="text-gray-600">Delivery fee</span><span id="modalDeliveryFee" class="font-medium">-</span></div>
         <div class="flex justify-between border-t pt-2 mt-2"><span class="font-semibold">Total</span><span id="modalTotal" class="font-bold text-green-700">-</span></div>
       </div>
 
       <div class="mb-4">
-        <p class="text-xs font-bold uppercase text-gray-500 mb-2">Timeline</p>
-        <div id="modalTimeline" class="space-y-2 text-sm text-gray-700"></div><p class="text-xs font-bold uppercase text-gray-500 mt-4 mb-2">Wallet Refund Settlement</p><div id="modalRefundStatus" class="text-sm" aria-live="polite"></div>
+        <p class="ak-modal-subhead">Timeline</p>
+        <div id="modalTimeline" class="space-y-2 text-sm text-gray-700"></div><p class="ak-modal-subhead">Wallet Refund Settlement</p><div id="modalRefundStatus" class="text-sm" aria-live="polite"></div>
       </div>
 
       <div class="flex flex-wrap items-end gap-3 mb-4">
         <div class="flex-1 min-w-[180px]">
           <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Update status</label>
-          <select id="modalStatusSelect" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white">
+          <select id="modalStatusSelect" class="ak-select">
             <option value="pending">Pending</option>
             <option value="confirmed">Confirmed</option>
             <option value="preparing">Preparing</option>
@@ -1317,81 +1322,81 @@
             <option value="cancelled">Cancelled</option>
           </select>
         </div>
-        <button onclick="updateOrderStatus()" class="px-4 py-2 gradient-bg text-white rounded-lg text-sm font-medium hover:opacity-90">Update Status</button>
-        <button onclick="showOrderTimeline(currentOrderId)" class="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50">Full timeline</button>
-        <button onclick="openAddOrderNoteModal(currentOrderId)" class="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50">Add note</button>
-        <button onclick="openRefundModal(currentOrderId, 0)" class="px-4 py-2 border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50">Refund</button>
+        <button onclick="updateOrderStatus()" class="ak-btn ak-btn--primary">Update Status</button>
+        <button onclick="showOrderTimeline(currentOrderId)" class="ak-btn">Full timeline</button>
+        <button onclick="openAddOrderNoteModal(currentOrderId)" class="ak-btn">Add note</button>
+        <button onclick="openRefundModal(currentOrderId, 0)" class="ak-btn ak-btn--danger">Refund</button>
       </div>
 
-      <div class="flex gap-3"><button onclick="printOrder()" class="flex-1 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">Print</button><button onclick="closeOrderModal()" class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">Close</button></div>
+      <div class="ak-modal-foot"><button onclick="printOrder()" class="ak-btn flex-1">Print</button><button onclick="closeOrderModal()" class="ak-btn flex-1">Close</button></div>
     </div>
   </div>
 
   <!-- New Feature Modals -->
-  <div id="orderTimelineModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-      <div class="p-6 border-b flex justify-between items-center"><h3 class="font-bold text-xl text-gray-900">Order Timeline</h3><button onclick="document.getElementById('orderTimelineModal').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
-      <div class="flex-1 overflow-y-auto p-6" id="orderTimelineContent"><div class="flex items-center justify-center py-12"><div class="animate-spin w-8 h-8 border-4 border-green-700 border-t-transparent rounded-full"></div></div></div>
+  <div id="orderTimelineModal" class="ak-overlay hidden">
+    <div class="ak-modal ak-modal--panel ak-modal--wide ak-form">
+      <div class="ak-modal-head"><h3 class="ak-modal-title">Order Timeline</h3><button onclick="document.getElementById('orderTimelineModal').classList.add('hidden')" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
+      <div class="ak-modal-body" id="orderTimelineContent"><div class="flex items-center justify-center py-12"><div class="ak-spin"></div></div></div>
     </div>
   </div>
 
-  <div id="orderNoteModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-      <div class="flex items-center justify-between mb-6"><h3 class="font-bold text-xl text-gray-900">Add Internal Note</h3><button onclick="closeOrderNoteModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
-      <textarea id="orderNoteInput" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" rows="4" placeholder="Internal note about this order..."></textarea>
-      <div class="flex gap-3 mt-6"><button onclick="closeOrderNoteModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button onclick="addOrderNote()" class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium hover:opacity-90">Add Note</button></div>
+  <div id="orderNoteModal" class="ak-overlay hidden">
+    <div class="ak-modal ak-modal--legacy ak-form">
+      <div class="ak-modal-head"><h3 class="ak-modal-title">Add Internal Note</h3><button onclick="closeOrderNoteModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
+      <textarea id="orderNoteInput" class="ak-input" rows="4" placeholder="Internal note about this order..."></textarea>
+      <div class="ak-modal-foot"><button onclick="closeOrderNoteModal()" class="ak-btn flex-1">Cancel</button><button onclick="addOrderNote()" class="ak-btn ak-btn--primary flex-1">Add Note</button></div>
     </div>
   </div>
 
-  <div id="refundModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-      <div class="flex items-center justify-between mb-6"><h3 class="font-bold text-xl text-gray-900">Refund to Customer Wallet</h3><button onclick="closeRefundModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
-      <div class="space-y-4">
-        <div><p class="text-sm text-gray-600 mb-3">Refunds credit the customer wallet. The full refundable balance excludes non-refundable fees. Released/disputed funds require review.</p><label class="block text-sm font-semibold text-gray-700 mb-1">Amount (TSh)</label><input id="refundAmount" type="number" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500"></div>
-        <div><label class="block text-sm font-semibold text-gray-700 mb-1">Reason</label><textarea id="refundReason" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" rows="3" placeholder="Reason for refund..."></textarea></div>
+  <div id="refundModal" class="ak-overlay hidden">
+    <div class="ak-modal ak-modal--legacy ak-form">
+      <div class="ak-modal-head"><h3 class="ak-modal-title">Refund to Customer Wallet</h3><button onclick="closeRefundModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
+      <div>
+        <div><p class="text-sm text-gray-600 mb-3">Refunds credit the customer wallet. The full refundable balance excludes non-refundable fees. Released/disputed funds require review.</p><label>Amount (TSh)</label><input id="refundAmount" type="number" class="ak-input"></div>
+        <div><label>Reason</label><textarea id="refundReason" class="ak-input" rows="3" placeholder="Reason for refund..."></textarea></div>
       </div>
-      <div class="flex gap-3 mt-6"><button onclick="closeRefundModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button id="processWalletRefundBtn" onclick="processRefund()" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700">Credit Customer Wallet</button></div>
+      <div class="ak-modal-foot"><button onclick="closeRefundModal()" class="ak-btn flex-1">Cancel</button><button id="processWalletRefundBtn" onclick="processRefund()" class="ak-btn ak-btn--danger flex-1">Credit Customer Wallet</button></div>
     </div>
   </div>
 
-  <div id="bulkOrderStatusModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-      <div class="flex items-center justify-between mb-6"><h3 class="font-bold text-xl text-gray-900">Bulk Update Status</h3><button onclick="document.getElementById('bulkOrderStatusModal').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
+  <div id="bulkOrderStatusModal" class="ak-overlay hidden">
+    <div class="ak-modal ak-modal--legacy ak-form">
+      <div class="ak-modal-head"><h3 class="ak-modal-title">Bulk Update Status</h3><button onclick="document.getElementById('bulkOrderStatusModal').classList.add('hidden')" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
       <p class="text-gray-600 mb-4">Update status for <strong id="bulkOrderCount">0</strong> selected orders</p>
-      <select id="bulkOrderStatusSelect" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500"><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="preparing">Preparing</option><option value="ready_for_delivery">Ready for delivery</option><option value="dispatched">Dispatched</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select>
-      <div class="flex gap-3 mt-6"><button onclick="document.getElementById('bulkOrderStatusModal').classList.add('hidden')" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button onclick="executeBulkOrderStatus()" class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium hover:opacity-90">Update</button></div>
+      <select id="bulkOrderStatusSelect" class="ak-select"><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="preparing">Preparing</option><option value="ready_for_delivery">Ready for delivery</option><option value="dispatched">Dispatched</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select>
+      <div class="ak-modal-foot"><button onclick="document.getElementById('bulkOrderStatusModal').classList.add('hidden')" class="ak-btn flex-1">Cancel</button><button onclick="executeBulkOrderStatus()" class="ak-btn ak-btn--primary flex-1">Update</button></div>
     </div>
   </div>
 
-  <div id="restockModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-      <div class="flex items-center justify-between mb-6"><h3 class="font-bold text-xl text-gray-900">Restock Item</h3><button onclick="closeRestockModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
-      <div><label class="block text-sm font-semibold text-gray-700 mb-1">Add Quantity</label><input id="restockQuantity" type="number" min="1" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500"></div>
-      <div class="flex gap-3 mt-6"><button onclick="closeRestockModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button onclick="executeRestock()" class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium hover:opacity-90">Restock</button></div>
+  <div id="restockModal" class="ak-overlay hidden">
+    <div class="ak-modal ak-modal--legacy ak-form">
+      <div class="ak-modal-head"><h3 class="ak-modal-title">Restock Item</h3><button onclick="closeRestockModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
+      <div><label>Add Quantity</label><input id="restockQuantity" type="number" min="1" class="ak-input"></div>
+      <div class="ak-modal-foot"><button onclick="closeRestockModal()" class="ak-btn flex-1">Cancel</button><button onclick="executeRestock()" class="ak-btn ak-btn--primary flex-1">Restock</button></div>
     </div>
   </div>
 
-  <div id="commissionRuleModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-      <div class="flex items-center justify-between mb-6"><h3 class="font-bold text-xl text-gray-900">Commission Rule</h3><button onclick="closeCommissionRuleModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
-      <div class="space-y-4">
-        <div><label class="block text-sm font-semibold text-gray-700 mb-1">Name</label><input id="commRuleName" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="e.g. Grocery Commission"></div>
-        <div><label class="block text-sm font-semibold text-gray-700 mb-1">Category</label><select id="commRuleCategory" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm"><option value="all">All Categories</option><option value="groceries">Groceries</option><option value="electronics">Electronics</option><option value="fashion">Fashion</option><option value="food">Food</option></select></div>
-        <div class="flex gap-3"><div class="flex-1"><label class="block text-sm font-semibold text-gray-700 mb-1">Rate</label><input id="commRuleRate" type="number" step="0.5" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500"></div><div class="flex-1"><label class="block text-sm font-semibold text-gray-700 mb-1">Type</label><select id="commRuleType" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm"><option value="percentage">Percentage</option><option value="fixed">Fixed (TSh)</option></select></div></div>
+  <div id="commissionRuleModal" class="ak-overlay hidden">
+    <div class="ak-modal ak-modal--legacy ak-form">
+      <div class="ak-modal-head"><h3 class="ak-modal-title">Commission Rule</h3><button onclick="closeCommissionRuleModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
+      <div>
+        <div><label>Name</label><input id="commRuleName" class="ak-input" placeholder="e.g. Grocery Commission"></div>
+        <div><label>Category</label><select id="commRuleCategory" class="ak-select"><option value="all">All Categories</option><option value="groceries">Groceries</option><option value="electronics">Electronics</option><option value="fashion">Fashion</option><option value="food">Food</option></select></div>
+        <div class="ak-form-row"><div class="flex-1"><label>Rate</label><input id="commRuleRate" type="number" step="0.5" class="ak-input"></div><div class="flex-1"><label>Type</label><select id="commRuleType" class="ak-select"><option value="percentage">Percentage</option><option value="fixed">Fixed (TSh)</option></select></div></div>
       </div>
-      <div class="flex gap-3 mt-6"><button onclick="closeCommissionRuleModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button onclick="saveCommissionRule()" class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium hover:opacity-90">Save</button></div>
+      <div class="ak-modal-foot"><button onclick="closeCommissionRuleModal()" class="ak-btn flex-1">Cancel</button><button onclick="saveCommissionRule()" class="ak-btn ak-btn--primary flex-1">Save</button></div>
     </div>
   </div>
 
-  <div id="createPayoutModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-      <div class="flex items-center justify-between mb-6"><h3 class="font-bold text-xl text-gray-900">Create Payout</h3><button onclick="closeCreatePayoutModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
-      <div class="space-y-4">
-        <div><label class="block text-sm font-semibold text-gray-700 mb-1">Seller ID</label><input id="payoutSellerId" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Seller document ID"></div>
-        <div><label class="block text-sm font-semibold text-gray-700 mb-1">Amount (TSh)</label><input id="payoutAmount" type="number" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500"></div>
-        <div><label class="block text-sm font-semibold text-gray-700 mb-1">Notes</label><textarea id="payoutNotes" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" rows="2" placeholder="Optional notes..."></textarea></div>
+  <div id="createPayoutModal" class="ak-overlay hidden">
+    <div class="ak-modal ak-modal--legacy ak-form">
+      <div class="ak-modal-head"><h3 class="ak-modal-title">Create Payout</h3><button onclick="closeCreatePayoutModal()" class="ak-iconbtn"><span class="material-symbols-outlined text-gray-500">close</span></button></div>
+      <div>
+        <div><label>Seller ID</label><input id="payoutSellerId" class="ak-input" placeholder="Seller document ID"></div>
+        <div><label>Amount (TSh)</label><input id="payoutAmount" type="number" class="ak-input"></div>
+        <div><label>Notes</label><textarea id="payoutNotes" class="ak-input" rows="2" placeholder="Optional notes..."></textarea></div>
       </div>
-      <div class="flex gap-3 mt-6"><button onclick="closeCreatePayoutModal()" class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50">Cancel</button><button onclick="createPayout()" class="flex-1 py-3 gradient-bg text-white rounded-xl font-medium hover:opacity-90">Create Payout</button></div>
+      <div class="ak-modal-foot"><button onclick="closeCreatePayoutModal()" class="ak-btn flex-1">Cancel</button><button onclick="createPayout()" class="ak-btn ak-btn--primary flex-1">Create Payout</button></div>
     </div>
   </div>
 
@@ -1694,13 +1699,13 @@
 
     // Modal accessibility: mark overlay modals as dialogs, close on ESC.
     function initModalAccessibility() {
-      document.querySelectorAll('.fixed.inset-0').forEach(function(m) {
+      document.querySelectorAll('.fixed.inset-0, .ak-overlay').forEach(function(m) {
         if (!m.getAttribute('role')) { m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); }
         if (m.id && !m.getAttribute('aria-label')) m.setAttribute('aria-label', m.id);
       });
       document.addEventListener('keydown', function(e) {
         if (e.key !== 'Escape') return;
-        var open = document.querySelector('.fixed.inset-0:not(.hidden)');
+        var open = document.querySelector('.fixed.inset-0:not(.hidden), .ak-overlay:not(.hidden)');
         if (open) { open.classList.add('hidden'); open.classList.remove('flex'); LOG.info('ui', 'Closed modal via ESC'); }
       });
     }
@@ -3986,11 +3991,10 @@
         document.getElementById('modalUserPhone').value = u.phone || '';
         selectedRoleForUser = u.role || 'customer';
         document.querySelectorAll('.role-option').forEach(function(btn) {
-          btn.classList.remove('border-green-700', 'bg-green-50');
-          btn.classList.add('border-gray-200');
+          btn.classList.remove('ak-choice--on');
         });
         var roleBtn = document.getElementById('role-' + selectedRoleForUser);
-        if (roleBtn) { roleBtn.classList.remove('border-gray-200'); roleBtn.classList.add('border-green-700', 'bg-green-50'); }
+        if (roleBtn) roleBtn.classList.add('ak-choice--on');
         document.getElementById('saveUserRoleBtn').textContent = 'Save Changes';
       }).catch(function() {
         document.getElementById('modalUserName').textContent = 'Error loading user';
@@ -4006,11 +4010,10 @@
     function selectRole(role) {
       selectedRoleForUser = role;
       document.querySelectorAll('.role-option').forEach(function(btn) {
-        btn.classList.remove('border-green-700', 'bg-green-50');
-        btn.classList.add('border-gray-200');
+        btn.classList.remove('ak-choice--on');
       });
       var btn = document.getElementById('role-' + role);
-      if (btn) { btn.classList.remove('border-gray-200'); btn.classList.add('border-green-700', 'bg-green-50'); }
+      if (btn) btn.classList.add('ak-choice--on');
     }
 
     function saveUserRole() {
@@ -4053,7 +4056,7 @@
       var content = document.getElementById('userDetailContent');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
-      content.innerHTML = '<div class="flex items-center justify-center py-8"><div class="animate-spin w-8 h-8 border-4 border-green-700 border-t-transparent rounded-full"></div></div>';
+      content.innerHTML = '<div class="flex items-center justify-center py-8"><div class="ak-spin"></div></div>';
       apiHelpers.get(API_ROUTES.ADMIN_API.USERS + '/' + id).then(function(res) {
         var u = res.data || {};
         var name = u.name || u.fullName || 'N/A';
@@ -4162,7 +4165,7 @@
       var content = document.getElementById('userActivityContent');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
-      content.innerHTML = '<div class="flex items-center justify-center py-12"><div class="animate-spin w-8 h-8 border-4 border-green-700 border-t-transparent rounded-full"></div></div>';
+      content.innerHTML = '<div class="flex items-center justify-center py-12"><div class="ak-spin"></div></div>';
       apiHelpers.get(API_ROUTES.ADMIN_API.USERS + '/' + id + '/activity').then(function(res) {
         var activities = res.data || [];
         if (!activities.length) {
@@ -4199,7 +4202,7 @@
       var content = document.getElementById('userOrdersContent');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
-      content.innerHTML = '<div class="flex items-center justify-center py-12"><div class="animate-spin w-8 h-8 border-4 border-green-700 border-t-transparent rounded-full"></div></div>';
+      content.innerHTML = '<div class="flex items-center justify-center py-12"><div class="ak-spin"></div></div>';
       apiHelpers.get(API_ROUTES.ADMIN_API.USERS + '/' + id + '/orders').then(function(res) {
         var orders = res.data || [];
         if (!orders.length) {
@@ -4243,7 +4246,7 @@
       var content = document.getElementById('userPaymentsContent');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
-      content.innerHTML = '<div class="flex items-center justify-center py-12"><div class="animate-spin w-8 h-8 border-4 border-green-700 border-t-transparent rounded-full"></div></div>';
+      content.innerHTML = '<div class="flex items-center justify-center py-12"><div class="ak-spin"></div></div>';
       apiHelpers.get(API_ROUTES.ADMIN_API.USERS + '/' + id + '/payments').then(function(res) {
         var data = res.data || {};
         var methods = data.paymentMethods || [];
@@ -4305,7 +4308,7 @@
       var content = document.getElementById('userReferralsContent');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
-      content.innerHTML = '<div class="flex items-center justify-center py-12"><div class="animate-spin w-8 h-8 border-4 border-green-700 border-t-transparent rounded-full"></div></div>';
+      content.innerHTML = '<div class="flex items-center justify-center py-12"><div class="ak-spin"></div></div>';
       apiHelpers.get(API_ROUTES.ADMIN_API.USERS + '/' + id + '/referrals').then(function(res) {
         var data = res.data || {};
         var code = data.referralCode || '—';
@@ -4784,7 +4787,7 @@
       var modal = document.getElementById('orderTimelineModal');
       var content = document.getElementById('orderTimelineContent');
       modal.classList.remove('hidden'); modal.classList.add('flex');
-      content.innerHTML = '<div class="flex items-center justify-center py-12"><div class="animate-spin w-8 h-8 border-4 border-green-700 border-t-transparent rounded-full"></div></div>';
+      content.innerHTML = '<div class="flex items-center justify-center py-12"><div class="ak-spin"></div></div>';
       apiHelpers.get('/admin/orders/' + id + '/timeline').then(function(res) {
         var events = res.data || [];
         if (!events.length) { content.innerHTML = '<div class="text-center py-12 text-gray-500">No timeline events yet</div>'; return; }
