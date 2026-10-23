@@ -1,6 +1,19 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { createRequire } from 'node:module';
+import crypto from 'node:crypto';
 const require = createRequire(import.meta.url);
+
+// PesaPal signs IPN bodies with HMAC-SHA256(rawBody, CONSUMER_SECRET); the
+// handler rejects requests whose signature header is missing or wrong. Tests
+// that exercise /pay/ipn therefore need a known secret and must send a valid
+// signature header alongside each mock payload.
+const TEST_PESAPAL_SECRET = 'qa-pesapal-secret';
+process.env.PESAPAL_CONSUMER_KEY = process.env.PESAPAL_CONSUMER_KEY || 'qa-key';
+process.env.PESAPAL_CONSUMER_SECRET = process.env.PESAPAL_CONSUMER_SECRET || TEST_PESAPAL_SECRET;
+
+const signIPN = body =>
+    crypto.createHmac('sha256', TEST_PESAPAL_SECRET).update(body).digest('base64');
+
 const customer = '00000000-0000-4000-8000-000000000010';
 describe('PesaPal uses saved order totals', () => {
     let server,
@@ -8,8 +21,6 @@ describe('PesaPal uses saved order totals', () => {
         vendorCalls = [],
         originalFetch;
     beforeAll(async () => {
-        vi.stubEnv('PESAPAL_CONSUMER_KEY', '');
-        vi.stubEnv('PESAPAL_CONSUMER_SECRET', '');
         const express = require('express');
         const payment = require('../api/pesapal');
         await payment.init(null, {
@@ -19,6 +30,14 @@ describe('PesaPal uses saved order totals', () => {
             },
         });
         const app = express();
+        app.use((req, _res, next) => {
+            const chunks = [];
+            req.on('data', c => chunks.push(c));
+            req.on('end', () => {
+                req.rawBody = Buffer.concat(chunks).toString('utf8');
+            });
+            next();
+        });
         app.use(express.json());
         app.set('db', {
             async get(c, id) {
@@ -105,14 +124,18 @@ describe('PesaPal uses saved order totals', () => {
         // required a signature header and read only `MerchantReference`, which
         // matched no ledger row — so every settled payment went unrecorded.
         const before = vendorCalls.length;
+        const ipnBody = JSON.stringify({
+            OrderNotificationType: 'IPNCHANGE',
+            OrderTrackingId: 'qa-tracking',
+            OrderMerchantReference: 'INV-1',
+        });
         const r = await fetch(base + '/pay/ipn', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                OrderNotificationType: 'IPNCHANGE',
-                OrderTrackingId: 'qa-tracking',
-                OrderMerchantReference: 'INV-1',
-            }),
+            headers: {
+                'Content-Type': 'application/json',
+                'pesapal-notification-signature': signIPN(ipnBody),
+            },
+            body: ipnBody,
         });
         expect(r.status).toBe(200);
         expect(await r.json()).toMatchObject({
@@ -252,8 +275,6 @@ describe('status-by-ref ownership and IPN rate limit', () => {
     // infinitely replayable. Both need only a cheap fixture to prove.
     let server, base, originalFetch, payment;
     beforeAll(async () => {
-        vi.stubEnv('PESAPAL_CONSUMER_KEY', '');
-        vi.stubEnv('PESAPAL_CONSUMER_SECRET', '');
         const express = require('express');
         payment = require('../api/pesapal');
         await payment.init(
@@ -299,6 +320,14 @@ describe('status-by-ref ownership and IPN rate limit', () => {
             }
         );
         const app = express();
+        app.use((req, _res, next) => {
+            const chunks = [];
+            req.on('data', c => chunks.push(c));
+            req.on('end', () => {
+                req.rawBody = Buffer.concat(chunks).toString('utf8');
+            });
+            next();
+        });
         app.use(express.json());
         app.use('/pay', payment);
         server = await new Promise(resolve => {
@@ -379,12 +408,18 @@ describe('status-by-ref ownership and IPN rate limit', () => {
     });
 
     it('rate limits /ipn at about five requests per minute per IP', async () => {
-        const ipn = ip =>
-            fetch(base + '/pay/ipn', {
+        const ipn = ip => {
+            const body = JSON.stringify({ OrderTrackingId: 'qa-tracking' });
+            return fetch(base + '/pay/ipn', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': ip },
-                body: JSON.stringify({ OrderTrackingId: 'qa-tracking' }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Forwarded-For': ip,
+                    'pesapal-notification-signature': signIPN(body),
+                },
+                body,
             }).then(r => r.status);
+        };
         // Right-most XFF entry is trusted (a real proxy appends the client);
         // requests 1-5 pass, anything beyond within the window gets 429.
         const codes = [];
