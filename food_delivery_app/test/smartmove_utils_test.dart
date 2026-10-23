@@ -29,9 +29,12 @@ void main() {
     });
 
     test('NumberFormat produces correct TZS format', () {
+      // `symbol` must not carry its own trailing space: intl inserts a
+      // non-breaking space between the symbol and the number, so 'TZS ' would
+      // render as "TZS\u00a0\u00a01,000". Mirrors the ride-history formatter.
       final formatter = NumberFormat.currency(
         locale: 'sw_TZ',
-        symbol: 'TZS ',
+        symbol: 'TZS',
         decimalDigits: 0,
       );
 

@@ -53,6 +53,26 @@ describe('capability RBAC', () => {
 });
 
 describe('tenant isolation (resolveMerchant)', () => {
+  it('resolves an unlinked legacy owner profile using verified email', async () => {
+    const db = { where: async (table, field, op, value) => {
+      if (table === 'profiles' && field === 'email' && value === 'owner@example.com') return [{ id: 'owner-profile', firebase_uid: null }];
+      if (table === 'sellers' && field === 'ownerId' && value === 'owner-profile') return [{ id: 'owned-store' }];
+      return [];
+    } };
+    expect(await resolveMerchant(db, null, { user: { uid: 'firebase-owner', email: 'Owner@example.com', emailVerified: true } })).toBe('owned-store');
+    expect(await resolveMerchant(db, null, { user: { uid: 'firebase-owner', email: 'Owner@example.com', emailVerified: false } })).toBeNull();
+  });
+
+  it('does not use email to take over a linked or ambiguous owner profile', async () => {
+    for (const profiles of [[{ id: 'owner-profile', firebase_uid: 'another-user' }], [{ id: 'one' }, { id: 'two' }]]) {
+      const db = { where: async (table, field) => {
+        if (table === 'profiles' && field === 'email') return profiles;
+        if (table === 'sellers') throw new Error('Must not look up another owner');
+        return [];
+      } };
+      expect(await resolveMerchant(db, null, { user: { uid: 'firebase-owner', email: 'owner@example.com', emailVerified: true } })).toBeNull();
+    }
+  });
   function fakeAdmin(sellerId) {
     return {
       firestore: () => ({

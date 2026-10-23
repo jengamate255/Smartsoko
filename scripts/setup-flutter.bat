@@ -1,0 +1,1 @@
+@powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File `"$Script:FullPath`"

@@ -78,6 +78,56 @@ describe('merchant OS API — isolation & capabilities', () => {
     app = await makeApp(SEED);
   });
 
+  it('insights exclude foreign tenant data and restrict reporting capabilities', async () => {
+    const server = buildServer(app);
+    const report = await req(server, 'GET', '/api/merchant/insights?days=30', auth('uA','merchant','S-A'));
+    expect(report.status).toBe(200);
+    expect(report.body.data.rows.some(row=>row.id==='o3')).toBe(false);
+    const denied = await req(server, 'GET', '/api/merchant/insights?days=30', auth('staff','delivery','S-A'));
+    expect(denied.status).toBe(403);
+    const invalid = await req(server, 'GET', '/api/merchant/insights?days=999999', auth('uA','merchant','S-A'));
+    expect(invalid.status).toBe(400);
+    close(server);
+  });
+
+  it('activity only returns the current merchant and excludes before/after payloads', async () => {
+    const local = await makeApp({merchant_audit_logs:[
+      {id:'own',merchantId:'S-A',action:'inventory.adjusted',ts:today,before:{secret:'private'}},
+      {id:'foreign',merchantId:'S-B',action:'staff.created',ts:today},
+    ]});
+    const server=buildServer(local);
+    const response=await req(server,'GET','/api/merchant/activity',auth('uA','merchant','S-A'));
+    expect(response.body.data.map(row=>row.id)).toEqual(['own']);
+    expect(response.body.data[0].before).toBeUndefined();
+    expect((await req(server,'GET','/api/merchant/activity',auth('staff','sales','S-A'))).status).toBe(403);
+    close(server);
+  });
+
+  it('only platform administrators can browse the store picker', async () => {
+    const server=buildServer(await makeApp({sellers:[{id:'S-A',name:'A',phone:'private'}]}));
+    expect((await req(server,'GET','/api/merchant/stores',auth('uA','merchant','S-A'))).status).toBe(403);
+    const response=await req(server,'GET','/api/merchant/stores',auth('admin','admin','none'));
+    expect(response.body.data).toEqual([{id:'S-A',name:'A'}]);
+    close(server);
+  });
+
+  it('persists zero stock thresholds and rejects invalid threshold values', async () => {
+    const server=buildServer(await makeApp({sellers:[{id:'S-A',name:'A'}]}));
+    const saved=await req(server,'PUT','/api/merchant/config/low-stock-threshold',auth('uA','merchant','S-A'),{threshold:0});
+    expect(saved.status).toBe(200);
+    const read=await req(server,'GET','/api/merchant/config/low-stock-threshold',auth('uA','merchant','S-A'));
+    expect(read.body.data.threshold).toBe(0);
+    expect((await req(server,'PUT','/api/merchant/config/low-stock-threshold',auth('uA','merchant','S-A'),{threshold:-1})).status).toBe(400);
+    close(server);
+  });
+
+  it('rejects staff invitations with elevated role names or invalid capabilities', async()=>{
+    const server=buildServer(await makeApp({}));
+    expect((await req(server,'POST','/api/merchant/staff',auth('uA','merchant','S-A'),{name:'Test',email:'test@example.com',role:'admin'})).status).toBe(400);
+    expect((await req(server,'POST','/api/merchant/staff',auth('uA','merchant','S-A'),{name:'Test',email:'test@example.com',role:'sales',capabilities:['unknown']})).status).toBe(400);
+    close(server);
+  });
+
   it('401s without a token', async () => {
     const server = buildServer(app);
     const res = await req(server, 'GET', '/api/merchant/orders');

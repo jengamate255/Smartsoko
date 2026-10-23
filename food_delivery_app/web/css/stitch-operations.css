@@ -1,0 +1,46 @@
+@import url('stitch-fonts.css');
+/* Shared operational surfaces from the SmartSoko merchant and driver references. */
+body.stitch-admin { background: #f5f8f4; color: #203d2b; font-family: Inter,'Plus Jakarta Sans',sans-serif; --os-primary: #14532d; --os-bg: #f5f8f4; --os-surface: #fff; --os-text: #203d2b; }
+.stitch-admin > header { background: #ffffffee; box-shadow: none; border-bottom: 1px solid #dce6d6; }
+.stitch-admin main > .grid > .bg-white, .stitch-admin .os-section-card { border-radius: 16px; border-color: #dce6d6; box-shadow: 0 4px 20px #183d2804; }
+.stitch-admin main input, .stitch-admin main select { border-radius: 10px; border-color: #d6e1d0; }
+.stitch-admin .font-headline { font-family: Inter,'Plus Jakarta Sans',sans-serif; }
+.merchant-workspace #analyticsTab, .merchant-workspace #financeTab, .merchant-workspace #promotionsTab, .merchant-workspace #reviewsTab, .merchant-workspace #profileTab { color: var(--mw-ink); }
+.merchant-workspace #analyticsTab > .grid > div, .merchant-workspace #financeTab > .grid > div, .merchant-workspace #profileTab .grid > div { border-radius: 14px; border-color: #dfe7dd; box-shadow: none; }
+.merchant-workspace #analyticsTab canvas { border-radius: 10px; }
+.merchant-workspace #financeTab .mo-card, .merchant-workspace #profileTab .mo-card { border-radius: 14px; border-color: #dfe7dd; background: #fcfdf9; padding: 24px; }
+.merchant-workspace #reviewsTab .bg-white, .merchant-workspace #promotionsTab .bg-white { border-radius: 14px; border-color: #dfe7dd; box-shadow: none; }
+.merchant-workspace #analyticsTab h2, .merchant-workspace #financeTab h2, .merchant-workspace #profileTab h2, .merchant-workspace #reviewsTab h2, .merchant-workspace #promotionsTab h2 { font-size: 24px; letter-spacing: -.7px; }
+.merchant-workspace #profileTab input:not([type=checkbox]), .merchant-workspace #profileTab textarea { background: #fcfdf9; border-color: #d6e0d1; min-height: 44px; }
+.merchant-workspace #financeTab .mo-metric { background: #fff; border-color: #dce6d7; border-radius: 12px; padding: 18px; }
+.merchant-workspace .mo-card table th { color: #71876b; background: #f1f6ed; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .7px; }
+.merchant-workspace .mo-card table td { font-size: 12px; padding: 15px 12px; border-color: #e2e9dc; }
+.merchant-workspace .mo-card .mi-table-empty { padding: 28px; text-align: center; color: #8a9c80; }
+body.stitch-driver {
+  --primary: #14532d; --primary-dark: #0a3923; --primary-light: #377450; --primary-glow: #dcebdd;
+  --bg-dark: #f5f8f4; --bg-gradient: #f5f8f4; --surface: #fff; --surface-glass: #f0f5ed;
+  --text-main: #19392a; --text-dim: #7a8d78; --border: #dde6d8;
+  background: #f5f8f4; color: #19392a; font-family: Inter,sans-serif;
+}
+.stitch-driver .auth-card { background: white; border: 1px solid #dbe5d5; border-radius: 24px; box-shadow: 0 10px 45px #21452c08; }
+.stitch-driver .stat-card { border: 1px solid #dce6d6; background: white; border-radius: 16px; }
+.stitch-driver .stat-value { color: #14532d; font-variant-numeric: tabular-nums; }
+.stitch-driver .app-header { border-bottom: 1px solid #e1e8db; background: #ffffffef; }
+.stitch-driver .tabs { background: #e9f0e3; border-radius: 12px; padding: 5px; }
+.stitch-driver .tabs .tab.active { background: white; color: #14532d; border-radius: 9px; box-shadow: 0 2px 8px #183d2708; }
+.stitch-driver .order-card { border: 1px solid #dce6d6; background: white; border-radius: 16px; box-shadow: 0 3px 15px #21452c04; }
+.stitch-driver .bottom-nav { background: #ffffffee; border-color: #dce6d6; }
+.stitch-driver input { border-radius: 12px; background: #f9fbf7; border-color: #d8e2d1; color: #234932; }
+.stitch-driver .nav-item.active { color: #14532d; }
+.stitch-driver #mapContainer { border-radius: 18px; border: 1px solid #dce6d6; overflow: hidden; }
+@media(min-width:1100px) {
+  .stitch-driver:has(#mainApp:not(.hidden)) .app-container { max-width: 1440px; margin-left: 208px; padding: 0 30px 40px; }
+  .stitch-driver #mainApp > .bottom-nav { position: fixed; top: 0; bottom: 0; left: 0; width: 208px; max-width: none; height: 100dvh; transform: none; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 10px; padding: 100px 18px 24px; border-radius: 0; border-right: 1px solid #d9e4d3; background: #e4ece1; }
+  .stitch-driver #mainApp > .bottom-nav::before { content: 'SmartSoko / Driver'; position: absolute; top: 36px; left: 24px; color: #235137; font-size: 17px; font-weight: 750; letter-spacing: -.6px; }
+  .stitch-driver #mainApp > .bottom-nav .nav-item { flex-direction: row; justify-content: flex-start; gap: 13px; min-height: 48px; padding: 12px; border-radius: 10px; }
+  .stitch-driver #mainApp > .bottom-nav .nav-item.active { background: #14532d; color: white; }
+  .stitch-driver #ordersList, .stitch-driver #historyList { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
+  .stitch-driver .stats-container { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media(prefers-reduced-motion:reduce) { .stitch-driver *, .stitch-driver *::before { animation: none !important; transition: none !important; } }
+.dark .merchant-workspace #financeTab .mo-card, .dark .merchant-workspace #profileTab .mo-card, .dark .merchant-workspace #financeTab .mo-metric { background: #20392c; border-color: #3d5540; }

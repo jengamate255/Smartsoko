@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_delivery_app/models/restaurant.dart';
+import 'package:smartsoko/models/restaurant.dart';
 
 void main() {
   group('Restaurant Model - OwnerId Field', () {

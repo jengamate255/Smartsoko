@@ -1,0 +1,72 @@
+/* Inventory operations, using the same calm forest palette as the catalogue. */
+.merchant-workspace:has(#inventoryTab:not(.hidden)) .mw-counter-metrics,
+.merchant-workspace:has(#inventoryTab:not(.hidden)) .mw-pulse-toggle,
+.merchant-workspace:has(#inventoryTab:not(.hidden)) .mw-page-header,
+.merchant-workspace:has(#inventoryTab:not(.hidden)) .mw-dashboard-grid { display: none; }
+.merchant-workspace #inventoryTab { background: transparent; border: 0; border-radius: 0; padding: 0; margin: 24px 0 0; }
+.mi-page-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 18px; }
+.mi-eyebrow { display: block; color: #648471; font-size: 10px; font-weight: 650; letter-spacing: 1.4px; }
+.merchant-workspace #inventoryTab .mi-page-heading h2 { font-size: 30px; letter-spacing: -.9px; margin: 8px 0; line-height: 1.2; }
+.merchant-workspace #inventoryTab .mi-page-heading p { color: #708076; font-size: 13px; }
+.mi-heading-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 16px; border: 1px solid #cfded4; border-radius: 8px; color: #13533a; font-size: 12px; font-weight: 600; text-decoration: none; background: white; flex-shrink: 0; }
+.mi-heading-link .material-symbols-outlined { font-size: 18px; }
+#moInventoryStatus { color: #647e6c; font-size: 12px; line-height: 1.7; }
+#moStockSummary { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin: 20px 0; }
+#inventoryTab .mo-metric { background: #fff; border: 1px solid #dce5df; border-radius: 12px; padding: 19px 22px; color: #6a8172; font-size: 12px; }
+#inventoryTab .mo-metric strong { color: #124d34; font-size: 30px; letter-spacing: -.8px; line-height: 1.2; margin: 10px 0 0; }
+#inventoryTab .mo-metric:nth-child(2) { background: #f9f4e9; border-color: #e8dfc9; color: #856b42; }
+#inventoryTab .mo-metric:nth-child(2) strong { color: #8f6c2b; }
+.merchant-workspace #inventoryTab .mi-section { min-width: 0; padding: 24px; background: #fff; border: 1px solid #dce5df; border-radius: 12px; }
+.mi-section-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.mi-section-heading > div { min-width: 0; }
+.merchant-workspace #inventoryTab h3 { color: #274c36; font-size: 16px; font-weight: 650; margin: 0; line-height: 1.5; letter-spacing: -.3px; }
+.merchant-workspace #inventoryTab .mi-section p { color: #7b8a7f; font-size: 12px; line-height: 1.7; margin: 5px 0 0; }
+.mi-section-icon { display: grid !important; place-items: center; width: 38px !important; height: 38px !important; padding: 9px; font-size: 20px; border-radius: 11px; background: #edf5ef; color: #4c7c5b; }
+.mi-work-grid { display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap: 18px; align-items: start; margin: 20px 0; }
+.merchant-workspace #inventoryTab form { margin: 0; gap: 17px; }
+.mi-work-grid .mi-purchase { grid-row: span 2; background: #fcfdfb !important; }
+.mi-draft-label { margin-left: auto; padding: 4px 9px; border-radius: 30px; background: #eaf0e2; color: #6d8258; font-size: 10px; font-weight: 600; }
+.merchant-workspace #inventoryTab label { font-size: 11px; font-weight: 550; color: #607967; gap: 8px; }
+.merchant-workspace #inventoryTab input, .merchant-workspace #inventoryTab select { width: 100%; min-height: 44px; background: #fafcf9; border: 1px solid #d4dfd4; color: #2c5036; font-size: 13px; padding: 11px 12px; box-shadow: none; }
+.merchant-workspace #inventoryTab input::placeholder { color: #9ba99a; }
+.merchant-workspace #inventoryTab .mo-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.merchant-workspace #inventoryTab button { min-height: 44px; justify-self: start; padding: 10px 16px; border: 1px solid #d0ddce; border-radius: 8px; background: #f1f6ee; color: #356141; font-size: 12px; font-weight: 600; }
+.merchant-workspace #inventoryTab button:hover:not(:disabled) { background: #e4eedf; }
+.mi-form-end { display: flex; flex-direction: column; align-items: stretch; gap: 14px; padding-top: 16px; border-top: 1px solid #e5ece2; margin-top: 5px; }
+.mi-form-end small { color: #82957c; font-size: 11px; }
+.merchant-workspace #inventoryTab .mi-form-end button { display: flex; justify-content: center; align-items: center; gap: 10px; width: 100%; background: #07563c; border-color: #07563c; color: #fff; }
+.mi-form-end .material-symbols-outlined { font-size: 18px; }
+.merchant-workspace #inventoryTab .mi-form-end button:hover:not(:disabled) { background: #003f2a; }
+.merchant-workspace #inventoryTab .mi-threshold { display: grid; grid-template-columns: minmax(0,1fr) 120px auto; gap: 22px; align-items: center; margin-bottom: 20px; padding: 20px 24px; background: #f0f4ec; }
+.mi-threshold label { display: flex; align-items: center; flex-wrap: wrap; }
+.mi-history-grid { display: grid; grid-template-columns: minmax(0,1fr); gap: 20px; }
+#moPurchaseRows > h3 { padding-bottom: 18px; }
+.merchant-workspace #inventoryTab table { width: 100%; font-size: 12px; }
+.merchant-workspace #inventoryTab th { background: #f3f7f1; color: #6b816b; font-size: 10px; text-transform: uppercase; letter-spacing: .7px; padding: 13px 14px; }
+.merchant-workspace #inventoryTab td { padding: 15px 14px; color: #45634b; border-color: #e7ece4; }
+.merchant-workspace #inventoryTab .mi-table-empty { padding: 32px 16px; text-align: center; font-size: 12px; color: #8b9b85; }
+.merchant-workspace #inventoryTab .mo-scroll { border: 1px solid #e2e9de; border-radius: 8px; }
+.merchant-workspace:has(#inventoryTab:not(.hidden)) .mo-banner { padding: 13px 18px; border-radius: 10px; border-color: #d9e5db; gap: 16px; }
+.merchant-workspace:has(#inventoryTab:not(.hidden)) .mo-banner strong { font-size: 12px; }
+.merchant-workspace:has(#inventoryTab:not(.hidden)) .mo-banner small { color: #7b9180; font-size: 10px; margin-top: 4px; }
+.merchant-workspace:has(#inventoryTab:not(.hidden)) .mo-banner button { margin-left: auto; font-size: 11px; border-color: #d2dfd2; padding: 8px 14px; background: #fff; }
+@media(min-width:1500px) { .mi-history-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:800px) { .mi-work-grid { grid-template-columns: minmax(0,1fr); } .mi-work-grid .mi-purchase { grid-row: auto; } }
+@media(max-width:640px) {
+  .mi-page-heading { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .merchant-workspace #inventoryTab .mi-page-heading h2 { font-size: 26px; }
+  .merchant-workspace #inventoryTab .mi-section { padding: 18px; }
+  #moStockSummary { gap: 10px; }
+  #inventoryTab .mo-metric { padding: 16px; }
+  .merchant-workspace #inventoryTab .mi-threshold { grid-template-columns: minmax(0,1fr); gap: 16px; padding: 18px; }
+  .merchant-workspace #inventoryTab input, .merchant-workspace #inventoryTab select { font-size: 16px; }
+  .merchant-workspace #inventoryTab .mo-grid { grid-template-columns: minmax(0,1fr); }
+  .merchant-workspace #inventoryTab button { width: 100%; }
+  .mi-section-heading .mi-eyebrow { font-size: 9px; letter-spacing: .8px; }
+}
+.dark .merchant-workspace #inventoryTab .mi-section, .dark .merchant-workspace #inventoryTab .mo-metric { background: #20392c !important; color: #c5d8c7; border-color: #38533e; }
+.dark .merchant-workspace #inventoryTab h3, .dark .merchant-workspace #inventoryTab .mo-metric strong { color: #dceedd; }
+.dark .merchant-workspace #inventoryTab label, .dark .merchant-workspace #inventoryTab .mi-section p { color: #aabdac; }
+.dark .merchant-workspace #inventoryTab input, .dark .merchant-workspace #inventoryTab select { background: #192e22; color: #dbe8d8; border-color: #49624b; }
+.dark .merchant-workspace #inventoryTab td, .dark .merchant-workspace #inventoryTab th { background: #20392c; color: #bdd1be; border-color: #39543d; }
+.dark .merchant-workspace #inventoryTab .mo-scroll { border-color: #39543d; }

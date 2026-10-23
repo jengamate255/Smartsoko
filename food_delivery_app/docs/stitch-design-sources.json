@@ -1,0 +1,325 @@
+{
+  "projects": [
+    {
+      "projectId": "904715823202515991",
+      "screens": []
+    },
+    {
+      "projectId": "15620036158330806831",
+      "screens": [
+        {
+          "id": "47b2966e382845428e86e9234a04817a",
+          "title": "SmartSoko Merchant Dashboard",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "e27f12ec71484f568894fe01c6e6180e",
+          "title": "SmartSoko Merchant Dashboard (Desktop)",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "cfb7f661c41c447a88e0ac1bea6a565c",
+          "title": "SmartSoko Merchant Dashboard",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "9e6ee04a07ba4dda991496f2521984c1",
+          "title": "Merchant Dashboard Overview",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "371a4aa7f7c4454aac7a935de6ba9220",
+          "title": "SmartSoko Mobile Dashboard",
+          "device": "MOBILE"
+        },
+        {
+          "id": "76422624efaf4c6e9f018ac6260c1a9b",
+          "title": "Emerald Merchant Dashboard",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "856f771eb9cd462aaff2c4a88d09c82c",
+          "title": "SmartSoko Merchant Dashboard (Mobile)",
+          "device": "MOBILE"
+        },
+        {
+          "id": "d0de08af061b4ed6b5563933aed5dfcf",
+          "title": "SmartSoko Merchant Dashboard (Mobile)",
+          "device": "MOBILE"
+        },
+        {
+          "id": "f3859cc2b77e4afbade18485a8c04a09",
+          "title": "SmartSoko Merchant Dashboard (Mobile)",
+          "device": "MOBILE"
+        },
+        {
+          "id": "311c769b2d7843dda64bbc20c4b85720",
+          "title": "SmartSoko Merchant Dashboard (Desktop)",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "b5b1699e56d3449982282156827ac59f",
+          "title": "SmartSoko Merchant Dashboard (Desktop)",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "c43fcacab32d46e0816b21f3300a1443",
+          "title": "Emerald Merchant Dashboard",
+          "device": "DESKTOP"
+        }
+      ]
+    },
+    {
+      "projectId": "11675664027020795950",
+      "screens": [
+        {
+          "id": "5d30ae9aedae4247865811258ca110f1",
+          "title": "SmartSoko Merchant Dashboard",
+          "device": "DESKTOP"
+        }
+      ]
+    },
+    {
+      "projectId": "18311388537432084624",
+      "screens": [
+        {
+          "id": "ee5866b24b0141ecbdc04d34bb9afe46",
+          "title": "SmartSoko Logo",
+          "device": "ASSET"
+        },
+        {
+          "id": "8bf6cf4da58c419aa590d44acbd3ef8a",
+          "title": "Professional headshot of a friendly African male merchant in his 30s, clean modern attire, warm indoor lighting, blurred background, high quality photography.",
+          "device": "ASSET"
+        },
+        {
+          "id": "351b56208f5f48ce9bdf734a9c9bdd0a",
+          "title": "Orders | SmartSoko",
+          "device": "MOBILE"
+        },
+        {
+          "id": "2f4159461cad40c6bbb21730f4e7da6f",
+          "title": "Menu Management | SmartSoko",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "d1130cc697bb462bb5617eafa0687f52",
+          "title": "SmartSoko | Dashboard",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "49221f461bdd44eb92656f30c63ac62e",
+          "title": "Analytics & Insights | SmartSoko",
+          "device": "DESKTOP"
+        }
+      ]
+    },
+    {
+      "projectId": "7875963631660458576",
+      "screens": []
+    },
+    {
+      "projectId": "620713273628273462",
+      "screens": []
+    },
+    {
+      "projectId": "8052287942923066467",
+      "screens": []
+    },
+    {
+      "projectId": "4470957492600036342",
+      "screens": [
+        {
+          "id": "e24eb21d87104fbfb8f6acbdfe962a54",
+          "title": "SmartSoko Marketplace",
+          "device": "MOBILE"
+        },
+        {
+          "id": "21c51c6a020f4f8e8d5793d993635f16",
+          "title": "SmartSoko Home",
+          "device": "MOBILE"
+        },
+        {
+          "id": "ca90fa1c61e84d078daaac105b19e0ca",
+          "title": "SmartAI Concierge",
+          "device": "MOBILE"
+        },
+        {
+          "id": "fabe36dbe0a542ed9cf89c3120aedb8a",
+          "title": "SmartWallet Financial Hub",
+          "device": "MOBILE"
+        }
+      ]
+    },
+    {
+      "projectId": "3584016013784402564",
+      "screens": [
+        {
+          "id": "eaed109902c247249fae43bff2a9c015",
+          "title": "Driver Dashboard (1280px)",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "ff00724726f4403792a0b845aeea659d",
+          "title": "Merchant Dashboard",
+          "device": "MOBILE"
+        },
+        {
+          "id": "45d88f1674394c8b813e443280df5528",
+          "title": "SmartMove Ride & Delivery Desktop",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "9a045c31274e485e97adc8e00a9c79bf",
+          "title": "SmartSoko Home Dashboard",
+          "device": "MOBILE"
+        },
+        {
+          "id": "bc950eef7d8f4745abf6c19180945bed",
+          "title": "SmartMove Ride & Delivery Desktop",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "e0f4f9c37ba746488f2560ab7bf8614b",
+          "title": "SmartSoko Home (2560px)",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "392e69de98ec4de08e2521c2483fcaf9",
+          "title": "SmartMove Ride & Delivery Desktop",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "516bf2e53e5f4845b1f4a5fe650174fa",
+          "title": "Mama's Kitchen Menu",
+          "device": "MOBILE"
+        },
+        {
+          "id": "d0272109b8424516a1440112b4fdc987",
+          "title": "Customer Dashboard",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "2f8806396ac14167a599f29a84bafd63",
+          "title": "SmartSoko Home",
+          "device": "MOBILE"
+        },
+        {
+          "id": "3d0262b5b5b04b7590210bf31fcab724",
+          "title": "Driver Dashboard Desktop",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "0f88cc44a9274b84be59ca542d9cc0f1",
+          "title": "SmartWallet",
+          "device": "MOBILE"
+        },
+        {
+          "id": "1434cfe161884ed086aa1e07f92659fd",
+          "title": "SmartMove Ride & Delivery",
+          "device": "MOBILE"
+        },
+        {
+          "id": "e7319f30a95a4d9e896c67b8819613a5",
+          "title": "SmartMove Ride-Hailing Desktop",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "4b4e125d34674591b6b29df012efbdf4",
+          "title": "SmartSoko Home Dashboard",
+          "device": "MOBILE"
+        },
+        {
+          "id": "4acec3dfc10d4c03b6e78900bf80e2dd",
+          "title": "Home Dashboard with Sidebar",
+          "device": "MOBILE"
+        },
+        {
+          "id": "f9005d5cdf9e4a098a3094c2e86b0612",
+          "title": "Driver Dashboard (1280px)",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "7db5639cbbec497ead33aacff22ed76b",
+          "title": "Customer Profile",
+          "device": "MOBILE"
+        },
+        {
+          "id": "b058a3a2504e48aabe2f45f8f605146e",
+          "title": "Food Delivery Desktop Dashboard",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "74e21ec53e3c4ae1b397e735996992ac",
+          "title": "Driver Dashboard Desktop",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "860cafc774ab4eec9da3f05742c82797",
+          "title": "Driver Dashboard",
+          "device": "MOBILE"
+        },
+        {
+          "id": "17a3d8768dc243fda8da48c7c45518b0",
+          "title": "Driver Dashboard Desktop",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "187795783b0c479295728cf483d7257d",
+          "title": "Food Delivery",
+          "device": "MOBILE"
+        },
+        {
+          "id": "220028dc57b64685a65580fcf7010806",
+          "title": "Vehicle Management",
+          "device": "MOBILE"
+        },
+        {
+          "id": "2dc10281d212485c804b1ee480fd431e",
+          "title": "Unified Dashboard — Complete",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "07738caef8c142a6a22fc0abb876e33c",
+          "title": "SmartSoko Home Dashboard",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "baffc074cfec4892a46ee975ae844942",
+          "title": "Checkout",
+          "device": "MOBILE"
+        },
+        {
+          "id": "edffcb0807bd4c208fd73333bb5cfa17",
+          "title": "Driver Dashboard Desktop (1280px)",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "4b437f39395942c6a71bde129ef7faf6",
+          "title": "Driver Dashboard Desktop",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "3a6a9d0395a749edb9432dcb8c81c8ff",
+          "title": "SmartSoko Home Dashboard",
+          "device": "MOBILE"
+        },
+        {
+          "id": "d28bc63ed8f2405a8ce95806d46870c8",
+          "title": "SmartMove Ride-Hailing Desktop Dashboard",
+          "device": "DESKTOP"
+        },
+        {
+          "id": "3a15ed33af06478fa752f07cd2d57384",
+          "title": "Marketplace",
+          "device": "MOBILE"
+        },
+        {
+          "id": "8875b5c08da44c9580965166b340382d",
+          "title": "Track Order",
+          "device": "MOBILE"
+        }
+      ]
+    }
+  ]
+}

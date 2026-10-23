@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_delivery_app/models/user.dart';
+import 'package:smartsoko/models/user.dart';
 
 void main() {
   group('User Model - Merchant Role', () {
@@ -54,13 +54,43 @@ void main() {
     test('merchant role name should match string representation', () {
       // Verify the merchant role serializes to the correct string
       expect(UserRole.merchant.name, equals('merchant'));
-      
+
       // Verify it can be found in the enum values by name
       final foundRole = UserRole.values.firstWhere(
         (e) => e.name == 'merchant',
         orElse: () => UserRole.customer,
       );
       expect(foundRole, equals(UserRole.merchant));
+    });
+  });
+
+  group('User.fromApiProfile', () {
+    test('maps the API server payload (phone_number, role)', () {
+      final user = User.fromApiProfile({
+        'id': '62f63314-16e4-4347-8248-4bda8bba6abb',
+        'phone_number': '255712345678',
+        'name': 'Asha',
+        'email': 'asha@example.com',
+        'image_url': null,
+        'role': 'merchant',
+        'is_verified': true,
+      }, fallbackId: 'AbCdEf1234567890');
+
+      expect(user.id, '62f63314-16e4-4347-8248-4bda8bba6abb');
+      expect(user.phone, '255712345678');
+      expect(user.name, 'Asha');
+      expect(user.email, 'asha@example.com');
+      expect(user.role, UserRole.merchant);
+    });
+
+    test('unknown or missing role falls back to customer', () {
+      final user = User.fromApiProfile({
+        'phone_number': '255700000000',
+      }, fallbackId: 'uid-1');
+
+      expect(user.role, UserRole.customer);
+      expect(user.id, 'uid-1');
+      expect(user.phone, '255700000000');
     });
   });
 }

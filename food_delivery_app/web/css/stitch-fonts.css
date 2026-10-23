@@ -1,0 +1,4 @@
+/* Self-hosted Google Fonts; licenses are distributed beside the font assets. */
+@font-face { font-family: 'SmartSoko Symbols'; font-style: normal; font-weight: 400; font-display: block; src: url('../fonts/material-symbols.woff2') format('woff2'); }
+@font-face { font-family: 'SmartSoko Inter'; font-style: normal; font-weight: 400 800; font-display: swap; src: url('../fonts/inter-latin.woff2') format('woff2'); }
+.stitch-site .material-symbols-outlined, .stitch-storefront .material-symbols-outlined, .merchant-workspace .material-symbols-outlined, .stitch-driver .material-symbols-outlined, .stitch-admin .material-symbols-outlined { font-family: 'SmartSoko Symbols' !important; font-weight: 400; }

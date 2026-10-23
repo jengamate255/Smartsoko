@@ -1,0 +1,22 @@
+[
+  {
+    "key": "catalogue",
+    "prompt": "Use case: illustration-story. Create a single original editorial illustration for a bilingual SmartSoko supermarket and grocery delivery training booklet in Tanzania. Warm contemporary hand-painted digital illustration, crisp expressive shapes, subtle paper grain, natural human proportions, forest green and burnt orange accents on a soft ivory background. Landscape 3:2. One coherent scene, not a collage. All characters are adults. Professional publication quality. No text, letters, numbers, logos, watermarks, price labels, readable interface or claims. Keep subjects fully inside frame with generous margins. A Black Tanzanian woman supermarket owner in a green apron photographing a neatly arranged 1 litre cooking oil bottle with her smartphone at a clean counter. Shelves of groceries behind her. Show a handwritten inventory clipboard with only abstract marks beside three identical bottles. Three-quarter medium-wide view. Focus on accurate product listing and stock.",
+    "generator": "built-in image_gen"
+  },
+  {
+    "key": "shopping",
+    "prompt": "Use case: illustration-story. Create a single original editorial illustration for a bilingual SmartSoko supermarket and grocery delivery training booklet in Tanzania. Warm contemporary hand-painted digital illustration, crisp expressive shapes, subtle paper grain, natural human proportions, forest green and burnt orange accents on a soft ivory background. Landscape 3:2. One coherent scene, not a collage. All characters are adults. Professional publication quality. No text, letters, numbers, logos, watermarks, price labels, readable interface or claims. Keep subjects fully inside frame with generous margins. A Black Tanzanian woman customer sitting at her bright home kitchen table, choosing groceries on her smartphone. Beside her is a reusable shopping bag, a bowl of tomatoes and a small list shown only as abstract lines. Her phone screen has simple coloured product tiles with no text. Friendly everyday scene. Focus on browsing and ordering.",
+    "generator": "built-in image_gen"
+  },
+  {
+    "key": "packing",
+    "prompt": "Use case: illustration-story. Create a single original editorial illustration for a bilingual SmartSoko supermarket and grocery delivery training booklet in Tanzania. Warm contemporary hand-painted digital illustration, crisp expressive shapes, subtle paper grain, natural human proportions, forest green and burnt orange accents on a soft ivory background. Landscape 3:2. One coherent scene, not a collage. All characters are adults. Professional publication quality. No text, letters, numbers, logos, watermarks, price labels, readable interface or claims. Keep subjects fully inside frame with generous margins. A Black Tanzanian male supermarket worker in a green apron checking a grocery order against a clipboard with only abstract marks, while packing rice, cooking oil, tomatoes and a sealed milk carton into two sturdy paper bags on a spacious store counter. Distinct checked and unchecked groups of products. Focus on careful order checking, accurate quantities and safe packing.",
+    "generator": "built-in image_gen"
+  },
+  {
+    "key": "delivery",
+    "prompt": "Use case: illustration-story. Create a single original editorial illustration for a bilingual SmartSoko supermarket and grocery delivery training booklet in Tanzania. Warm contemporary hand-painted digital illustration, crisp expressive shapes, subtle paper grain, natural human proportions, forest green and burnt orange accents on a soft ivory background. Landscape 3:2. One coherent scene, not a collage. All characters are adults. Professional publication quality. No text, letters, numbers, logos, watermarks, price labels, readable interface or claims. Keep subjects fully inside frame with generous margins. A Black Tanzanian delivery rider wearing an orange helmet and green jacket handing a sealed paper grocery bag to a Black Tanzanian adult male customer at the doorway of a contemporary home. A parked delivery motorcycle with an unbranded rear insulated box is visible safely in the background. Customer is checking the bag, both friendly. Focus on correct delivery handover.",
+    "generator": "built-in image_gen"
+  }
+]

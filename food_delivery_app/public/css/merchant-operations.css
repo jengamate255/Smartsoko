@@ -1,0 +1,27 @@
+.mo-banner,.mo-card {border:1px solid #cbd5d1;border-radius:16px;padding:18px;margin:16px 0;background:#fff;color:#183d31}
+.mo-banner {display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#fff8e8}
+.mo-banner[data-state="connected"] {background:#ecfdf5}
+.mo-banner p,.mo-card p {margin:8px 0;color:#486158}
+.mo-banner small {display:block}
+.mo-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.mo-card h2 {font-size:1.4rem;font-weight:700;margin-bottom:12px}
+.mo-card h3 {font-weight:700;margin:14px 0 8px}
+.mo-card label {display:grid;gap:5px;font-size:.9rem}
+.mo-card input,.mo-card select,.mo-card textarea {border:1px solid #94a99e;border-radius:8px;background:#fff;color:#183d31;padding:10px;min-width:0;max-width:100%}
+.mo-card button,.mo-banner button {border:1px solid #496b5c;border-radius:8px;padding:9px 14px;background:#f2f8f4;color:#153f2c;font-weight:600;min-height:42px}
+.mo-card button:disabled {opacity:.5;cursor:not-allowed}
+.mo-card form {display:grid;gap:12px;margin:14px 0}
+.mo-card table {border-collapse:collapse;width:100%;font-size:.9rem}
+.mo-card th,.mo-card td {padding:11px 8px;border-bottom:1px solid #dbe7df;text-align:left;white-space:nowrap}
+.mo-scroll {overflow-x:auto;max-width:100%}
+.mo-toolbar {display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.mo-metric {padding:14px;border:1px solid #dbe7df;border-radius:10px}
+.mo-metric strong {display:block;font-size:1.25rem;margin:8px 0}
+.mo-error {color:#9b1c1c!important;white-space:pre-wrap}
+.mo-chart-row {display:grid;grid-template-columns:90px 1fr 110px;gap:8px;margin:8px 0;align-items:center}
+.mo-bar {height:14px;background:#23734a;border-radius:4px;min-width:2px}
+.dark .mo-card,.dark .mo-banner {background:#132e24;color:#e1f4e7;border-color:#456554}
+.dark .mo-card p,.dark .mo-banner p {color:#c5d7cc}
+[data-mo-stale="true"] {outline:2px dashed #c89430;outline-offset:4px}
+@media(max-width:640px) {.mo-banner,.mo-card {padding:12px}.mo-chart-row {grid-template-columns:65px 1fr 90px;font-size:.75rem}}
+.merchant-workspace [hidden] {display:none!important}

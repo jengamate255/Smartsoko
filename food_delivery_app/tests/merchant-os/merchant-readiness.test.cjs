@@ -179,6 +179,30 @@ async function transport() {
   return (await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'))).merchantRequest;
 }
 
+test('hosting HTML 404s are service failures, not missing seller profiles', async () => {
+  const merchantRequest = await transport();
+  global.window = { auth: { currentUser: { getIdToken: async () => 'test-token' } } };
+  global.fetch = async () => ({ ok: false, status: 404, json: async () => { throw new Error('HTML'); } });
+  await assert.rejects(merchantRequest('/profile'), { code: 'MERCHANT_API_UNAVAILABLE', status: 404 });
+});
+
+test('only an explicit missing seller error asks for registration', async () => {
+  for (const [code, status, registration] of [
+    ['MERCHANT_API_UNAVAILABLE', 404, false],
+    [undefined, 403, false],
+    ['NO_MERCHANT_PROFILE', 403, true],
+  ]) {
+    const { context, elements } = page();
+    context.window.auth = { currentUser: {} };
+    vm.runInContext('currentSeller = null;', context);
+    context.showNotification = () => {};
+    context.console = { error() {} };
+    context.merchantApi = async () => { throw Object.assign(new Error('Service unavailable'), { code, status }); };
+    await context.loadSellerData('test-user');
+    assert.equal(elements.get('ordersList').innerHTML.includes('Complete your seller registration'), registration);
+  }
+});
+
 test('transport rejects invalid responses and sends authenticated uncached requests', async () => {
   const merchantRequest = await transport();
   global.window = { auth: { currentUser: { getIdToken: async () => 'test-token' } } };
@@ -209,6 +233,26 @@ test('unsigned users cannot send merchant requests', async () => {
   global.window = { auth: { currentUser: null } };
   global.fetch = () => assert.fail('unauthenticated request');
   await assert.rejects(merchantRequest('/orders'), { status: 401 });
+});
+
+test('disconnected and unrefreshed sections cannot send mutations', async () => {
+  const merchantRequest = await transport();
+  global.window = {auth:{currentUser:{getIdToken:async()=> 'test-token'}},merchantConnectionReady:false};
+  global.fetch = () => assert.fail('stale mutation was sent');
+  await assert.rejects(merchantRequest('/inventory/adjust',{method:'POST',body:'{}'}),/Reconnect/);
+  global.window.merchantConnectionReady=true;
+  global.window.merchantFreshReads=new Set();
+  await assert.rejects(merchantRequest('/inventory/adjust',{method:'POST',body:'{}'}),/Refresh this section/);
+});
+
+test('offline reads may retain a snapshot but permission failures never do', async () => {
+  const merchantRequest=await transport();
+  global.window={auth:{currentUser:{getIdToken:async()=> 'test-token'}},merchantReadSnapshot:()=>({success:true,data:[{id:'old'}]})};
+  global.fetch=async()=>{throw new TypeError('Offline');};
+  const cached=await merchantRequest('/orders');
+  assert.equal(cached.stale,true);assert.equal(cached.data[0].id,'old');
+  global.fetch=async()=>({ok:false,status:403,json:async()=>({error:'Forbidden'})});
+  await assert.rejects(merchantRequest('/orders'),{status:403});
 });
 
 test('a stalled token refresh is bounded by the request timeout', async () => {

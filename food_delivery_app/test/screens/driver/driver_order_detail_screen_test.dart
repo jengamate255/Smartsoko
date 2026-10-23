@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_delivery_app/models/order.dart';
+import 'package:smartsoko/models/order.dart';
 
 void main() {
   // Helper function to create a test order

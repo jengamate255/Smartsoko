@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_delivery_app/models/user.dart';
-import 'package:food_delivery_app/utils/role_validator.dart';
+import 'package:smartsoko/models/user.dart';
+import 'package:smartsoko/utils/role_validator.dart';
 
 void main() {
   group('RoleValidator', () {

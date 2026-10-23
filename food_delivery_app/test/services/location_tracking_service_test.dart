@@ -1,10 +1,12 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:food_delivery_app/services/location_tracking_service.dart';
-import 'package:food_delivery_app/services/location_service.dart';
+import 'package:smartsoko/services/location_tracking_service.dart';
+import 'package:smartsoko/services/location_service.dart';
 
-// Simple mock for LocationService
-class MockLocationService extends LocationService {
+// Simple mock for LocationService. Implemented rather than extended so the
+// Firestore field initializer on the real service is never constructed.
+class MockLocationService implements LocationService {
   Position? _mockPosition;
   Exception? _mockError;
   bool _updateCalled = false;
@@ -36,19 +38,42 @@ class MockLocationService extends LocationService {
   }) async {
     _updateCalled = true;
   }
+
+  // The remaining LocationService members are not exercised by these tests.
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  // permission_handler talks to the host over this channel. With no plugin in
+  // the test environment every call would throw MissingPluginException, so
+  // answer status checks with "denied" to model an unpermissioned device.
+  const permissionChannel = MethodChannel(
+    'flutter.baseflow.com/permissions/methods',
+  );
+
   late LocationTrackingService trackingService;
   late MockLocationService mockLocationService;
 
   setUp(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(permissionChannel, (call) async {
+          if (call.method == 'checkPermissionStatus') {
+            return 0; // PermissionStatus.denied
+          }
+          return null;
+        });
+
     mockLocationService = MockLocationService();
     trackingService = LocationTrackingService(mockLocationService);
   });
 
   tearDown(() {
     trackingService.dispose();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(permissionChannel, null);
   });
 
   group('LocationTrackingService', () {
@@ -88,10 +113,7 @@ void main() {
       mockLocationService.setMockError(Exception('Location error'));
 
       // Should not throw when stopping tracking
-      await expectLater(
-        trackingService.stopTracking(),
-        completes,
-      );
+      await expectLater(trackingService.stopTracking(), completes);
     });
 
     test('dispose should clean up resources', () {
@@ -101,10 +123,14 @@ void main() {
       expect(trackingService.currentDriverId, null);
     });
 
-    test('should return false for hasBackgroundLocationPermission initially', () async {
-      // This will return false in test environment without proper permission setup
-      final hasPermission = await trackingService.hasBackgroundLocationPermission();
-      expect(hasPermission, false);
-    });
+    test(
+      'should return false for hasBackgroundLocationPermission initially',
+      () async {
+        // This will return false in test environment without proper permission setup
+        final hasPermission = await trackingService
+            .hasBackgroundLocationPermission();
+        expect(hasPermission, false);
+      },
+    );
   });
 }

@@ -11,6 +11,7 @@
  */
 
 import { auth } from '../config/firebase-config.js';
+import { merchantRequest } from './merchant-request.js?v=2';
 
 // ─── tiny authed fetch helpers ────────────────────────────────────────
 export async function getAuthToken() {
@@ -101,6 +102,7 @@ export async function apiFetch(path, options = {}) {
     }
     throw new Error('Not signed in');
   }
+  if (token) return merchantRequest(path, options);
   const res = await fetch('/api/merchant' + path, {
     ...options,
     headers: {

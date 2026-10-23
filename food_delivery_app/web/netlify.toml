@@ -1,8 +1,0 @@
-# Nested config intentionally minimal — root netlify.toml owns redirects.
-# Keep cleanUrls-style behavior when this folder is published directly.
-[build]
-  publish = "."
-  command = "echo ok"
-
-[build.environment]
-  NODE_VERSION = "18"
