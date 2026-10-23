@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html class="light" lang="en">
 <head>
+  <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>SmartSoko - Discover</title>
@@ -100,8 +101,14 @@
       .hero-bg { transition: none; }
     }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/stitch-site.css?v=5">
+  <script src="js/stitch-site.js?v=2" defer></script>
+  <link rel="stylesheet" href="css/site-uniform.css?v=1">
+  <link rel="stylesheet" href="css/shopping-experience.css?v=1">
+  <script src="js/shopping-experience.js?v=1" defer></script>
 </head>
-<body class="bg-[#F8FAF6] text-on-background min-h-screen pb-24 md:pb-0">
+<body class="ss-uniform stitch-site ss-commerce ss-discovery bg-[#F8FAF6] text-on-background min-h-screen pb-24 md:pb-0" data-stitch-page="discovery">
 
   <!-- Header -->
   <header class="top-header">
@@ -144,8 +151,8 @@
         <span class="inline-flex items-center gap-1.5 bg-green-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold mb-3 w-fit uppercase tracking-wider">
           <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">verified</span> Verified Sellers
         </span>
-        <h1 class="text-2xl md:text-4xl font-extrabold mb-2 leading-tight">Discover Local Quality</h1>
-        <p class="text-white/80 mb-5 text-sm md:text-base">Find authentic, handcrafted products from Africa's most talented artisans and businesses.</p>
+        <h1 class="text-2xl md:text-4xl font-extrabold mb-2 leading-tight">Your next local favourite.</h1>
+        <p class="text-white/80 mb-5 text-sm md:text-base">Fresh groceries, good food and everyday finds from shops in your neighbourhood.</p>
         <div class="flex flex-wrap gap-3">
           <a href="#productsSection" class="bg-white text-green-800 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-100 transition shadow-lg no-underline">Shop Now</a>
           <a href="#sellersSection" class="bg-white/15 backdrop-blur-md border border-white/25 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/25 transition no-underline">Meet Sellers</a>
@@ -196,16 +203,11 @@
     </section>
 
     <!-- Filter Chips -->
-    <section class="sticky top-16 bg-[#F8FAF6] z-30 pt-1 pb-3 space-y-3">
-      <div class="flex flex-nowrap items-center gap-2.5 overflow-x-auto hide-scrollbar">
-        <button class="filter-chip active" onclick="this.classList.toggle('active')">
-          <span class="material-symbols-outlined text-base">tune</span> Filters
-        </button>
-        <div class="h-5 w-px bg-gray-200 flex-shrink-0"></div>
-        <button class="filter-chip" onclick="this.classList.toggle('active')">Local Origin</button>
-        <button class="filter-chip" onclick="this.classList.toggle('active')">Delivery Speed</button>
-        <button class="filter-chip" onclick="this.classList.toggle('active')">Price Range</button>
-        <button class="filter-chip" onclick="this.classList.toggle('active')">Verified Only</button>
+    <section class="ss-catalogue-tools sticky top-16 bg-[#F8FAF6] z-30 pt-1 pb-3 space-y-3">
+      <div class="shopping-filter-fields" aria-label="Filter products by price">
+        <label>Min price <input id="minPriceFilter" type="number" min="0" placeholder="TSh 0" oninput="applyShoppingFilters()"></label>
+        <label>Max price <input id="maxPriceFilter" type="number" min="0" placeholder="Any price" oninput="applyShoppingFilters()"></label>
+        <button type="button" onclick="clearFilter()">Clear filters</button>
       </div>
       <div class="flex items-center justify-between text-gray-500 border-b border-gray-100 pb-2">
         <span id="resultsCount" class="text-xs font-medium">0 products found</span>
@@ -223,15 +225,7 @@
 
     <!-- Active Filter Tags -->
     <section id="activeFilters" class="mb-4 hidden">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-xs text-gray-500 font-medium">Active:</span>
-        <span id="filterTag" class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-semibold flex items-center gap-1.5">
-          <span id="filterText">Filter</span>
-          <button onclick="clearFilter()" class="hover:bg-green-100 rounded-full p-0.5">
-            <span class="material-symbols-outlined text-xs">close</span>
-          </button>
-        </span>
-      </div>
+      <div id="shoppingFilterChips" class="shopping-filter-chips"></div>
     </section>
 
     <!-- Products Grid -->
@@ -353,17 +347,14 @@
     </a>
   </nav>
 
-  <!-- Desktop FAB -->
-  <button class="hidden md:flex fixed bottom-8 right-8 bg-green-700 text-white shadow-2xl px-5 py-3 rounded-full items-center gap-2 hover:scale-105 active:scale-95 transition-all z-40 font-semibold text-sm">
-    <span class="material-symbols-outlined">message</span> Chat with Sellers
-  </button>
-
   <script>
     let cart = window.CartService ? CartService.getCart() : (JSON.parse(localStorage.getItem('smartsoko_cart')) || []);
+    let catalogLoaded = false;
     let allProducts = [];
     let filteredProducts = [];
     let currentCategory = 'all';
     let currentSearch = '';
+    let currentSeller = new URLSearchParams(location.search).get('sellerId') || '';
 
     function syncSearch(val) {
       document.getElementById('searchInputMobile').value = val;
@@ -371,53 +362,77 @@
       handleSearchInput(val);
     }
 
-    function handleSearchInput(val) {
-      const query = val.trim();
-      if (query) {
-        currentSearch = query;
-        filteredProducts = allProducts.filter(p =>
-          p.name.toLowerCase().includes(query.toLowerCase()) ||
-          (p.category || '').toLowerCase().includes(query.toLowerCase()) ||
-          (p.seller || '').toLowerCase().includes(query.toLowerCase())
-        );
-        if (currentCategory !== 'all') {
-          filteredProducts = filteredProducts.filter(p => p.category === currentCategory);
-        }
-        document.getElementById('activeFilters').classList.remove('hidden');
-        document.getElementById('filterText').textContent = `"${query}"`;
-      } else {
-        currentSearch = '';
-        filterByCategory(currentCategory);
-        document.getElementById('activeFilters').classList.add('hidden');
+    function handleSearchInput(val) { currentSearch = val.trim(); applyShoppingFilters(); }
+    function applyShoppingFilters() {
+      if (!catalogLoaded) return;
+      const min = Number(document.getElementById('minPriceFilter').value) || 0;
+      const maxRaw = document.getElementById('maxPriceFilter').value;
+      const max = maxRaw === '' ? Infinity : Number(maxRaw);
+      const query = currentSearch.toLowerCase();
+      filteredProducts = allProducts.filter(p =>
+        (currentCategory === 'all' || categoryKey(p.category) === categoryKey(currentCategory)) &&
+        (!currentSeller || p.sellerId === currentSeller) &&
+        (!query || [p.name,p.category,p.seller].some(value => String(value || '').toLowerCase().includes(query))) && p.price >= min && p.price <= max);
+      const sort = document.getElementById('sortSelect').value;
+      if (sort === 'price-low') filteredProducts.sort((a,b)=>a.price-b.price);
+      if (sort === 'price-high') filteredProducts.sort((a,b)=>b.price-a.price);
+      if (sort === 'name') filteredProducts.sort((a,b)=>a.name.localeCompare(b.name));
+      const url = new URL(location.href);
+      for (const [key,value] of Object.entries({search:currentSearch,category:currentCategory === 'all' ? '' : currentCategory,min:min || '',max:maxRaw,sort:sort === 'default' ? '' : sort})) {
+        if (value !== '') url.searchParams.set(key,value); else url.searchParams.delete(key);
       }
+      history.replaceState(null,'',url);
+      document.getElementById('activeFilters').classList.toggle('hidden',!query && currentCategory === 'all' && !min && !maxRaw);
+      const chips = document.getElementById('shoppingFilterChips'); chips.replaceChildren();
+      const addChip = (label,clear) => { const button=document.createElement('button'); button.type='button'; button.textContent=label+' ×'; button.setAttribute('aria-label','Remove filter: '+label); button.onclick=()=>{clear();applyShoppingFilters();}; chips.append(button); };
+      if(currentSearch) addChip(currentSearch,()=>{currentSearch='';['searchInputMobile','searchInputDesktop'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});});
+      if(currentCategory!=='all') addChip(currentCategory,()=>{currentCategory='all';document.querySelectorAll('.cat-pill').forEach(c=>c.classList.toggle('active',c.dataset.category==='all'));});
+      if(min) addChip('From TSh '+min.toLocaleString(),()=>document.getElementById('minPriceFilter').value='');
+      if(maxRaw) addChip('Up to TSh '+max.toLocaleString(),()=>document.getElementById('maxPriceFilter').value='');
       renderProducts(filteredProducts);
+    }
+
+    function categoryKey(value) {
+      const key = String(value || '').trim().toLowerCase();
+      return ({ grocery: 'groceries', vegs: 'vegetables', fruit: 'fruits' })[key] || key;
     }
 
     function normalizeProduct(d) {
       return {
         id: d.id,
+        unit: d.unit || d.unitLabel || d.unit_label || '',
+        originalPrice: Number(d.originalPrice || d.original_price || d.compareAtPrice || d.compare_at_price || 0),
+        stockQuantity: d.stockQuantity == null && d.stock_quantity == null && d.stock == null ? null : Number(d.stockQuantity ?? d.stock_quantity ?? d.stock),
         name: d.name || d.product_name || 'Unnamed Item',
         description: d.description || '',
         price: d.price || 0,
         imageUrl: d.imageUrl || d.image_url || d.image || '',
+        rating: Number(d.rating || d.averageRating || 0),
+        reviewCount: Number(d.reviewCount || d.review_count || 0),
         category: d.category || 'General',
         isAvailable: d.isAvailable !== false,
         sellerId: d.sellerId || d.seller_id || d.restaurantId || d.restaurant_id || '',
-        seller: d.seller || d.seller_name || d.restaurantName || d.restaurant_name || 'SmartSoko',
+        seller: d.seller || d.sellerName || d.seller_name || d.restaurantName || d.restaurant_name || 'SmartSoko',
       };
     }
 
     async function loadProducts() {
-      const svc = window.crossPlatformService;
-      const db = window.db;
-
       try {
-        const response = await fetch('/api/products?limit=100', { signal: AbortSignal.timeout(10000) });
-        const payload = await response.json();
-        if (!response.ok || !payload.success || !Array.isArray(payload.data)) throw new Error(payload.error || 'Catalog unavailable');
-        const items = payload.data;
+        if (!window.crossPlatformService || !window.crossPlatformService.isReady()) {
+          await new Promise(resolve => {
+            document.addEventListener('data-service-ready', resolve, { once: true });
+            setTimeout(resolve, 5000);
+          });
+        }
+        const svc = window.crossPlatformService;
+        if (!svc) throw new Error('Data service not available');
+        const items = await svc.list('products', { limit: 100 });
+        catalogLoaded = true;
 
         if (!items || items.length === 0) {
+          allProducts = [];
+          document.getElementById('emptyState').classList.add('hidden');
+          document.getElementById('resultsCount').textContent = '0 products found';
           document.getElementById('productsGrid').innerHTML = '<div class="col-span-full text-center py-12 text-gray-400"><span class="material-symbols-outlined text-5xl mb-2 block">inventory_2</span><p>No products available yet</p></div>';
           return;
         }
@@ -425,16 +440,21 @@
         allProducts = items.map(normalizeProduct);
         filteredProducts = [...allProducts];
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const cat = urlParams.get('category');
-        const search = urlParams.get('search');
-
-        if (cat) filterByCategory(cat);
-        else if (search) {
-          document.getElementById('searchInputMobile').value = search;
-          syncSearch(search);
-        } else renderProducts(allProducts);
+        const params = new URLSearchParams(location.search);
+        currentCategory = params.get('category') || 'all';
+        currentSearch = params.get('search') || params.get('seller') || '';
+        ['Mobile','Desktop'].forEach(size => { const input=document.getElementById('searchInput'+size); if(input){ input.value=currentSearch; input.setAttribute('list','catalogueSuggestions'); }});
+        document.getElementById('minPriceFilter').value=params.get('min') || '';
+        document.getElementById('maxPriceFilter').value=params.get('max') || '';
+        document.getElementById('sortSelect').value=params.get('sort') || 'default';
+        let suggestions=document.getElementById('catalogueSuggestions');
+        if(!suggestions){ suggestions=document.createElement('datalist'); suggestions.id='catalogueSuggestions'; document.body.append(suggestions); }
+        suggestions.replaceChildren(...[...new Set(allProducts.map(p=>p.name))].slice(0,100).map(name=>{ const option=document.createElement('option'); option.value=name; return option; }));
+        filterByCategory(currentCategory);
       } catch (err) {
+        catalogLoaded = false;
+        document.getElementById('emptyState').classList.add('hidden');
+        document.getElementById('resultsCount').textContent = 'Products unavailable';
         console.error('Load error:', err);
         document.getElementById('productsGrid').innerHTML = `<div class="col-span-full text-center py-8"><p class="text-red-500 mb-2">Failed to load products</p><button onclick="loadProducts()" class="mt-3 px-5 py-2 gradient-bg text-white rounded-xl text-sm font-semibold">Retry</button></div>`;
       }
@@ -457,83 +477,21 @@
       }
       empty.classList.add('hidden');
 
-      const ratingStars = () => {
-        const full = Math.floor(Math.random() * 2) + 4;
-        let html = '';
-        for (let i = 0; i < 5; i++) {
-          html += `<span class="material-symbols-outlined text-[13px] ${i < full ? 'text-amber-400' : 'text-gray-200'}" style="font-variation-settings:'FILL' ${i < full ? 1 : 0};">star</span>`;
-        }
-        return html;
-      };
-
-      container.innerHTML = products.map((p, idx) => {
-        const reviews = Math.floor(Math.random() * 300) + 5;
-        return `
-        <a href="/product?id=${p.id}" class="product-card no-underline" style="animation: fadeIn 0.4s cubic-bezier(0.23,1,0.32,1) ${Math.min(idx, 12) * 0.04}s backwards;">
-          <div class="relative aspect-square bg-gray-50 overflow-hidden">
-            <img src="${p.imageUrl || '/images/product-placeholder.svg'}" alt="${p.name}" loading="lazy" decoding="async"
-              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              onerror="this.onerror=null; this.src='/images/product-placeholder.svg';">
-            <button onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('${p.id}', this)"
-              class="absolute top-2.5 right-2.5 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-sm active:scale-90 transition-transform">
-              <span class="material-symbols-outlined text-base text-gray-400" style="font-variation-settings:'FILL' 0;">favorite</span>
-            </button>
-          </div>
-          <div class="p-3 space-y-1.5 flex-1 flex flex-col">
-            <div class="flex items-center gap-1">
-              <span class="material-symbols-outlined text-green-600 text-[13px]" style="font-variation-settings:'FILL' 1;">verified</span>
-              <span class="text-[11px] text-green-600 font-semibold">Verified</span>
-            </div>
-            <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 leading-tight">${p.name}</h3>
-            <div class="flex items-center gap-1">${ratingStars()}<span class="text-[11px] text-gray-400 ml-0.5">(${reviews})</span></div>
-            <div class="flex items-center justify-between mt-auto pt-1">
-              <span class="text-base font-extrabold text-green-800">TSh ${(p.price || 0).toLocaleString()}</span>
-              <button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}')"
-                class="w-8 h-8 gradient-bg text-white rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all hover:bg-green-800">
-                <span class="material-symbols-outlined text-base">add</span>
-              </button>
-            </div>
-          </div>
-        </a>`;
-      }).join('');
+      ShoppingUI.cards(container, products);
     }
 
     function filterByCategory(category) {
       currentCategory = category;
-      document.querySelectorAll('.cat-pill').forEach(c => {
-        c.classList.toggle('active', c.dataset.category === category);
-      });
-
-      if (category === 'all') {
-        filteredProducts = currentSearch
-          ? allProducts.filter(p => p.name.toLowerCase().includes(currentSearch.toLowerCase()))
-          : [...allProducts];
-      } else {
-        filteredProducts = allProducts.filter(p => p.category === category);
-        if (currentSearch) {
-          filteredProducts = filteredProducts.filter(p => p.name.toLowerCase().includes(currentSearch.toLowerCase()));
-        }
-      }
-      renderProducts(filteredProducts);
+      document.querySelectorAll('.cat-pill').forEach(c => c.classList.toggle('active', c.dataset.category === category));
+      applyShoppingFilters();
     }
-
-    function sortProducts() {
-      const v = document.getElementById('sortSelect').value;
-      if (v === 'price-low') filteredProducts.sort((a, b) => a.price - b.price);
-      else if (v === 'price-high') filteredProducts.sort((a, b) => b.price - a.price);
-      else if (v === 'name') filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
-      renderProducts(filteredProducts);
-    }
-
+    function sortProducts() { applyShoppingFilters(); }
     function clearFilter() {
-      document.getElementById('searchInputMobile').value = '';
-      if (document.getElementById('searchInputDesktop')) document.getElementById('searchInputDesktop').value = '';
-      document.getElementById('activeFilters').classList.add('hidden');
-      currentSearch = '';
-      currentCategory = 'all';
-      document.querySelectorAll('.cat-pill').forEach(c => c.classList.toggle('active', c.dataset.category === 'all'));
-      filteredProducts = [...allProducts];
-      renderProducts(filteredProducts);
+      currentSearch = ''; currentCategory = 'all'; currentSeller = '';
+      const cleanUrl = new URL(location.href); cleanUrl.searchParams.delete('sellerId'); history.replaceState(null, '', cleanUrl);
+      ['searchInputMobile','searchInputDesktop','minPriceFilter','maxPriceFilter'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+      document.getElementById('sortSelect').value='default';
+      filterByCategory('all');
     }
 
     function toggleWishlist(id, btn) {
@@ -548,11 +506,14 @@
       const product = allProducts.find(p => p.id === productId);
       if (!product) return;
       const existing = cart.find(i => i.id === productId);
+      if (Number.isFinite(product.stockQuantity) && product.stockQuantity >= 0 && (existing?.quantity || 0) >= product.stockQuantity) {
+        ShoppingUI.feedback(product, 'Only '+product.stockQuantity+' available. Review your basket quantity.'); return;
+      }
       if (existing) existing.quantity++;
       else cart.push({ ...product, quantity: 1 });
       saveCart();
       updateCartUI();
-      showToast(`${product.name} added to cart`);
+      ShoppingUI.feedback(product);
     }
 
     function saveCart() {
@@ -584,7 +545,13 @@
       loadProducts();
     }
 
-    tryLoadProducts();
+    if (window.crossPlatformService && window.crossPlatformService.isReady()) {
+      tryLoadProducts();
+    } else {
+      document.addEventListener('data-service-ready', () => {
+        tryLoadProducts();
+      }, { once: true });
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof SmartNav !== 'undefined' && typeof SmartNav.initPageTransition === 'function') SmartNav.initPageTransition();

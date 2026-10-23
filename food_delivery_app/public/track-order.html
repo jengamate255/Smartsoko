@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html class="light" lang="en">
 <head>
+  <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>SmartSoko - Track Order</title>
@@ -82,8 +83,12 @@
     .os-focus-ring:focus-visible { outline: 2px solid var(--os-primary); outline-offset: 2px; }
     .os-transition { transition: all 0.2s ease; }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/stitch-site.css?v=5">
+  <script src="js/stitch-site.js?v=2" defer></script>
+  <link rel="stylesheet" href="css/site-uniform.css?v=1">
 </head>
-<body class="bg-[var(--os-bg)] text-[var(--os-text)] min-h-screen pt-20 animate-premium">
+<body class="ss-uniform stitch-site ss-commerce ss-track bg-[var(--os-bg)] text-[var(--os-text)] min-h-screen pt-20 animate-premium" data-stitch-page="track-order">
 
   <!-- Top Header -->
   <header class="os-section-card fixed top-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-sm flex justify-between items-center px-4 md:px-12 h-16">
@@ -427,20 +432,20 @@
     async function loadOrderDetails() {
       try {
         if (!orderId || orderId === 'demo-order') throw new Error('Choose an order from My Orders to see delivery updates.');
-        const headers = {};
-        const user = window.auth?.currentUser;
-        if (user) headers.Authorization = 'Bearer ' + await user.getIdToken();
-        const keys = JSON.parse(localStorage.getItem('smartsoko_order_access') || '{}');
-        if (keys[orderId]) headers['X-Order-Access-Token'] = keys[orderId];
-        const response = await fetch('/api/orders/' + encodeURIComponent(orderId), { headers, cache: 'no-store', signal: AbortSignal.timeout(15000) });
-        const payload = await response.json();
-        if (!response.ok || !payload.success) throw new Error(payload.error || 'Unable to load this order');
+        const svc = window.crossPlatformService;
+        if (!svc || !svc.isReady()) {
+          await new Promise(resolve => {
+            document.addEventListener('data-service-ready', resolve, { once: true });
+            setTimeout(resolve, 5000);
+          });
+        }
+        const data = await svc.get('orders', orderId);
+        if (!data) throw new Error('Order not found');
         if (window.trackingTemplate) {
           document.querySelector('main').innerHTML = window.trackingTemplate; window.trackingTemplate = null;
           if (map) { map.remove(); map = null; }
           initMap();
         }
-        const data = payload.order;
         orderData = { ...data,
           customerName: data.customerName || data.customer_name,
           customerPhone: data.customerPhone || data.customer_phone,
@@ -470,7 +475,6 @@
 
         updateOrderDisplay();
         setupRealtimeTracking();
-        // Order status is fetched through the ownership-checked API.
         if (!window.orderStatusPoll) window.orderStatusPoll = setInterval(loadOrderDetails, 15000);
       } catch (error) {
         console.error('Error loading order:', error);

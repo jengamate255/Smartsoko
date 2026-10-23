@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html class="light" lang="en">
 <head>
+  <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>SmartSoko - Cart</title>
@@ -49,8 +50,12 @@
     }
   </style>
   <script src="js/toast.js?v=1" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/stitch-site.css?v=5">
+  <script src="js/stitch-site.js?v=2" defer></script>
+  <link rel="stylesheet" href="css/site-uniform.css?v=1">
 </head>
-<body class="bg-[#F8FAF6] text-on-background min-h-screen pb-24 md:pb-0">
+<body class="ss-uniform stitch-site ss-commerce ss-cart bg-[#F8FAF6] text-on-background min-h-screen pb-24 md:pb-0" data-stitch-page="cart">
 
   <!-- Header -->
   <header class="bg-white/80 backdrop-blur-xl fixed top-0 w-full z-50 shadow-sm flex justify-between items-center px-4 md:px-12 h-16">
@@ -106,7 +111,7 @@
           <div class="flex-1">
             <div class="flex justify-between items-center">
               <span class="font-semibold text-green-800">Delivery Address</span>
-              <button onclick="window.location.href='/profile?tab=addresses'" class="text-green-700 text-sm font-semibold hover:underline">Change</button>
+              <button onclick="window.location.href='/checkout?edit=address'" class="text-green-700 text-sm font-semibold hover:underline">Change</button>
             </div>
             <p id="deliveryAddress" class="text-gray-500 text-sm mt-1 leading-relaxed">Set delivery address</p>
           </div>
@@ -303,14 +308,13 @@
 
     async function applyServerConfig() {
       try {
-        const res = await fetch('/api/config', { cache: 'no-store' });
-        if (!res.ok) return;
-        const cfg = await res.json();
-        const pricing = cfg && cfg.pricing;
-        if (!pricing) return;
-        if (pricing.deliveryFee != null) document.body.dataset.deliveryFee = pricing.deliveryFee;
-        if (pricing.taxRate != null) document.body.dataset.taxRate = pricing.taxRate;
-        if (pricing.currency != null) document.body.dataset.currency = pricing.currency;
+        const svc = window.crossPlatformService;
+        if (!svc || !svc.isReady()) return;
+        const config = await svc.get('appConfig', 'pricing');
+        if (!config) return;
+        if (config.deliveryFee != null) document.body.dataset.deliveryFee = config.deliveryFee;
+        if (config.taxRate != null) document.body.dataset.taxRate = config.taxRate;
+        if (config.currency != null) document.body.dataset.currency = config.currency;
       } catch (e) {
         /* fall back to defaults in getConfig() */
       }
@@ -389,7 +393,7 @@
         else if (typeof SmartNav !== 'undefined' && SmartNav.showToast) SmartNav.showToast('Your cart is empty', 'error');
         return;
       }
-      window.location.href = 'checkout.html';
+      window.location.href = '/checkout';
     }
 
     // Initialize

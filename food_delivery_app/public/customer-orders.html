@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>My Orders · SmartSoko</title><link rel="icon" href="/favicon.svg">
   <style>
@@ -12,8 +13,12 @@
     .state,article{background:white;border:1px solid var(--line);border-radius:20px;padding:28px;margin:0 0 16px}.state{text-align:center;padding:48px 24px}.button,button{display:inline-block;background:var(--green);color:white;padding:12px 22px;border:0;border-radius:999px;font:inherit;text-decoration:none;cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid #d3a044;outline-offset:4px}
     .row{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}h2{font-size:18px;margin:0}.status{font-size:13px;background:#e9f3eb;border-radius:999px;padding:6px 12px;text-transform:capitalize}.total{font-size:20px;font-weight:700}time{font-size:14px;color:#587061}ul{padding-left:20px;margin:22px 0;color:#405a49}article footer{border-top:1px solid var(--line);padding-top:18px}article a{font-size:14px;font-weight:700}.small{font-size:13px}@media(max-width:500px){main{margin-top:32px}article{padding:20px}nav{padding:16px 20px}}
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/stitch-site.css?v=5">
+  <script src="js/stitch-site.js?v=2" defer></script>
+  <link rel="stylesheet" href="css/site-uniform.css?v=1">
 </head>
-<body>
+<body class="ss-uniform stitch-site ss-commerce ss-orders" data-stitch-page="customer-orders">
   <header><nav aria-label="Main"><a href="/home">SmartSoko</a><a href="/discovery">Keep shopping</a><a href="/cart">Cart</a></nav></header>
   <main><div class="intro"><div class="eyebrow">Your marketplace</div><h1>My orders</h1><p>Follow your deliveries and revisit your recent purchases.</p></div>
     <section id="orderHistory" aria-label="Order history" aria-live="polite"><div class="state"><h2>Your orders, in one place.</h2><p>Sign in to see your purchases and delivery updates.</p><a class="button" href="/login?redirect=%2Fcustomer-orders">Sign in</a></div></section>
@@ -25,17 +30,25 @@
       if (!user) return;
       historyContainer.replaceChildren(orderNode('p', 'Loading your orders…'));
       try {
-        const token = await user.getIdToken();
-        const response = await fetch('/api/orders', { headers: { Authorization: 'Bearer ' + token }, cache: 'no-store', signal: AbortSignal.timeout(15000) });
-        const data = await response.json();
-        if (!response.ok || !data.success || !Array.isArray(data.orders)) throw new Error(data.error || 'Unable to load your orders');
+        const svc = window.crossPlatformService;
+        if (!svc || !svc.isReady()) {
+          await new Promise(resolve => {
+            document.addEventListener('data-service-ready', resolve, { once: true });
+            setTimeout(resolve, 5000);
+          });
+        }
+        const orders = await svc.list('orders', {
+          where: [['customerId', '==', user.uid]],
+          orderBy: { field: 'createdAt', direction: 'desc' },
+          limit: 100
+        });
         historyContainer.replaceChildren();
-        if (!data.orders.length) {
+        if (!orders || !orders.length) {
           const state = orderNode('div', '', 'state'); state.append(orderNode('h2', 'Your first order starts here.'), orderNode('p', 'Explore local shops and find something fresh.'));
           const link = orderNode('a', 'Explore the marketplace', 'button'); link.href = '/discovery'; state.append(link); historyContainer.append(state); return;
         }
-        const orders = data.orders.sort((a,b) => Date.parse(b.createdAt || b.created_at || 0) - Date.parse(a.createdAt || a.created_at || 0));
-        for (const order of orders) {
+        const sortedOrders = orders.sort((a,b) => Date.parse(b.createdAt || b.created_at || 0) - Date.parse(a.createdAt || a.created_at || 0));
+        for (const order of sortedOrders) {
           const card = document.createElement('article'), top = orderNode('div', '', 'row');
           top.append(orderNode('h2', 'Order #' + String(order.id).slice(-8)), orderNode('span', String(order.status || 'pending').replaceAll('_', ' '), 'status'));
           const date = new Date(order.createdAt || order.created_at); const time = orderNode('time', isNaN(date) ? 'Order received' : date.toLocaleDateString(undefined, {day:'numeric',month:'long',year:'numeric'}));

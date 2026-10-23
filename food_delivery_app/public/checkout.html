@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html class="light" lang="en">
 <head>
+  <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>SmartSoko - Checkout</title>
@@ -309,8 +310,13 @@
     .os-transition { transition: all 0.2s ease; }
     .os-transition-slow { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/stitch-site.css?v=5">
+  <script src="js/stitch-site.js?v=2" defer></script>
+  <link rel="stylesheet" href="css/site-uniform.css?v=1">
+  <link rel="stylesheet" href="css/shopping-experience.css?v=1">
 </head>
-<body class="font-body-md text-on-background bg-[#F8FAF6] min-h-screen">
+<body class="ss-uniform stitch-site ss-commerce ss-checkout font-body-md text-on-background bg-[#F8FAF6] min-h-screen" data-stitch-page="checkout">
 
   <!-- Top Header -->
   <header class="os-section-card sticky top-0 z-40 bg-surface-container-lowest">
@@ -348,6 +354,12 @@
 
     <!-- Checkout Content -->
     <div id="checkoutContent" class="hidden">
+      <nav class="checkout-guide" aria-label="Checkout sections">
+        <button type="button" onclick="editAddress()">1 · Delivery details</button>
+        <a href="#paymentMethods">2 · Payment method</a>
+        <a href="#checkoutSummary">3 · Review your order</a>
+      </nav>
+      <p id="checkoutNotice" role="alert" class="hidden shopping-checkout-notice" tabindex="-1"></p>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Left Column: Address + Items -->
         <div class="lg:col-span-2 space-y-4">
@@ -355,10 +367,10 @@
           <div id="locationBanner" class="os-section-card p-4 bg-primary-container\/30 border-primary">
             <div class="flex items-center gap-3">
               <div id="locationIcon" class="os-icon-circle-md bg-primary-container\/30 flex items-center justify-center">
-                <span class="material-symbols-outlined text-primary animate-spin">my_location</span>
+                <span class="material-symbols-outlined text-primary">my_location</span>
               </div>
               <div class="flex-1">
-                <h3 id="locationStatus" class="font-semibold text-primary text-sm">Detecting your location...</h3>
+                <h3 id="locationStatus" class="font-semibold text-primary text-sm">Choose your delivery location</h3>
                 <p id="locationSubtext" class="text-xs text-primary/70 mt-0.5">We need your location for delivery</p>
               </div>
               <button id="locationActionBtn" onclick="detectLocation()" class="os-btn-ghost text-primary text-sm font-medium">Try Again</button>
@@ -433,7 +445,7 @@
           <!-- Cart Items -->
           <div class="os-section-card overflow-hidden">
             <div class="p-5 border-b os-border">
-              <h3 class="font-semibold text-on-background text-sm">Order Items</h3>
+              <h3 class="font-semibold text-on-background text-sm">Order items <a class="shopping-edit-basket" href="/cart">Edit basket →</a></h3>
             </div>
             <div id="checkoutItems" class="divide-y os-divider">
               <!-- Skeleton loaders -->
@@ -458,7 +470,7 @@
 
         <!-- Right Column: Order Summary -->
         <div class="lg:col-span-1">
-          <div class="os-section-card p-5 sticky top-20">
+          <div id="checkoutSummary" class="os-section-card p-5 sticky top-20">
             <h3 class="font-semibold text-lg font-bold text-on-background mb-4">Order Summary</h3>
             
             <div class="space-y-3 mb-4">
@@ -592,14 +604,13 @@
 
     async function applyServerConfig() {
       try {
-        const res = await fetch('/api/config', { cache: 'no-store' });
-        if (!res.ok) return;
-        const cfg = await res.json();
-        const pricing = cfg && cfg.pricing;
-        if (!pricing) return;
-        if (pricing.deliveryFee != null) document.body.dataset.deliveryFee = pricing.deliveryFee;
-        if (pricing.taxRate != null) document.body.dataset.taxRate = pricing.taxRate;
-        if (pricing.currency != null) document.body.dataset.currency = pricing.currency;
+        const svc = window.crossPlatformService;
+        if (!svc || !svc.isReady()) return;
+        const config = await svc.get('appConfig', 'pricing');
+        if (!config) return;
+        if (config.deliveryFee != null) document.body.dataset.deliveryFee = config.deliveryFee;
+        if (config.taxRate != null) document.body.dataset.taxRate = config.taxRate;
+        if (config.currency != null) document.body.dataset.currency = config.currency;
       } catch (e) {
         /* fall back to defaults in getConfig() */
       }
@@ -716,7 +727,15 @@
       renderItems();
       updateTotals();
       loadAddress();
-      detectLocation();
+      if (new URLSearchParams(location.search).get('edit') === 'address') {
+        history.replaceState(null, '', location.pathname);
+        editAddress();
+      } else if (!address || address === 'No address set') detectLocation();
+      else {
+        document.getElementById('locationStatus').textContent = 'Delivery address saved';
+        document.getElementById('locationSubtext').textContent = 'Your saved address will be used for delivery.';
+        document.getElementById('locationActionBtn').textContent = 'Use my location';
+      }
 
       if (typeof SmartNav !== 'undefined' && SmartNav.updateCartBadge) SmartNav.updateCartBadge();
     }
@@ -1019,7 +1038,6 @@
 
       closeAddressModal();
       loadCheckout();
-      detectLocation();
       showNotification('Address saved!');
     }
 
@@ -1034,7 +1052,7 @@
       const addressText = localStorage.getItem('smartsoko_address') || localStorage.getItem('smartsoko_user_address');
       if (!addressText || addressText === 'No address set') {
         showNotification('Please provide a delivery address');
-        detectLocation();
+        editAddress();
         return;
       }
 
@@ -1393,6 +1411,9 @@
     };
 
     function showNotification(message, type = 'success') {
+      const notice = document.getElementById('checkoutNotice');
+      if (notice) { notice.textContent = message; notice.classList.remove('hidden'); }
+
       const el = document.createElement('div');
       const isError = type === 'error';
       el.className = 'sk-toast ' + (isError ? 'sk-toast-error' : 'sk-toast-success');

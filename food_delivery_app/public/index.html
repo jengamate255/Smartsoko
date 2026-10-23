@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html class="light" lang="en">
 <head>
+  <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>SmartSoko - Your Local Marketplace | Shop Food, Groceries & More</title>
@@ -282,15 +283,21 @@
       .lg\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
     }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;750;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/storefront-stitch.css?v=3">
+  <link rel="stylesheet" href="css/site-uniform.css?v=1">
+  <link rel="stylesheet" href="css/shopping-experience.css?v=1">
+  <script src="js/shopping-experience.js?v=1" defer></script>
 </head>
-<body class="text-on-background min-h-screen pb-24 md:pb-0" style="background-color: var(--sk-canvas);">
+<body class="ss-uniform stitch-storefront text-on-background min-h-screen pb-24 md:pb-0" style="background-color: var(--sk-canvas);">
+  <a href="#storefrontMain" class="skip-storefront">Skip to shopping</a>
   <h1 class="sr-only" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">SmartSoko — Your Local Marketplace for Fresh Food, Groceries &amp; More</h1>
 
   <!-- Header -->
   <header class="top-header">
     <div class="flex items-center justify-between px-4 md:px-12 h-16 max-w-[1280px] mx-auto">
       <div class="flex items-center gap-3">
-        <a href="/home" class="flex items-center gap-2 text-white no-underline">
+        <a href="/" class="flex items-center gap-2 text-white no-underline" aria-label="SmartSoko home">
           <div class="w-9 h-9 bg-white/15 rounded-lg flex items-center justify-center">
             <span class="material-symbols-outlined text-white">shopping_basket</span>
           </div>
@@ -322,7 +329,7 @@
         <a href="/merchant" class="sm:hidden p-2 bg-orange-500 text-white rounded-full active:scale-90 transition-transform" aria-label="Sell on SmartSoko" title="Open Seller Dashboard">
           <span class="material-symbols-outlined">storefront</span>
         </a>
-        <a href="/cart" class="relative p-2 text-white/80 hover:text-white rounded-full">
+        <a href="/cart" class="relative p-2 text-white/80 hover:text-white rounded-full" aria-label="Your shopping cart">
           <span class="material-symbols-outlined">shopping_cart</span>
           <span id="headerCartBadge" style="background: var(--sk-amber);" class="absolute -top-0.5 -right-0.5 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
         </a>
@@ -330,7 +337,15 @@
     </div>
   </header>
 
-  <main class="max-w-[1280px] mx-auto px-4 md:px-12 pt-5 pb-24">
+  <nav class="storefront-nav" aria-label="Shop departments">
+    <a href="/discovery"><span class="material-symbols-outlined" aria-hidden="true">grid_view</span>All departments</a>
+    <a href="/discovery?category=vegetables">Fresh produce</a>
+    <a href="/discovery?category=food">Food &amp; restaurants</a>
+    <a href="/discovery?category=groceries">Groceries</a>
+    <a href="/discovery?category=bakery">Bakery</a>
+    <span class="storefront-local">Your neighbourhood, delivered.</span>
+  </nav>
+  <main id="storefrontMain" tabindex="-1" class="max-w-[1280px] mx-auto px-4 md:px-12 pt-5 pb-24">
 
     <!-- Mobile Search -->
     <div class="md:hidden mb-4">
@@ -346,17 +361,17 @@
     <section class="hero-carousel mb-6">
       <div class="hero-slide active">
         <div class="hero-content relative">
-          <span style="background: var(--sk-amber);" class="inline-block text-white px-3 py-1 rounded-full text-xs font-bold mb-2 tracking-wide">Flash Sale · up to 40% off</span>
-          <h2 class="text-3xl md:text-5xl font-extrabold mb-2 leading-tight">Fresh Groceries<br>Delivered Fast</h2>
-          <p class="text-lg mb-3 max-w-md" style="color: var(--sk-muted);">Straight from local farms &amp; kitchens across Dar es Salaam</p>
-          <div class="flex items-center gap-3 mb-4 text-xs font-semibold" style="color: var(--sk-charcoal);">
-            <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm" style="color: var(--sk-amber);">star</span> 4.8 rating</span>
+          <span style="background: #e2ecd6; color: #14532d;" class="inline-block px-3 py-1 rounded-full text-xs font-bold mb-2 tracking-wide">FRESH FINDS. LOCAL FAVOURITES.</span>
+          <h2 class="text-3xl md:text-5xl font-extrabold mb-2 leading-tight">A little local.<br>A lot to love.</h2>
+          <p class="text-lg mb-3 max-w-md" style="color: var(--sk-muted);">Fresh groceries and good food from your neighbourhood, brought to your door.</p>
+          <div class="trust-row flex items-center gap-3 mb-4 text-xs font-semibold" style="color: var(--sk-charcoal);">
+            <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm" style="color: var(--sk-green);">eco</span> Fresh essentials</span>
             <span aria-hidden="true">·</span>
-            <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm text-green-700">storefront</span> 1,200+ vendors</span>
+            <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm text-green-700">storefront</span> Local sellers</span>
             <span aria-hidden="true">·</span>
-            <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm text-green-700">bolt</span> 30-min delivery</span>
+            <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm text-green-700">local_shipping</span> To your door</span>
           </div>
-          <a href="/discovery" style="background: var(--sk-green); color:#fff;" class="inline-block px-8 py-3.5 rounded-full font-bold text-sm hover:opacity-90 transition shadow-lg no-underline">Shop Now</a>
+          <a href="/discovery" style="background: var(--sk-green); color:#fff;" class="inline-block px-8 py-3.5 rounded-full font-bold text-sm hover:opacity-90 transition shadow-lg no-underline">Explore the market →</a>
         </div>
       </div>
       <div class="hero-slide">
@@ -376,20 +391,17 @@
         </div>
       </div>
       <div class="carousel-dots">
-        <span class="dot active" onclick="goToSlide(0)"></span>
-        <span class="dot" onclick="goToSlide(1)"></span>
-        <span class="dot" onclick="goToSlide(2)"></span>
+        <button type="button" class="dot active" onclick="goToSlide(0)" aria-label="Show fresh groceries" aria-pressed="true"></button>
+        <button type="button" class="dot" onclick="goToSlide(1)" aria-label="Show local restaurants" aria-pressed="false"></button>
+        <button type="button" class="dot" onclick="goToSlide(2)" aria-label="Show dairy products" aria-pressed="false"></button>
       </div>
     </section>
 
-    <!-- Sell on SmartSoko: slim footer strip -->
-    <section class="mb-8">
-      <a href="/merchant" class="flex items-center justify-center gap-2 rounded-full border border-green-800/20 bg-white px-6 py-3 text-sm font-semibold no-underline transition hover:shadow-md" style="color: var(--sk-green);">
-        <span class="material-symbols-outlined text-lg">storefront</span>
-        Sell on SmartSoko <span aria-hidden="true">→</span>
-        <span class="text-xs font-normal" style="color: var(--sk-muted);">Free to join · start selling in 5 minutes</span>
-      </a>
-    </section>
+    <div class="storefront-assurances" aria-label="Shopping with SmartSoko">
+      <div><span class="material-symbols-outlined" aria-hidden="true">eco</span><div><strong>Fresh, everyday essentials</strong><small>Good food starts close to home.</small></div></div>
+      <div><span class="material-symbols-outlined" aria-hidden="true">storefront</span><div><strong>Support your local sellers</strong><small>Discover shops in your community.</small></div></div>
+      <div><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span><div><strong>From market to doorstep</strong><small>More time for the things you love.</small></div></div>
+    </div>
 
     <!-- Quick Categories -->
     <section class="mb-6">
@@ -450,18 +462,11 @@
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-2xl text-red-600">flash_on</span>
           <div>
-            <h2 class="text-lg font-bold text-gray-800">Flash Deals</h2>
-            <p class="text-xs text-gray-600">Limited time offers</p>
+            <h2 id="dealsHeading" class="text-lg font-bold text-gray-800">Fresh finds from your local market</h2>
+            <p id="dealsSubtitle" class="text-xs text-gray-600">A few good things to add to your basket</p>
           </div>
         </div>
-        <div class="countdown">
-          <span class="text-xs font-medium text-gray-600 mr-1">Ends in:</span>
-          <div class="countdown-item" id="hours">04</div>
-          <span class="text-lg font-bold">:</span>
-          <div class="countdown-item" id="minutes">32</div>
-          <span class="text-lg font-bold">:</span>
-          <div class="countdown-item" id="seconds">15</div>
-        </div>
+        <a class="shop-browse" href="/discovery">Explore the market →</a>
       </div>
       <div id="flashDealsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         <div class="bg-white rounded-xl overflow-hidden shadow-sm"><div class="aspect-square skeleton"></div><div class="p-2 skeleton-text"></div><div class="p-2 skeleton-text-sm"></div><div class="p-2 skeleton" style="height:16px;width:30%"></div></div>
@@ -585,15 +590,9 @@
           <p class="text-xs text-gray-500">Real-time tracking</p>
         </div>
       </a>
-      <a href="/merchant" class="quick-link no-underline" style="background: linear-gradient(135deg, #fff7ed, #ffedd5); border-color: #fed7aa;">
-        <div class="quick-icon bg-gradient-to-br from-orange-500 to-amber-600 shadow-md">
-          <span class="material-symbols-outlined text-xl text-white" style="font-variation-settings:'FILL' 1;">storefront</span>
-        </div>
-        <div>
-          <h3 class="font-bold text-orange-700 text-sm">Sell on SmartSoko</h3>
-          <p class="text-xs text-gray-500">Open seller dashboard</p>
-        </div>
-        <span class="material-symbols-outlined ml-auto text-orange-500" style="font-variation-settings:'FILL' 1;">arrow_forward</span>
+      <a href="#customer-service" class="quick-link sf-service-shortcut no-underline">
+        <div class="quick-icon"><span class="material-symbols-outlined text-xl" aria-hidden="true">support_agent</span></div>
+        <div><h3 class="font-bold text-sm">Customer service</h3><p class="text-xs">We’re here to help</p></div>
       </a>
     </section>
   </main>
@@ -642,22 +641,14 @@
       </div>
       <span>Cart</span>
     </a>
-    <a href="/merchant" class="nav-item">
-      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">storefront</span>
-      <span>Sell</span>
-    </a>
+    <a href="#customer-service" class="nav-item"><span class="material-symbols-outlined" aria-hidden="true">support_agent</span><span>Support</span></a>
     <a href="/profile" class="nav-item">
       <span class="material-symbols-outlined">person</span>
       <span>Profile</span>
     </a>
   </nav>
 
-  <!-- Desktop FAB -->
-  <button onclick="window.location.href='/chat'" class="hidden md:flex fixed bottom-8 right-8 bg-green-700 text-white shadow-2xl px-5 py-3 rounded-full items-center gap-2 hover:scale-105 active:scale-95 transition-all z-40 font-semibold text-sm">
-    <span class="material-symbols-outlined">message</span> Chat with Sellers
-  </button>
-
-  <script>
+<script>
     let cart = window.CartService ? CartService.getCart() : (JSON.parse(localStorage.getItem('smartsoko_cart')) || []);
     let products = [];
 
@@ -671,7 +662,14 @@
       if (!query) return;
       window.location.href = '/discovery?search=' + encodeURIComponent(query);
     }
-    tryLoadProducts();
+    
+    if (window.crossPlatformService && window.crossPlatformService.isReady()) {
+      tryLoadProducts();
+    } else {
+      document.addEventListener('data-service-ready', () => {
+        tryLoadProducts();
+      }, { once: true });
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       ['searchInputMobile', 'searchInputDesktop'].forEach(id => {
@@ -685,108 +683,45 @@
     const totalSlides = 3;
     function goToSlide(index) {
       document.querySelectorAll('.hero-slide').forEach((s, i) => s.classList.toggle('active', i === index));
-      document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === index));
+      document.querySelectorAll('.dot').forEach((d, i) => {
+        d.classList.toggle('active', i === index);
+        d.setAttribute('aria-pressed', String(i === index));
+      });
       currentSlide = index;
     }
-    setInterval(() => goToSlide((currentSlide + 1) % totalSlides), 5000);
-
-    // Countdown Timer
-    function updateCountdown() {
-      const endOfDay = new Date();
-      endOfDay.setHours(23, 59, 59, 999);
-      const diff = endOfDay - new Date();
-      const h = String(Math.floor(diff / 3.6e6)).padStart(2, '0');
-      const m = String(Math.floor((diff % 3.6e6) / 6e4)).padStart(2, '0');
-      const s = String(Math.floor((diff % 6e4) / 1000)).padStart(2, '0');
-      document.getElementById('hours').textContent = h;
-      document.getElementById('minutes').textContent = m;
-      document.getElementById('seconds').textContent = s;
-    }
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
-
-    // Render functions
-    function renderProducts(items, containerId) {
-      // Filter out unavailable products (isAvailable === false)
-      items = items.filter(p => p.isAvailable !== false);
-      
-      const container = document.getElementById(containerId);
-      if (items.length === 0) {
-        container.innerHTML = '<div class="col-span-full text-center py-8 text-gray-400">No products available</div>';
-        return;
-      }
-      const ratingHtml = () => {
-        const full = Math.floor(Math.random() * 2) + 4;
-        let html = '';
-        for (let i = 0; i < 5; i++) {
-          html += `<span class="material-symbols-outlined text-[12px] ${i < full ? 'text-amber-400' : 'text-gray-200'}" style="font-variation-settings:'FILL' ${i < full ? 1 : 0};">star</span>`;
+    // Keep manual controls available and avoid moving content during keyboard interaction.
+    const heroCarousel = document.querySelector('.hero-carousel');
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setInterval(() => {
+        if (!document.hidden && !heroCarousel.matches(':hover') && !heroCarousel.contains(document.activeElement)) {
+          goToSlide((currentSlide + 1) % totalSlides);
         }
-        return html;
-      };
-      container.innerHTML = items.map((p, idx) => {
-        const reviews = Math.floor(Math.random() * 500) + 50;
-        const originalPrice = Math.round((p.price || 0) * 1.2);
-        return `
-        <a href="/product?id=${p.id}" class="product-card no-underline" style="animation: fadeIn 0.4s cubic-bezier(0.23,1,0.32,1) ${Math.min(idx, 12) * 0.04}s backwards;">
-          <div class="relative aspect-square bg-gray-50 overflow-hidden">
-            <img src="${p.imageUrl || '/images/product-placeholder.svg'}" alt="${p.name}" loading="lazy" decoding="async"
-              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              onerror="this.onerror=null; this.src='/images/product-placeholder.svg';">
-            <button onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('${p.id}', this)"
-              class="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-sm active:scale-90 transition-transform">
-              <span class="material-symbols-outlined text-base text-gray-400" style="font-variation-settings:'FILL' 0;">favorite</span>
-            </button>
-          </div>
-          <div class="p-3 space-y-1.5 flex-1 flex flex-col">
-            <div class="flex items-center gap-1">
-              <span class="material-symbols-outlined text-green-600 text-[12px]" style="font-variation-settings:'FILL' 1;">verified</span>
-              <span class="text-[10px] text-green-600 font-semibold">Verified</span>
-            </div>
-            <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 leading-tight">${p.name}</h3>
-            <div class="flex items-center gap-1">${ratingHtml()}<span class="text-[10px] text-gray-400 ml-0.5">(${reviews})</span></div>
-            <div class="flex items-center justify-between mt-auto pt-1">
-              <span class="text-base font-extrabold text-green-800">TSh ${(p.price || 0).toLocaleString()}</span>
-              <button onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}')"
-                class="w-8 h-8 gradient-bg text-white rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all hover:bg-green-800">
-                <span class="material-symbols-outlined text-base">add</span>
-              </button>
-            </div>
-          </div>
-        </a>`;
-      }).join('');
-      checkPriceDrops(items);
+      }, 7000);
     }
 
+    // Cards display supplied catalogue values, without invented discounts or urgency.
+    function renderProducts(items, containerId) {
+      const list = items.filter(p => p.isAvailable !== false);
+      ShoppingUI.cards(document.getElementById(containerId), list);
+      if (!list.length) document.getElementById(containerId).textContent = 'No products available yet. Please check back soon.';
+    }
     function renderFlashDeals(items) {
-      const container = document.getElementById('flashDealsGrid');
-      if (!container || items.length === 0) return;
-      const discounts = [30, 40, 50, 25, 35, 45];
-      container.innerHTML = items.slice(0, 6).map((p, i) => {
-        const disc = discounts[i] || 30;
-        return `
-        <a href="/product?id=${p.id}" class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition cursor-pointer">
-          <div class="aspect-square bg-gray-50 relative overflow-hidden">
-            <img src="${p.imageUrl || '/images/product-placeholder.svg'}" alt="${p.name}"
-              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              onerror="this.onerror=null; this.src='/images/product-placeholder.svg';">
-            <span class="deal-badge absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 rounded-md">-${disc}%</span>
-            <span class="absolute bottom-2 right-2 deal-badge text-white text-[10px] font-bold px-2 py-0.5 rounded-full">HOT</span>
-          </div>
-          <div class="p-2">
-            <p class="text-sm font-bold text-gray-900">TSh ${(p.price || 0).toLocaleString()}</p>
-            <p class="text-xs text-gray-400 line-through">TSh ${Math.round((p.price || 0) * 1.3).toLocaleString()}</p>
-            <div class="mt-1.5 h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div class="h-full bg-red-500 rounded-full" style="width: ${Math.random() * 50 + 40}%"></div>
-            </div>
-            <p class="text-xs font-medium text-red-600 mt-1">${Math.floor(Math.random() * 20 + 5)} left</p>
-          </div>
-        </a>`;
-      }).join('');
+      const actualDeals = items.filter(p => p.originalPrice > p.price && p.price > 0);
+      const selection = (actualDeals.length ? actualDeals : items).slice(0, 4);
+      document.getElementById('dealsHeading').textContent = actualDeals.length ? 'Fresh finds. Better prices.' : 'Fresh finds from your local market';
+      document.getElementById('dealsSubtitle').textContent = actualDeals.length ? 'Savings on everyday favourites' : 'A few good things to add to your basket';
+      ShoppingUI.cards(document.getElementById('flashDealsGrid'), selection, true);
+      if (!selection.length) document.getElementById('flashDealsGrid').textContent = 'New products are on their way. Explore the marketplace.';
     }
 
     function normalizeProduct(item) {
       return {
         id: item.id,
+        originalPrice: Number(item.originalPrice || item.original_price || item.compareAtPrice || item.compare_at_price || 0),
+        unit: item.unit || item.unitLabel || item.unit_label || '',
+        rating: Number(item.rating || 0),
+        reviewCount: Number(item.reviewCount || item.review_count || 0),
+        stockQuantity: item.stockQuantity == null && item.stock_quantity == null && item.stock == null ? null : Number(item.stockQuantity ?? item.stock_quantity ?? item.stock),
         name: item.name || item.product_name || 'Unnamed Item',
         description: item.description || '',
         price: item.price || 0,
@@ -794,33 +729,34 @@
         category: item.category || 'General',
         isAvailable: item.isAvailable !== false,
         sellerId: item.sellerId || item.seller_id || item.restaurantId || item.restaurant_id || '',
-        seller: item.seller || item.seller_name || item.restaurantName || item.restaurant_name || 'SmartSoko'
+        seller: item.seller || item.sellerName || item.seller_name || item.restaurantName || item.restaurant_name || 'SmartSoko'
       };
     }
 
     async function loadProducts() {
-      const svc = window.crossPlatformService;
-      const db = window.db;
-
-
-
       try {
-        const response = await fetch('/api/products?limit=100', { signal: AbortSignal.timeout(10000) });
-        const payload = await response.json();
-        if (!response.ok || !payload.success || !Array.isArray(payload.data)) throw new Error(payload.error || 'Catalog unavailable');
-        const items = payload.data;
+        if (!window.crossPlatformService || !window.crossPlatformService.isReady()) {
+          await new Promise(resolve => {
+            document.addEventListener('data-service-ready', resolve, { once: true });
+            setTimeout(resolve, 5000);
+          });
+        }
+        const svc = window.crossPlatformService;
+        if (!svc) throw new Error('Data service not available');
+        const items = await svc.list('products', { limit: 100 });
 
         if (!items || items.length === 0) {
-          document.getElementById('popularProducts').innerHTML = '<div class="col-span-full text-center py-8 text-gray-400"><span class="material-symbols-outlined text-5xl mb-2 block">inventory_2</span><p>No products available yet</p></div>';
-          return;
+          renderProducts([], 'popularProducts'); renderProducts([], 'recommendedProducts'); renderFlashDeals([]); return;
         }
 
         products = items.map(normalizeProduct).filter(p => p.isAvailable !== false);
         renderProducts(products, 'popularProducts');
         renderProducts(products.length > 4 ? products.slice(4, 8) : [...products].reverse(), 'recommendedProducts');
-        renderFlashDeals(products.slice(0, 6));
+        renderFlashDeals(products);
       } catch (err) {
         console.error('Load error:', err);
+        document.getElementById('flashDealsGrid').textContent = 'Products could not load. Use Retry below to try again.';
+        document.getElementById('recommendedProducts').textContent = 'Products are temporarily unavailable.';
         document.getElementById('popularProducts').innerHTML = `<div class="col-span-full text-center py-8"><p class="text-red-500 mb-2">Failed to load products</p><button onclick="loadProducts()" class="mt-3 px-5 py-2 gradient-bg text-white rounded-xl text-sm font-semibold">Retry</button></div>`;
       }
     }
@@ -829,10 +765,13 @@
       const product = products.find(p => p.id === productId);
       if (!product) return;
       const existing = cart.find(i => i.id === productId);
+      if (Number.isFinite(product.stockQuantity) && product.stockQuantity >= 0 && (existing?.quantity || 0) >= product.stockQuantity) {
+        ShoppingUI.feedback(product, 'Only '+product.stockQuantity+' available. Review your basket quantity.'); return;
+      }
       if (existing) existing.quantity++; else cart.push({ ...product, quantity: 1 });
       saveCart();
       updateCartUI();
-      showToast(`${product.name} added to cart`);
+      ShoppingUI.feedback(product);
     }
 
     function saveCart() {
@@ -928,54 +867,49 @@
   </script>
 
   <!-- Footer -->
-  <footer class="bg-surface-container-lowest border-t border-outline-variant mt-auto">
-    <div class="max-w-[1280px] mx-auto px-4 md:px-12 py-8">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-6">
-        <div>
-          <h3 class="font-headline text-lg font-bold mb-3 flex items-center gap-2" style="color: var(--sk-green);">
-            <span class="material-symbols-outlined text-primary">shopping_basket</span>
-            SmartSoko
-          </h3>
-          <p class="text-body-sm text-on-surface-variant">Tanzania's premier marketplace for fresh food, groceries, and daily essentials.</p>
+  <footer class="storefront-footer" aria-label="SmartSoko information">
+    <div class="sf-footer-inner">
+      <div class="sf-footer-top">
+        <div class="sf-footer-brand">
+          <a href="/" class="sf-footer-logo"><span class="sf-footer-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 8h18l-2 12H5L3 8Z"/><path d="m8 8 4-6 4 6M9 12v4m6-4v4"/></svg></span>SmartSoko</a>
+          <p class="sf-footer-tagline">Good things. Closer to home.</p>
+          <p>Fresh food, daily essentials and the neighbourhood shops you love. Delivered across your community.</p>
+          <span class="sf-footer-local"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>Made for local life in Tanzania</span>
         </div>
-        <div>
-          <h4 class="font-semibold text-body-md mb-3">Quick Links</h4>
-          <ul class="space-y-2 text-body-sm text-on-surface-variant">
-            <li><a href="/home" class="hover:text-primary transition-colors">Home</a></li>
-            <li><a href="/discovery" class="hover:text-primary transition-colors">Discover</a></li>
-            <li><a href="/cart" class="hover:text-primary transition-colors inline-flex items-center min-h-[40px] px-2">Cart</a></li>
-            <li><a href="/customer" class="hover:text-primary transition-colors">My Account</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4 class="font-semibold text-body-md mb-3">Support</h4>
-          <ul class="space-y-2 text-body-sm text-on-surface-variant">
-            <li><a href="#" class="hover:text-primary transition-colors">Help Center</a></li>
-            <li><a href="#" class="hover:text-primary transition-colors">Contact Us</a></li>
-            <li><a href="#" class="hover:text-primary transition-colors">Track Order</a></li>
-            <li><a href="#" class="hover:text-primary transition-colors">FAQs</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4 class="font-semibold text-body-md mb-3">Connect</h4>
-          <div class="flex gap-4">
-            <a href="#" class="text-on-surface-variant hover:text-primary transition-colors" aria-label="Facebook">
-              <span class="material-symbols-outlined text-xl">facebook</span>
-            </a>
-            <a href="#" class="text-on-surface-variant hover:text-primary transition-colors" aria-label="Twitter">
-              <span class="material-symbols-outlined text-xl">alternate_email</span>
-            </a>
-            <a href="#" class="text-on-surface-variant hover:text-primary transition-colors" aria-label="Instagram">
-              <span class="material-symbols-outlined text-xl">camera</span>
-            </a>
-          </div>
-        </div>
+        <nav class="sf-footer-links" aria-label="Explore SmartSoko">
+          <h2>Explore</h2>
+          <a href="/discovery">Shop the marketplace</a>
+          <a href="/customer-orders">My orders</a>
+          <a href="/track-order">Track a delivery</a>
+          <a href="/profile">My account</a>
+        </nav>
+        <section class="sf-footer-support" id="customer-service" aria-labelledby="customerServiceTitle">
+          <button type="button" id="customerServiceMinimize" class="sf-support-close" aria-label="Minimize customer service"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+          <span class="sf-footer-eyebrow">A little help, from a real person</span>
+          <h2 id="customerServiceTitle">We’re here for you.</h2>
+          <p>Questions about an order or your account? Contact a SmartSoko customer service associate.</p>
+          <a class="sf-support-link" href="mailto:info@smartsoko.co.tz?subject=SmartSoko%20customer%20service"><span class="material-symbols-outlined" aria-hidden="true">support_agent</span>Contact customer service<span aria-hidden="true">↗</span></a>
+          <a class="sf-support-email" href="mailto:info@smartsoko.co.tz">info@smartsoko.co.tz</a>
+        </section>
       </div>
-      <div class="border-t border-outline-variant pt-6 text-center text-body-sm text-on-surface-variant">
+      <div class="sf-footer-bottom">
         <p>&copy; 2026 SmartSoko. All rights reserved.</p>
+        <div class="sf-social-group" aria-label="Social channels">
+          <span>Find us online</span>
+          <div class="sf-social-icons" aria-label="Social profile links coming soon">
+            <span class="sf-social-icon" role="img" aria-label="Facebook — profile link coming soon" title="Facebook — coming soon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M13.5 21v-8.2h2.8l.4-3.2h-3.2V7.5c0-.9.3-1.5 1.6-1.5h1.7V3.1c-.3 0-1.3-.1-2.5-.1-2.5 0-4.1 1.5-4.1 4.2v2.4H7.5v3.2h2.7V21h3.3Z"/></svg></span>
+            <span class="sf-social-icon" role="img" aria-label="X — profile link coming soon" title="X — coming soon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M18.9 3H22l-6.8 7.8L23 21h-6.1l-4.8-6.3L6.6 21H3.4l7.3-8.5L3 3h6.3l4.4 5.8L18.9 3Zm-1.1 16.2h1.7L8.4 4.7H6.6l11.2 14.5Z"/></svg></span>
+            <span class="sf-social-icon" role="img" aria-label="Instagram — profile link coming soon" title="Instagram — coming soon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></span>
+          </div>
+          <small>Official links coming soon</small>
+        </div>
       </div>
     </div>
   </footer>
+  <button type="button" id="customerServiceLauncher" class="sf-support-launcher" aria-label="Open customer service" aria-controls="customer-service" aria-expanded="true" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 13v-1a8 8 0 0 1 16 0v1M4 12H3v6h4v-6H4Zm16 0h1v6h-4v-6h3Zm0 6v1a2 2 0 0 1-2 2h-5"/><path d="M10 21h3"/></svg>
+  </button>
+  <script src="js/customer-service-panel.js?v=1" defer></script>
 </body>
 </html>
 

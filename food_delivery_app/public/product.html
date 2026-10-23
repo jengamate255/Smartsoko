@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html class="light" lang="en">
 <head>
+  <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -564,8 +565,14 @@
       footer a { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 10px; }
     }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/stitch-site.css?v=5">
+  <script src="js/stitch-site.js?v=2" defer></script>
+  <link rel="stylesheet" href="css/site-uniform.css?v=1">
+  <link rel="stylesheet" href="css/shopping-experience.css?v=1">
+  <script src="js/shopping-experience.js?v=1" defer></script>
 </head>
-<body class="font-body-md text-on-surface bg-[#F8FAF6] min-h-screen">
+<body class="ss-uniform stitch-site ss-commerce ss-product font-body-md text-on-surface bg-[#F8FAF6] min-h-screen" data-stitch-page="product">
 
   <!-- Trust Strip -->
   <div class="trust-strip" aria-label="Shopping benefits">
@@ -654,19 +661,19 @@
   <main class="max-w-[1280px] mx-auto px-4 md:px-12 pt-5 pb-24">
 
     <!-- Breadcrumbs -->
-    <nav class="flex items-center gap-2 text-body-sm text-on-surface-variant mb-6 overflow-hidden min-w-0" aria-label="Breadcrumb">
+    <nav class="ss-breadcrumb flex items-center gap-2 text-body-sm text-on-surface-variant mb-6 overflow-hidden min-w-0" aria-label="Breadcrumb">
       <a class="hover:text-primary shrink-0" href="/home">Home</a>
       <span class="material-symbols-outlined text-xs shrink-0">chevron_right</span>
       <a class="hover:text-primary shrink-0" href="/discovery">Discover</a>
       <span class="material-symbols-outlined text-xs shrink-0">chevron_right</span>
-      <span class="font-medium text-on-surface truncate min-w-0" id="breadcrumbName">Product</span>
+      <span class="font-medium text-on-surface truncate min-w-0" id="breadcrumbName" aria-current="page">Product</span>
     </nav>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
       <!-- Left Column: Media Gallery -->
       <div class="lg:col-span-7 flex flex-col gap-4">
         <!-- Main Image -->
-        <div class="bg-white rounded-2xl overflow-hidden aspect-[4/3] lg:aspect-square product-card-shadow relative group">
+        <div class="ss-product-media bg-white rounded-2xl overflow-hidden aspect-[4/3] lg:aspect-square product-card-shadow relative group">
           <img id="mainProductImg" src="images/default-product.svg" alt="Product" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" onerror="this.onerror=null; this.src='images/default-product.svg'" loading="eager" width="800" height="600">
           <div class="absolute inset-0 opacity-[0.02] pointer-events-none" style="background-image: radial-gradient(circle, #064e3b 1px, transparent 1px); background-size: 24px 24px;"></div>
           <button id="editPhotosBtn" onclick="openImageGalleryModal()" class="absolute top-3 right-3 bg-white/90 backdrop-blur shadow-lg text-primary px-3 py-1.5 rounded-full font-semibold text-sm flex items-center gap-1.5 hover:bg-primary hover:text-white transition-all hidden">
@@ -706,7 +713,7 @@
       </div>
 
 <!-- Right Column: Product Identity -->
-      <div class="lg:col-span-5 flex flex-col">
+      <div class="ss-product-info lg:col-span-5 flex flex-col">
         <div class="space-y-4">
           <div class="flex items-start justify-between gap-3">
             <span id="productCategory" class="bg-secondary text-on-secondary px-3 py-1.5 rounded-full text-[12px] font-bold tracking-widest uppercase w-fit"><span class="skeleton-text-sm"></span></span>
@@ -719,15 +726,16 @@
         </div>
 
         <!-- Price -->
-        <div class="mt-2 flex items-center gap-3 flex-wrap">
+        <div class="sp-price mt-2 flex items-center gap-3 flex-wrap">
           <span id="productPrice" class="font-headline text-2xl md:text-3xl lg:text-4xl font-extrabold text-primary"><span class="skeleton-heading"></span></span>
           <span id="productOldPrice" class="hidden text-outline text-sm line-through font-semibold"></span>
           <p id="productUnit" class="text-on-surface-variant text-sm font-medium">per unit</p>
           <span id="stockPill" class="hidden bg-secondary text-on-secondary px-2 py-0.5 rounded text-[12px] font-bold uppercase tracking-wide">In Stock</span>
         </div>
 
+        <p class="shopping-delivery-note">Delivery fees are confirmed at checkout after you select an address.</p>
         <!-- Rating & Stats -->
-        <div class="flex items-center gap-3 mt-4 flex-wrap">
+        <div class="sp-rating-row flex items-center gap-3 mt-4 flex-wrap">
            <button type="button" onclick="switchDetailTab('reviews')" class="flex items-center gap-1 bg-surface-container-low border border-outline-variant/30 px-3 py-1.5 rounded-full hover:border-primary transition-colors" aria-label="View customer reviews">
              <span class="material-symbols-outlined text-tertiary text-sm filled-icon">star</span>
              <span class="font-bold text-sm text-on-surface" id="ratingValue"><span class="skeleton-text-sm"></span></span>
@@ -745,7 +753,7 @@
         </div>
 
         <!-- Quick Info Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+        <div class="sp-legacy-facts grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
           <div class="bg-surface-container-lowest border border-outline-variant/30 p-3 md:p-4 rounded-xl flex flex-col items-center justify-center text-center shadow-sm">
             <span class="text-on-surface-variant text-[12px] md:text-[12px] font-bold uppercase tracking-wider">Delivery</span>
             <span class="font-headline text-sm md:text-base font-bold text-primary" id="deliveryInfo">25-35m</span>
@@ -763,7 +771,7 @@
             <span class="font-headline text-sm md:text-base font-bold text-primary" id="paymentInfo">COD</span>
           </div>
         </div>
-        <div class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-outline-variant/30">
+        <div class="sp-legacy-trust flex flex-wrap gap-2 mt-3 pt-3 border-t border-outline-variant/30">
           <span class="flex items-center gap-1.5 text-xs bg-secondary-container text-on-secondary-container px-3 py-1.5 rounded-full">
             <span class="material-symbols-outlined text-on-secondary-container text-[11px] filled-icon">verified</span>
             <span class="font-semibold">Verified Seller</span>
@@ -800,7 +808,7 @@
     <!-- Product Details -->
     <div id="tabPanel-description" class="px-4 md:px-0 pt-8 space-y-8">
       <!-- Description -->
-      <div class="space-y-3">
+      <div class="sp-description-copy space-y-3">
         <h2 class="font-headline text-lg md:text-xl font-bold text-on-surface flex items-center gap-2">
           <span class="material-symbols-outlined text-primary text-xl md:text-2xl">description</span>
           Description
@@ -816,16 +824,16 @@
       </div>
 
 <!-- Seller Card -->
-      <div class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-outline-variant/30 hover:border-green-200 hover:shadow-md hover:shadow-green-100/50 transition-all">
+      <div class="sp-shop-card bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-outline-variant/30 hover:border-green-200 hover:shadow-md hover:shadow-green-100/50 transition-all">
         <div class="flex items-center gap-4">
           <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-100 to-primary/20 flex items-center justify-center shadow-md flex-shrink-0">
             <span class="material-symbols-outlined text-xl text-primary">store</span>
           </div>
            <div class="flex-1 min-w-0">
              <h3 id="sellerName" class="font-bold text-on-surface text-sm truncate">SmartSoko</h3>
-             <p id="sellerMeta" class="text-on-surface-variant text-xs">Verified Seller · Fast responses</p>
+             <p id="sellerMeta" class="text-on-surface-variant text-xs">Explore this shop’s products</p>
            </div>
-           <a href="discovery.html" class="flex items-center gap-1 text-primary hover:text-primary-dark transition-colors text-sm font-semibold" title="View seller products">
+           <a id="sellerProductsLink" href="/discovery" class="flex items-center gap-1 text-primary hover:text-primary-dark transition-colors text-sm font-semibold" title="View seller products">
              <span class="hidden sm:inline">View shop</span>
              <span class="material-symbols-outlined">chevron_right</span>
            </a>
@@ -840,7 +848,7 @@
       </div>
 
       <!-- Trust Signals -->
-      <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-outline-variant/30">
+      <div class="sp-legacy-trust flex flex-wrap gap-2 mt-4 pt-4 border-t border-outline-variant/30">
         <span class="flex items-center gap-1.5 text-xs bg-secondary-container text-on-secondary-container px-3 py-1.5 rounded-full">
           <span class="material-symbols-outlined text-on-secondary-container text-[11px] filled-icon">verified</span>
           <span class="font-semibold">Verified Seller</span>
@@ -1265,11 +1273,15 @@
       if (loadInProgress) return;
       loadInProgress = true;
 
+      const svc = window.crossPlatformService;
       try {
-        const response = await fetch('/api/products/' + encodeURIComponent(productId), { signal: AbortSignal.timeout(10000) });
-        const payload = await response.json();
-        if (!response.ok || !payload.success) throw new Error(payload.error || 'Product unavailable');
-        const data = payload.data;
+        if (!svc || !svc.isReady()) {
+          await new Promise(resolve => {
+            document.addEventListener('data-service-ready', resolve, { once: true });
+            setTimeout(resolve, 5000);
+          });
+        }
+        const data = await svc.get('products', productId);
 
         if (data) {
           const imageUrls = data.imageUrls || (data.imageUrl || data.image ? [data.imageUrl || data.image] : []);
@@ -1288,6 +1300,8 @@
           
           currentProduct = {
             id: data.id,
+            stockQuantity: data.stockQuantity == null && data.stock_quantity == null && data.stock == null ? null : Number(data.stockQuantity ?? data.stock_quantity ?? data.stock),
+            unit: data.unit || data.unitLabel || data.unit_label || '',
             name: data.name || 'Unnamed Item',
             description: data.description || '',
             price: data.price || 0,
@@ -1298,7 +1312,7 @@
             category: data.category || 'General',
             isAvailable: data.isAvailable !== false,
              sellerId: data.sellerId || data.seller_id || data.restaurantId || '',
-             seller: data.seller || data.restaurantName || 'SmartSoko',
+             seller: data.seller || data.sellerName || data.restaurantName || 'SmartSoko',
              sellerRating: Number(data.sellerRating || 0),
             restaurantId: data.restaurantId || data.sellerId || '',
             variations: variations,
@@ -1375,8 +1389,9 @@
       if (wishIcon) wishIcon.classList.toggle('filled-icon', getWishlist().includes(product.id));
       document.getElementById('productSeller').textContent = 'by ' + (product.seller || 'SmartSoko');
       document.getElementById('sellerName').textContent = product.seller || 'SmartSoko';
+      document.getElementById('sellerProductsLink').href = product.sellerId ? '/discovery?sellerId=' + encodeURIComponent(product.sellerId) : '/discovery';
       const sellerMeta = document.getElementById('sellerMeta');
-      if (sellerMeta) sellerMeta.textContent = `${product.sellerRating ? product.sellerRating.toFixed(1) + ' seller rating · ' : ''}Verified Seller · Fast responses`;
+      if (sellerMeta) sellerMeta.textContent = `${product.sellerRating ? Number(product.sellerRating).toFixed(1) + ' seller rating' : 'Explore this shop’s products'}`;
       // document.getElementById('sellerSubtitle').textContent = product.category ? `${product.category} Seller` : 'Verified Seller'; // element removed
       const descEl = document.getElementById('productDescription');
       const desc = product.description || 'No description available.';
@@ -1412,9 +1427,14 @@
       document.getElementById('thumb2').src = images[1] || images[0] || 'images/default-product.svg';
       document.getElementById('thumb3').src = images[2] || images[0] || 'images/default-product.svg';
 
+      const unitNode = document.getElementById('productUnit');
+      unitNode.textContent = product.unit ? 'per ' + product.unit : '';
+      unitNode.hidden = !product.unit;
+
       // Rating & Reviews from backend (or defaults)
       const reviewCount = product.reviewCount || 0;
-      const rating = product.rating || 4.5;
+      const rating = Number(product.rating) || 0;
+      document.querySelector('.sp-rating-row button').hidden = !rating || !reviewCount;
       document.getElementById('ratingValue').textContent = rating.toFixed(1);
       document.getElementById('reviewCount').textContent = `(${reviewCount})`;
 
@@ -1529,7 +1549,7 @@
         const q = cf.query(cf.collection('reviews'), cf.where('productId', '==', productId), cf.limit(5));
         const snapshot = await withTimeout(cf.getDocs(q), 2500, 'reviews load');
         const reviews = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-        const rating = Math.max(0, Math.min(5, currentProduct?.rating || 4.5));
+        const rating = Math.max(0, Math.min(5, currentProduct?.rating || 0));
         renderRatingSummary(reviews, rating);
         if (!reviews.length) {
           if (summary) summary.textContent = 'Be the first to share your experience';
@@ -1573,7 +1593,7 @@
       } catch (error) {
         console.warn('Reviews load failed:', error.message);
         if (summary) summary.textContent = 'No reviews yet';
-        renderRatingSummary([], currentProduct?.rating || 4.5);
+        renderRatingSummary([], currentProduct?.rating || 0);
         container.innerHTML = `<div class="text-center py-12 bg-white border border-gray-100 rounded-2xl shadow-sm">
           <span class="material-symbols-outlined text-5xl mb-3 block text-outline">reviews</span>
           <p class="text-sm font-medium text-on-surface">No reviews yet. Be the first to review this product.</p>
@@ -1587,7 +1607,7 @@
       const bigStars = document.getElementById('ratingBigStars');
       const bars = document.getElementById('ratingBars');
       const total = reviews.length || 0;
-      if (big) big.textContent = (total ? rating : rating).toFixed(1);
+      if (big) big.textContent = rating > 0 ? rating.toFixed(1) : '—';
       if (bigStars) {
         const full = Math.floor(rating);
         const half = rating % 1 >= 0.5;
@@ -1849,7 +1869,7 @@
         return;
       }
       const rawImg = currentProduct.imageUrl || currentProduct.image || '';
-      const leanImg = (typeof rawImg === 'string' && rawImg.startsWith('http')) ? rawImg : '';
+      const leanImg = typeof rawImg === 'string' && /^(https?:\/\/|\/(?!\/)|images\/|uploads\/)/i.test(rawImg) ? rawImg : '';
       const leanItem = {
         id: currentProduct.id,
         name: currentProduct.name,
@@ -1865,11 +1885,14 @@
         variationDelta: selectedVariation?.delta || 0
       };
       const existing = cart.find(item => item.id === currentProduct.id);
+      if (Number.isFinite(currentProduct.stockQuantity) && currentProduct.stockQuantity >= 0 && (existing?.quantity || 0) + quantity > currentProduct.stockQuantity) {
+        ShoppingUI.feedback(currentProduct, 'Only '+currentProduct.stockQuantity+' available. Reduce your quantity.'); return;
+      }
       if (existing) { existing.quantity += quantity; existing.imageUrl = existing.imageUrl || leanImg; }
       else cart.push({ ...leanItem, quantity: quantity });
       saveCart();
       updateCartUI();
-      showToast(`${currentProduct.name} added to cart (${quantity} item${quantity > 1 ? 's' : ''})`);
+      ShoppingUI.feedback(currentProduct);
       quantity = 1;
       document.getElementById('quantityDisplay').textContent = quantity;
       updateAddToCartText();
