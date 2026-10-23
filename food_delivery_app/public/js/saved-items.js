@@ -11,13 +11,14 @@
     const ids = savedIds();
     container.replaceChildren();
     if (!ids.length) { container.append(node('p', 'No saved items yet. Save a product to find it here.')); return; }
-    const svc = window.crossPlatformService;
-    if (!svc || !svc.isReady()) {
+    if (!window.crossPlatformService || !window.crossPlatformService.isReady()) {
       await new Promise(resolve => {
         document.addEventListener('data-service-ready', resolve, { once: true });
         setTimeout(resolve, 5000);
       });
     }
+    const svc = window.crossPlatformService;
+    if (!svc) { container.append(node('p', 'Service unavailable. Please refresh the page.')); return; }
     for (const id of ids) {
       const card = node('article', ''), row = node('div', ''); row.className = 'row';
       const link = node('a', 'View saved product'); link.href = '/product?id=' + encodeURIComponent(id);

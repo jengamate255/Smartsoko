@@ -1273,14 +1273,16 @@
       if (loadInProgress) return;
       loadInProgress = true;
 
-      const svc = window.crossPlatformService;
       try {
-        if (!svc || !svc.isReady()) {
-          await new Promise(resolve => {
-            document.addEventListener('data-service-ready', resolve, { once: true });
-            setTimeout(resolve, 5000);
-          });
+        // Wait for cross-platform service to be ready
+        let waitAttempts = 0;
+        while ((!window.crossPlatformService || !window.crossPlatformService.isReady()) && waitAttempts < 20) {
+          await new Promise(resolve => setTimeout(resolve, 250));
+          waitAttempts++;
         }
+        
+        const svc = window.crossPlatformService;
+        if (!svc || !svc.isReady()) throw new Error('Data service not available after waiting');
         const data = await svc.get('products', productId);
 
         if (data) {
@@ -2243,20 +2245,25 @@
     // Mock data injection handled by serve-product.js for local preview.
     // In production, cross-platform-service.js handles data loading.
 
-    loadProduct();
-
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof SmartNav !== 'undefined' && typeof SmartNav.initPageTransition === 'function') SmartNav.initPageTransition();
       updateCartUI();
-      loadProduct();
-      document.addEventListener('data-service-ready', () => { if (!currentProduct) loadProduct(); }, { once: true });
+      
+      // Wait for data service to be ready before loading product
+      if (window.crossPlatformService && window.crossPlatformService.isReady()) {
+        loadProduct();
+      } else {
+        document.addEventListener('data-service-ready', () => { loadProduct(); }, { once: true });
+      }
 
       // Watchdog: guarantee the page loads even if init events never fire
       let attempts = 0;
       const watchdog = setInterval(() => {
         attempts++;
         if (currentProduct || attempts > 4) { clearInterval(watchdog); return; }
-        loadProduct();
+        if (window.crossPlatformService && window.crossPlatformService.isReady()) {
+          loadProduct();
+        }
       }, 2500);
 
       // Skeleton killer: never leave shimmer placeholders stuck on screen

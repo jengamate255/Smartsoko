@@ -418,14 +418,15 @@
 
     async function loadProducts() {
       try {
-        if (!window.crossPlatformService || !window.crossPlatformService.isReady()) {
-          await new Promise(resolve => {
-            document.addEventListener('data-service-ready', resolve, { once: true });
-            setTimeout(resolve, 5000);
-          });
+        // Wait for cross-platform service to be ready
+        let waitAttempts = 0;
+        while ((!window.crossPlatformService || !window.crossPlatformService.isReady()) && waitAttempts < 20) {
+          await new Promise(resolve => setTimeout(resolve, 250));
+          waitAttempts++;
         }
+        
         const svc = window.crossPlatformService;
-        if (!svc) throw new Error('Data service not available');
+        if (!svc || !svc.isReady()) throw new Error('Data service not available after waiting');
         const items = await svc.list('products', { limit: 100 });
         catalogLoaded = true;
 
