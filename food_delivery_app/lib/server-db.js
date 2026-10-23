@@ -7,13 +7,10 @@
 const { createClient } = require('@supabase/supabase-js');
 
 // ------ Supabase credentials ------
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://vonkqyiczeqhuqhahsxm.supabase.co';
+// Validated lazily in getSupabase() so pure field-mapping helpers can be
+// unit-tested without a live database connection.
+const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
-
-if (!SUPABASE_SERVICE_KEY) {
-  console.error('[DB] WARNING: SUPABASE_SERVICE_KEY not set in environment -- Supabase fallback will fail');
-}
-
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
 
 // ------ Collection -> Supabase table mapping ------
@@ -115,6 +112,17 @@ function tableName(collection) {
     addresses: { userId: 'user_id' },
     payment_methods: { userId: 'user_id' },
     carts: { userId: 'user_id' },
+    // Admin tables: verified against the deployed schema.
+    // admin_settings stores its timestamp as a quoted camelCase column.
+    admin_settings: { updatedAt: 'updatedAt' },
+    // api_keys has no updated_at column at all (only created_at/revoked_at).
+    api_keys: { updatedAt: null },
+    // role_assignments only has (id, user_id, role_id, created_at).
+    role_assignments: { userId: 'user_id', updatedAt: null },
+    // admin notifications key the recipient by user_id, not owner_id.
+    admin_notifications: { userId: 'user_id' },
+    // orders has no status_updated_by column; audits carry that information.
+    orders: { statusUpdatedBy: null, adminNote: null, refundAmount: null },
   };
 
 // Build reverse map
@@ -240,6 +248,14 @@ function createDualDb(firestoreDb) {
   }
 
   function getSupabase() {
+    if (!SUPABASE_URL) {
+      console.error('[DB] ERROR: SUPABASE_URL not set -- Supabase is the primary datastore and must be configured');
+      throw new Error('SUPABASE_URL environment variable is required');
+    }
+    if (!SUPABASE_SERVICE_KEY) {
+      console.error('[DB] ERROR: SUPABASE_SERVICE_KEY not set -- Supabase writes will fail');
+      throw new Error('SUPABASE_SERVICE_KEY environment variable is required');
+    }
     if (!supabaseClient) {
       supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
     }
