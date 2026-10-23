@@ -96,8 +96,13 @@ service cloud.firestore {
     // Merchants/admins may flip availability fields when assigning jobs.
     // Canonical layout is drivers/{uid}; web-created docs sometimes lack an
     // explicit ownerId, so the document id itself is an ownership fallback.
+    //
+    // READ is scoped to the driver themselves or an admin. Letting every
+    // authenticated user read every driver profile exposed phone numbers and
+    // live locations to the world; merchants interact with drivers via the
+    // orders collection, not by reading driver docs directly.
     match /drivers/{driverId} {
-      allow read: if isAuthenticated();
+      allow read: if request.auth.uid == driverId || isAdmin();
       allow create: if isAuthenticated() && 
         request.resource.data.ownerId == request.auth.uid;
       allow update: if isAuthenticated() && (
@@ -110,11 +115,12 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
-    // Products - public read, sellers write their own.
-    // The native merchant app stores the store's document id in "merchantId";
-    // legacy/web rows used "sellerId" equal to the owner uid. Accept both.
+    // Products - authenticated read (native apps and the PWA sign in before
+    // browsing), sellers write their own. The native merchant app stores the
+    // store's document id in "merchantId"; legacy/web rows used "sellerId"
+    // equal to the owner uid. Accept both.
     match /products/{productId} {
-      allow read: if true;
+      allow read: if isAuthenticated();
       allow create: if isAuthenticated() && (
         request.resource.data.get('sellerId', '') == request.auth.uid ||
         ownsSeller(request.resource.data.get('merchantId', ''))
@@ -137,11 +143,14 @@ service cloud.firestore {
         (request.auth.uid == resource.data.userId || isOwner(resource.data.userId));
     }
     
-    // Payments - user owns their payments
+    // Payments - user reads their own payments; writes go through the PesaPal/
+    // escrow API (Admin SDK). Letting any authenticated user create a payments
+    // row with an arbitrary userId let anyone forge a "paid" record against
+    // another user's account.
     match /payments/{paymentId} {
       allow read: if isAuthenticated() && 
         (request.auth.uid == resource.data.userId || isAdmin());
-      allow create: if isAuthenticated();
+      allow create, update, write: if false;
     }
     
     // Notifications - user owns their notifications
@@ -150,18 +159,22 @@ service cloud.firestore {
         (request.auth.uid == resource.data.userId || isAdmin());
     }
     
-    // Referrals - users can read their own referrals
+    // Referrals - users read their own (as referrer or referee); writes go
+    // through the API. Letting any authenticated user create a referral row
+    // with an arbitrary referrerId let anyone credit themselves rewards for
+    // inviting another user.
     match /referrals/{referralId} {
       allow read: if isAuthenticated() && 
         (request.auth.uid == resource.data.referrerId || 
          request.auth.uid == resource.data.refereeId || 
          isAdmin());
-      allow create: if isAuthenticated();
+      allow create, update, write: if false;
     }
     
-    // Reviews - users can read all, create their own; sellers reply to their own
+    // Reviews - authenticated read, users create their own; sellers reply to
+    // their own.
     match /reviews/{reviewId} {
-      allow read: if true;
+      allow read: if isAuthenticated();
       allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
       allow update: if isAuthenticated() && 
         (request.auth.uid == resource.data.userId || 
@@ -170,10 +183,15 @@ service cloud.firestore {
         (request.auth.uid == resource.data.userId || isAdmin());
     }
     
-    // Sellers - owner can manage, public can read
+    // Sellers - owner can manage, authenticated users can read (storefront
+    // needs to list merchants). Create is scoped so a user can only claim the
+    // seller doc whose id equals their own uid — without this, any signed-in
+    // user could squat on an unclaimed sellerId and impersonate a merchant.
     match /sellers/{sellerId} {
-      allow read: if true;
-      allow create, update, delete: if isOwner(sellerId) || isAdmin();
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        (sellerId == request.auth.uid || isAdmin());
+      allow update, delete: if isOwner(sellerId) || isAdmin();
     }
     
     // Riders/Drivers - owner can manage, admins can read all
@@ -182,64 +200,55 @@ service cloud.firestore {
       allow create, update: if isOwner(riderId) || isAdmin();
     }
     
-    // Wallet - user owns their wallet
+    // Wallet - user reads their own balance; writes go through the escrow API
+    // (Admin SDK), never directly from the client. Letting clients write their
+    // own wallet doc contradicted the escrow model and let anyone credit
+    // themselves by posting `{ balance: 99999 }`.
     match /wallets/{userId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if false;
     }
     
-    // Transactions - user owns their transactions
+    // Transactions - user reads their own; writes go through the escrow API.
+    // Same forgery risk as /payments if clients could create rows freely.
     match /transactions/{transactionId} {
       allow read: if isAuthenticated() && 
         (request.auth.uid == resource.data.userId || isAdmin());
-      allow create: if isAuthenticated();
+      allow create, update, write: if false;
     }
     
-    // Categories - public read, admin write
+    // Categories - authenticated read, admin write
     match /categories/{categoryId} {
-      allow read: if true;
+      allow read: if isAuthenticated();
       allow create, update, delete: if isAdmin();
     }
     
-    // Flash Deals - public read, admin write
+    // Flash Deals - authenticated read, admin write
     match /flashDeals/{dealId} {
-      allow read: if true;
+      allow read: if isAuthenticated();
       allow create, update, delete: if isAdmin();
     }
     
-    // Deals - public read, merchant/admin write
+    // Deals - authenticated read, merchant/admin write
     match /deals/{dealId} {
-      allow read: if true;
+      allow read: if isAuthenticated();
       allow create, update, delete: if isAdmin() || 
         (isAuthenticated() && request.resource.data.merchantId == request.auth.uid);
     }
     
-    // Gift Cards - buyer can create, recipient can read
+    // Gift Cards - buyer/recipient read their own; writes go through the API
+    // (Admin SDK). Letting any authenticated user create a giftCards row with
+    // an arbitrary balance let anyone mint themselves credit.
     match /giftCards/{cardId} {
       allow read: if isAuthenticated() && 
         (request.auth.uid == resource.data.purchaserId || 
-         request.auth.uid == resource.data.recipientId);
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated() && 
-        (request.auth.uid == resource.data.purchaserId || isAdmin());
+         request.auth.uid == resource.data.recipientId ||
+         isAdmin());
+      allow create, update, write: if false;
     }
     
     // Subscriptions - user owns their subscriptions
     match /subscriptions/{subscriptionId} {
-      allow read, write: if isAuthenticated() && 
-        (request.auth.uid == resource.data.userId || isAdmin());
-    }
-    
-    // Referrals
-    match /referrals/{referralId} {
-      allow read: if isAuthenticated() && 
-        (request.auth.uid == resource.data.referrerId || 
-         request.auth.uid == resource.data.refereeId || 
-         isAdmin());
-      allow create: if isAuthenticated();
-    }
-    
-    // Notifications
-    match /notifications/{notificationId} {
       allow read, write: if isAuthenticated() && 
         (request.auth.uid == resource.data.userId || isAdmin());
     }
