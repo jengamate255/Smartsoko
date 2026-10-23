@@ -1,5 +1,5 @@
 [build]
-  publish = "web"
+  publish = "public"
   command = "echo Static build complete"
 
 [build.environment]
@@ -28,44 +28,15 @@
   [headers.values]
     Cache-Control = "public, max-age=3600"
 
+# Redirect table trimmed to pages that actually exist in public/ (Netlify publishes "public").
+# Dropped routes whose target pages were removed: /register, /signup, /dashboard,
+# /merchant, /login, /forgot-password, /home, /discovery, /track-order, /profile,
+# /orders, /chat, /referral, /seller, /restaurant, /admin, /admin-panel,
+# /fleet-manager, /main.
+
 [[redirects]]
   from = "/"
-  to = "/home.html"
-  status = 200
-
-[[redirects]]
-  from = "/register"
-  to = "/signup.html"
-  status = 200
-
-[[redirects]]
-  from = "/dashboard"
-  to = "/merchant.html"
-  status = 200
-
-[[redirects]]
-  from = "/forgot-password"
-  to = "/check-user.html"
-  status = 200
-
-[[redirects]]
-  from = "/login"
-  to = "/login.html"
-  status = 200
-
-[[redirects]]
-  from = "/signup"
-  to = "/signup.html"
-  status = 200
-
-[[redirects]]
-  from = "/home"
-  to = "/home.html"
-  status = 200
-
-[[redirects]]
-  from = "/merchant"
-  to = "/merchant.html"
+  to = "/index.html"
   status = 200
 
 [[redirects]]
@@ -94,31 +65,6 @@
   status = 200
 
 [[redirects]]
-  from = "/discovery"
-  to = "/discovery.html"
-  status = 200
-
-[[redirects]]
-  from = "/track-order"
-  to = "/track-order.html"
-  status = 200
-
-[[redirects]]
-  from = "/profile"
-  to = "/profile.html"
-  status = 200
-
-[[redirects]]
-  from = "/orders"
-  to = "/orders.html"
-  status = 200
-
-[[redirects]]
-  from = "/chat"
-  to = "/chat.html"
-  status = 200
-
-[[redirects]]
   from = "/messages"
   to = "/messages.html"
   status = 200
@@ -126,11 +72,6 @@
 [[redirects]]
   from = "/wallet"
   to = "/wallet.html"
-  status = 200
-
-[[redirects]]
-  from = "/referral"
-  to = "/referral.html"
   status = 200
 
 [[redirects]]
@@ -146,16 +87,6 @@
 [[redirects]]
   from = "/wishlists"
   to = "/wishlists.html"
-  status = 200
-
-[[redirects]]
-  from = "/seller"
-  to = "/seller.html"
-  status = 200
-
-[[redirects]]
-  from = "/restaurant"
-  to = "/restaurant.html"
   status = 200
 
 [[redirects]]
@@ -176,24 +107,4 @@
 [[redirects]]
   from = "/store-settings"
   to = "/store-settings.html"
-  status = 200
-
-[[redirects]]
-  from = "/admin"
-  to = "/admin.html"
-  status = 200
-
-[[redirects]]
-  from = "/admin-panel"
-  to = "/admin-panel.html"
-  status = 200
-
-[[redirects]]
-  from = "/fleet-manager"
-  to = "/fleet-manager.html"
-  status = 200
-
-[[redirects]]
-  from = "/main"
-  to = "/main.html"
   status = 200
