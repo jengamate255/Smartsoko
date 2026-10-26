@@ -111,6 +111,15 @@ nul
 archived/APK-Builds/
 vercel-deploy.zip
 
+# archived/ build-tool stdout/license dumps (keep README/requirements/CMakeLists/R*.txt)
+archived/*-stdout.txt
+archived/*-stderr.txt
+archived/*-stdout-stderr.txt
+archived/*LICENSE*.txt
+archived/*LEGAL*.txt
+archived/manifest-merger-*.txt
+archived/lint-results-*.txt
+
 # Local deployment folders
 .netlify
 .vercel
