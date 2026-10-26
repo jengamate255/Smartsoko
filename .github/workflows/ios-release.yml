@@ -30,6 +30,7 @@ jobs:
           fi
           mkdir -p assets/config
           echo "$ENV_FILE_B64" | base64 --decode > assets/config/.env
+          cp assets/config/.env .env
           grep -c '=' assets/config/.env > /dev/null || { echo "::error::Decoded .env is empty"; exit 1; }
 
       - name: Cache CocoaPods

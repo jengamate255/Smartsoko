@@ -36,7 +36,7 @@ jobs:
       # pubspec declares assets/config/.env as an asset; it is gitignored,
       # so materialize an empty one or the asset bundling fails.
       - name: Materialize .env placeholder
-        run: mkdir -p assets/config && touch assets/config/.env
+        run: mkdir -p assets/config && touch assets/config/.env .env
 
       - name: flutter pub get
         run: flutter pub get
