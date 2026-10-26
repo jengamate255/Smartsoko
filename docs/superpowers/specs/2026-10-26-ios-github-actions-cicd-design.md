@@ -49,8 +49,9 @@
   - Info.plist permission strings: location (when-in-use + always for driver
     tracking), camera, photo library, local notifications.
   - Google Sign-In reverse client ID URL scheme (from the Firebase plist).
-  - Maps/Mapbox API keys injected into Info.plist at CI time; AppDelegate passes
-    the Google Maps key to the SDK.
+  - Maps/Mapbox API keys: deferred — `.env` carries no `GOOGLE_MAPS_API_KEY` /
+    `MAPBOX_TOKEN` today, matching Android's current no-key behavior. Inject into
+    Info.plist at CI when keys are provisioned.
   - Crashlytics dSYM upload run-script phase.
 - The user registers an iOS app in the Firebase console (browser step) and supplies
   `GoogleService-Info.plist`.
