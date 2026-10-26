@@ -63,7 +63,16 @@ function mobileAppRoutes(app) {
 
             const a = admin();
             const ensure = authMiddleware.ensureAdminForAuth || (async () => false);
-            const ready = a.apps && a.apps.length ? true : await ensure();
+            // In Supabase-only mode, always use the Supabase path: the auth-only
+            // Firebase admin can get lazily initialized by ID-token verification,
+            // which would otherwise flip this route to the Firebase plane mid-life
+            // and return a custom token that Supabase-only middleware rejects.
+            const skipFirebase = req.app.get('skipFirebase');
+            const ready = skipFirebase
+                ? false
+                : a.apps && a.apps.length
+                  ? true
+                  : await ensure();
             if (!ready) {
                 // Supabase-only mode: verify against Supabase Auth and return
                 // its access token (the middleware accepts Supabase JWTs).
@@ -998,7 +1007,10 @@ function mobileAppRoutes(app) {
                         notes: null,
                         variation: it.variation,
                         variationDelta: it.variationDelta,
+                        sellerId,
+                        sellerName: it.sellerName || null,
                     })),
+                    non_refundable_fee: quote.platformFee,
                     subtotal,
                     delivery_fee: deliveryFee,
                     tax: taxAmount,
