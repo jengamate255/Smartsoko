@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
     kotlin("kapt")
 }
 
@@ -19,7 +20,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
 
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3000/api/\"")
+        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3001/api/\"")
     }
 
     signingConfigs {

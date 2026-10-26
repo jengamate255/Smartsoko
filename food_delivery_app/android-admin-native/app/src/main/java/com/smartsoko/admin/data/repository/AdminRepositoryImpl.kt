@@ -13,7 +13,7 @@ class AdminRepositoryImpl @Inject constructor() : AdminRepository {
 
     private val api: AdminApiService get() = ApiClient.apiService
 
-    private suspend fun <T> safeApiCall(call: suspend () -> retrofit2.Response<*>): Result<T> {
+    private suspend inline fun <reified T> safeApiCall(crossinline call: suspend () -> retrofit2.Response<*>): Result<T> {
         Log.d("SmartSokoAdmin", "Making API call...")
         return try {
             val response = call()
@@ -21,8 +21,13 @@ class AdminRepositoryImpl @Inject constructor() : AdminRepository {
             if (response.isSuccessful) {
                 val body = response.body()
                 Log.d("SmartSokoAdmin", "Success body: $body")
+                val data: Any? = when (body) {
+                    is ApiResponse<*> -> body.data
+                    is ApiListResponse<*> -> body.data
+                    else -> body
+                }
                 @Suppress("UNCHECKED_CAST")
-                Result.success(body as T)
+                Result.success(if (T::class == Unit::class) Unit as T else data as T)
             } else {
                 val errorBody = response.errorBody()?.string() ?: "Unknown error"
                 Log.e("SmartSokoAdmin", "API Error: ${response.code()} $errorBody")

@@ -18,14 +18,17 @@ import com.smartsoko.admin.ui.screens.users.UserDetailScreen
 import com.smartsoko.admin.ui.screens.users.UsersScreen
 
 @Composable
-fun AdminNavGraph(navController: NavHostController) {
+fun AdminNavGraph(
+    navController: NavHostController,
+    startDestination: String = Screen.Login.route
+) {
     val actions = remember(navController) {
         AdminActions(navController)
     }
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+        startDestination = startDestination
     ) {
         composable(Screen.Login.route) {
             LoginScreen(onLoginSuccess = { actions.navigateToDashboard() })

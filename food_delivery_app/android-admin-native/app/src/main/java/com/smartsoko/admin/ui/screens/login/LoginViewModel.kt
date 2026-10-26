@@ -2,6 +2,8 @@ package com.smartsoko.admin.ui.screens.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.smartsoko.admin.data.local.TokenManager
+import com.smartsoko.admin.data.remote.ApiClient
 import com.smartsoko.admin.domain.repository.AdminRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +20,8 @@ data class LoginUiState(
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val repository: AdminRepository
+    private val repository: AdminRepository,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -33,7 +36,9 @@ class LoginViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             val result = repository.login(email, password)
             result.fold(
-                onSuccess = {
+                onSuccess = { response ->
+                    tokenManager.saveToken(response.token)
+                    ApiClient.setToken(response.token)
                     _uiState.value = _uiState.value.copy(isLoading = false, isLoggedIn = true)
                 },
                 onFailure = { e ->
