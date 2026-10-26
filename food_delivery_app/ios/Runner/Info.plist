@@ -5,7 +5,17 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Smartsoko</string>
+	<string>SmartSoko</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>SmartSoko uses your location to find nearby shops and deliver your orders.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>SmartSoko uses your location in the background to track deliveries when you are driving.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>SmartSoko uses the camera to take photos of products and deliveries.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>SmartSoko accesses your photo library to upload product and delivery photos.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>SmartSoko uses the microphone when recording video with the camera.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -45,13 +55,5 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Smartsoko uses your location to show nearby shops and track deliveries.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Smartsoko uses your location to show nearby shops and track deliveries.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Smartsoko needs photo library access so you can upload profile pictures and product photos.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Smartsoko uses the camera to take profile pictures and product photos.</string>
 </dict>
 </plist>
