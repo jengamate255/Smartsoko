@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/sme_models.dart';
-import '../models/shop.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:smartsoko/models/sme_models.dart';
+import 'package:smartsoko/models/shop.dart';
 
 class SMEService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

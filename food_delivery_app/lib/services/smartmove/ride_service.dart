@@ -1,12 +1,12 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:json_annotation/json_annotation.dart';
-import '../../utils/logger.dart';
-import '../supabase_service.dart';
-import '../../models/smartmove/ride_request.dart';
-import '../../models/smartmove/ride.dart';
-import '../../models/smartmove/ride_stop.dart';
-import '../../models/smartmove/fare_breakdown.dart';
+import 'package:smartsoko/utils/logger.dart';
+import 'package:smartsoko/services/supabase_service.dart';
+import 'package:smartsoko/models/smartmove/ride_request.dart';
+import 'package:smartsoko/models/smartmove/ride.dart';
+import 'package:smartsoko/models/smartmove/ride_stop.dart';
+import 'package:smartsoko/models/smartmove/fare_breakdown.dart';
 import 'tracking_service.dart';
 
 part 'ride_service.g.dart';

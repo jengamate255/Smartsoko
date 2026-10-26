@@ -1,6 +1,6 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../config/app_config.dart';
-import '../utils/logger.dart';
+﻿import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:smartsoko/config/app_config.dart';
+import 'package:smartsoko/utils/logger.dart';
 
 class SupabaseService {
   static final SupabaseService _instance = SupabaseService._internal();

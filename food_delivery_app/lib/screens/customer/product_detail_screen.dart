@@ -1,7 +1,7 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../widgets/shimmer_loading.dart';
+import 'package:smartsoko/widgets/shimmer_loading.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productName;

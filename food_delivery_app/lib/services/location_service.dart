@@ -1,7 +1,7 @@
-import 'package:geolocator/geolocator.dart';
+﻿import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/rider.dart';
-import '../config/app_config.dart';
+import 'package:smartsoko/models/rider.dart';
+import 'package:smartsoko/config/app_config.dart';
 
 class LocationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

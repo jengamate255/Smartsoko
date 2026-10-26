@@ -1,8 +1,9 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/shop.dart';
-import '../../services/shop_service.dart';
-import '../../services/auth_service.dart';
+import 'package:smartsoko/models/shop.dart';
+import 'package:smartsoko/services/shop_service.dart';
+import 'package:smartsoko/services/auth_service.dart';
 
 class ShopDetailScreen extends StatefulWidget {
   final Shop shop;
@@ -29,11 +30,12 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
-            onPressed: () {
-              // Share shop functionality
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Share functionality coming soon!')),
-              );
+            tooltip: 'Copy shop link',
+            onPressed: () async {
+              final uri = Uri.https('smartsoko.tz', '/discovery', {'sellerId': widget.shop.id});
+              await Clipboard.setData(ClipboardData(text: uri.toString()));
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Shop link copied')));
             },
           ),
         ],

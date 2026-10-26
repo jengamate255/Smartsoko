@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/connectivity_service.dart';
+import 'package:smartsoko/services/connectivity_service.dart';
 
 /// Base offline indicator widget with consistent design system styling
 /// Used by both OfflineIndicator and AnimatedOfflineIndicator

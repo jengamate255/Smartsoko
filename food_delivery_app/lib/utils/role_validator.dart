@@ -1,4 +1,4 @@
-import '../models/user.dart';
+﻿import 'package:smartsoko/models/user.dart';
 
 /// Utility class for validating user roles against app types
 class RoleValidator {

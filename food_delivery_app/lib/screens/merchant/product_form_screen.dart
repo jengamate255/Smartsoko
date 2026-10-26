@@ -1,21 +1,17 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../models/shop.dart';
-import '../../services/shop_service.dart';
-import '../../services/image_upload_service.dart';
-import '../../services/ai_product_service.dart';
-import '../../utils/validators.dart';
+import 'package:smartsoko/models/shop.dart';
+import 'package:smartsoko/services/shop_service.dart';
+import 'package:smartsoko/services/image_upload_service.dart';
+import 'package:smartsoko/services/ai_product_service.dart';
+import 'package:smartsoko/utils/validators.dart';
 
 class ProductFormScreen extends StatefulWidget {
   final Product? product;
   final Shop shop;
 
-  const ProductFormScreen({
-    super.key,
-    this.product,
-    required this.shop,
-  });
+  const ProductFormScreen({super.key, this.product, required this.shop});
 
   @override
   State<ProductFormScreen> createState() => _ProductFormScreenState();
@@ -62,11 +58,22 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   ];
 
   final List<String> _weekDays = [
-    'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'
+    'mon',
+    'tue',
+    'wed',
+    'thu',
+    'fri',
+    'sat',
+    'sun',
   ];
   final Map<String, String> _dayLabels = {
-    'mon': 'Mon', 'tue': 'Tue', 'wed': 'Wed', 'thu': 'Thu',
-    'fri': 'Fri', 'sat': 'Sat', 'sun': 'Sun',
+    'mon': 'Mon',
+    'tue': 'Tue',
+    'wed': 'Wed',
+    'thu': 'Thu',
+    'fri': 'Fri',
+    'sat': 'Sat',
+    'sun': 'Sun',
   };
 
   bool _hasSchedule = false;
@@ -94,11 +101,17 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       }
       if (p.scheduleStart != null) {
         final parts = p.scheduleStart!.split(':');
-        _startTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+        _startTime = TimeOfDay(
+          hour: int.parse(parts[0]),
+          minute: int.parse(parts[1]),
+        );
       }
       if (p.scheduleEnd != null) {
         final parts = p.scheduleEnd!.split(':');
-        _endTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+        _endTime = TimeOfDay(
+          hour: int.parse(parts[0]),
+          minute: int.parse(parts[1]),
+        );
       }
     }
   }
@@ -122,9 +135,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error picking image: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error picking image: $e')));
       }
     }
   }
@@ -140,20 +153,27 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     setState(() => _isExtracting = true);
 
     try {
-      final result = await AIProductService.extractProductFromImage(_selectedImage!);
+      final result = await AIProductService.extractProductFromImage(
+        _selectedImage!,
+      );
 
       if (result.success) {
         setState(() {
           if (result.name.isNotEmpty) _nameController.text = result.name;
-          if (result.description.isNotEmpty) _descriptionController.text = result.description;
-          if (result.price > 0) _priceController.text = result.price.toStringAsFixed(0);
-          if (result.category.isNotEmpty) _categoryController.text = result.category;
+          if (result.description.isNotEmpty)
+            _descriptionController.text = result.description;
+          if (result.price > 0)
+            _priceController.text = result.price.toStringAsFixed(0);
+          if (result.category.isNotEmpty)
+            _categoryController.text = result.category;
         });
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Product extracted! Confidence: ${(result.confidence * 100).toStringAsFixed(0)}%'),
+              content: Text(
+                'Product extracted! Confidence: ${(result.confidence * 100).toStringAsFixed(0)}%',
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -161,14 +181,20 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result.error ?? 'Failed to extract product'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text(result.error ?? 'Failed to extract product'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Extraction error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Extraction error: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -200,13 +226,21 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         category: _categoryController.text.trim(),
         stockQuantity: int.tryParse(_stockController.text) ?? 0,
         isAvailable: widget.product?.isAvailable ?? true,
-        unit: _unitController.text.trim().isNotEmpty ? _unitController.text.trim() : null,
+        unit: _unitController.text.trim().isNotEmpty
+            ? _unitController.text.trim()
+            : null,
         imageUrl: imageUrl,
         attributes: null,
         hasSchedule: _hasSchedule,
-        scheduleDays: _hasSchedule && _selectedDays.isNotEmpty ? _selectedDays.join(',') : null,
-        scheduleStart: _hasSchedule ? '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}' : null,
-        scheduleEnd: _hasSchedule ? '${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}' : null,
+        scheduleDays: _hasSchedule && _selectedDays.isNotEmpty
+            ? _selectedDays.join(',')
+            : null,
+        scheduleStart: _hasSchedule
+            ? '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}'
+            : null,
+        scheduleEnd: _hasSchedule
+            ? '${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}'
+            : null,
         createdAt: widget.product?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -220,7 +254,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(isEditing ? 'Product updated successfully' : 'Product created successfully'),
+            content: Text(
+              isEditing
+                  ? 'Product updated successfully'
+                  : 'Product created successfully',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -240,9 +278,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditing ? 'Edit Product' : 'Add Product'),
-      ),
+      appBar: AppBar(title: Text(isEditing ? 'Edit Product' : 'Add Product')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -265,20 +301,31 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                           child: Image.file(_selectedImage!, fit: BoxFit.cover),
                         )
                       : _existingImageUrl != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.network(_existingImageUrl!, fit: BoxFit.cover),
-                            )
-                          : Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.add_photo_alternate, size: 50, color: Colors.grey[400]),
-                                  const SizedBox(height: 8),
-                                  Text('Tap to add product image', style: TextStyle(color: Colors.grey[500])),
-                                ],
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            _existingImageUrl!,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_photo_alternate,
+                                size: 50,
+                                color: Colors.grey[400],
                               ),
-),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Tap to add product image',
+                                style: TextStyle(color: Colors.grey[500]),
+                              ),
+                            ],
+                          ),
+                        ),
+                ),
               ),
               if (_selectedImage != null && !_isExtracting) ...[
                 const SizedBox(height: 12),
@@ -298,9 +345,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ],
               if (_isExtracting) ...[
                 const SizedBox(height: 12),
-                const Center(
-                  child: CircularProgressIndicator(),
-                ),
+                const Center(child: CircularProgressIndicator()),
               ],
               const SizedBox(height: 24),
 
@@ -348,7 +393,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       validator: (v) {
                         if (v == null || v.isEmpty) return 'Price is required';
                         final price = int.tryParse(v);
-                        if (price == null || price <= 0) return 'Enter a valid price';
+                        if (price == null || price <= 0)
+                          return 'Enter a valid price';
                         return null;
                       },
                     ),
@@ -374,54 +420,65 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               Autocomplete<String>(
                 optionsBuilder: (textEditingValue) {
                   if (textEditingValue.text.isEmpty) return _defaultCategories;
-                  return _defaultCategories.where((c) =>
-                      c.toLowerCase().contains(textEditingValue.text.toLowerCase()));
-                },
-                onSelected: (selection) => _categoryController.text = selection,
-                fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-                  if (controller.text.isEmpty && _categoryController.text.isNotEmpty) {
-                    controller.text = _categoryController.text;
-                  }
-                  return TextFormField(
-                    controller: controller,
-                    focusNode: focusNode,
-                    decoration: const InputDecoration(
-                      labelText: 'Category *',
-                      hintText: 'Select or enter category',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.category),
+                  return _defaultCategories.where(
+                    (c) => c.toLowerCase().contains(
+                      textEditingValue.text.toLowerCase(),
                     ),
-                    textCapitalization: TextCapitalization.words,
-                    onChanged: (v) => _categoryController.text = v,
-                    validator: (v) => Validators.validateRequired(v, 'Category'),
                   );
                 },
+                onSelected: (selection) => _categoryController.text = selection,
+                fieldViewBuilder:
+                    (context, controller, focusNode, onFieldSubmitted) {
+                      if (controller.text.isEmpty &&
+                          _categoryController.text.isNotEmpty) {
+                        controller.text = _categoryController.text;
+                      }
+                      return TextFormField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        decoration: const InputDecoration(
+                          labelText: 'Category *',
+                          hintText: 'Select or enter category',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.category),
+                        ),
+                        textCapitalization: TextCapitalization.words,
+                        onChanged: (v) => _categoryController.text = v,
+                        validator: (v) =>
+                            Validators.validateRequired(v, 'Category'),
+                      );
+                    },
               ),
               const SizedBox(height: 16),
 
               Autocomplete<String>(
                 optionsBuilder: (textEditingValue) {
                   if (textEditingValue.text.isEmpty) return _defaultUnits;
-                  return _defaultUnits.where((u) =>
-                      u.toLowerCase().contains(textEditingValue.text.toLowerCase()));
-                },
-                onSelected: (selection) => _unitController.text = selection,
-                fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-                  if (controller.text.isEmpty && _unitController.text.isNotEmpty) {
-                    controller.text = _unitController.text;
-                  }
-                  return TextFormField(
-                    controller: controller,
-                    focusNode: focusNode,
-                    decoration: const InputDecoration(
-                      labelText: 'Unit (optional)',
-                      hintText: 'piece, kg, litre...',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.scale),
+                  return _defaultUnits.where(
+                    (u) => u.toLowerCase().contains(
+                      textEditingValue.text.toLowerCase(),
                     ),
-                    onChanged: (v) => _unitController.text = v,
                   );
                 },
+                onSelected: (selection) => _unitController.text = selection,
+                fieldViewBuilder:
+                    (context, controller, focusNode, onFieldSubmitted) {
+                      if (controller.text.isEmpty &&
+                          _unitController.text.isNotEmpty) {
+                        controller.text = _unitController.text;
+                      }
+                      return TextFormField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        decoration: const InputDecoration(
+                          labelText: 'Unit (optional)',
+                          hintText: 'piece, kg, litre...',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.scale),
+                        ),
+                        onChanged: (v) => _unitController.text = v,
+                      );
+                    },
               ),
               const SizedBox(height: 24),
 
@@ -439,7 +496,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Schedule Availability', style: TextStyle(fontWeight: FontWeight.w600)),
+                        const Text(
+                          'Schedule Availability',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
                         Switch(
                           value: _hasSchedule,
                           onChanged: (v) => setState(() => _hasSchedule = v),
@@ -449,7 +509,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     ),
                     if (_hasSchedule) ...[
                       const SizedBox(height: 12),
-                      const Text('Available Days', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                      const Text(
+                        'Available Days',
+                        style: TextStyle(fontSize: 13, color: Colors.grey),
+                      ),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 6,
@@ -463,8 +526,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                             checkmarkColor: Colors.orange[800],
                             onSelected: (v) {
                               setState(() {
-                                if (v) { _selectedDays.add(day); }
-                                else { _selectedDays.remove(day); }
+                                if (v) {
+                                  _selectedDays.add(day);
+                                } else {
+                                  _selectedDays.remove(day);
+                                }
                               });
                             },
                           );
@@ -476,8 +542,12 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                           Expanded(
                             child: InkWell(
                               onTap: () async {
-                                final time = await showTimePicker(context: context, initialTime: _startTime);
-                                if (time != null) setState(() => _startTime = time);
+                                final time = await showTimePicker(
+                                  context: context,
+                                  initialTime: _startTime,
+                                );
+                                if (time != null)
+                                  setState(() => _startTime = time);
                               },
                               child: InputDecorator(
                                 decoration: const InputDecoration(
@@ -493,8 +563,12 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                           Expanded(
                             child: InkWell(
                               onTap: () async {
-                                final time = await showTimePicker(context: context, initialTime: _endTime);
-                                if (time != null) setState(() => _endTime = time);
+                                final time = await showTimePicker(
+                                  context: context,
+                                  initialTime: _endTime,
+                                );
+                                if (time != null)
+                                  setState(() => _endTime = time);
                               },
                               child: InputDecorator(
                                 decoration: const InputDecoration(
@@ -525,9 +599,15 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     ? const SizedBox(
                         height: 20,
                         width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       )
-                    : Text(isEditing ? 'Update Product' : 'Add Product', style: const TextStyle(fontSize: 16)),
+                    : Text(
+                        isEditing ? 'Update Product' : 'Add Product',
+                        style: const TextStyle(fontSize: 16),
+                      ),
               ),
             ],
           ),

@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/restaurant.dart';
-import '../../services/restaurant_service.dart';
-import '../../services/cart_service.dart';
-import '../../utils/constants.dart';
+import 'package:smartsoko/models/restaurant.dart';
+import 'package:smartsoko/services/restaurant_service.dart';
+import 'package:smartsoko/services/cart_service.dart';
+import 'package:smartsoko/utils/constants.dart';
 import 'cart_screen.dart';
 
 class RestaurantScreen extends StatefulWidget {
@@ -49,13 +49,23 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Icon(Icons.access_time, size: 20, color: Colors.grey[600]),
+                      Icon(
+                        Icons.access_time,
+                        size: 20,
+                        color: Colors.grey[600],
+                      ),
                       const SizedBox(width: 8),
                       Text('${widget.restaurant.deliveryTimeMinutes} min'),
                       const SizedBox(width: 24),
-                      Icon(Icons.delivery_dining, size: 20, color: Colors.grey[600]),
+                      Icon(
+                        Icons.delivery_dining,
+                        size: 20,
+                        color: Colors.grey[600],
+                      ),
                       const SizedBox(width: 8),
-                      Text(AppConstants.formatPrice(widget.restaurant.deliveryFee)),
+                      Text(
+                        AppConstants.formatPrice(widget.restaurant.deliveryFee),
+                      ),
                     ],
                   ),
                 ],
@@ -78,7 +88,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 );
               }
 
-              final categories = menuItems.map((e) => e.category).toSet().toList();
+              final categories = menuItems
+                  .map((e) => e.category)
+                  .toSet()
+                  .toList();
 
               return SliverList(
                 delegate: SliverChildBuilderDelegate(
@@ -92,13 +105,17 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                             FilterChip(
                               label: const Text('All'),
                               selected: _selectedCategory == null,
-                              onSelected: (_) => setState(() => _selectedCategory = null),
+                              onSelected: (_) =>
+                                  setState(() => _selectedCategory = null),
                             ),
-                            ...categories.map((cat) => FilterChip(
-                              label: Text(cat),
-                              selected: _selectedCategory == cat,
-                              onSelected: (_) => setState(() => _selectedCategory = cat),
-                            )),
+                            ...categories.map(
+                              (cat) => FilterChip(
+                                label: Text(cat),
+                                selected: _selectedCategory == cat,
+                                onSelected: (_) =>
+                                    setState(() => _selectedCategory = cat),
+                              ),
+                            ),
                           ],
                         ),
                       );
@@ -107,7 +124,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                     final itemIndex = index - 1;
                     final filteredItems = _selectedCategory == null
                         ? menuItems
-                        : menuItems.where((e) => e.category == _selectedCategory).toList();
+                        : menuItems
+                              .where((e) => e.category == _selectedCategory)
+                              .toList();
 
                     if (itemIndex >= filteredItems.length) return null;
 
@@ -125,7 +144,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                         child: item.imageUrl.isNotEmpty
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: Image.network(item.imageUrl, fit: BoxFit.cover),
+                                child: Image.network(
+                                  item.imageUrl,
+                                  fit: BoxFit.cover,
+                                ),
                               )
                             : const Icon(Icons.fastfood),
                       ),
@@ -152,9 +174,13 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                             ),
                     );
                   },
-                  childCount: 1 + (_selectedCategory == null
-                      ? menuItems.length
-                      : menuItems.where((e) => e.category == _selectedCategory).length),
+                  childCount:
+                      1 +
+                      (_selectedCategory == null
+                          ? menuItems.length
+                          : menuItems
+                                .where((e) => e.category == _selectedCategory)
+                                .length),
                 ),
               );
             },
@@ -174,7 +200,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                     builder: (_) => CartScreen(
                       restaurant: widget.restaurant,
                       cartItems: {
-                        for (final line in cart.lines) line.item.id: line.quantity,
+                        for (final line in cart.lines)
+                          line.item.id: line.quantity,
                       },
                     ),
                   ),
@@ -183,7 +210,11 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
               onClearDifferentRestaurant: () {
                 cart.clearCart();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Previous restaurant cart cleared — add items from this restaurant')),
+                  const SnackBar(
+                    content: Text(
+                      'Previous restaurant cart cleared — add items from this restaurant',
+                    ),
+                  ),
                 );
               },
             ),
@@ -197,8 +228,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
         builder: (ctx) => AlertDialog(
           title: const Text('Start a new cart?'),
           content: Text(
-              'Your cart has items from ${cart.restaurantName ?? 'another restaurant'}. '
-              'Clear it and add items from ${widget.restaurant.name}?'),
+            'Your cart has items from ${cart.restaurantName ?? 'another restaurant'}. '
+            'Clear it and add items from ${widget.restaurant.name}?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
@@ -268,7 +300,9 @@ class _CartBar extends StatelessWidget {
               backgroundColor: Colors.orange,
               foregroundColor: Colors.white,
             ),
-            child: Text('View Cart (${cart.itemCount} items · TZS ${cart.subtotal.toStringAsFixed(0)})'),
+            child: Text(
+              'View Cart (${cart.itemCount} items · TZS ${cart.subtotal.toStringAsFixed(0)})',
+            ),
           ),
         ),
       ),

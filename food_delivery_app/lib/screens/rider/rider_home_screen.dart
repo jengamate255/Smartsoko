@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/order.dart';
-import '../../services/order_service.dart';
-import '../../services/location_service.dart';
-import '../../services/auth_service.dart';
+import 'package:smartsoko/models/order.dart';
+import 'package:smartsoko/services/order_service.dart';
+import 'package:smartsoko/services/location_service.dart';
+import 'package:smartsoko/services/auth_service.dart';
 import 'rider_map_screen.dart';
 
 class RiderHomeScreen extends StatefulWidget {
@@ -74,7 +74,11 @@ class _RiderHomeScreenState extends State<RiderHomeScreen> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.delivery_dining, size: 64, color: Colors.grey),
+                                  Icon(
+                                    Icons.delivery_dining,
+                                    size: 64,
+                                    color: Colors.grey,
+                                  ),
                                   SizedBox(height: 16),
                                   Text('No pending orders'),
                                 ],
@@ -172,9 +176,16 @@ class _RiderOrderCard extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
-                  final riderId = 'rider_${authService.currentUser?.uid ?? 'current'}';
-                  await orderService.assignRider(order.id, riderId);
-                  await orderService.updateOrderStatus(order.id, OrderStatus.pickedUp);
+                  final idToken = await authService.requireIdToken();
+                  // The server binds the order to the calling driver and
+                  // enforces the transition; the rider no longer writes
+                  // `driver_id` with the anon key (the policies 401'd).
+                  await orderService.acceptOrder(order.id, idToken: idToken);
+                  await orderService.updateDriverOrderStatus(
+                    order.id,
+                    OrderStatus.pickedUp,
+                    idToken: idToken,
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../widgets/offline_indicator.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:smartsoko/widgets/offline_indicator.dart';
 import 'restaurant_list_screen.dart';
 import 'order_history_screen.dart';
 import 'customer_profile_screen.dart';

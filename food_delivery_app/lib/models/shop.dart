@@ -11,7 +11,7 @@ enum ShopType {
   fish,
   farming,
   dairy,
-  other
+  other,
 }
 
 extension ShopTypeExtension on ShopType {
@@ -207,6 +207,10 @@ class Product {
   final Map<String, dynamic>? attributes; // Additional product attributes
   final DateTime createdAt;
   final DateTime? updatedAt;
+  final bool hasSchedule;
+  final String? scheduleDays;
+  final String? scheduleStart;
+  final String? scheduleEnd;
 
   Product({
     required this.id,
@@ -222,6 +226,10 @@ class Product {
     this.attributes,
     required this.createdAt,
     this.updatedAt,
+    this.hasSchedule = false,
+    this.scheduleDays,
+    this.scheduleStart,
+    this.scheduleEnd,
   });
 
   factory Product.fromFirestore(DocumentSnapshot doc) {
@@ -229,6 +237,10 @@ class Product {
     return Product(
       id: doc.id,
       shopId: data['shopId'] ?? '',
+      hasSchedule: data['hasSchedule'] ?? false,
+      scheduleDays: data['scheduleDays'],
+      scheduleStart: data['scheduleStart'],
+      scheduleEnd: data['scheduleEnd'],
       name: data['name'] ?? '',
       description: data['description'] ?? '',
       price: (data['price'] ?? 0.0).toDouble(),
@@ -251,6 +263,10 @@ class Product {
       'name': name,
       'description': description,
       'price': price,
+      'hasSchedule': hasSchedule,
+      'scheduleDays': scheduleDays,
+      'scheduleStart': scheduleStart,
+      'scheduleEnd': scheduleEnd,
       'imageUrl': imageUrl,
       'category': category,
       'stockQuantity': stockQuantity,
@@ -273,11 +289,19 @@ class Product {
     String? unit,
     Map<String, dynamic>? attributes,
     DateTime? updatedAt,
+    bool? hasSchedule,
+    String? scheduleDays,
+    String? scheduleStart,
+    String? scheduleEnd,
   }) {
     return Product(
       id: id,
       shopId: shopId,
       name: name ?? this.name,
+      hasSchedule: hasSchedule ?? this.hasSchedule,
+      scheduleDays: scheduleDays ?? this.scheduleDays,
+      scheduleStart: scheduleStart ?? this.scheduleStart,
+      scheduleEnd: scheduleEnd ?? this.scheduleEnd,
       description: description ?? this.description,
       price: price ?? this.price,
       imageUrl: imageUrl ?? this.imageUrl,
@@ -344,7 +368,8 @@ class ShopOrder {
       userId: data['userId'] ?? '',
       shopId: data['shopId'] ?? '',
       shopName: data['shopName'] ?? '',
-      items: (data['items'] as List<dynamic>?)
+      items:
+          (data['items'] as List<dynamic>?)
               ?.map((item) => ShopOrderItem.fromMap(item))
               .toList() ??
           [],
@@ -390,8 +415,9 @@ class ShopOrder {
       'paymentStatus': paymentStatus,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
-      'deliveredAt':
-          deliveredAt != null ? Timestamp.fromDate(deliveredAt!) : null,
+      'deliveredAt': deliveredAt != null
+          ? Timestamp.fromDate(deliveredAt!)
+          : null,
     };
   }
 }

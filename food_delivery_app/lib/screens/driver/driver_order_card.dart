@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import '../../models/order.dart';
-import '../../services/analytics_service.dart';
-import '../../utils/constants.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:smartsoko/models/order.dart';
+import 'package:smartsoko/services/analytics_service.dart';
+import 'package:smartsoko/utils/constants.dart';
 import 'driver_order_detail_screen.dart';
 
 class DriverOrderCard extends StatelessWidget {

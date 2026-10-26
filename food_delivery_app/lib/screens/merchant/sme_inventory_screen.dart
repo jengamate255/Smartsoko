@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../models/shop.dart';
-import '../../models/sme_models.dart';
-import '../../services/sme_service.dart';
+import 'package:smartsoko/models/shop.dart';
+import 'package:smartsoko/models/sme_models.dart';
+import 'package:smartsoko/services/sme_service.dart';
 
 class SMEInventoryScreen extends StatefulWidget {
   final Shop shop;
@@ -40,12 +40,14 @@ class _SMEInventoryScreenState extends State<SMEInventoryScreen> {
                 .collection('products')
                 .where('shopId', isEqualTo: widget.shop.id)
                 .snapshots()
-                .map((snapshot) => snapshot.docs
-                    .map((doc) => Product.fromFirestore(doc))
-                    .toList()),
+                .map(
+                  (snapshot) => snapshot.docs
+                      .map((doc) => Product.fromFirestore(doc))
+                      .toList(),
+                ),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return const SizedBox.shrink();
-              
+
               final lowStockProducts = snapshot.data!
                   .where((p) => p.stockQuantity > 0 && p.stockQuantity < 10)
                   .toList();
@@ -100,16 +102,26 @@ class _SMEInventoryScreenState extends State<SMEInventoryScreen> {
                           ),
                           if (lowStockProducts.isNotEmpty)
                             Text(
-                              lowStockProducts.map((p) => p.name).take(3).join(', ') +
+                              lowStockProducts
+                                      .map((p) => p.name)
+                                      .take(3)
+                                      .join(', ') +
                                   (lowStockProducts.length > 3 ? '...' : ''),
-                              style: const TextStyle(fontSize: 12, color: Colors.grey),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
                             ),
                         ],
                       ),
                     ),
                     TextButton(
                       onPressed: () {
-                        setState(() => _filter = outOfStockProducts.isNotEmpty ? 'out' : 'low');
+                        setState(
+                          () => _filter = outOfStockProducts.isNotEmpty
+                              ? 'out'
+                              : 'low',
+                        );
                       },
                       child: const Text('VIEW'),
                     ),
@@ -134,7 +146,8 @@ class _SMEInventoryScreenState extends State<SMEInventoryScreen> {
                     filled: true,
                     fillColor: Colors.grey[100],
                   ),
-                  onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
+                  onChanged: (v) =>
+                      setState(() => _searchQuery = v.toLowerCase()),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -156,9 +169,11 @@ class _SMEInventoryScreenState extends State<SMEInventoryScreen> {
                   .collection('products')
                   .where('shopId', isEqualTo: widget.shop.id)
                   .snapshots()
-                  .map((snapshot) => snapshot.docs
-                      .map((doc) => Product.fromFirestore(doc))
-                      .toList()),
+                  .map(
+                    (snapshot) => snapshot.docs
+                        .map((doc) => Product.fromFirestore(doc))
+                        .toList(),
+                  ),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
@@ -173,9 +188,13 @@ class _SMEInventoryScreenState extends State<SMEInventoryScreen> {
                 }
 
                 if (_filter == 'low') {
-                  products = products.where((p) => p.stockQuantity > 0 && p.stockQuantity < 10).toList();
+                  products = products
+                      .where((p) => p.stockQuantity > 0 && p.stockQuantity < 10)
+                      .toList();
                 } else if (_filter == 'out') {
-                  products = products.where((p) => p.stockQuantity == 0).toList();
+                  products = products
+                      .where((p) => p.stockQuantity == 0)
+                      .toList();
                 } else if (_filter == 'available') {
                   products = products.where((p) => p.isAvailable).toList();
                 }
@@ -223,12 +242,24 @@ class _SMEInventoryScreenState extends State<SMEInventoryScreen> {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: isOutOfStock ? Colors.red[100] : isLowStock ? Colors.orange[100] : Colors.green[100],
+            color: isOutOfStock
+                ? Colors.red[100]
+                : isLowStock
+                ? Colors.orange[100]
+                : Colors.green[100],
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
-            isOutOfStock ? Icons.block : isLowStock ? Icons.warning : Icons.inventory_2,
-            color: isOutOfStock ? Colors.red : isLowStock ? Colors.orange : Colors.green,
+            isOutOfStock
+                ? Icons.block
+                : isLowStock
+                ? Icons.warning
+                : Icons.inventory_2,
+            color: isOutOfStock
+                ? Colors.red
+                : isLowStock
+                ? Colors.orange
+                : Colors.green,
           ),
         ),
         title: Text(product.name),
@@ -316,9 +347,7 @@ class _SMEInventoryScreenState extends State<SMEInventoryScreen> {
       onPressed: onTap,
       icon: Icon(icon, size: 18, color: color),
       label: Text(label, style: TextStyle(color: color)),
-      style: OutlinedButton.styleFrom(
-        side: BorderSide(color: color),
-      ),
+      style: OutlinedButton.styleFrom(side: BorderSide(color: color)),
     );
   }
 
@@ -359,7 +388,10 @@ class _SMEInventoryScreenState extends State<SMEInventoryScreen> {
 
       if (newStock < 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cannot remove more than current stock'), backgroundColor: Colors.red),
+          const SnackBar(
+            content: Text('Cannot remove more than current stock'),
+            backgroundColor: Colors.red,
+          ),
         );
         return;
       }
@@ -382,7 +414,12 @@ class _SMEInventoryScreenState extends State<SMEInventoryScreen> {
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Stock updated: ${product.stockQuantity} → $newStock'), backgroundColor: Colors.green),
+          SnackBar(
+            content: Text(
+              'Stock updated: ${product.stockQuantity} → $newStock',
+            ),
+            backgroundColor: Colors.green,
+          ),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -406,13 +443,19 @@ class _SMEInventoryScreenState extends State<SMEInventoryScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Text(
                   'Stock History: ${product.name}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const Divider(),
               Expanded(
                 child: StreamBuilder<List<StockHistory>>(
-                  stream: _smeService.getProductStockHistory(widget.shop.id, product.id),
+                  stream: _smeService.getProductStockHistory(
+                    widget.shop.id,
+                    product.id,
+                  ),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const Center(child: CircularProgressIndicator());
@@ -428,11 +471,19 @@ class _SMEInventoryScreenState extends State<SMEInventoryScreen> {
                         final entry = history[index];
                         return ListTile(
                           leading: Icon(
-                            entry.quantityChange > 0 ? Icons.arrow_upward : Icons.arrow_downward,
-                            color: entry.quantityChange > 0 ? Colors.green : Colors.red,
+                            entry.quantityChange > 0
+                                ? Icons.arrow_upward
+                                : Icons.arrow_downward,
+                            color: entry.quantityChange > 0
+                                ? Colors.green
+                                : Colors.red,
                           ),
-                          title: Text('${entry.quantityChange > 0 ? '+' : ''}${entry.quantityChange} ${entry.type.name}'),
-                          subtitle: Text('${entry.previousStock} → ${entry.newStock}'),
+                          title: Text(
+                            '${entry.quantityChange > 0 ? '+' : ''}${entry.quantityChange} ${entry.type.name}',
+                          ),
+                          subtitle: Text(
+                            '${entry.previousStock} → ${entry.newStock}',
+                          ),
                           trailing: Text(
                             _formatDate(entry.createdAt),
                             style: const TextStyle(fontSize: 12),
@@ -468,9 +519,11 @@ class _SMEInventoryScreenState extends State<SMEInventoryScreen> {
                 .collection('products')
                 .where('shopId', isEqualTo: widget.shop.id)
                 .snapshots()
-                .map((snapshot) => snapshot.docs
-                    .map((doc) => Product.fromFirestore(doc))
-                    .toList()),
+                .map(
+                  (snapshot) => snapshot.docs
+                      .map((doc) => Product.fromFirestore(doc))
+                      .toList(),
+                ),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
@@ -501,21 +554,43 @@ class _SMEInventoryScreenState extends State<SMEInventoryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (outOfStock.isNotEmpty) ...[
-                    const Text('Out of Stock', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Out of Stock',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 8),
-                    ...outOfStock.map((p) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text('• ${p.name}', style: const TextStyle(color: Colors.red)),
-                    )),
+                    ...outOfStock.map(
+                      (p) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          '• ${p.name}',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 16),
                   ],
                   if (lowStock.isNotEmpty) ...[
-                    const Text('Low Stock', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Low Stock',
+                      style: TextStyle(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 8),
-                    ...lowStock.map((p) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text('• ${p.name} (${p.stockQuantity} left)', style: const TextStyle(color: Colors.orange)),
-                    )),
+                    ...lowStock.map(
+                      (p) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          '• ${p.name} (${p.stockQuantity} left)',
+                          style: const TextStyle(color: Colors.orange),
+                        ),
+                      ),
+                    ),
                   ],
                 ],
               );

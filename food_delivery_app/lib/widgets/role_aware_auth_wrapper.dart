@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/auth_service.dart';
-import '../config/app_config.dart';
-import '../utils/role_validator.dart';
-import '../models/user.dart' as models;
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/config/app_config.dart';
+import 'package:smartsoko/utils/role_validator.dart';
+import 'package:smartsoko/models/user.dart' as models;
 
 /// Widget that wraps authentication and validates user role against app type
 /// 

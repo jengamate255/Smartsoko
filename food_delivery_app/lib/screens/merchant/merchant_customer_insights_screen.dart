@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../models/shop.dart';
-import '../../models/sme_models.dart';
-import '../../services/sme_service.dart';
-import '../../services/auth_service.dart';
-import '../../services/restaurant_service.dart';
+import 'package:smartsoko/models/shop.dart';
+import 'package:smartsoko/models/sme_models.dart';
+import 'package:smartsoko/services/sme_service.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/services/restaurant_service.dart';
 
 class MerchantCustomerInsightsScreen extends StatefulWidget {
   final String restaurantId;

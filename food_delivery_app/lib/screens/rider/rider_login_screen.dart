@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:smartsoko/utils/validators.dart';
 import 'package:provider/provider.dart';
-import '../../services/auth_service.dart';
-import '../../models/user.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/models/user.dart';
 import 'rider_home_screen.dart';
 
 class RiderLoginScreen extends StatefulWidget {
@@ -30,7 +31,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
     try {
       final authService = context.read<AuthService>();
       final user = await authService.signInWithPhone(_phoneController.text);
-      
+
       await authService.updateUserRole(user.id, UserRole.rider);
 
       if (mounted) {
@@ -41,9 +42,9 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) {
@@ -64,11 +65,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(
-                  Icons.delivery_dining,
-                  size: 80,
-                  color: Colors.blue,
-                ),
+                const Icon(Icons.delivery_dining, size: 80, color: Colors.blue),
                 const SizedBox(height: 24),
                 Text(
                   'Rider Login',
@@ -80,9 +77,9 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Enter your phone number to start delivering',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 48),
@@ -95,7 +92,7 @@ class _RiderLoginScreenState extends State<RiderLoginScreen> {
                     prefixIcon: Icon(Icons.phone),
                     border: OutlineInputBorder(),
                   ),
-                   validator: Validators.validatePhone,
+                  validator: Validators.validatePhone,
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(

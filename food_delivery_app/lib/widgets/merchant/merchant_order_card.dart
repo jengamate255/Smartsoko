@@ -1,18 +1,16 @@
-import 'package:flutter/material.dart';
-import '../../models/order.dart';
-import '../../services/order_service.dart';
-import '../../screens/merchant/merchant_order_detail_screen.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smartsoko/models/order.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/services/order_service.dart';
+import 'package:smartsoko/screens/merchant/merchant_order_detail_screen.dart';
 
 class MerchantOrderCard extends StatelessWidget {
   final Order order;
   final String? customerName;
   final OrderService _orderService = OrderService();
 
-  MerchantOrderCard({
-    super.key,
-    required this.order,
-    this.customerName,
-  });
+  MerchantOrderCard({super.key, required this.order, this.customerName});
 
   Color _getStatusColor() {
     switch (order.status) {
@@ -114,7 +112,9 @@ class MerchantOrderCard extends StatelessWidget {
                 height: 4,
                 decoration: BoxDecoration(
                   color: statusColor,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                 ),
               ),
               Padding(
@@ -131,7 +131,11 @@ class MerchantOrderCard extends StatelessWidget {
                             color: statusColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Icon(_getStatusIcon(), color: statusColor, size: 18),
+                          child: Icon(
+                            _getStatusIcon(),
+                            color: statusColor,
+                            size: 18,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -149,17 +153,25 @@ class MerchantOrderCard extends StatelessWidget {
                               const SizedBox(height: 2),
                               Text(
                                 _formatTime(order.createdAt),
-                                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[500],
+                                ),
                               ),
                             ],
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: statusColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: statusColor.withOpacity(0.2)),
+                            border: Border.all(
+                              color: statusColor.withOpacity(0.2),
+                            ),
                           ),
                           child: Text(
                             _getStatusText(),
@@ -180,7 +192,9 @@ class MerchantOrderCard extends StatelessWidget {
                         children: [
                           CircleAvatar(
                             radius: 12,
-                            backgroundColor: const Color(0xFF064E3B).withOpacity(0.1),
+                            backgroundColor: const Color(
+                              0xFF064E3B,
+                            ).withOpacity(0.1),
                             child: Text(
                               (customerName ?? '?')[0].toUpperCase(),
                               style: const TextStyle(
@@ -214,12 +228,19 @@ class MerchantOrderCard extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.shopping_bag_outlined, size: 15, color: Colors.grey),
+                          const Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 15,
+                            color: Colors.grey,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               _getItemsSummary(),
-                              style: const TextStyle(fontSize: 13, color: Color(0xFF4B5563)),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF4B5563),
+                              ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -246,14 +267,16 @@ class MerchantOrderCard extends StatelessWidget {
                             label: 'Accept',
                             icon: Icons.check,
                             color: const Color(0xFF064E3B),
-                            onPressed: () => _updateStatus(context, OrderStatus.confirmed),
+                            onPressed: () =>
+                                _updateStatus(context, OrderStatus.confirmed),
                           ),
                         if (order.status == OrderStatus.confirmed)
                           _ActionButton(
                             label: 'Start Prep',
                             icon: Icons.restaurant,
                             color: const Color(0xFF8B5CF6),
-                            onPressed: () => _updateStatus(context, OrderStatus.preparing),
+                            onPressed: () =>
+                                _updateStatus(context, OrderStatus.preparing),
                           ),
                         if (order.status == OrderStatus.preparing)
                           _ActionButton(
@@ -261,14 +284,16 @@ class MerchantOrderCard extends StatelessWidget {
                             icon: Icons.check_circle,
                             color: const Color(0xFF10B981),
                             isPrimary: true,
-                            onPressed: () => _updateStatus(context, OrderStatus.ready),
+                            onPressed: () =>
+                                _updateStatus(context, OrderStatus.ready),
                           ),
                         if (order.status == OrderStatus.ready)
                           _ActionButton(
                             label: 'Picked Up',
                             icon: Icons.delivery_dining,
                             color: const Color(0xFF06B6D4),
-                            onPressed: () => _updateStatus(context, OrderStatus.pickedUp),
+                            onPressed: () =>
+                                _updateStatus(context, OrderStatus.pickedUp),
                           ),
                       ],
                     ),
@@ -286,13 +311,15 @@ class MerchantOrderCard extends StatelessWidget {
     if (order.items.isEmpty) {
       return 'No items';
     }
-    return order.items.map((item) => '${item.quantity}x ${item.name}').join(', ');
+    return order.items
+        .map((item) => '${item.quantity}x ${item.name}')
+        .join(', ');
   }
 
   String _formatTime(DateTime dateTime) {
     final now = DateTime.now();
     final diff = now.difference(dateTime);
-    
+
     if (diff.inMinutes < 1) {
       return 'Just now';
     } else if (diff.inMinutes < 60) {
@@ -304,9 +331,16 @@ class MerchantOrderCard extends StatelessWidget {
     }
   }
 
-  Future<void> _updateStatus(BuildContext context, OrderStatus newStatus) async {
+  Future<void> _updateStatus(
+    BuildContext context,
+    OrderStatus newStatus,
+  ) async {
     try {
-      await _orderService.updateOrderStatus(order.id, newStatus);
+      await _orderService.updateOrderStatus(
+        order.id,
+        newStatus,
+        idToken: await context.read<AuthService>().requireIdToken(),
+      );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -319,7 +353,9 @@ class MerchantOrderCard extends StatelessWidget {
             ),
             backgroundColor: const Color(0xFF064E3B),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }
@@ -336,7 +372,9 @@ class MerchantOrderCard extends StatelessWidget {
             ),
             backgroundColor: Colors.red[600],
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }
@@ -371,7 +409,9 @@ class _ActionButton extends StatelessWidget {
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
     }

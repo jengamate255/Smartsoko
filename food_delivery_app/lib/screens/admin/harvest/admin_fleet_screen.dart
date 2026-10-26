@@ -1,7 +1,8 @@
+import 'package:smartsoko/utils/csv_export.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../services/supabase_service.dart';
-import '../../utils/app_theme.dart';
+import 'package:smartsoko/services/supabase_service.dart';
+import 'package:smartsoko/utils/app_theme.dart';
 
 class AdminFleetScreen extends StatefulWidget {
   const AdminFleetScreen({super.key});
@@ -29,11 +30,10 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
     setState(() => _isLoading = true);
     try {
       final client = _supabaseService.client;
-      
+
       var query = client
           .from('driver_profiles')
-          .select('*, wallet:wallets(balance, total_earned)')
-          .order('created_at', ascending: false);
+          .select('*, wallet:wallets(balance, total_earned)');
 
       if (_selectedStatus == 'online') {
         query = query.eq('is_online', true);
@@ -48,11 +48,17 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
       }
 
       if (_searchQuery.isNotEmpty) {
-        query = query.or('full_name.ilike.%$_searchQuery%,phone.ilike.%$_searchQuery%,vehicle_plate.ilike.%$_searchQuery%');
+        query = query.or(
+          'full_name.ilike.%$_searchQuery%,phone.ilike.%$_searchQuery%,vehicle_plate.ilike.%$_searchQuery%',
+        );
       }
 
       final response = await query
-          .range((_currentPage - 1) * _itemsPerPage, _currentPage * _itemsPerPage - 1)
+          .order('created_at', ascending: false)
+          .range(
+            (_currentPage - 1) * _itemsPerPage,
+            _currentPage * _itemsPerPage - 1,
+          )
           .count(CountOption.exact);
 
       if (mounted) {
@@ -65,7 +71,10 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading drivers: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error loading drivers: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -74,15 +83,21 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
   Future<void> _updateDriverStatus(String driverId, String newStatus) async {
     try {
       final client = _supabaseService.client;
-      await client.from('driver_profiles').update({
-        'status': newStatus,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', driverId);
-      
+      await client
+          .from('driver_profiles')
+          .update({
+            'status': newStatus,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', driverId);
+
       _loadDrivers();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Driver status updated to $newStatus'), backgroundColor: Colors.green),
+          SnackBar(
+            content: Text('Driver status updated to $newStatus'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
@@ -100,16 +115,22 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
 
     try {
       final client = _supabaseService.client;
-      await client.from('driver_profiles').update({
-        'status': 'suspended',
-        'suspension_reason': reason,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', driverId);
-      
+      await client
+          .from('driver_profiles')
+          .update({
+            'status': 'suspended',
+            'suspension_reason': reason,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', driverId);
+
       _loadDrivers();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Driver suspended'), backgroundColor: Colors.orange),
+          const SnackBar(
+            content: Text('Driver suspended'),
+            backgroundColor: Colors.orange,
+          ),
         );
       }
     } catch (e) {
@@ -133,7 +154,10 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
           maxLines: 3,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(context, controller.text),
             child: const Text('Submit'),
@@ -145,8 +169,12 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
 
   void _showDriverDetail(Map<String, dynamic> driver) {
     final wallet = driver['wallet'] as List<dynamic>?;
-    final balance = wallet?.isNotEmpty == true ? wallet!.first['balance'] ?? 0 : 0;
-    final totalEarned = wallet?.isNotEmpty == true ? wallet!.first['total_earned'] ?? 0 : 0;
+    final balance = wallet?.isNotEmpty == true
+        ? wallet!.first['balance'] ?? 0
+        : 0;
+    final totalEarned = wallet?.isNotEmpty == true
+        ? wallet!.first['total_earned'] ?? 0
+        : 0;
 
     showDialog(
       context: context,
@@ -159,34 +187,78 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
             children: [
               _buildInfoRow('Phone', driver['phone'] ?? 'N/A'),
               _buildInfoRow('Email', driver['email'] ?? 'N/A'),
-              _buildInfoRow('Vehicle', '${driver['vehicle_type'] ?? ''} ${driver['vehicle_plate'] ?? ''}'),
+              _buildInfoRow(
+                'Vehicle',
+                '${driver['vehicle_type'] ?? ''} ${driver['vehicle_plate'] ?? ''}',
+              ),
               _buildInfoRow('License', driver['license_number'] ?? 'N/A'),
-              _buildInfoRow('Status', _getStatusChip(driver['status'], driver['is_online'])),
-              _buildInfoRow('Online', driver['is_online'] == true ? 'Yes' : 'No'),
+              _buildInfoRow(
+                'Status',
+                _getStatusChip(driver['status'], driver['is_online']),
+              ),
+              _buildInfoRow(
+                'Online',
+                driver['is_online'] == true ? 'Yes' : 'No',
+              ),
               _buildInfoRow('Rating', driver['rating']?.toString() ?? 'N/A'),
-              _buildInfoRow('Total Trips', driver['total_trips']?.toString() ?? '0'),
+              _buildInfoRow(
+                'Total Trips',
+                driver['total_trips']?.toString() ?? '0',
+              ),
               _buildInfoRow('Wallet Balance', 'TZS $balance'),
               _buildInfoRow('Total Earned', 'TZS $totalEarned'),
               _buildInfoRow('Created', _formatDate(driver['created_at'])),
               const Divider(),
-              const Text('Actions', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                'Actions',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               Wrap(
                 spacing: 8,
                 children: [
                   if (driver['status'] == 'pending')
-                    ActionChip(label: const Text('Approve'), onPressed: () { Navigator.pop(context); _updateDriverStatus(driver['id'], 'approved'); }),
+                    ActionChip(
+                      label: const Text('Approve'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _updateDriverStatus(driver['id'], 'approved');
+                      },
+                    ),
                   if (driver['status'] == 'pending')
-                    ActionChip(label: const Text('Reject'), onPressed: () { Navigator.pop(context); _updateDriverStatus(driver['id'], 'rejected'); }),
+                    ActionChip(
+                      label: const Text('Reject'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _updateDriverStatus(driver['id'], 'rejected');
+                      },
+                    ),
                   if (driver['status'] == 'approved')
-                    ActionChip(label: const Text('Suspend'), onPressed: () { Navigator.pop(context); _suspendDriver(driver['id']); }),
+                    ActionChip(
+                      label: const Text('Suspend'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _suspendDriver(driver['id']);
+                      },
+                    ),
                   if (driver['status'] == 'suspended')
-                    ActionChip(label: const Text('Reactivate'), onPressed: () { Navigator.pop(context); _updateDriverStatus(driver['id'], 'approved'); }),
+                    ActionChip(
+                      label: const Text('Reactivate'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _updateDriverStatus(driver['id'], 'approved');
+                      },
+                    ),
                 ],
               ),
             ],
           ),
         ),
-        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close'))],
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
@@ -197,7 +269,16 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 100, child: Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.grey))),
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
+              ),
+            ),
+          ),
           Expanded(child: value is Widget ? value : Text(value.toString())),
         ],
       ),
@@ -252,9 +333,8 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.download),
-            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Export coming soon')),
-            ),
+            tooltip: 'Export loaded records as CSV',
+            onPressed: () => showCsvExport(context, 'Fleet CSV', _drivers, {'id':'ID','name':'Name','is_online':'Online','vehicle_type':'Vehicle'}),
           ),
           IconButton(icon: const Icon(Icons.refresh), onPressed: _loadDrivers),
         ],
@@ -274,7 +354,9 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
                         decoration: InputDecoration(
                           hintText: 'Search drivers...',
                           prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           filled: true,
                           fillColor: Colors.white,
                         ),
@@ -290,13 +372,28 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
                       child: DropdownButtonFormField<String>(
                         value: _selectedStatus,
                         decoration: InputDecoration(
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           filled: true,
                           fillColor: Colors.white,
                         ),
-                        items: ['all', 'online', 'offline', 'pending', 'approved', 'suspended']
-                            .map((s) => DropdownMenuItem(value: s, child: Text(s.toUpperCase())))
-                            .toList(),
+                        items:
+                            [
+                                  'all',
+                                  'online',
+                                  'offline',
+                                  'pending',
+                                  'approved',
+                                  'suspended',
+                                ]
+                                .map(
+                                  (s) => DropdownMenuItem(
+                                    value: s,
+                                    child: Text(s.toUpperCase()),
+                                  ),
+                                )
+                                .toList(),
                         onChanged: (value) {
                           _selectedStatus = value!;
                           _currentPage = 1;
@@ -313,55 +410,86 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _drivers.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.local_shipping, size: 64, color: Colors.grey[400]),
-                            const SizedBox(height: 16),
-                            Text('No drivers found', style: TextStyle(fontSize: 18, color: Colors.grey[600])),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.local_shipping,
+                          size: 64,
+                          color: Colors.grey[400],
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _drivers.length,
-                        itemBuilder: (context, index) {
-                          final driver = _drivers[index];
-                          final wallet = driver['wallet'] as List<dynamic>?;
-                          final balance = wallet?.isNotEmpty == true ? wallet!.first['balance'] ?? 0 : 0;
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: _getDriverColor(driver).withOpacity(0.1),
-                                child: Icon(Icons.person, color: _getDriverColor(driver)),
-                              ),
-                              title: Text(driver['full_name'] ?? 'Unnamed', style: const TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('${driver['vehicle_type'] ?? ''} ${driver['vehicle_plate'] ?? ''}'),
-                                  Text('Trips: ${driver['total_trips'] ?? 0} • Rating: ${driver['rating']?.toString() ?? 'N/A'} • TZS $balance'),
-                                ],
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _getStatusChip(driver['status'], driver['is_online']),
-                                  const SizedBox(width: 8),
-                                  Icon(
-                                    driver['is_online'] == true ? Icons.circle : Icons.circle_outlined,
-                                    color: driver['is_online'] == true ? Colors.green : Colors.grey,
-                                    size: 16,
-                                  ),
-                                ],
-                              ),
-                              onTap: () => _showDriverDetail(driver),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No drivers found',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _drivers.length,
+                    itemBuilder: (context, index) {
+                      final driver = _drivers[index];
+                      final wallet = driver['wallet'] as List<dynamic>?;
+                      final balance = wallet?.isNotEmpty == true
+                          ? wallet!.first['balance'] ?? 0
+                          : 0;
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: _getDriverColor(
+                              driver,
+                            ).withOpacity(0.1),
+                            child: Icon(
+                              Icons.person,
+                              color: _getDriverColor(driver),
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                          title: Text(
+                            driver['full_name'] ?? 'Unnamed',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${driver['vehicle_type'] ?? ''} ${driver['vehicle_plate'] ?? ''}',
+                              ),
+                              Text(
+                                'Trips: ${driver['total_trips'] ?? 0} â€¢ Rating: ${driver['rating']?.toString() ?? 'N/A'} â€¢ TZS $balance',
+                              ),
+                            ],
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _getStatusChip(
+                                driver['status'],
+                                driver['is_online'],
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                driver['is_online'] == true
+                                    ? Icons.circle
+                                    : Icons.circle_outlined,
+                                color: driver['is_online'] == true
+                                    ? Colors.green
+                                    : Colors.grey,
+                                size: 16,
+                              ),
+                            ],
+                          ),
+                          onTap: () => _showDriverDetail(driver),
+                        ),
+                      );
+                    },
+                  ),
           ),
           if (!_isLoading)
             Padding(
@@ -371,12 +499,22 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.chevron_left),
-                    onPressed: _currentPage > 1 ? () { _currentPage--; _loadDrivers(); } : null,
+                    onPressed: _currentPage > 1
+                        ? () {
+                            _currentPage--;
+                            _loadDrivers();
+                          }
+                        : null,
                   ),
                   Text('Page $_currentPage'),
                   IconButton(
                     icon: const Icon(Icons.chevron_right),
-                    onPressed: _drivers.length == _itemsPerPage ? () { _currentPage++; _loadDrivers(); } : null,
+                    onPressed: _drivers.length == _itemsPerPage
+                        ? () {
+                            _currentPage++;
+                            _loadDrivers();
+                          }
+                        : null,
                   ),
                 ],
               ),
@@ -390,7 +528,8 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
     final status = driver['status'];
     if (status == 'pending') return Colors.amber;
     if (status == 'suspended' || status == 'rejected') return Colors.red;
-    if (status == 'approved' && driver['is_online'] == true) return Colors.green;
+    if (status == 'approved' && driver['is_online'] == true)
+      return Colors.green;
     if (status == 'approved') return Colors.blue;
     return Colors.grey;
   }

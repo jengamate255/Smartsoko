@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
-import '../../models/restaurant.dart';
-import '../../services/analytics_service.dart';
-import '../../services/auth_service.dart';
-import '../../services/restaurant_service.dart';
-import '../../services/image_upload_service.dart';
-import '../../utils/validators.dart';
-import '../../widgets/merchant/image_picker_widget.dart';
+import 'package:smartsoko/models/restaurant.dart';
+import 'package:smartsoko/services/analytics_service.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/services/restaurant_service.dart';
+import 'package:smartsoko/services/image_upload_service.dart';
+import 'package:smartsoko/utils/validators.dart';
+import 'package:smartsoko/widgets/merchant/image_picker_widget.dart';
 
 class RestaurantSettingsScreen extends StatefulWidget {
   const RestaurantSettingsScreen({super.key});

@@ -1,17 +1,17 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import '../../../models/smartmove/vehicle_type.dart';
-import '../../../models/smartmove/fare_breakdown.dart';
-import '../../../models/smartmove/ride_request.dart';
-import '../../../models/smartmove/promo_code.dart';
-import '../../../models/smartmove/ride_stop.dart';
-import '../../../services/smartmove/ride_service.dart';
-import '../../../services/smartmove/pricing_service.dart';
-import '../../../services/smartmove/matching_service.dart';
-import '../../../services/supabase_service.dart';
-import '../../../config/app_config.dart';
-import '../../../utils/app_theme.dart';
+import 'package:smartsoko/models/smartmove/vehicle_type.dart';
+import 'package:smartsoko/models/smartmove/fare_breakdown.dart';
+import 'package:smartsoko/models/smartmove/ride_request.dart';
+import 'package:smartsoko/models/smartmove/promo_code.dart';
+import 'package:smartsoko/models/smartmove/ride_stop.dart';
+import 'package:smartsoko/services/smartmove/ride_service.dart';
+import 'package:smartsoko/services/smartmove/pricing_service.dart';
+import 'package:smartsoko/services/smartmove/matching_service.dart';
+import 'package:smartsoko/services/supabase_service.dart';
+import 'package:smartsoko/config/app_config.dart';
+import 'package:smartsoko/utils/app_theme.dart';
 import 'ride_tracking_screen.dart';
 import 'package:uuid/uuid.dart';
 
@@ -126,7 +126,8 @@ class _RideBookingScreenState extends State<RideBookingScreen>
   Future<void> _estimateFare() async {
     if (_pickupLocation == null ||
         _dropoffLocation == null ||
-        _selectedVehicleType == null) return;
+        _selectedVehicleType == null)
+      return;
 
     setState(() => _isLoadingFare = true);
     try {
@@ -274,7 +275,7 @@ class _RideBookingScreenState extends State<RideBookingScreen>
     );
   }
 
-  // ─── LuxeRide UI ────────────────────────────────────────────────
+  // â”€â”€â”€ LuxeRide UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   @override
   Widget build(BuildContext context) {
@@ -312,11 +313,12 @@ class _RideBookingScreenState extends State<RideBookingScreen>
       ),
       children: [
         TileLayer(
-          urlTemplate:
-              'https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}@2x?access_token=${AppConfig.mapboxToken}',
+          // Use Mapbox when a token is configured, otherwise fall back to
+          // keyless OpenStreetMap tiles so the map still renders.
+          urlTemplate: AppConfig.mapboxToken.isNotEmpty
+              ? 'https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}@2x?access_token=${AppConfig.mapboxToken}'
+              : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           userAgentPackageName: 'com.smartsoko.smartmove',
-          fallbackUrl:
-              'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png',
         ),
         if (_pickupLocation != null)
           MarkerLayer(
@@ -355,7 +357,11 @@ class _RideBookingScreenState extends State<RideBookingScreen>
                           ),
                         ],
                       ),
-                      child: const Icon(Icons.circle, color: Colors.white, size: 6),
+                      child: const Icon(
+                        Icons.circle,
+                        color: Colors.white,
+                        size: 6,
+                      ),
                     ),
                   ],
                 ),
@@ -381,7 +387,11 @@ class _RideBookingScreenState extends State<RideBookingScreen>
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.location_on, color: Colors.white, size: 22),
+                  child: const Icon(
+                    Icons.location_on,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                 ),
               ),
             ],
@@ -507,7 +517,9 @@ class _RideBookingScreenState extends State<RideBookingScreen>
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  _pickupAddress.isNotEmpty ? _pickupAddress : 'Current location',
+                  _pickupAddress.isNotEmpty
+                      ? _pickupAddress
+                      : 'Current location',
                   style: TextStyle(
                     color: _pickupAddress.isNotEmpty
                         ? AppTheme.luxeOnSurface
@@ -639,8 +651,12 @@ class _RideBookingScreenState extends State<RideBookingScreen>
               const SizedBox(height: 16),
               TextField(
                 decoration: InputDecoration(
-                  hintText: isPickup ? 'Search pickup location...' : 'Search destination...',
-                  hintStyle: TextStyle(color: AppTheme.luxeOnSurfaceVariant.withOpacity(0.5)),
+                  hintText: isPickup
+                      ? 'Search pickup location...'
+                      : 'Search destination...',
+                  hintStyle: TextStyle(
+                    color: AppTheme.luxeOnSurfaceVariant.withOpacity(0.5),
+                  ),
                   filled: true,
                   fillColor: AppTheme.luxeSurfaceContainerLow,
                   border: OutlineInputBorder(
@@ -649,7 +665,9 @@ class _RideBookingScreenState extends State<RideBookingScreen>
                   ),
                   prefixIcon: Icon(
                     isPickup ? Icons.location_on : Icons.pin_drop_outlined,
-                    color: isPickup ? AppTheme.luxeSecondary : AppTheme.luxePrimary,
+                    color: isPickup
+                        ? AppTheme.luxeSecondary
+                        : AppTheme.luxePrimary,
                   ),
                 ),
                 style: const TextStyle(color: AppTheme.luxeOnSurface),
@@ -667,7 +685,10 @@ class _RideBookingScreenState extends State<RideBookingScreen>
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text('Use Current Location', style: TextStyle(fontWeight: FontWeight.w600)),
+                  child: const Text(
+                    'Use Current Location',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
                 ),
               ),
             ],
@@ -687,7 +708,9 @@ class _RideBookingScreenState extends State<RideBookingScreen>
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOut,
-        height: _sheetExpanded ? maxSheetHeight : _sheetHeight.clamp(260, maxSheetHeight),
+        height: _sheetExpanded
+            ? maxSheetHeight
+            : _sheetHeight.clamp(260, maxSheetHeight),
         decoration: BoxDecoration(
           color: AppTheme.luxeGlassBg,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
@@ -779,7 +802,8 @@ class _RideBookingScreenState extends State<RideBookingScreen>
                         itemCount: _vehicleTypes.length,
                         itemBuilder: (context, index) {
                           final type = _vehicleTypes[index];
-                          final isSelected = _selectedVehicleType?.id == type.id;
+                          final isSelected =
+                              _selectedVehicleType?.id == type.id;
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 8),
                             child: _buildRideCard(type, isSelected, index),
@@ -830,11 +854,13 @@ class _RideBookingScreenState extends State<RideBookingScreen>
                 decoration: BoxDecoration(
                   color: vehicleMeta.color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: vehicleMeta.color.withOpacity(0.2),
-                  ),
+                  border: Border.all(color: vehicleMeta.color.withOpacity(0.2)),
                 ),
-                child: Icon(vehicleMeta.icon, color: vehicleMeta.color, size: 28),
+                child: Icon(
+                  vehicleMeta.icon,
+                  color: vehicleMeta.color,
+                  size: 28,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -916,11 +942,28 @@ class _RideBookingScreenState extends State<RideBookingScreen>
     );
   }
 
-  ({String name, String description, IconData icon, Color color}) _vehicleMeta(int index) {
+  ({String name, String description, IconData icon, Color color}) _vehicleMeta(
+    int index,
+  ) {
     const metas = [
-      (name: 'Luxe', description: 'Top-tier comfort \u2022 2 min', icon: Icons.directions_car, color: AppTheme.luxePrimary),
-      (name: 'Executive', description: 'Quiet & spacious \u2022 5 min', icon: Icons.directions_car_filled, color: Color(0xFFC0C0C0)),
-      (name: 'SUV', description: 'Up to 6 people \u2022 8 min', icon: Icons.directions_bus, color: Color(0xFF00304E)),
+      (
+        name: 'Luxe',
+        description: 'Top-tier comfort \u2022 2 min',
+        icon: Icons.directions_car,
+        color: AppTheme.luxePrimary,
+      ),
+      (
+        name: 'Executive',
+        description: 'Quiet & spacious \u2022 5 min',
+        icon: Icons.directions_car_filled,
+        color: Color(0xFFC0C0C0),
+      ),
+      (
+        name: 'SUV',
+        description: 'Up to 6 people \u2022 8 min',
+        icon: Icons.directions_bus,
+        color: Color(0xFF00304E),
+      ),
     ];
     return metas[index < metas.length ? index : metas.length - 1];
   }
@@ -936,7 +979,9 @@ class _RideBookingScreenState extends State<RideBookingScreen>
           foregroundColor: AppTheme.luxeBackground,
           disabledBackgroundColor: AppTheme.luxePrimary.withOpacity(0.3),
           disabledForegroundColor: AppTheme.luxeBackground.withOpacity(0.5),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
           elevation: 0,
           shadowColor: AppTheme.luxePrimary.withOpacity(0.4),
         ),
@@ -974,17 +1019,27 @@ class _RideBookingScreenState extends State<RideBookingScreen>
     final points = <LatLng>[];
     if (_pickupLocation != null) points.add(_pickupLocation!);
     if (_dropoffLocation != null) points.add(_dropoffLocation!);
-    final minLat = points.map((p) => p.latitude).reduce((a, b) => a < b ? a : b);
-    final maxLat = points.map((p) => p.latitude).reduce((a, b) => a > b ? a : b);
-    final minLon = points.map((p) => p.longitude).reduce((a, b) => a < b ? a : b);
-    final maxLon = points.map((p) => p.longitude).reduce((a, b) => a > b ? a : b);
+    final minLat = points
+        .map((p) => p.latitude)
+        .reduce((a, b) => a < b ? a : b);
+    final maxLat = points
+        .map((p) => p.latitude)
+        .reduce((a, b) => a > b ? a : b);
+    final minLon = points
+        .map((p) => p.longitude)
+        .reduce((a, b) => a < b ? a : b);
+    final maxLon = points
+        .map((p) => p.longitude)
+        .reduce((a, b) => a > b ? a : b);
     final center = LatLng((minLat + maxLat) / 2, (minLon + maxLon) / 2);
     final latDiff = maxLat - minLat;
     final lonDiff = maxLon - minLon;
     final maxDiff = latDiff > lonDiff ? latDiff : lonDiff;
     double zoom = 14.0;
-    if (maxDiff > 0.1) zoom = 12.0;
-    else if (maxDiff > 0.05) zoom = 13.0;
+    if (maxDiff > 0.1)
+      zoom = 12.0;
+    else if (maxDiff > 0.05)
+      zoom = 13.0;
     return (center: center, zoom: zoom);
   }
 }

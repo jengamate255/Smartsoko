@@ -1,19 +1,16 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/auth_service.dart';
-import '../../services/analytics_service.dart';
-import '../../services/supabase_service.dart';
-import '../../models/user.dart';
-import '../../config/app_config.dart';
-import '../../utils/logger.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/services/analytics_service.dart';
+import 'package:smartsoko/services/supabase_service.dart';
+import 'package:smartsoko/models/user.dart';
+import 'package:smartsoko/config/app_config.dart';
+import 'package:smartsoko/utils/logger.dart';
 
 class RoleSelectionScreen extends StatefulWidget {
   final String phoneNumber;
 
-  const RoleSelectionScreen({
-    super.key,
-    required this.phoneNumber,
-  });
+  const RoleSelectionScreen({super.key, required this.phoneNumber});
 
   @override
   State<RoleSelectionScreen> createState() => _RoleSelectionScreenState();
@@ -46,7 +43,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
 
     try {
       final authService = context.read<AuthService>();
-      
+
       // Check if user already exists
       final normalizedPhone = authService.normalizePhone(widget.phoneNumber);
       final existingUserDoc = await authService.firestore
@@ -55,7 +52,9 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
           .limit(1)
           .get();
 
-      if (existingUser != null) {
+      final existingUser = existingUserDoc.docs.isNotEmpty;
+
+      if (existingUser) {
         // User exists, just authenticate them
         await authService.signInWithPhone(widget.phoneNumber);
       } else {
@@ -80,7 +79,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
 
         // Update the auth service user
         authService.user = createdUser;
-        
+
         // Also create in Supabase for sync
         try {
           await authService.supabaseService.client.from('profiles').insert({
@@ -95,9 +94,9 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) {
@@ -118,26 +117,19 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(
-                  Icons.fastfood,
-                  size: 80,
-                  color: Color(0xFF064E3B),
-                ),
+                const Icon(Icons.fastfood, size: 80, color: Color(0xFF064E3B)),
                 const SizedBox(height: 24),
                 const Text(
                   'SmartSoko',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Select your role to continue',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 48),
@@ -169,7 +161,9 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
-                  onPressed: _isLoading || _selectedRole == null ? null : _continueWithRole,
+                  onPressed: _isLoading || _selectedRole == null
+                      ? null
+                      : _continueWithRole,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF064E3B),
                     foregroundColor: Colors.white,
@@ -194,9 +188,14 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
     );
   }
 
-  Widget _buildRoleOption(IconData icon, String title, String description, UserRole role) {
+  Widget _buildRoleOption(
+    IconData icon,
+    String title,
+    String description,
+    UserRole role,
+  ) {
     final isSelected = _selectedRole == role;
-    
+
     return InkWell(
       onTap: () {
         setState(() => _selectedRole = role);
@@ -210,11 +209,17 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(12),
-          color: isSelected ? const Color(0xFF064E3B).withValues(alpha:0.05) : null,
+          color: isSelected
+              ? const Color(0xFF064E3B).withValues(alpha: 0.05)
+              : null,
         ),
         child: Row(
           children: [
-            Icon(icon, size: 28, color: isSelected ? const Color(0xFF064E3B) : Colors.grey[700]),
+            Icon(
+              icon,
+              size: 28,
+              color: isSelected ? const Color(0xFF064E3B) : Colors.grey[700],
+            ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -225,16 +230,15 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? const Color(0xFF064E3B) : Colors.grey[800],
+                      color: isSelected
+                          ? const Color(0xFF064E3B)
+                          : Colors.grey[800],
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     description,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   ),
                 ],
               ),

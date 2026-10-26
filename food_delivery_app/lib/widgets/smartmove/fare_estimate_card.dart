@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../utils/app_theme.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:smartsoko/utils/app_theme.dart';
 
 class FareEstimateCard extends StatelessWidget {
   final dynamic fareEstimate;

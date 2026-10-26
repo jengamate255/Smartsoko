@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../config/app_config.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:smartsoko/config/app_config.dart';
 import 'customer/login_screen.dart' as customer;
 import 'driver/driver_login_screen.dart' as driver;
 import 'merchant/merchant_login_screen.dart' as merchant;

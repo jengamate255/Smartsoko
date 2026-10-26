@@ -1,11 +1,11 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import '../../services/location_service.dart';
-import '../../services/order_service.dart';
-import '../../models/order.dart';
-import '../../config/app_config.dart';
+import 'package:smartsoko/services/location_service.dart';
+import 'package:smartsoko/services/order_service.dart';
+import 'package:smartsoko/models/order.dart';
+import 'package:smartsoko/config/app_config.dart';
 
 class RiderMapScreen extends StatefulWidget {
   const RiderMapScreen({super.key});

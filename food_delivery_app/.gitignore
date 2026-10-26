@@ -61,7 +61,6 @@ google-services*.json
 # setup-merchant.js writes a plaintext test password here — never commit it
 merchant-creds.json
 *creds*.json
-lib/config/app_config.dart
 node_modules/
 
 # Deployment exclusions - reduce file count (keep android wrappers for APK builds)

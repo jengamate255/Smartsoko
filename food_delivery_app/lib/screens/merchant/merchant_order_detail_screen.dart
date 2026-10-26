@@ -1,20 +1,18 @@
-import 'package:flutter/material.dart';
-import '../../models/order.dart';
-import '../../models/user.dart';
-import '../../services/analytics_service.dart';
-import '../../services/auth_service.dart';
-import '../../services/order_service.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:smartsoko/models/order.dart';
+import 'package:smartsoko/models/user.dart';
+import 'package:smartsoko/services/analytics_service.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/services/order_service.dart';
 
 class MerchantOrderDetailScreen extends StatefulWidget {
   final Order order;
 
-  const MerchantOrderDetailScreen({
-    super.key,
-    required this.order,
-  });
+  const MerchantOrderDetailScreen({super.key, required this.order});
 
   @override
-  State<MerchantOrderDetailScreen> createState() => _MerchantOrderDetailScreenState();
+  State<MerchantOrderDetailScreen> createState() =>
+      _MerchantOrderDetailScreenState();
 }
 
 class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
@@ -138,7 +136,11 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
             // Customer Info
             const Text(
               'Customer Info',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1F2937),
+              ),
             ),
             const SizedBox(height: 12),
             if (_isLoadingCustomer)
@@ -150,7 +152,10 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
                     backgroundColor: const Color(0xFFC1ECD4),
                     child: Text(
                       (_customer?.name ?? 'U')[0].toUpperCase(),
-                      style: const TextStyle(color: Color(0xFF064E3B), fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Color(0xFF064E3B),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -159,7 +164,10 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
                     children: [
                       Text(
                         _customer?.name ?? 'Unknown Customer',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
                         _customer?.phone ?? 'No phone provided',
@@ -174,46 +182,76 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
             // Order Items
             const Text(
               'Order Items',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1F2937),
+              ),
             ),
             const SizedBox(height: 12),
-            ...widget.order.items.map((item) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF3F4F6),
-                      borderRadius: BorderRadius.circular(8),
+            ...widget.order.items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF3F4F6),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${item.quantity}x',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF064E3B),
+                        ),
+                      ),
                     ),
-                    child: Text(
-                      '${item.quantity}x',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF064E3B)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.name,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          if (item.notes != null)
+                            Text(
+                              item.notes!,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[600],
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(item.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-                        if (item.notes != null)
-                          Text(item.notes!, style: TextStyle(fontSize: 13, color: Colors.grey[600], fontStyle: FontStyle.italic)),
-                      ],
+                    Text(
+                      'TSh ${(item.price * item.quantity).toStringAsFixed(0)}',
                     ),
-                  ),
-                  Text('TSh ${(item.price * item.quantity).toStringAsFixed(0)}'),
-                ],
+                  ],
+                ),
               ),
-            )),
+            ),
             const Divider(height: 48, color: Color(0xFFE5E7EB)),
 
             // Summary
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Subtotal', style: TextStyle(color: Color(0xFF6B7280))),
+                const Text(
+                  'Subtotal',
+                  style: TextStyle(color: Color(0xFF6B7280)),
+                ),
                 Text('TSh ${widget.order.subtotal.toStringAsFixed(0)}'),
               ],
             ),
@@ -221,7 +259,10 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Delivery Fee', style: TextStyle(color: Color(0xFF6B7280))),
+                const Text(
+                  'Delivery Fee',
+                  style: TextStyle(color: Color(0xFF6B7280)),
+                ),
                 Text('TSh ${widget.order.deliveryFee.toStringAsFixed(0)}'),
               ],
             ),
@@ -231,19 +272,27 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
               children: [
                 const Text(
                   'Total Amount',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF064E3B)),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF064E3B),
+                  ),
                 ),
                 Text(
                   'TSh ${widget.order.total.toStringAsFixed(0)}',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF064E3B)),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF064E3B),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 48),
 
             // Action Buttons
-            if (widget.order.status != OrderStatus.delivered && 
-                widget.order.status != OrderStatus.cancelled && 
+            if (widget.order.status != OrderStatus.delivered &&
+                widget.order.status != OrderStatus.cancelled &&
                 widget.order.status != OrderStatus.pickedUp &&
                 widget.order.status != OrderStatus.ready)
               SizedBox(
@@ -254,14 +303,19 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
                     backgroundColor: const Color(0xFF064E3B),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     elevation: 0,
                   ),
                   child: _isUpdatingStatus
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
                           _getNextStatusAction(),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                 ),
               ),
@@ -284,7 +338,9 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
                     foregroundColor: Colors.red,
                     side: const BorderSide(color: Colors.red),
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                 ),
               ),
@@ -324,15 +380,19 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
     setState(() => _isUpdatingStatus = true);
     try {
       final nextStatus = _getNextStatus();
-      await _orderService.updateOrderStatus(widget.order.id, nextStatus);
-      
+      await _orderService.updateOrderStatus(
+        widget.order.id,
+        nextStatus,
+        idToken: await _authService.requireIdToken(),
+      );
+
       if (nextStatus == OrderStatus.confirmed) {
         await _analyticsService.logOrderConfirmed(
           orderId: widget.order.id,
           estimatedPrepTimeMinutes: 30,
         );
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Order updated to ${nextStatus.name}')),
@@ -342,7 +402,10 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating status: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error updating status: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -357,7 +420,8 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('Cancel this order?'),
         content: const Text(
-            'The customer will be notified and the order cannot be restored.'),
+          'The customer will be notified and the order cannot be restored.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -375,7 +439,11 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
 
     setState(() => _isUpdatingStatus = true);
     try {
-      await _orderService.updateOrderStatus(widget.order.id, OrderStatus.cancelled);
+      await _orderService.updateOrderStatus(
+        widget.order.id,
+        OrderStatus.cancelled,
+        idToken: await _authService.requireIdToken(),
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Order cancelled — customer notified')),
@@ -385,7 +453,10 @@ class _MerchantOrderDetailScreenState extends State<MerchantOrderDetailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error cancelling: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error cancelling: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {

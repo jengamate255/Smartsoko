@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 /// Follows DRY principle - used by both ErrorScreen and EmptyStateScreen
 class BaseEmptyState extends StatelessWidget {
   final String message;
-  final Widget? icon;
+  final IconData? icon;
   final Widget? action;
   final EdgeInsetsGeometry? padding;
   final bool showTitle;
@@ -28,8 +28,7 @@ class BaseEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isReduced = respectReducedMotion || 
-        Theme.of(context).platformBrightness == Brightness.dark; // simplified check
+    final isReduced = respectReducedMotion;
 
     final effectivePadding = padding ?? const EdgeInsets.all(24);
 
@@ -43,23 +42,22 @@ class BaseEmptyState extends StatelessWidget {
               Icon(
                 icon ?? Icons.error_outline,
                 size: 80,
-                color: isReduced ? colorScheme.onSurfaceVariant : colorScheme.error,
+                color: isReduced
+                    ? colorScheme.onSurfaceVariant
+                    : colorScheme.error,
               ),
               const SizedBox(height: 24),
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: messageStyle ??
+                style:
+                    messageStyle ??
                     theme.textTheme.bodyLarge?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
               ),
-            ] ...[
-              if (action != null) ...[
-                const SizedBox(height: 24),
-                action!,
-              ],
             ],
+            if (action != null) ...[const SizedBox(height: 24), action!],
           ],
         ),
       ),
@@ -71,13 +69,9 @@ class BaseEmptyState extends StatelessWidget {
 class ErrorScreen extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
-  
-  const ErrorScreen({
-    super.key,
-    required this.message,
-    this.onRetry,
-  });
-  
+
+  const ErrorScreen({super.key, required this.message, this.onRetry});
+
   @override
   Widget build(BuildContext context) => BaseEmptyState(
     message: message,
@@ -88,10 +82,7 @@ class ErrorScreen extends StatelessWidget {
             icon: const Icon(Icons.refresh),
             label: const Text('Try Again'),
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 32,
-                vertical: 16,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             ),
           )
         : null,
@@ -104,14 +95,14 @@ class EmptyStateScreen extends StatelessWidget {
   final String message;
   final IconData icon;
   final Widget? action;
-  
+
   const EmptyStateScreen({
     super.key,
     required this.message,
     this.icon = Icons.inbox_outlined,
     this.action,
   });
-  
+
   @override
   Widget build(BuildContext context) => BaseEmptyState(
     message: message,

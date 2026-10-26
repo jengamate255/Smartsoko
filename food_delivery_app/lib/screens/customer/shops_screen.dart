@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/shop.dart';
-import '../../services/shop_service.dart';
+import 'package:smartsoko/models/shop.dart';
+import 'package:smartsoko/services/shop_service.dart';
 import 'shop_detail_screen.dart';
-import '../sme_onboarding_screen.dart';
+import 'package:smartsoko/screens/sme_onboarding_screen.dart';
 
 class ShopsScreen extends StatefulWidget {
   const ShopsScreen({Key? key}) : super(key: key);

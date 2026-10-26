@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/restaurant_service.dart';
-import '../../models/restaurant.dart';
-import '../../widgets/shimmer_loading.dart';
-import '../customer/restaurant_card.dart';
+import 'package:smartsoko/services/restaurant_service.dart';
+import 'package:smartsoko/models/restaurant.dart';
+import 'package:smartsoko/widgets/shimmer_loading.dart';
+import 'package:smartsoko/screens/customer/restaurant_card.dart';
 
 class RestaurantListScreen extends StatelessWidget {
   const RestaurantListScreen({super.key});

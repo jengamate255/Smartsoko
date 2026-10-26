@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/auth_service.dart';
-import '../../utils/role_validator.dart';
-import '../../utils/validators.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/utils/role_validator.dart';
+import 'package:smartsoko/utils/validators.dart';
 
 class CustomerLoginScreen extends StatefulWidget {
   const CustomerLoginScreen({super.key});

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import '../../../models/smartmove/driver_earnings.dart';
-import '../../../services/smartmove/driver_service.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:smartsoko/models/smartmove/driver_earnings.dart';
+import 'package:smartsoko/services/smartmove/driver_service.dart';
 
 class DriverEarningsScreen extends StatefulWidget {
   final String userId;
@@ -11,7 +11,8 @@ class DriverEarningsScreen extends StatefulWidget {
   State<DriverEarningsScreen> createState() => _DriverEarningsScreenState();
 }
 
-class _DriverEarningsScreenState extends State<DriverEarningsScreen> with SingleTickerProviderStateMixin {
+class _DriverEarningsScreenState extends State<DriverEarningsScreen>
+    with SingleTickerProviderStateMixin {
   final _driverService = SmartMoveDriverService();
   late final TabController _tabController;
 
@@ -39,8 +40,14 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> with Single
     setState(() => _isLoading = true);
     try {
       final summary = await _driverService.getEarningsSummary(widget.userId);
-      final daily = await _driverService.getDailyEarnings(widget.userId, DateTime.now());
-      final weekly = await _driverService.getWeeklyEarnings(widget.userId, DateTime.now());
+      final daily = await _driverService.getDailyEarnings(
+        widget.userId,
+        DateTime.now(),
+      );
+      final weekly = await _driverService.getWeeklyEarnings(
+        widget.userId,
+        DateTime.now(),
+      );
 
       if (mounted) {
         setState(() {
@@ -69,7 +76,9 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> with Single
   }
 
   Widget _buildWithdrawalSheet() {
-    final amountController = TextEditingController(text: _summary!.balance.toString());
+    final amountController = TextEditingController(
+      text: _summary!.balance.toString(),
+    );
 
     return StatefulBuilder(
       builder: (context, setDialogState) => Padding(
@@ -80,14 +89,28 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> with Single
           children: [
             Center(
               child: Container(
-                width: 40, height: 4,
-                decoration: BoxDecoration(color: const Color(0xFF2d3449), borderRadius: BorderRadius.circular(2)),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2d3449),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
             const SizedBox(height: 20),
-            const Text('Withdraw Earnings', style: TextStyle(color: Color(0xFFdae2fd), fontSize: 22, fontWeight: FontWeight.bold)),
+            const Text(
+              'Withdraw Earnings',
+              style: TextStyle(
+                color: Color(0xFFdae2fd),
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text('Available balance: ${_summary!.formattedBalance}', style: const TextStyle(color: Color(0xFF8c909f))),
+            Text(
+              'Available balance: ${_summary!.formattedBalance}',
+              style: const TextStyle(color: Color(0xFF8c909f)),
+            ),
             const SizedBox(height: 24),
             TextField(
               controller: amountController,
@@ -98,8 +121,14 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> with Single
                 labelStyle: const TextStyle(color: Color(0xFF8c909f)),
                 prefixText: 'TZS ',
                 prefixStyle: const TextStyle(color: Color(0xFFdae2fd)),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF2d3449))),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFadc6ff))),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF2d3449)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFadc6ff)),
+                ),
                 fillColor: const Color(0xFF171f33),
                 filled: true,
               ),
@@ -108,34 +137,68 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> with Single
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isWithdrawing ? null : () async {
-                  final amount = int.tryParse(amountController.text);
-                  if (amount == null || amount <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter a valid amount')));
-                    return;
-                  }
-                  if (amount > _summary!.balance) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Insufficient balance')));
-                    return;
-                  }
-                  setDialogState(() => _isWithdrawing = true);
-                  final result = await _driverService.requestWithdrawal(widget.userId, amount);
-                  Navigator.pop(context);
-                  if (result.success) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Withdrawal initiated: ${result.reference}')));
-                    _loadEarnings();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.error ?? 'Withdrawal failed')));
-                  }
-                },
+                onPressed: _isWithdrawing
+                    ? null
+                    : () async {
+                        final amount = int.tryParse(amountController.text);
+                        if (amount == null || amount <= 0) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Enter a valid amount'),
+                            ),
+                          );
+                          return;
+                        }
+                        if (amount > _summary!.balance) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Insufficient balance'),
+                            ),
+                          );
+                          return;
+                        }
+                        setDialogState(() => _isWithdrawing = true);
+                        final result = await _driverService.requestWithdrawal(
+                          widget.userId,
+                          amount,
+                        );
+                        Navigator.pop(context);
+                        if (result.success) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Withdrawal initiated: ${result.reference}',
+                              ),
+                            ),
+                          );
+                          _loadEarnings();
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                result.error ?? 'Withdrawal failed',
+                              ),
+                            ),
+                          );
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFadc6ff),
                   foregroundColor: const Color(0xFF002e6a),
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: _isWithdrawing
-                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Color(0xFF002e6a), strokeWidth: 2))
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF002e6a),
+                          strokeWidth: 2,
+                        ),
+                      )
                     : const Text('Withdraw', style: TextStyle(fontSize: 16)),
               ),
             ),
@@ -150,19 +213,34 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> with Single
     if (_isLoading) {
       return Scaffold(
         backgroundColor: const Color(0xFF0b1326),
-        appBar: AppBar(title: const Text('Earnings', style: TextStyle(color: Color(0xFFdae2fd))), backgroundColor: const Color(0xFF131b2e), iconTheme: const IconThemeData(color: Color(0xFFdae2fd))),
-        body: const Center(child: CircularProgressIndicator(color: Color(0xFFadc6ff))),
+        appBar: AppBar(
+          title: const Text(
+            'Earnings',
+            style: TextStyle(color: Color(0xFFdae2fd)),
+          ),
+          backgroundColor: const Color(0xFF131b2e),
+          iconTheme: const IconThemeData(color: Color(0xFFdae2fd)),
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(color: Color(0xFFadc6ff)),
+        ),
       );
     }
 
     return Scaffold(
       backgroundColor: const Color(0xFF0b1326),
       appBar: AppBar(
-        title: const Text('Earnings', style: TextStyle(color: Color(0xFFdae2fd))),
+        title: const Text(
+          'Earnings',
+          style: TextStyle(color: Color(0xFFdae2fd)),
+        ),
         backgroundColor: const Color(0xFF131b2e),
         iconTheme: const IconThemeData(color: Color(0xFFdae2fd)),
         actions: [
-          IconButton(icon: const Icon(Icons.history, color: Color(0xFFdae2fd)), onPressed: _showTransactionHistory),
+          IconButton(
+            icon: const Icon(Icons.history, color: Color(0xFFdae2fd)),
+            onPressed: _showTransactionHistory,
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -179,9 +257,22 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> with Single
             if (_bonuses.isNotEmpty) ...[
               Row(
                 children: [
-                  const Text('Bonuses', style: TextStyle(color: Color(0xFFdae2fd), fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Bonuses',
+                    style: TextStyle(
+                      color: Color(0xFFdae2fd),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const Spacer(),
-                  TextButton(onPressed: () {}, child: const Text('View All', style: TextStyle(color: Color(0xFFadc6ff)))),
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text(
+                      'View All',
+                      style: TextStyle(color: Color(0xFFadc6ff)),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -195,11 +286,16 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> with Single
                 child: ElevatedButton.icon(
                   onPressed: _withdrawEarnings,
                   icon: const Icon(Icons.account_balance_wallet),
-                  label: const Text('Withdraw Earnings', style: TextStyle(fontSize: 16)),
+                  label: const Text(
+                    'Withdraw Earnings',
+                    style: TextStyle(fontSize: 16),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFadc6ff),
                     foregroundColor: const Color(0xFF002e6a),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                 ),
               ),
@@ -216,28 +312,46 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> with Single
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [const Color(0xFFadc6ff).withValues(alpha: 0.15), const Color(0xFF5de6ff).withValues(alpha: 0.05)],
+          colors: [
+            const Color(0xFFadc6ff).withValues(alpha: 0.15),
+            const Color(0xFF5de6ff).withValues(alpha: 0.05),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFadc6ff).withValues(alpha: 0.2)),
+        border: Border.all(
+          color: const Color(0xFFadc6ff).withValues(alpha: 0.2),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Available Balance', style: TextStyle(color: Color(0xFF8c909f), fontSize: 14)),
+          const Text(
+            'Available Balance',
+            style: TextStyle(color: Color(0xFF8c909f), fontSize: 14),
+          ),
           const SizedBox(height: 8),
           Text(
             _summary?.formattedBalance ?? 'TZS 0',
-            style: const TextStyle(color: Color(0xFFdae2fd), fontSize: 40, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Color(0xFFdae2fd),
+              fontSize: 40,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 20),
           Row(
             children: [
-              _buildStatItem('Total Earned', _summary?.formattedTotalEarned ?? 'TZS 0'),
+              _buildStatItem(
+                'Total Earned',
+                _summary?.formattedTotalEarned ?? 'TZS 0',
+              ),
               const SizedBox(width: 16),
-              _buildStatItem('Withdrawn', _summary?.formattedTotalWithdrawn ?? 'TZS 0'),
+              _buildStatItem(
+                'Withdrawn',
+                _summary?.formattedTotalWithdrawn ?? 'TZS 0',
+              ),
               const SizedBox(width: 16),
               _buildStatItem('Pending', _summary?.formattedPending ?? 'TZS 0'),
             ],
@@ -252,8 +366,18 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> with Single
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(value, style: const TextStyle(color: Color(0xFFdae2fd), fontWeight: FontWeight.bold, fontSize: 16)),
-          Text(label, style: const TextStyle(color: Color(0xFF8c909f), fontSize: 11)),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Color(0xFFdae2fd),
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          Text(
+            label,
+            style: const TextStyle(color: Color(0xFF8c909f), fontSize: 11),
+          ),
         ],
       ),
     );
@@ -275,19 +399,45 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> with Single
         children: [
           Row(
             children: [
-              Text(title, style: const TextStyle(color: Color(0xFFdae2fd), fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Color(0xFFdae2fd),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const Spacer(),
-              Text(period.formattedGrossEarnings, style: const TextStyle(color: Color(0xFF5de6ff), fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(
+                period.formattedGrossEarnings,
+                style: const TextStyle(
+                  color: Color(0xFF5de6ff),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
           Row(
             children: [
               _buildMiniStat('${period.totalRides} rides'),
-              Container(width: 1, height: 20, color: const Color(0xFF2d3449), margin: const EdgeInsets.symmetric(horizontal: 12)),
+              Container(
+                width: 1,
+                height: 20,
+                color: const Color(0xFF2d3449),
+                margin: const EdgeInsets.symmetric(horizontal: 12),
+              ),
               _buildMiniStat('${period.totalDistanceKm.toStringAsFixed(0)} km'),
-              Container(width: 1, height: 20, color: const Color(0xFF2d3449), margin: const EdgeInsets.symmetric(horizontal: 12)),
-              _buildMiniStat('Platform: ${period.platformFees.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}'),
+              Container(
+                width: 1,
+                height: 20,
+                color: const Color(0xFF2d3449),
+                margin: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+              _buildMiniStat(
+                'Platform: ${period.platformFees.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}',
+              ),
             ],
           ),
           if (period.tipsReceived > 0 || period.bonuses > 0) ...[
@@ -295,10 +445,17 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> with Single
             Row(
               children: [
                 if (period.tipsReceived > 0)
-                  _buildMiniStat('Tips: ${period.tipsReceived.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}', color: const Color(0xFF5de6ff)),
-                if (period.tipsReceived > 0 && period.bonuses > 0) const SizedBox(width: 12),
+                  _buildMiniStat(
+                    'Tips: ${period.tipsReceived.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}',
+                    color: const Color(0xFF5de6ff),
+                  ),
+                if (period.tipsReceived > 0 && period.bonuses > 0)
+                  const SizedBox(width: 12),
                 if (period.bonuses > 0)
-                  _buildMiniStat('Bonuses: ${period.bonuses.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}', color: const Color(0xFFadc6ff)),
+                  _buildMiniStat(
+                    'Bonuses: ${period.bonuses.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}',
+                    color: const Color(0xFFadc6ff),
+                  ),
               ],
             ),
           ],
@@ -308,7 +465,10 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> with Single
   }
 
   Widget _buildMiniStat(String text, {Color? color}) {
-    return Text(text, style: TextStyle(fontSize: 12, color: color ?? const Color(0xFF8c909f)));
+    return Text(
+      text,
+      style: TextStyle(fontSize: 12, color: color ?? const Color(0xFF8c909f)),
+    );
   }
 
   Widget _buildBonusCard(DriverBonus bonus) {
@@ -335,16 +495,41 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> with Single
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(bonus.title, style: const TextStyle(color: Color(0xFFdae2fd), fontWeight: FontWeight.w500)),
-                if (bonus.description != null) Text(bonus.description!, style: const TextStyle(color: Color(0xFF8c909f), fontSize: 12)),
+                Text(
+                  bonus.title,
+                  style: const TextStyle(
+                    color: Color(0xFFdae2fd),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (bonus.description != null)
+                  Text(
+                    bonus.description!,
+                    style: const TextStyle(
+                      color: Color(0xFF8c909f),
+                      fontSize: 12,
+                    ),
+                  ),
               ],
             ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(bonus.formattedAmount, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF5de6ff))),
-              Text(bonus.isPaid ? 'Paid' : bonus.status, style: TextStyle(fontSize: 12, color: bonus.isPaid ? const Color(0xFF5de6ff) : Colors.orange)),
+              Text(
+                bonus.formattedAmount,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF5de6ff),
+                ),
+              ),
+              Text(
+                bonus.isPaid ? 'Paid' : bonus.status,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: bonus.isPaid ? const Color(0xFF5de6ff) : Colors.orange,
+                ),
+              ),
             ],
           ),
         ],
@@ -355,7 +540,9 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> with Single
   void _showTransactionHistory() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => DriverTransactionHistoryScreen(userId: widget.userId)),
+      MaterialPageRoute(
+        builder: (_) => DriverTransactionHistoryScreen(userId: widget.userId),
+      ),
     );
   }
 }
@@ -370,11 +557,19 @@ class DriverTransactionHistoryScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF0b1326),
       appBar: AppBar(
-        title: const Text('Transaction History', style: TextStyle(color: Color(0xFFdae2fd))),
+        title: const Text(
+          'Transaction History',
+          style: TextStyle(color: Color(0xFFdae2fd)),
+        ),
         backgroundColor: const Color(0xFF131b2e),
         iconTheme: const IconThemeData(color: Color(0xFFdae2fd)),
       ),
-      body: const Center(child: Text('Transaction history will be displayed here', style: TextStyle(color: Color(0xFF8c909f)))),
+      body: const Center(
+        child: Text(
+          'Transaction history will be displayed here',
+          style: TextStyle(color: Color(0xFF8c909f)),
+        ),
+      ),
     );
   }
 }
@@ -389,11 +584,19 @@ class DriverRideHistoryScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF0b1326),
       appBar: AppBar(
-        title: const Text('Ride History', style: TextStyle(color: Color(0xFFdae2fd))),
+        title: const Text(
+          'Ride History',
+          style: TextStyle(color: Color(0xFFdae2fd)),
+        ),
         backgroundColor: const Color(0xFF131b2e),
         iconTheme: const IconThemeData(color: Color(0xFFdae2fd)),
       ),
-      body: const Center(child: Text('Ride history will be displayed here', style: TextStyle(color: Color(0xFF8c909f)))),
+      body: const Center(
+        child: Text(
+          'Ride history will be displayed here',
+          style: TextStyle(color: Color(0xFF8c909f)),
+        ),
+      ),
     );
   }
 }

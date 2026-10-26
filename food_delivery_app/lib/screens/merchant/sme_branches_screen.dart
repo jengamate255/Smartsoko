@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../models/shop.dart';
-import '../../models/sme_models.dart';
-import '../../services/sme_service.dart';
+import 'package:smartsoko/models/shop.dart';
+import 'package:smartsoko/models/sme_models.dart';
+import 'package:smartsoko/services/sme_service.dart';
 
 class SMEBranchesScreen extends StatefulWidget {
   final Shop shop;

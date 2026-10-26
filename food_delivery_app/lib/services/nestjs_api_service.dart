@@ -1,10 +1,11 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../services/auth_service.dart';
-import '../utils/logger.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/utils/logger.dart';
+import 'package:smartsoko/config/app_config.dart';
 
 class NestJSApiService {
-  static const String _baseUrl = 'http://10.0.2.2:3000/api';
+  static const String _baseUrl = AppConfig.apiBaseUrl;
 
   final AuthService _authService;
 

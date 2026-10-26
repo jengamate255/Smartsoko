@@ -1,20 +1,20 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
-import '../../../models/smartmove/driver_profile.dart';
-import '../../../models/smartmove/ride.dart';
-import '../../../models/smartmove/ride_request.dart';
-import '../../../models/smartmove/driver_earnings.dart';
-import '../../../services/smartmove/driver_service.dart';
-import '../../../services/smartmove/tracking_service.dart';
-import '../../../services/smartmove/ride_service.dart';
-import '../../../config/app_config.dart';
-import '../../../utils/app_theme.dart';
-import '../../../widgets/smartmove/driver_card.dart';
+import 'package:smartsoko/models/smartmove/driver_profile.dart';
+import 'package:smartsoko/models/smartmove/ride.dart';
+import 'package:smartsoko/models/smartmove/ride_request.dart';
+import 'package:smartsoko/models/smartmove/driver_earnings.dart';
+import 'package:smartsoko/services/smartmove/driver_service.dart';
+import 'package:smartsoko/services/smartmove/tracking_service.dart';
+import 'package:smartsoko/services/smartmove/ride_service.dart';
+import 'package:smartsoko/config/app_config.dart';
+import 'package:smartsoko/utils/app_theme.dart';
+import 'package:smartsoko/widgets/smartmove/driver_card.dart';
 import 'driver_earnings_screen.dart';
-import '../customer/ride_tracking_screen.dart';
+import 'package:smartsoko/screens/smartmove/customer/ride_tracking_screen.dart';
 
 class SmartMoveDriverDashboardScreen extends StatefulWidget {
   final String userId;
@@ -22,10 +22,12 @@ class SmartMoveDriverDashboardScreen extends StatefulWidget {
   const SmartMoveDriverDashboardScreen({super.key, required this.userId});
 
   @override
-  State<SmartMoveDriverDashboardScreen> createState() => _SmartMoveDriverDashboardScreenState();
+  State<SmartMoveDriverDashboardScreen> createState() =>
+      _SmartMoveDriverDashboardScreenState();
 }
 
-class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboardScreen> {
+class _SmartMoveDriverDashboardScreenState
+    extends State<SmartMoveDriverDashboardScreen> {
   final _driverService = SmartMoveDriverService();
   final _trackingService = SmartMoveTrackingService();
   final _rideService = SmartMoveRideService();
@@ -111,7 +113,9 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
     return Scaffold(
       backgroundColor: const Color(0xFF0b1326),
       body: _profile == null
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFFadc6ff)))
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFFadc6ff)),
+            )
           : _buildBody(),
     );
   }
@@ -130,7 +134,8 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
           ),
           children: [
             TileLayer(
-              urlTemplate: 'https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}@2x?access_token=${AppConfig.mapboxToken}',
+              urlTemplate:
+                  'https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}@2x?access_token=${AppConfig.mapboxToken}',
               userAgentPackageName: 'com.smartsoko.smartmove',
             ),
           ],
@@ -149,12 +154,7 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
             ],
           ),
         ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: _buildBottomNav(),
-        ),
+        Positioned(left: 0, right: 0, bottom: 0, child: _buildBottomNav()),
       ],
     );
   }
@@ -174,7 +174,11 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
             child: ClipOval(
               child: Container(
                 color: const Color(0xFF2d3449),
-                child: const Icon(Icons.person, color: Color(0xFFdae2fd), size: 22),
+                child: const Icon(
+                  Icons.person,
+                  color: Color(0xFFdae2fd),
+                  size: 22,
+                ),
               ),
             ),
           ),
@@ -182,15 +186,30 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
           const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('LUXE DRIVER', style: TextStyle(color: Color(0xFFdae2fd), fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
-              Text('Online · Dar es Salaam', style: TextStyle(color: Color(0xFF8c909f), fontSize: 12)),
+              Text(
+                'LUXE DRIVER',
+                style: TextStyle(
+                  color: Color(0xFFdae2fd),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                ),
+              ),
+              Text(
+                'Online Â· Dar es Salaam',
+                style: TextStyle(color: Color(0xFF8c909f), fontSize: 12),
+              ),
             ],
           ),
           const Spacer(),
           Stack(
             children: [
               IconButton(
-                icon: const Icon(Icons.notifications_outlined, color: Color(0xFFdae2fd), size: 24),
+                icon: const Icon(
+                  Icons.notifications_outlined,
+                  color: Color(0xFFdae2fd),
+                  size: 24,
+                ),
                 onPressed: _showNotifications,
               ),
               Positioned(
@@ -227,14 +246,20 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
             children: [
               Icon(
                 _profile!.isOnline ? Icons.wifi : Icons.wifi_off,
-                color: _profile!.isOnline ? const Color(0xFF5de6ff) : const Color(0xFF8c909f),
+                color: _profile!.isOnline
+                    ? const Color(0xFF5de6ff)
+                    : const Color(0xFF8c909f),
                 size: 20,
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   _profile!.isOnline ? "You're online" : 'Go online to start',
-                  style: const TextStyle(color: Color(0xFFdae2fd), fontSize: 15, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    color: Color(0xFFdae2fd),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               Switch(
@@ -248,7 +273,11 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
           const SizedBox(height: 12),
           Row(
             children: [
-              _buildMiniStat('High Demand', '\$${(12 + (DateTime.now().hour % 6)).toString()}.50', const Color(0xFF5de6ff)),
+              _buildMiniStat(
+                'High Demand',
+                '\$${(12 + (DateTime.now().hour % 6)).toString()}.50',
+                const Color(0xFF5de6ff),
+              ),
               const SizedBox(width: 12),
               _buildMiniStat('Exclusive', 'Premium', const Color(0xFFadc6ff)),
             ],
@@ -277,8 +306,21 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: const TextStyle(color: Color(0xFF8c909f), fontSize: 11)),
-                Text(value, style: TextStyle(color: accent, fontSize: 13, fontWeight: FontWeight.w700)),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Color(0xFF8c909f),
+                    fontSize: 11,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: accent,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ],
             ),
           ],
@@ -303,11 +345,18 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Today's Earnings", style: TextStyle(color: Color(0xFF8c909f), fontSize: 12)),
+                  const Text(
+                    "Today's Earnings",
+                    style: TextStyle(color: Color(0xFF8c909f), fontSize: 12),
+                  ),
                   const SizedBox(height: 6),
                   Text(
                     _earningsSummary?.formattedBalance ?? 'TZS 0',
-                    style: const TextStyle(color: Color(0xFFdae2fd), fontSize: 22, fontWeight: FontWeight.w800),
+                    style: const TextStyle(
+                      color: Color(0xFFdae2fd),
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   ClipRRect(
@@ -315,7 +364,9 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
                     child: const LinearProgressIndicator(
                       value: 0.3,
                       backgroundColor: Color(0xFF2d3449),
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFadc6ff)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFFadc6ff),
+                      ),
                       minHeight: 4,
                     ),
                   ),
@@ -340,11 +391,18 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Active Hours', style: TextStyle(color: Color(0xFF8c909f), fontSize: 12)),
+                  const Text(
+                    'Active Hours',
+                    style: TextStyle(color: Color(0xFF8c909f), fontSize: 12),
+                  ),
                   const SizedBox(height: 6),
                   const Text(
                     '0.0h',
-                    style: TextStyle(color: Color(0xFFdae2fd), fontSize: 22, fontWeight: FontWeight.w800),
+                    style: TextStyle(
+                      color: Color(0xFFdae2fd),
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   ClipRRect(
@@ -352,12 +410,17 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
                     child: const LinearProgressIndicator(
                       value: 0.0,
                       backgroundColor: Color(0xFF2d3449),
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF5de6ff)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF5de6ff),
+                      ),
                       minHeight: 4,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text('Target: 12h', style: TextStyle(color: Color(0xFF8c909f), fontSize: 10)),
+                  const Text(
+                    'Target: 12h',
+                    style: TextStyle(color: Color(0xFF8c909f), fontSize: 10),
+                  ),
                 ],
               ),
             ),
@@ -378,11 +441,23 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
       ),
       child: Row(
         children: [
-          _buildStatItem(Icons.route, 'Trips', _profile?.completedRides.toString() ?? '0'),
+          _buildStatItem(
+            Icons.route,
+            'Trips',
+            _profile?.completedRides.toString() ?? '0',
+          ),
           _buildStatDivider(),
-          _buildStatItem(Icons.star, 'Rating', _profile?.rating.toStringAsFixed(2) ?? '0.00'),
+          _buildStatItem(
+            Icons.star,
+            'Rating',
+            _profile?.rating.toStringAsFixed(2) ?? '0.00',
+          ),
           _buildStatDivider(),
-          _buildStatItem(Icons.check_circle_outline, 'Acceptance', '${_profile?.acceptanceRate?.toStringAsFixed(0) ?? '100'}%'),
+          _buildStatItem(
+            Icons.check_circle_outline,
+            'Acceptance',
+            '${_profile?.acceptanceRate?.toStringAsFixed(0) ?? '100'}%',
+          ),
         ],
       ),
     );
@@ -394,8 +469,18 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
         children: [
           Icon(icon, color: const Color(0xFFadc6ff), size: 18),
           const SizedBox(height: 4),
-          Text(value, style: const TextStyle(color: Color(0xFFdae2fd), fontSize: 16, fontWeight: FontWeight.w700)),
-          Text(label, style: const TextStyle(color: Color(0xFF8c909f), fontSize: 10)),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Color(0xFFdae2fd),
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          Text(
+            label,
+            style: const TextStyle(color: Color(0xFF8c909f), fontSize: 10),
+          ),
         ],
       ),
     );
@@ -418,7 +503,11 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItem(Icons.home_rounded, 'Home', 0),
-              _buildNavItem(Icons.account_balance_wallet_rounded, 'Earnings', 1),
+              _buildNavItem(
+                Icons.account_balance_wallet_rounded,
+                'Earnings',
+                1,
+              ),
               _buildNavItem(Icons.bar_chart_rounded, 'Performance', 2),
               _buildNavItem(Icons.person_rounded, 'Account', 3),
             ],
@@ -433,9 +522,12 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
     return InkWell(
       onTap: () {
         setState(() => _currentNavIndex = index);
-        if (index == 1) _showEarnings();
-        else if (index == 2) _showPerformance();
-        else if (index == 3) _showAccount();
+        if (index == 1)
+          _showEarnings();
+        else if (index == 2)
+          _showPerformance();
+        else if (index == 3)
+          _showAccount();
       },
       borderRadius: BorderRadius.circular(12),
       child: Padding(
@@ -443,9 +535,24 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: isActive ? const Color(0xFF5de6ff) : const Color(0xFF8c909f), size: 22),
+            Icon(
+              icon,
+              color: isActive
+                  ? const Color(0xFF5de6ff)
+                  : const Color(0xFF8c909f),
+              size: 22,
+            ),
             const SizedBox(height: 2),
-            Text(label, style: TextStyle(fontSize: 10, color: isActive ? const Color(0xFF5de6ff) : const Color(0xFF8c909f), fontWeight: isActive ? FontWeight.w600 : FontWeight.w400)),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                color: isActive
+                    ? const Color(0xFF5de6ff)
+                    : const Color(0xFF8c909f),
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
           ],
         ),
       ),
@@ -455,14 +562,8 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
   Widget _buildActiveRideView() {
     return Column(
       children: [
-        Expanded(
-          flex: 3,
-          child: _buildRideMap(),
-        ),
-        Expanded(
-          flex: 1,
-          child: _buildActiveRidePanel(),
-        ),
+        Expanded(flex: 3, child: _buildRideMap()),
+        Expanded(flex: 1, child: _buildActiveRidePanel()),
       ],
     );
   }
@@ -477,19 +578,34 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
           ),
           children: [
             TileLayer(
-              urlTemplate: 'https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}@2x?access_token=${AppConfig.mapboxToken}',
+              urlTemplate:
+                  'https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}@2x?access_token=${AppConfig.mapboxToken}',
               userAgentPackageName: 'com.smartsoko.smartmove',
             ),
             if (_activeRide != null)
               MarkerLayer(
                 markers: [
                   Marker(
-                    point: LatLng(_activeRide!.pickupLatitude, _activeRide!.pickupLongitude),
-                    child: const Icon(Icons.location_on, color: Colors.green, size: 32),
+                    point: LatLng(
+                      _activeRide!.pickupLatitude,
+                      _activeRide!.pickupLongitude,
+                    ),
+                    child: const Icon(
+                      Icons.location_on,
+                      color: Colors.green,
+                      size: 32,
+                    ),
                   ),
                   Marker(
-                    point: LatLng(_activeRide!.dropoffLatitude, _activeRide!.dropoffLongitude),
-                    child: const Icon(Icons.location_on, color: Colors.red, size: 32),
+                    point: LatLng(
+                      _activeRide!.dropoffLatitude,
+                      _activeRide!.dropoffLongitude,
+                    ),
+                    child: const Icon(
+                      Icons.location_on,
+                      color: Colors.red,
+                      size: 32,
+                    ),
                   ),
                 ],
               ),
@@ -516,27 +632,41 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
             child: Container(
               width: 40,
               height: 4,
-              decoration: BoxDecoration(color: const Color(0xFF2d3449), borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2d3449),
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
           ),
           const SizedBox(height: 16),
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFadc6ff).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   _activeRide!.statusDisplayName,
-                  style: const TextStyle(color: Color(0xFFadc6ff), fontWeight: FontWeight.w600, fontSize: 12),
+                  style: const TextStyle(
+                    color: Color(0xFFadc6ff),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
                 ),
               ),
               const Spacer(),
               Text(
                 'TZS ${_activeRide!.totalFare?.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},') ?? '0'}',
-                style: const TextStyle(color: Color(0xFFdae2fd), fontWeight: FontWeight.bold, fontSize: 18),
+                style: const TextStyle(
+                  color: Color(0xFFdae2fd),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
               ),
             ],
           ),
@@ -548,7 +678,11 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
               Expanded(
                 child: Text(
                   _activeRide!.pickupAddress,
-                  style: const TextStyle(color: Color(0xFFdae2fd), fontWeight: FontWeight.w500, fontSize: 14),
+                  style: const TextStyle(
+                    color: Color(0xFFdae2fd),
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -557,7 +691,11 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
           ),
           Padding(
             padding: const EdgeInsets.only(left: 5),
-            child: Container(width: 1, height: 18, color: const Color(0xFF2d3449)),
+            child: Container(
+              width: 1,
+              height: 18,
+              color: const Color(0xFF2d3449),
+            ),
           ),
           Row(
             children: [
@@ -566,7 +704,11 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
               Expanded(
                 child: Text(
                   _activeRide!.dropoffAddress,
-                  style: const TextStyle(color: Color(0xFFdae2fd), fontWeight: FontWeight.w500, fontSize: 14),
+                  style: const TextStyle(
+                    color: Color(0xFFdae2fd),
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -583,14 +725,31 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF131b2e),
-        title: const Text('Accept Ride?', style: TextStyle(color: Color(0xFFdae2fd))),
-        content: Text('Pickup: ${request.pickupAddress}\nDropoff: ${request.dropoffAddress}', style: const TextStyle(color: Color(0xFFc2c6d6))),
+        title: const Text(
+          'Accept Ride?',
+          style: TextStyle(color: Color(0xFFdae2fd)),
+        ),
+        content: Text(
+          'Pickup: ${request.pickupAddress}\nDropoff: ${request.dropoffAddress}',
+          style: const TextStyle(color: Color(0xFFc2c6d6)),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Reject', style: TextStyle(color: Color(0xFF8c909f)))),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(
+              'Reject',
+              style: TextStyle(color: Color(0xFF8c909f)),
+            ),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFadc6ff)),
-            child: const Text('Accept', style: TextStyle(color: Color(0xFF002e6a))),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFadc6ff),
+            ),
+            child: const Text(
+              'Accept',
+              style: TextStyle(color: Color(0xFF002e6a)),
+            ),
           ),
         ],
       ),
@@ -612,7 +771,9 @@ class _SmartMoveDriverDashboardScreenState extends State<SmartMoveDriverDashboar
   void _showEarnings() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => DriverEarningsScreen(userId: widget.userId)),
+      MaterialPageRoute(
+        builder: (_) => DriverEarningsScreen(userId: widget.userId),
+      ),
     );
   }
 

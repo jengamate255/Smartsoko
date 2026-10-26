@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/shop.dart';
+﻿import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:smartsoko/models/shop.dart';
 
 class SampleData {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;

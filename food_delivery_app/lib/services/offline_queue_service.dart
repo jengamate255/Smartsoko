@@ -1,8 +1,8 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../utils/logger.dart';
+import 'package:smartsoko/utils/logger.dart';
 
 /// A queued offline write operation. Only order-status updates and
 /// location pings — the operations drivers/merchants trigger in the field
@@ -23,20 +23,20 @@ class QueuedOperation {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'type': type,
-        'payload': payload,
-        'createdAt': createdAt.toIso8601String(),
-        'attempts': attempts,
-      };
+    'id': id,
+    'type': type,
+    'payload': payload,
+    'createdAt': createdAt.toIso8601String(),
+    'attempts': attempts,
+  };
 
   static QueuedOperation fromJson(Map<String, dynamic> j) => QueuedOperation(
-        id: j['id'],
-        type: j['type'],
-        payload: (j['payload'] as Map).cast<String, dynamic>(),
-        createdAt: DateTime.parse(j['createdAt']),
-        attempts: (j['attempts'] as num?)?.toInt() ?? 0,
-      );
+    id: j['id'],
+    type: j['type'],
+    payload: (j['payload'] as Map).cast<String, dynamic>(),
+    createdAt: DateTime.parse(j['createdAt']),
+    attempts: (j['attempts'] as num?)?.toInt() ?? 0,
+  );
 }
 
 /// Persists failed writes and replays them when connectivity returns.
@@ -59,7 +59,9 @@ class OfflineQueueService extends ChangeNotifier {
   /// The executor returns true when the write succeeded (op is dropped),
   /// false to keep it queued for retry.
   void registerExecutor(
-      String type, Future<bool> Function(Map<String, dynamic>) executor) {
+    String type,
+    Future<bool> Function(Map<String, dynamic>) executor,
+  ) {
     _executors[type] = executor;
   }
 
@@ -68,12 +70,14 @@ class OfflineQueueService extends ChangeNotifier {
     if (_queue.length >= _maxQueueSize) {
       _queue.removeAt(0); // drop oldest — queue is bounded
     }
-    _queue.add(QueuedOperation(
-      id: DateTime.now().microsecondsSinceEpoch.toString(),
-      type: type,
-      payload: payload,
-      createdAt: DateTime.now(),
-    ));
+    _queue.add(
+      QueuedOperation(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        type: type,
+        payload: payload,
+        createdAt: DateTime.now(),
+      ),
+    );
     await _persist();
     notifyListeners();
   }
@@ -157,7 +161,9 @@ class OfflineQueueService extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
-          _prefsKey, jsonEncode(_queue.map((op) => op.toJson()).toList()));
+        _prefsKey,
+        jsonEncode(_queue.map((op) => op.toJson()).toList()),
+      );
     } catch (e) {
       debugPrint('OfflineQueue save error: $e');
     }

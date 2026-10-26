@@ -1,8 +1,8 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../supabase_service.dart';
-import '../../models/smartmove/ride.dart';
-import '../../models/smartmove/ride_event.dart';
+import 'package:smartsoko/services/supabase_service.dart';
+import 'package:smartsoko/models/smartmove/ride.dart';
+import 'package:smartsoko/models/smartmove/ride_event.dart';
 
 class SmartMoveTrackingService {
   final SupabaseService _supabaseService = SupabaseService();

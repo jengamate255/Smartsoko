@@ -1,7 +1,8 @@
+import 'package:smartsoko/utils/csv_export.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../services/supabase_service.dart';
-import '../../utils/app_theme.dart';
+import 'package:smartsoko/services/supabase_service.dart';
+import 'package:smartsoko/utils/app_theme.dart';
 
 class AdminInventoryScreen extends StatefulWidget {
   const AdminInventoryScreen({super.key});
@@ -32,11 +33,12 @@ class _AdminInventoryScreenState extends State<AdminInventoryScreen> {
     setState(() => _isLoading = true);
     try {
       final client = _supabaseService.client;
-      
+
       var query = client
           .from('products')
-          .select('*, merchant:profiles!products_merchant_id_fkey(name), category:categories(name)')
-          .order('created_at', ascending: false);
+          .select(
+            '*, merchant:profiles!products_merchant_id_fkey(name), category:categories(name)',
+          );
 
       if (_selectedCategory != 'all') {
         query = query.eq('category_id', _selectedCategory);
@@ -48,8 +50,14 @@ class _AdminInventoryScreenState extends State<AdminInventoryScreen> {
         query = query.ilike('name', '%$_searchQuery%');
       }
 
-      final [productsRes, catsRes, mersRes] = await Future.wait([
-        query.range((_currentPage - 1) * _itemsPerPage, _currentPage * _itemsPerPage - 1).count(CountOption.exact),
+      final productsRes = await query
+          .order('created_at', ascending: false)
+          .range(
+            (_currentPage - 1) * _itemsPerPage,
+            _currentPage * _itemsPerPage - 1,
+          )
+          .count(CountOption.exact);
+      final [catsRes, mersRes] = await Future.wait([
         client.from('categories').select('id, name'),
         client.from('profiles').select('id, name').eq('role', 'merchant'),
       ]);
@@ -57,8 +65,8 @@ class _AdminInventoryScreenState extends State<AdminInventoryScreen> {
       if (mounted) {
         setState(() {
           _products = List<Map<String, dynamic>>.from(productsRes.data ?? []);
-          _categories = ['all', ...catsRes.data.map((c) => c['id'] as String)];
-          _merchants = ['all', ...mersRes.data.map((m) => m['id'] as String)];
+          _categories = ['all', ...catsRes.map((c) => c['id'] as String)];
+          _merchants = ['all', ...mersRes.map((m) => m['id'] as String)];
           _isLoading = false;
         });
       }
@@ -66,7 +74,10 @@ class _AdminInventoryScreenState extends State<AdminInventoryScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading inventory: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error loading inventory: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -75,15 +86,21 @@ class _AdminInventoryScreenState extends State<AdminInventoryScreen> {
   Future<void> _toggleProductStatus(String productId, bool isActive) async {
     try {
       final client = _supabaseService.client;
-      await client.from('products').update({
-        'is_active': isActive,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', productId);
-      
+      await client
+          .from('products')
+          .update({
+            'is_active': isActive,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', productId);
+
       _loadInventory();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Product ${isActive ? "activated" : "deactivated"}'), backgroundColor: Colors.green),
+          SnackBar(
+            content: Text('Product ${isActive ? "activated" : "deactivated"}'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
@@ -98,7 +115,7 @@ class _AdminInventoryScreenState extends State<AdminInventoryScreen> {
   void _showProductDetail(Map<String, dynamic> product) {
     final merchant = product['merchant'] as Map<String, dynamic>?;
     final category = product['category'] as Map<String, dynamic>?;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -109,13 +126,24 @@ class _AdminInventoryScreenState extends State<AdminInventoryScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (product['image_url'] != null)
-                Image.network(product['image_url'], height: 150, width: double.infinity, fit: BoxFit.cover),
+                Image.network(
+                  product['image_url'],
+                  height: 150,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               const SizedBox(height: 16),
               _buildInfoRow('Merchant', merchant?['name'] ?? 'N/A'),
               _buildInfoRow('Category', category?['name'] ?? 'N/A'),
-              _buildInfoRow('Price', 'TZS ${product['price']?.toString() ?? '0'}'),
+              _buildInfoRow(
+                'Price',
+                'TZS ${product['price']?.toString() ?? '0'}',
+              ),
               _buildInfoRow('Stock', product['stock']?.toString() ?? '0'),
-              _buildInfoRow('Status', product['is_active'] == true ? 'Active' : 'Inactive'),
+              _buildInfoRow(
+                'Status',
+                product['is_active'] == true ? 'Active' : 'Inactive',
+              ),
               _buildInfoRow('Description', product['description'] ?? 'N/A'),
               _buildInfoRow('Created', _formatDate(product['created_at'])),
             ],
@@ -127,9 +155,14 @@ class _AdminInventoryScreenState extends State<AdminInventoryScreen> {
               Navigator.pop(context);
               _toggleProductStatus(product['id'], product['is_active'] != true);
             },
-            child: Text(product['is_active'] == true ? 'Deactivate' : 'Activate'),
+            child: Text(
+              product['is_active'] == true ? 'Deactivate' : 'Activate',
+            ),
           ),
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
         ],
       ),
     );
@@ -141,7 +174,16 @@ class _AdminInventoryScreenState extends State<AdminInventoryScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 100, child: Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.grey))),
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
+              ),
+            ),
+          ),
           Expanded(child: Text(value)),
         ],
       ),
@@ -167,11 +209,13 @@ class _AdminInventoryScreenState extends State<AdminInventoryScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.download),
-            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Export coming soon')),
-            ),
+            tooltip: 'Export loaded records as CSV',
+            onPressed: () => showCsvExport(context, 'Inventory CSV', _products, {'id':'ID','name':'Product','price':'Price','stock':'Stock','is_active':'Active'}),
           ),
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadInventory),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadInventory,
+          ),
         ],
       ),
       body: Column(
@@ -189,7 +233,9 @@ class _AdminInventoryScreenState extends State<AdminInventoryScreen> {
                         decoration: InputDecoration(
                           hintText: 'Search products...',
                           prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           filled: true,
                           fillColor: Colors.white,
                         ),
@@ -205,14 +251,20 @@ class _AdminInventoryScreenState extends State<AdminInventoryScreen> {
                       child: DropdownButtonFormField<String>(
                         value: _selectedCategory,
                         decoration: InputDecoration(
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           filled: true,
                           fillColor: Colors.white,
                         ),
-                        items: _categories.map((c) => DropdownMenuItem(
-                          value: c, 
-                          child: Text(c == 'all' ? 'All Categories' : c)
-                        )).toList(),
+                        items: _categories
+                            .map(
+                              (c) => DropdownMenuItem(
+                                value: c,
+                                child: Text(c == 'all' ? 'All Categories' : c),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (value) {
                           _selectedCategory = value!;
                           _currentPage = 1;
@@ -225,14 +277,20 @@ class _AdminInventoryScreenState extends State<AdminInventoryScreen> {
                       child: DropdownButtonFormField<String>(
                         value: _selectedMerchant,
                         decoration: InputDecoration(
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           filled: true,
                           fillColor: Colors.white,
                         ),
-                        items: _merchants.map((m) => DropdownMenuItem(
-                          value: m, 
-                          child: Text(m == 'all' ? 'All Merchants' : m)
-                        )).toList(),
+                        items: _merchants
+                            .map(
+                              (m) => DropdownMenuItem(
+                                value: m,
+                                child: Text(m == 'all' ? 'All Merchants' : m),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (value) {
                           _selectedMerchant = value!;
                           _currentPage = 1;
@@ -249,73 +307,121 @@ class _AdminInventoryScreenState extends State<AdminInventoryScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _products.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.inventory, size: 64, color: Colors.grey[400]),
-                            const SizedBox(height: 16),
-                            Text('No products found', style: TextStyle(fontSize: 18, color: Colors.grey[600])),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.inventory,
+                          size: 64,
+                          color: Colors.grey[400],
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _products.length,
-                        itemBuilder: (context, index) {
-                          final product = _products[index];
-                          final merchant = product['merchant'] as Map<String, dynamic>?;
-                          final category = product['category'] as Map<String, dynamic>?;
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: ListTile(
-                              leading: product['image_url'] != null
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.network(product['image_url'], width: 50, height: 50, fit: BoxFit.cover),
-                                    )
-                                  : CircleAvatar(
-                                      backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
-                                      child: Icon(Icons.fastfood, color: AppTheme.primaryColor),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No products found',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _products.length,
+                    itemBuilder: (context, index) {
+                      final product = _products[index];
+                      final merchant =
+                          product['merchant'] as Map<String, dynamic>?;
+                      final category =
+                          product['category'] as Map<String, dynamic>?;
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: ListTile(
+                          leading: product['image_url'] != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    product['image_url'],
+                                    width: 50,
+                                    height: 50,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : CircleAvatar(
+                                  backgroundColor: AppTheme.primaryColor
+                                      .withOpacity(0.1),
+                                  child: Icon(
+                                    Icons.fastfood,
+                                    color: AppTheme.primaryColor,
+                                  ),
+                                ),
+                          title: Text(
+                            product['name'] ?? 'Unnamed',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${merchant?['name'] ?? 'N/A'} â€¢ ${category?['name'] ?? 'N/A'}',
+                              ),
+                              Text(
+                                'TZS ${product['price']} â€¢ Stock: ${product['stock']}',
+                              ),
+                            ],
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                product['is_active'] == true
+                                    ? Icons.check_circle
+                                    : Icons.cancel,
+                                color: product['is_active'] == true
+                                    ? Colors.green
+                                    : Colors.red,
+                              ),
+                              const SizedBox(width: 8),
+                              PopupMenuButton(
+                                itemBuilder: (context) => [
+                                  PopupMenuItem(
+                                    value: 'toggle',
+                                    child: Text(
+                                      product['is_active'] == true
+                                          ? 'Deactivate'
+                                          : 'Activate',
                                     ),
-                              title: Text(product['name'] ?? 'Unnamed', style: const TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('${merchant?['name'] ?? 'N/A'} • ${category?['name'] ?? 'N/A'}'),
-                                  Text('TZS ${product['price']} • Stock: ${product['stock']}'),
-                                ],
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    product['is_active'] == true ? Icons.check_circle : Icons.cancel,
-                                    color: product['is_active'] == true ? Colors.green : Colors.red,
                                   ),
-                                  const SizedBox(width: 8),
-                                  PopupMenuButton(
-                                    itemBuilder: (context) => [
-                                      PopupMenuItem(
-                                        value: 'toggle',
-                                        child: Text(product['is_active'] == true ? 'Deactivate' : 'Activate'),
-                                      ),
-                                      const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                                      const PopupMenuItem(value: 'delete', child: Text('Delete', style: TextStyle(color: Colors.red))),
-                                    ],
-                                    onSelected: (value) {
-                                      if (value == 'toggle') {
-                                        _toggleProductStatus(product['id'], product['is_active'] != true);
-                                      }
-                                    },
+                                  const PopupMenuItem(
+                                    value: 'edit',
+                                    child: Text('Edit'),
+                                  ),
+                                  const PopupMenuItem(
+                                    value: 'delete',
+                                    child: Text(
+                                      'Delete',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
                                   ),
                                 ],
+                                onSelected: (value) {
+                                  if (value == 'toggle') {
+                                    _toggleProductStatus(
+                                      product['id'],
+                                      product['is_active'] != true,
+                                    );
+                                  }
+                                },
                               ),
-                              onTap: () => _showProductDetail(product),
-                            ),
-                          );
-                        },
-                      ),
+                            ],
+                          ),
+                          onTap: () => _showProductDetail(product),
+                        ),
+                      );
+                    },
+                  ),
           ),
           if (!_isLoading)
             Padding(
@@ -325,12 +431,22 @@ class _AdminInventoryScreenState extends State<AdminInventoryScreen> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.chevron_left),
-                    onPressed: _currentPage > 1 ? () { _currentPage--; _loadInventory(); } : null,
+                    onPressed: _currentPage > 1
+                        ? () {
+                            _currentPage--;
+                            _loadInventory();
+                          }
+                        : null,
                   ),
                   Text('Page $_currentPage'),
                   IconButton(
                     icon: const Icon(Icons.chevron_right),
-                    onPressed: _products.length == _itemsPerPage ? () { _currentPage++; _loadInventory(); } : null,
+                    onPressed: _products.length == _itemsPerPage
+                        ? () {
+                            _currentPage++;
+                            _loadInventory();
+                          }
+                        : null,
                   ),
                 ],
               ),

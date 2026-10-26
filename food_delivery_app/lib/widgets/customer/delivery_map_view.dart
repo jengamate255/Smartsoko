@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../../models/order.dart';
+import 'package:smartsoko/models/order.dart';
 
 class DeliveryMapView extends StatefulWidget {
   final Order order;
@@ -32,7 +32,7 @@ class _DeliveryMapViewState extends State<DeliveryMapView> {
   @override
   void didUpdateWidget(DeliveryMapView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.driverLat != widget.driverLat || 
+    if (oldWidget.driverLat != widget.driverLat ||
         oldWidget.driverLng != widget.driverLng) {
       _updateMarkers();
       _updateCamera();
@@ -41,12 +41,19 @@ class _DeliveryMapViewState extends State<DeliveryMapView> {
 
   void _updateMarkers() {
     final markers = <Marker>{};
+    final latitude = widget.order.deliveryLat;
+    final longitude = widget.order.deliveryLng;
+    _polylines = {};
+    if (latitude == null || longitude == null) {
+      setState(() => _markers = markers);
+      return;
+    }
 
     // Customer location marker
     markers.add(
       Marker(
         markerId: const MarkerId('customer'),
-        position: LatLng(widget.order.deliveryLat, widget.order.deliveryLng),
+        position: LatLng(latitude, longitude),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
         infoWindow: const InfoWindow(
           title: 'Delivery Location',
@@ -75,7 +82,7 @@ class _DeliveryMapViewState extends State<DeliveryMapView> {
           polylineId: const PolylineId('route'),
           points: [
             LatLng(widget.driverLat!, widget.driverLng!),
-            LatLng(widget.order.deliveryLat, widget.order.deliveryLng),
+            LatLng(latitude, longitude),
           ],
           color: Colors.blue,
           width: 4,
@@ -90,36 +97,42 @@ class _DeliveryMapViewState extends State<DeliveryMapView> {
 
   void _updateCamera() {
     if (_mapController == null) return;
+    final latitude = widget.order.deliveryLat;
+    final longitude = widget.order.deliveryLng;
+    if (latitude == null || longitude == null) return;
 
     if (widget.driverLat != null && widget.driverLng != null) {
       // Calculate bounds to show both driver and customer
       final bounds = LatLngBounds(
         southwest: LatLng(
-          widget.driverLat! < widget.order.deliveryLat ? widget.driverLat! : widget.order.deliveryLat,
-          widget.driverLng! < widget.order.deliveryLng ? widget.driverLng! : widget.order.deliveryLng,
+          widget.driverLat! < latitude ? widget.driverLat! : latitude,
+          widget.driverLng! < longitude ? widget.driverLng! : longitude,
         ),
         northeast: LatLng(
-          widget.driverLat! > widget.order.deliveryLat ? widget.driverLat! : widget.order.deliveryLat,
-          widget.driverLng! > widget.order.deliveryLng ? widget.driverLng! : widget.order.deliveryLng,
+          widget.driverLat! > latitude ? widget.driverLat! : latitude,
+          widget.driverLng! > longitude ? widget.driverLng! : longitude,
         ),
       );
 
-      _mapController!.animateCamera(
-        CameraUpdate.newLatLngBounds(bounds, 100),
-      );
+      _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100));
     } else {
       // Just show customer location
       _mapController!.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          LatLng(widget.order.deliveryLat, widget.order.deliveryLng),
-          15,
-        ),
+        CameraUpdate.newLatLngZoom(LatLng(latitude, longitude), 15),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final latitude = widget.order.deliveryLat;
+    final longitude = widget.order.deliveryLng;
+    if (latitude == null || longitude == null) {
+      return const SizedBox(
+        height: 300,
+        child: Center(child: Text('Delivery location is not available yet')),
+      );
+    }
     return Container(
       height: 300,
       decoration: BoxDecoration(
@@ -130,7 +143,7 @@ class _DeliveryMapViewState extends State<DeliveryMapView> {
         borderRadius: BorderRadius.circular(12),
         child: GoogleMap(
           initialCameraPosition: CameraPosition(
-            target: LatLng(widget.order.deliveryLat, widget.order.deliveryLng),
+            target: LatLng(latitude, longitude),
             zoom: 15,
           ),
           markers: _markers,

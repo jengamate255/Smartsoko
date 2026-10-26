@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../../services/auth_service.dart';
-import '../../services/analytics_service.dart';
-import '../../utils/role_validator.dart';
-import '../../utils/validators.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/services/analytics_service.dart';
+import 'package:smartsoko/utils/role_validator.dart';
+import 'package:smartsoko/utils/validators.dart';
 
 class DriverLoginScreen extends StatefulWidget {
   const DriverLoginScreen({super.key});

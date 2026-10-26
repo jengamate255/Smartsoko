@@ -1,13 +1,14 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../services/supabase_service.dart';
-import '../../utils/app_theme.dart';
+import 'package:smartsoko/services/supabase_service.dart';
+import 'package:smartsoko/utils/app_theme.dart';
 
 class SmartMoveVehiclesScreen extends StatefulWidget {
   const SmartMoveVehiclesScreen({super.key});
 
   @override
-  State<SmartMoveVehiclesScreen> createState() => _SmartMoveVehiclesScreenState();
+  State<SmartMoveVehiclesScreen> createState() =>
+      _SmartMoveVehiclesScreenState();
 }
 
 class _SmartMoveVehiclesScreenState extends State<SmartMoveVehiclesScreen> {
@@ -29,22 +30,29 @@ class _SmartMoveVehiclesScreenState extends State<SmartMoveVehiclesScreen> {
     setState(() => _isLoading = true);
     try {
       final client = _supabaseService.client;
-      
+
       var query = client
           .from('driver_vehicles')
-          .select('*, driver:driver_profiles!driver_vehicles_driver_id_fkey(full_name, phone)')
-          .order('created_at', ascending: false);
+          .select(
+            '*, driver:driver_profiles!driver_vehicles_driver_id_fkey(full_name, phone)',
+          );
 
       if (_selectedStatus != 'all') {
         query = query.eq('status', _selectedStatus);
       }
 
       if (_searchQuery.isNotEmpty) {
-        query = query.or('vehicle_plate.ilike.%$_searchQuery%,vehicle_type.ilike.%$_searchQuery%,driver.full_name.ilike.%$_searchQuery%');
+        query = query.or(
+          'vehicle_plate.ilike.%$_searchQuery%,vehicle_type.ilike.%$_searchQuery%,driver.full_name.ilike.%$_searchQuery%',
+        );
       }
 
       final response = await query
-          .range((_currentPage - 1) * _itemsPerPage, _currentPage * _itemsPerPage - 1)
+          .order('created_at', ascending: false)
+          .range(
+            (_currentPage - 1) * _itemsPerPage,
+            _currentPage * _itemsPerPage - 1,
+          )
           .count(CountOption.exact);
 
       if (mounted) {
@@ -57,7 +65,10 @@ class _SmartMoveVehiclesScreenState extends State<SmartMoveVehiclesScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading vehicles: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error loading vehicles: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -66,15 +77,21 @@ class _SmartMoveVehiclesScreenState extends State<SmartMoveVehiclesScreen> {
   Future<void> _approveVehicle(String vehicleId) async {
     try {
       final client = _supabaseService.client;
-      await client.from('driver_vehicles').update({
-        'status': 'approved',
-        'approved_at': DateTime.now().toIso8601String(),
-      }).eq('id', vehicleId);
-      
+      await client
+          .from('driver_vehicles')
+          .update({
+            'status': 'approved',
+            'approved_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', vehicleId);
+
       _loadVehicles();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vehicle approved'), backgroundColor: Colors.green),
+          const SnackBar(
+            content: Text('Vehicle approved'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
@@ -92,15 +109,18 @@ class _SmartMoveVehiclesScreenState extends State<SmartMoveVehiclesScreen> {
 
     try {
       final client = _supabaseService.client;
-      await client.from('driver_vehicles').update({
-        'status': 'rejected',
-        'rejection_reason': reason,
-      }).eq('id', vehicleId);
-      
+      await client
+          .from('driver_vehicles')
+          .update({'status': 'rejected', 'rejection_reason': reason})
+          .eq('id', vehicleId);
+
       _loadVehicles();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vehicle rejected'), backgroundColor: Colors.orange),
+          const SnackBar(
+            content: Text('Vehicle rejected'),
+            backgroundColor: Colors.orange,
+          ),
         );
       }
     } catch (e) {
@@ -124,7 +144,10 @@ class _SmartMoveVehiclesScreenState extends State<SmartMoveVehiclesScreen> {
           maxLines: 3,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(context, controller.text),
             child: const Text('Submit'),
@@ -136,7 +159,7 @@ class _SmartMoveVehiclesScreenState extends State<SmartMoveVehiclesScreen> {
 
   void _showVehicleDetail(Map<String, dynamic> vehicle) {
     final driver = vehicle['driver'] as Map<String, dynamic>?;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -151,14 +174,21 @@ class _SmartMoveVehiclesScreenState extends State<SmartMoveVehiclesScreen> {
               _buildInfoRow('Type', vehicle['vehicle_type'] ?? 'N/A'),
               _buildInfoRow('Model', vehicle['vehicle_model'] ?? 'N/A'),
               _buildInfoRow('Color', vehicle['vehicle_color'] ?? 'N/A'),
-              _buildInfoRow('Year', vehicle['vehicle_year']?.toString() ?? 'N/A'),
+              _buildInfoRow(
+                'Year',
+                vehicle['vehicle_year']?.toString() ?? 'N/A',
+              ),
               _buildInfoRow('Plate', vehicle['vehicle_plate'] ?? 'N/A'),
               _buildInfoRow('Status', _getStatusChip(vehicle['status'])),
               _buildInfoRow('Submitted', _formatDate(vehicle['created_at'])),
-              if (vehicle['rejection_reason'] != null) _buildInfoRow('Rejection Reason', vehicle['rejection_reason']),
+              if (vehicle['rejection_reason'] != null)
+                _buildInfoRow('Rejection Reason', vehicle['rejection_reason']),
               const Divider(),
               if (vehicle['photo_url'] != null) ...[
-                const Text('Vehicle Photo:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Vehicle Photo:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
@@ -180,23 +210,49 @@ class _SmartMoveVehiclesScreenState extends State<SmartMoveVehiclesScreen> {
         ),
         actions: [
           if (vehicle['status'] == 'pending') ...[
-            TextButton(onPressed: () { Navigator.pop(context); _approveVehicle(vehicle['id']); }, child: const Text('Approve')),
-            TextButton(onPressed: () { Navigator.pop(context); _rejectVehicle(vehicle['id']); }, child: const Text('Reject')),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _approveVehicle(vehicle['id']);
+              },
+              child: const Text('Approve'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _rejectVehicle(vehicle['id']);
+              },
+              child: const Text('Reject'),
+            ),
           ],
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, Object? value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 100, child: Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.grey))),
-          Expanded(child: Text(value)),
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          Expanded(
+            child: value is Widget ? value : Text(value?.toString() ?? 'N/A'),
+          ),
         ],
       ),
     );
@@ -241,7 +297,9 @@ class _SmartMoveVehiclesScreenState extends State<SmartMoveVehiclesScreen> {
         title: const Text('Vehicle Approvals'),
         backgroundColor: AppTheme.primaryColor,
         foregroundColor: Colors.white,
-        actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: _loadVehicles)],
+        actions: [
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadVehicles),
+        ],
       ),
       body: Column(
         children: [
@@ -258,7 +316,9 @@ class _SmartMoveVehiclesScreenState extends State<SmartMoveVehiclesScreen> {
                         decoration: InputDecoration(
                           hintText: 'Search vehicles...',
                           prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           filled: true,
                           fillColor: Colors.white,
                         ),
@@ -274,12 +334,19 @@ class _SmartMoveVehiclesScreenState extends State<SmartMoveVehiclesScreen> {
                       child: DropdownButtonFormField<String>(
                         value: _selectedStatus,
                         decoration: InputDecoration(
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           filled: true,
                           fillColor: Colors.white,
                         ),
                         items: ['all', 'pending', 'approved', 'rejected']
-                            .map((s) => DropdownMenuItem(value: s, child: Text(s.toUpperCase())))
+                            .map(
+                              (s) => DropdownMenuItem(
+                                value: s,
+                                child: Text(s.toUpperCase()),
+                              ),
+                            )
                             .toList(),
                         onChanged: (value) {
                           _selectedStatus = value!;
@@ -297,43 +364,63 @@ class _SmartMoveVehiclesScreenState extends State<SmartMoveVehiclesScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _vehicles.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.directions_car, size: 64, color: Colors.grey[400]),
-                            const SizedBox(height: 16),
-                            Text('No vehicles found', style: TextStyle(fontSize: 18, color: Colors.grey[600])),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.directions_car,
+                          size: 64,
+                          color: Colors.grey[400],
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _vehicles.length,
-                        itemBuilder: (context, index) {
-                          final vehicle = _vehicles[index];
-                          final driver = vehicle['driver'] as Map<String, dynamic>?;
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: _getStatusColor(vehicle['status']).withOpacity(0.1),
-                                child: Icon(Icons.directions_car, color: _getStatusColor(vehicle['status'])),
-                              ),
-                              title: Text('${vehicle['vehicle_type'] ?? ''} ${vehicle['vehicle_plate'] ?? ''}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(driver?['full_name'] ?? 'Unknown'),
-                                  Text('${vehicle['vehicle_model'] ?? ''} • ${_formatDate(vehicle['created_at'])}'),
-                                ],
-                              ),
-                              trailing: _getStatusChip(vehicle['status']),
-                              onTap: () => _showVehicleDetail(vehicle),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No vehicles found',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _vehicles.length,
+                    itemBuilder: (context, index) {
+                      final vehicle = _vehicles[index];
+                      final driver = vehicle['driver'] as Map<String, dynamic>?;
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: _getStatusColor(
+                              vehicle['status'],
+                            ).withOpacity(0.1),
+                            child: Icon(
+                              Icons.directions_car,
+                              color: _getStatusColor(vehicle['status']),
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                          title: Text(
+                            '${vehicle['vehicle_type'] ?? ''} ${vehicle['vehicle_plate'] ?? ''}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(driver?['full_name'] ?? 'Unknown'),
+                              Text(
+                                '${vehicle['vehicle_model'] ?? ''} â€¢ ${_formatDate(vehicle['created_at'])}',
+                              ),
+                            ],
+                          ),
+                          trailing: _getStatusChip(vehicle['status']),
+                          onTap: () => _showVehicleDetail(vehicle),
+                        ),
+                      );
+                    },
+                  ),
           ),
           if (!_isLoading)
             Padding(
@@ -343,12 +430,22 @@ class _SmartMoveVehiclesScreenState extends State<SmartMoveVehiclesScreen> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.chevron_left),
-                    onPressed: _currentPage > 1 ? () { _currentPage--; _loadVehicles(); } : null,
+                    onPressed: _currentPage > 1
+                        ? () {
+                            _currentPage--;
+                            _loadVehicles();
+                          }
+                        : null,
                   ),
                   Text('Page $_currentPage'),
                   IconButton(
                     icon: const Icon(Icons.chevron_right),
-                    onPressed: _vehicles.length == _itemsPerPage ? () { _currentPage++; _loadVehicles(); } : null,
+                    onPressed: _vehicles.length == _itemsPerPage
+                        ? () {
+                            _currentPage++;
+                            _loadVehicles();
+                          }
+                        : null,
                   ),
                 ],
               ),
@@ -360,9 +457,12 @@ class _SmartMoveVehiclesScreenState extends State<SmartMoveVehiclesScreen> {
 
   Color _getStatusColor(String? status) {
     switch (status) {
-      case 'approved': return Colors.green;
-      case 'rejected': return Colors.red;
-      default: return Colors.amber;
+      case 'approved':
+        return Colors.green;
+      case 'rejected':
+        return Colors.red;
+      default:
+        return Colors.amber;
     }
   }
 }

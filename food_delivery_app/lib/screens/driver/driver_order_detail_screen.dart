@@ -1,24 +1,22 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../models/order.dart';
-import '../../models/restaurant.dart';
-import '../../services/order_service.dart';
-import '../../services/restaurant_service.dart';
-import '../../services/analytics_service.dart';
-import '../../services/auth_service.dart';
-import '../../widgets/navigation_map_view.dart';
+import 'package:smartsoko/models/order.dart';
+import 'package:smartsoko/models/restaurant.dart';
+import 'package:smartsoko/services/order_service.dart';
+import 'package:smartsoko/services/restaurant_service.dart';
+import 'package:smartsoko/services/analytics_service.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/widgets/navigation_map_view.dart';
 
 class DriverOrderDetailScreen extends StatefulWidget {
   final Order order;
 
-  const DriverOrderDetailScreen({
-    super.key,
-    required this.order,
-  });
+  const DriverOrderDetailScreen({super.key, required this.order});
 
   @override
-  State<DriverOrderDetailScreen> createState() => _DriverOrderDetailScreenState();
+  State<DriverOrderDetailScreen> createState() =>
+      _DriverOrderDetailScreenState();
 }
 
 class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
@@ -38,7 +36,9 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
 
   Future<void> _loadRestaurant() async {
     final restaurantService = context.read<RestaurantService>();
-    final restaurant = await restaurantService.getRestaurant(widget.order.restaurantId);
+    final restaurant = await restaurantService.getRestaurant(
+      widget.order.restaurantId,
+    );
     if (mounted) {
       setState(() {
         _restaurant = restaurant;
@@ -54,10 +54,17 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
       transitionDuration: const Duration(milliseconds: 200),
       pageBuilder: (context, anim1, anim2) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Text(
-            newStatus == OrderStatus.pickedUp ? 'Confirm Pickup' : 'Confirm Delivery',
-            style: const TextStyle(color: Color(0xFF064E3B), fontWeight: FontWeight.bold),
+            newStatus == OrderStatus.pickedUp
+                ? 'Confirm Pickup'
+                : 'Confirm Delivery',
+            style: const TextStyle(
+              color: Color(0xFF064E3B),
+              fontWeight: FontWeight.bold,
+            ),
           ),
           content: Text(
             newStatus == OrderStatus.pickedUp
@@ -75,7 +82,9 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF064E3B),
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: const Text('Confirm'),
             ),
@@ -93,13 +102,17 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
     setState(() => _isLoading = true);
     try {
       final orderService = context.read<OrderService>();
-      await orderService.updateOrderStatus(widget.order.id, newStatus);
-      
+      await orderService.updateDriverOrderStatus(
+        widget.order.id,
+        newStatus,
+        idToken: await context.read<AuthService>().requireIdToken(),
+      );
+
       if (newStatus == OrderStatus.delivered) {
         final analyticsService = AnalyticsService();
         final authService = context.read<AuthService>();
         final driverId = authService.currentUser?.uid ?? '';
-        
+
         await analyticsService.logDeliveryCompleted(
           orderId: widget.order.id,
           driverId: driverId,
@@ -107,11 +120,15 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
           deliveryAddress: widget.order.deliveryAddress,
         );
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(newStatus == OrderStatus.pickedUp ? 'Order Picked Up!' : 'Order Delivered!'),
+            content: Text(
+              newStatus == OrderStatus.pickedUp
+                  ? 'Order Picked Up!'
+                  : 'Order Delivered!',
+            ),
             backgroundColor: const Color(0xFF064E3B),
             behavior: SnackBarBehavior.floating,
           ),
@@ -139,12 +156,17 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
 
     if (lat == null || lng == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Coordinates not available'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Coordinates not available'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
-    final url = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+    final url = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng',
+    );
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     }
@@ -171,7 +193,10 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFFBF9F5),
       appBar: AppBar(
-        title: Text('Order #${widget.order.id.substring(0, 8)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Order #${widget.order.id.substring(0, 8)}',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xFF064E3B),
         elevation: 0,
@@ -187,24 +212,43 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: _getStatusColor().withOpacity(0.1), shape: BoxShape.circle),
-                    child: Icon(Icons.delivery_dining, color: _getStatusColor()),
+                    decoration: BoxDecoration(
+                      color: _getStatusColor().withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.delivery_dining,
+                      color: _getStatusColor(),
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Current Status', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                        const Text(
+                          'Current Status',
+                          style: TextStyle(color: Colors.grey, fontSize: 13),
+                        ),
                         Text(
                           widget.order.status.name.toUpperCase(),
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _getStatusColor()),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: _getStatusColor(),
+                          ),
                         ),
                       ],
                     ),
@@ -215,11 +259,15 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
             const SizedBox(height: 32),
 
             // Navigation Map
-            if (widget.order.deliveryLat != null && widget.order.deliveryLng != null)
+            if (widget.order.deliveryLat != null &&
+                widget.order.deliveryLng != null)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Route Preview', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Route Preview',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 12),
                   NavigationMapView(
                     pickupLat: _restaurant?.lat ?? widget.order.deliveryLat!,
@@ -239,7 +287,9 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
                       minimumSize: const Size(double.infinity, 56),
                       backgroundColor: const Color(0xFF064E3B),
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       elevation: 0,
                     ),
                   ),
@@ -248,7 +298,10 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
               ),
 
             // Pickup/Delivery Details
-            const Text('Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Details',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             _buildDetailCard(
               title: 'Pickup From',
@@ -277,18 +330,29 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : () => _showConfirmationDialog(isReady ? OrderStatus.pickedUp : OrderStatus.delivered),
+                  onPressed: _isLoading
+                      ? null
+                      : () => _showConfirmationDialog(
+                          isReady
+                              ? OrderStatus.pickedUp
+                              : OrderStatus.delivered,
+                        ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF064E3B),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
                           isReady ? 'Confirm Pickup' : 'Confirm Delivery',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                 ),
               ),
@@ -311,12 +375,21 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: isCurrent ? Border.all(color: const Color(0xFF064E3B), width: 2) : null,
+        border: isCurrent
+            ? Border.all(color: const Color(0xFF064E3B), width: 2)
+            : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: TextStyle(color: isCurrent ? const Color(0xFF064E3B) : Colors.grey, fontSize: 13, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: TextStyle(
+              color: isCurrent ? const Color(0xFF064E3B) : Colors.grey,
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,14 +400,32 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    Text(address, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      address,
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    ),
                     if (notes != null && notes.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.orange.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                        child: Text('Note: $notes', style: const TextStyle(color: Colors.orange, fontSize: 12)),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Note: $notes',
+                          style: const TextStyle(
+                            color: Colors.orange,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ],
                   ],
@@ -350,30 +441,56 @@ class _DriverOrderDetailScreenState extends State<DriverOrderDetailScreen> {
   Widget _buildItemsCard() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Order Content', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text(
+            'Order Content',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           const Divider(height: 24),
-          ...widget.order.items.map((item) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              children: [
-                Text('${item.quantity}x', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF064E3B))),
-                const SizedBox(width: 12),
-                Text(item.name),
-                const Spacer(),
-                Text('TSh ${(item.price * item.quantity).toStringAsFixed(0)}'),
-              ],
+          ...widget.order.items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Text(
+                    '${item.quantity}x',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF064E3B),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(item.name),
+                  const Spacer(),
+                  Text(
+                    'TSh ${(item.price * item.quantity).toStringAsFixed(0)}',
+                  ),
+                ],
+              ),
             ),
-          )),
+          ),
           const Divider(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Total to collect', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('TSh ${widget.order.total.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF064E3B))),
+              const Text(
+                'Total to collect',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                'TSh ${widget.order.total.toStringAsFixed(0)}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF064E3B),
+                ),
+              ),
             ],
           ),
         ],

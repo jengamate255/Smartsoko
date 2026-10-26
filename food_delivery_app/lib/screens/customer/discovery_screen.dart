@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../widgets/shimmer_loading.dart';
+import 'package:smartsoko/services/supabase_service.dart';
+import 'package:smartsoko/widgets/shimmer_loading.dart';
 import 'product_listing_screen.dart';
 
 class DiscoveryScreen extends StatefulWidget {
@@ -97,7 +97,10 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                       decoration: InputDecoration(
                         hintText: 'Search products, shops...',
                         hintStyle: TextStyle(color: Colors.grey[600]),
-                        prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          color: Colors.grey,
+                        ),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 24,
@@ -180,10 +183,10 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
     );
   }
 
-  /// Live product stream: newest available products (search filters by name).
+  /// Live product feed from Supabase (search filters by name).
   Widget _buildProductGrid() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _productsQuery().snapshots(),
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _fetchProducts(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return GridView.count(
@@ -193,21 +196,23 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
             crossAxisSpacing: 24,
             mainAxisSpacing: 24,
             childAspectRatio: 0.7,
-            children: List.generate(4, (_) => const ShimmerLoading(
-              width: double.infinity,
-              height: 200,
-            )),
+            children: List.generate(
+              4,
+              (_) => const ShimmerLoading(width: double.infinity, height: 200),
+            ),
           );
         }
         if (snapshot.hasError) {
           return const Padding(
             padding: EdgeInsets.all(32),
-            child: Center(child: Text('Could not load products — check your connection')),
+            child: Center(
+              child: Text('Could not load products â€” check your connection'),
+            ),
           );
         }
 
-        final docs = snapshot.data?.docs ?? [];
-        if (docs.isEmpty) {
+        final products = snapshot.data ?? const <Map<String, dynamic>>[];
+        if (products.isEmpty) {
           return Padding(
             padding: const EdgeInsets.all(32),
             child: Center(
@@ -227,13 +232,12 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
           crossAxisSpacing: 24,
           mainAxisSpacing: 24,
           childAspectRatio: 0.7,
-          children: docs.take(20).map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
+          children: products.take(20).map((data) {
             return _buildProductCard(
               data['name']?.toString() ?? 'Product',
-              data['description']?.toString() ?? data['shopName']?.toString() ?? '',
+              data['description']?.toString() ?? '',
               (data['price'] as num?)?.toDouble() ?? 0,
-              data['imageUrl']?.toString() ?? '',
+              data['image_url']?.toString() ?? '',
             );
           }).toList(),
         );
@@ -241,25 +245,14 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
     );
   }
 
-  Query _productsQuery() {
-    final firestore = FirebaseFirestore.instance;
-    if (_searchQuery.isEmpty) {
-      // Featured products: available items, newest first
-      return firestore
-          .collection('products')
-          .where('isAvailable', isEqualTo: true)
-          .orderBy('createdAt', descending: true)
-          .limit(20);
+  /// Fetches available products from Supabase, newest first.
+  Future<List<Map<String, dynamic>>> _fetchProducts() async {
+    final client = SupabaseService().client;
+    var query = client.from('products').select().eq('is_available', true);
+    if (_searchQuery.isNotEmpty) {
+      query = query.ilike('name', '%$_searchQuery%');
     }
-    // Firestore can't do case-insensitive substring search — use a
-    // case-insensitive exact/prefix match on the lowercase mirror field
-    // when present, else client-filter a wider fetch.
-    return firestore
-        .collection('products')
-        .where('isAvailable', isEqualTo: true)
-        .orderBy('name')
-        .startAt([_searchQuery])
-        .endAt(['$_searchQuery\uf8ff']);
+    return await query.order('created_at', ascending: false).limit(20);
   }
 
   Widget _buildCategoryItem(IconData icon, String label) {
@@ -283,13 +276,9 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                 color: const Color(0xFFF5F3EF),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(
-                icon,
-                size: 32,
-                color: const Color(0xFF012D1D),
-              ),
+              child: Icon(icon, size: 32, color: const Color(0xFF012D1D)),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               label,
               style: TextStyle(
@@ -320,9 +309,7 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
         );
       },
       child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -341,10 +328,11 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                               imageUrl: imageUrl,
                               fit: BoxFit.cover,
                               width: double.infinity,
-                              placeholder: (context, url) => const ShimmerLoading(
-                                width: double.infinity,
-                                height: double.infinity,
-                              ),
+                              placeholder: (context, url) =>
+                                  const ShimmerLoading(
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
                               errorWidget: (context, url, error) => const Icon(
                                 Icons.image_not_supported,
                                 size: 50,
@@ -370,10 +358,7 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.add,
-                        color: Colors.white,
-                      ),
+                      child: const Icon(Icons.add, color: Colors.white),
                     ),
                   ),
                 ],
@@ -398,10 +383,7 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -424,7 +406,7 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
   }
 
   void _showNotifications(BuildContext context) {
-    // Unread merchant/customer notifications from the shared notifications table.
+    // Notifications from the shared notifications table (Supabase).
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -433,35 +415,46 @@ class _DiscoveryScreenState extends State<DiscoveryScreen> {
         maxChildSize: 0.9,
         minChildSize: 0.4,
         expand: false,
-        builder: (ctx, scrollController) => StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('notifications')
-              .orderBy('createdAt', descending: true)
-              .limit(30)
-              .snapshots(),
-          builder: (ctx, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            final docs = snap.data?.docs ?? [];
-            if (docs.isEmpty) {
-              return const Center(child: Text('No notifications'));
-            }
-            return ListView.builder(
-              controller: scrollController,
-              itemCount: docs.length,
-              itemBuilder: (ctx, i) {
-                final d = docs[i].data() as Map<String, dynamic>;
-                return ListTile(
-                  leading: const Icon(Icons.notifications),
-                  title: Text(d['title']?.toString() ?? 'Update'),
-                  subtitle: Text(d['body']?.toString() ?? ''),
+        builder: (ctx, scrollController) =>
+            FutureBuilder<List<Map<String, dynamic>>>(
+              future: _fetchNotifications(),
+              builder: (ctx, snap) {
+                if (snap.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final items = snap.data ?? const <Map<String, dynamic>>[];
+                if (items.isEmpty) {
+                  return const Center(child: Text('No notifications'));
+                }
+                return ListView.builder(
+                  controller: scrollController,
+                  itemCount: items.length,
+                  itemBuilder: (ctx, i) {
+                    final d = items[i];
+                    return ListTile(
+                      leading: const Icon(Icons.notifications),
+                      title: Text(d['title']?.toString() ?? 'Update'),
+                      subtitle: Text(d['body']?.toString() ?? ''),
+                    );
+                  },
                 );
               },
-            );
-          },
-        ),
+            ),
       ),
     );
+  }
+
+  /// Newest notifications, newest first. Degrades to an empty list if the
+  /// table is unavailable so the sheet never shows a hard error.
+  Future<List<Map<String, dynamic>>> _fetchNotifications() async {
+    try {
+      return await SupabaseService().client
+          .from('notifications')
+          .select()
+          .order('created_at', ascending: false)
+          .limit(30);
+    } catch (_) {
+      return const <Map<String, dynamic>>[];
+    }
   }
 }

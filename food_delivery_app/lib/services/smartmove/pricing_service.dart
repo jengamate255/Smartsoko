@@ -1,8 +1,8 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../supabase_service.dart';
-import '../../models/smartmove/vehicle_type.dart';
-import '../../models/smartmove/promo_code.dart';
+import 'package:smartsoko/services/supabase_service.dart';
+import 'package:smartsoko/models/smartmove/vehicle_type.dart';
+import 'package:smartsoko/models/smartmove/promo_code.dart';
 import 'ride_service.dart';
 
 class SmartMovePricingService {

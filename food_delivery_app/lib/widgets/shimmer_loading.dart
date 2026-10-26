@@ -5,34 +5,38 @@ class ShimmerLoading extends StatelessWidget {
   final double width;
   final double height;
   final BorderRadius? borderRadius;
-  
+  final Widget? child;
+
   const ShimmerLoading({
     super.key,
-    required this.width,
-    required this.height,
+    this.width = double.infinity,
+    this.height = 150,
     this.borderRadius,
+    this.child,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
-      child: Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: borderRadius ?? BorderRadius.circular(8),
-        ),
-      ),
+      child:
+          child ??
+          Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: borderRadius ?? BorderRadius.circular(8),
+            ),
+          ),
     );
   }
 }
 
 class RestaurantCardShimmer extends StatelessWidget {
   const RestaurantCardShimmer({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -72,7 +76,7 @@ class RestaurantCardShimmer extends StatelessWidget {
 
 class OrderCardShimmer extends StatelessWidget {
   const OrderCardShimmer({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return Card(

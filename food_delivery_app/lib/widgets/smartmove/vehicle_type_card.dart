@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import '../../models/smartmove/vehicle_type.dart';
-import '../../utils/app_theme.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:smartsoko/models/smartmove/vehicle_type.dart';
+import 'package:smartsoko/utils/app_theme.dart';
 
 class VehicleTypeCard extends StatelessWidget {
   final VehicleType vehicleType;

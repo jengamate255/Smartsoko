@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import '../../../models/smartmove/driver_earnings.dart';
-import '../../../services/smartmove/driver_service.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:smartsoko/models/smartmove/driver_earnings.dart';
+import 'package:smartsoko/services/smartmove/driver_service.dart';
 
 class DriverEarningsScreen extends StatefulWidget {
   final String userId;

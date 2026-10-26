@@ -1,7 +1,7 @@
-import 'dart:async';
-import '../supabase_service.dart';
-import '../../models/smartmove/ride_request.dart';
-import '../../models/smartmove/driver_profile.dart';
+﻿import 'dart:async';
+import 'package:smartsoko/services/supabase_service.dart';
+import 'package:smartsoko/models/smartmove/ride_request.dart';
+import 'package:smartsoko/models/smartmove/driver_profile.dart';
 
 class SmartMoveMatchingService {
   final SupabaseService _supabaseService = SupabaseService();

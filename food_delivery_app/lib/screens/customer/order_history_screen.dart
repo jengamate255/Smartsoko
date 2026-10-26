@@ -1,10 +1,13 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/order_service.dart';
-import '../../services/auth_service.dart';
-import '../../services/analytics_service.dart';
-import '../../models/order.dart';
+import 'package:smartsoko/services/order_service.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/services/analytics_service.dart';
+import 'package:smartsoko/models/order.dart';
 import 'order_tracking_screen.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:smartsoko/config/app_config.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
   const OrderHistoryScreen({super.key});
@@ -14,6 +17,52 @@ class OrderHistoryScreen extends StatefulWidget {
 }
 
 class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
+  Future<void> _rateOrder(Order order) async {
+    final products = order.items.where((item) => item.id.isNotEmpty).toList();
+    if (products.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Product details are unavailable for this order.')));
+      return;
+    }
+    var productId = products.first.id;
+    var rating = 5;
+    var saving = false;
+    String? error;
+    final comment = TextEditingController();
+    await showDialog<void>(context: context, barrierDismissible: false, builder: (dialogContext) => StatefulBuilder(
+      builder: (dialogContext, update) => AlertDialog(
+        title: const Text('Rate a product from your order'),
+        content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
+          DropdownButtonFormField<String>(value: productId, decoration: const InputDecoration(labelText: 'Product'),
+            items: {for (final item in products) item.id: item}.values.map((item) => DropdownMenuItem(value: item.id, child: Text(item.name))).toList(),
+            onChanged: saving ? null : (value) => update(() => productId = value!)),
+          DropdownButtonFormField<int>(value: rating, decoration: const InputDecoration(labelText: 'Rating'),
+            items: List.generate(5, (index) => DropdownMenuItem(value: index + 1, child: Text('${index + 1} / 5'))),
+            onChanged: saving ? null : (value) => update(() => rating = value!)),
+          TextField(controller: comment, enabled: !saving, maxLength: 1000, decoration: const InputDecoration(labelText: 'Comment (optional)')),
+          if (error != null) Text(error!, style: const TextStyle(color: Colors.red)),
+        ])),
+        actions: [TextButton(onPressed: saving ? null : () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+          FilledButton(onPressed: saving ? null : () async {
+            update(() { saving = true; error = null; });
+            try {
+              final user = context.read<AuthService>().currentUser;
+              if (user == null) throw Exception('Sign in to submit a review.');
+              final token = await user.getIdToken();
+              final response = await http.post(Uri.parse('${AppConfig.apiBaseUrl}/reviews'),
+                headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+                body: jsonEncode({'productId': productId, 'userId': user.uid, 'orderId': order.id, 'rating': rating, 'comment': comment.text.trim()})).timeout(const Duration(seconds: 15));
+              final result = jsonDecode(response.body);
+              if (response.statusCode != 200 || result['success'] != true) throw Exception(result['error'] ?? 'Could not save your review.');
+              if (dialogContext.mounted) Navigator.pop(dialogContext);
+              if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Review submitted')));
+            } catch (failure) {
+              if (dialogContext.mounted) update(() { saving = false; error = failure.toString().replaceFirst('Exception: ', ''); });
+            }
+          }, child: Text(saving ? 'Submitting…' : 'Submit review'))],
+      ),
+    ));
+    comment.dispose();
+  }
   @override
   void initState() {
     super.initState();
@@ -170,12 +219,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                             ),
                             if (isCompleted)
                               TextButton.icon(
-                                onPressed: () {
-                                  // TODO: Implement Rating Dialog
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Rating feature coming soon!')),
-                                  );
-                                },
+                                onPressed: () => _rateOrder(order),
                                 icon: const Icon(Icons.star_outline, size: 18),
                                 label: const Text('Rate Order'),
                                 style: TextButton.styleFrom(

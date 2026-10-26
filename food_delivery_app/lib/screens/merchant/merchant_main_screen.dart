@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/auth_service.dart';
-import '../../services/analytics_service.dart';
-import '../../services/restaurant_service.dart';
-import '../../widgets/offline_indicator.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/services/analytics_service.dart';
+import 'package:smartsoko/services/restaurant_service.dart';
+import 'package:smartsoko/widgets/offline_indicator.dart';
 import 'merchant_order_list_screen.dart';
 import 'menu_management_screen.dart';
 import 'restaurant_settings_screen.dart';
@@ -49,9 +49,7 @@ class _MerchantMainScreenState extends State<MerchantMainScreen> {
       body: Column(
         children: [
           const AnimatedOfflineIndicator(),
-          Expanded(
-            child: _screens[_currentIndex],
-          ),
+          Expanded(child: _screens[_currentIndex]),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -60,7 +58,12 @@ class _MerchantMainScreenState extends State<MerchantMainScreen> {
           setState(() {
             _currentIndex = index;
           });
-          final screenNames = ['MerchantDashboard', 'MerchantOrders', 'MerchantMenu', 'MerchantSettings'];
+          final screenNames = [
+            'MerchantDashboard',
+            'MerchantOrders',
+            'MerchantMenu',
+            'MerchantSettings',
+          ];
           _logScreenView(screenNames[index]);
         },
         elevation: 3,
@@ -162,7 +165,11 @@ class _DashboardTab extends StatelessWidget {
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.storefront, color: Colors.white, size: 28),
+                          child: const Icon(
+                            Icons.storefront,
+                            color: Colors.white,
+                            size: 28,
+                          ),
                         ),
                         const SizedBox(width: 14),
                         const Expanded(
@@ -246,11 +253,17 @@ class _DashboardTab extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primaryContainer.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: theme.colorScheme.primary.withOpacity(0.15)),
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withOpacity(0.15),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.lightbulb, color: theme.colorScheme.primary, size: 28),
+                    Icon(
+                      Icons.lightbulb,
+                      color: theme.colorScheme.primary,
+                      size: 28,
+                    ),
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(
@@ -266,7 +279,10 @@ class _DashboardTab extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             'Keep your menu updated with fresh photos to attract more customers.',
-                            style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[700],
+                            ),
                           ),
                         ],
                       ),
@@ -466,7 +482,9 @@ class _SettingsTabState extends State<_SettingsTab> {
   Future<void> _loadRestaurantId() async {
     final user = _authService.currentUser;
     if (user == null) return;
-    final restaurant = await _restaurantService.getRestaurantByOwnerId(user.uid);
+    final restaurant = await _restaurantService.getRestaurantByOwnerId(
+      user.uid,
+    );
     if (mounted && restaurant != null) {
       setState(() => _restaurantId = restaurant.id);
     }
@@ -505,7 +523,10 @@ class _SettingsTabState extends State<_SettingsTab> {
               ),
               const SizedBox(height: 4),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -531,7 +552,9 @@ class _SettingsTabState extends State<_SettingsTab> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const RestaurantSettingsScreen()),
+              MaterialPageRoute(
+                builder: (_) => const RestaurantSettingsScreen(),
+              ),
             );
           },
         ),
@@ -542,7 +565,9 @@ class _SettingsTabState extends State<_SettingsTab> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const RestaurantSettingsScreen()),
+              MaterialPageRoute(
+                builder: (_) => const RestaurantSettingsScreen(),
+              ),
             );
           },
         ),
@@ -553,7 +578,9 @@ class _SettingsTabState extends State<_SettingsTab> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const RestaurantSettingsScreen()),
+              MaterialPageRoute(
+                builder: (_) => const RestaurantSettingsScreen(),
+              ),
             );
           },
         ),
@@ -568,7 +595,9 @@ class _SettingsTabState extends State<_SettingsTab> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => MerchantCustomerInsightsScreen(restaurantId: _restaurantId!),
+                builder: (_) => MerchantCustomerInsightsScreen(
+                  restaurantId: _restaurantId!,
+                ),
               ),
             );
           },
@@ -623,7 +652,10 @@ class _SettingsTabState extends State<_SettingsTab> {
           iconColor: Colors.red,
           titleColor: Colors.red,
           onTap: () async {
-            final authService = Provider.of<AuthService>(context, listen: false);
+            final authService = Provider.of<AuthService>(
+              context,
+              listen: false,
+            );
             await authService.signOut();
           },
         ),
@@ -657,15 +689,18 @@ class _SettingsTabState extends State<_SettingsTab> {
   }) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: (iconColor ?? const Color(0xFF064E3B)).withOpacity(0.1),
-        child: Icon(icon, color: iconColor ?? const Color(0xFF064E3B), size: 20),
+        backgroundColor: (iconColor ?? const Color(0xFF064E3B)).withOpacity(
+          0.1,
+        ),
+        child: Icon(
+          icon,
+          color: iconColor ?? const Color(0xFF064E3B),
+          size: 20,
+        ),
       ),
       title: Text(
         title,
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: titleColor,
-        ),
+        style: TextStyle(fontWeight: FontWeight.w600, color: titleColor),
       ),
       subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
       trailing: const Icon(Icons.chevron_right, color: Colors.grey),

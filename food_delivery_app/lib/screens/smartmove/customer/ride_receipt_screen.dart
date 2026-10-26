@@ -1,15 +1,15 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../models/smartmove/ride.dart';
-import '../../../models/smartmove/fare_breakdown.dart';
-import '../../../services/smartmove/ride_service.dart';
-import '../../../services/supabase_service.dart';
-import '../../../utils/app_theme.dart';
-import '../../../widgets/smartmove/driver_card.dart';
+import 'package:smartsoko/models/smartmove/ride.dart';
+import 'package:smartsoko/models/smartmove/fare_breakdown.dart';
+import 'package:smartsoko/services/smartmove/ride_service.dart';
+import 'package:smartsoko/services/supabase_service.dart';
+import 'package:smartsoko/utils/app_theme.dart';
+import 'package:smartsoko/widgets/smartmove/driver_card.dart';
 
 class RideReceiptScreen extends StatefulWidget {
   final String rideId;
-  
+
   const RideReceiptScreen({super.key, required this.rideId});
 
   @override
@@ -18,7 +18,7 @@ class RideReceiptScreen extends StatefulWidget {
 
 class _RideReceiptScreenState extends State<RideReceiptScreen> {
   final _rideService = SmartMoveRideService();
-  
+
   Ride? _ride;
   Map<String, dynamic>? _receipt;
   bool _isLoading = true;
@@ -32,10 +32,12 @@ class _RideReceiptScreenState extends State<RideReceiptScreen> {
   Future<void> _loadReceipt() async {
     try {
       final ride = await _rideService.getRideReceipt(widget.rideId);
-      final rideDetails = await _rideService.getActiveRideForCustomer(SupabaseService().client.auth.currentUser!.id);
+      final rideDetails = await _rideService.getActiveRideForCustomer(
+        SupabaseService().client.auth.currentUser!.id,
+      );
       // Actually get ride by ID
       // This would need a method to get ride by ID
-      
+
       if (mounted) {
         setState(() {
           _receipt = ride;
@@ -81,7 +83,10 @@ class _RideReceiptScreenState extends State<RideReceiptScreen> {
                 children: [
                   Icon(Icons.receipt_long, size: 64, color: Colors.grey[400]),
                   const SizedBox(height: 16),
-                  Text('Receipt not available', style: TextStyle(color: Colors.grey[600])),
+                  Text(
+                    'Receipt not available',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
                 ],
               ),
             )
@@ -100,26 +105,32 @@ class _RideReceiptScreenState extends State<RideReceiptScreen> {
                             color: AppTheme.primaryColor,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.directions_car, color: Colors.white, size: 32),
+                          child: const Icon(
+                            Icons.directions_car,
+                            color: Colors.white,
+                            size: 32,
+                          ),
                         ),
                         const SizedBox(height: 12),
                         Text(
                           'SmartMove',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primaryColor,
-                          ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryColor,
+                              ),
                         ),
                         Text(
                           'Trip Receipt',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(color: Colors.grey[600]),
                         ),
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Receipt number and date
                   Container(
                     padding: const EdgeInsets.all(16),
@@ -133,10 +144,19 @@ class _RideReceiptScreenState extends State<RideReceiptScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Receipt #', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                              Text(
+                                'Receipt #',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
                               Text(
                                 _receipt!['receipt_number'] ?? 'N/A',
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                               ),
                             ],
                           ),
@@ -145,10 +165,21 @@ class _RideReceiptScreenState extends State<RideReceiptScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text('Date', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                               Text(
-                                DateFormat('MMM d, yyyy').format(DateTime.parse(_receipt!['issued_at'])),
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                'Date',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              Text(
+                                DateFormat('MMM d, yyyy').format(
+                                  DateTime.parse(_receipt!['issued_at']),
+                                ),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                               ),
                             ],
                           ),
@@ -156,57 +187,108 @@ class _RideReceiptScreenState extends State<RideReceiptScreen> {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Trip details
                   _buildSectionTitle('Trip Details'),
                   const SizedBox(height: 12),
-                  _buildInfoRow('Pickup', _receipt!['pickup_address'] ?? 'N/A', Icons.circle, Colors.green),
+                  _buildInfoRow(
+                    'Pickup',
+                    _receipt!['pickup_address'] ?? 'N/A',
+                    Icons.circle,
+                    Colors.green,
+                  ),
                   const SizedBox(height: 8),
-                  _buildInfoRow('Drop-off', _receipt!['dropoff_address'] ?? 'N/A', Icons.location_on, Colors.red),
+                  _buildInfoRow(
+                    'Drop-off',
+                    _receipt!['dropoff_address'] ?? 'N/A',
+                    Icons.location_on,
+                    Colors.red,
+                  ),
                   const SizedBox(height: 8),
                   if (_receipt!['distance_km'] != null)
-                    _buildInfoRow('Distance', '${_receipt!['distance_km']} km', Icons.route, AppTheme.primaryColor),
+                    _buildInfoRow(
+                      'Distance',
+                      '${_receipt!['distance_km']} km',
+                      Icons.route,
+                      AppTheme.primaryColor,
+                    ),
                   if (_receipt!['duration_minutes'] != null)
-                    _buildInfoRow('Duration', '${_receipt!['duration_minutes']} min', Icons.access_time, AppTheme.primaryColor),
+                    _buildInfoRow(
+                      'Duration',
+                      '${_receipt!['duration_minutes']} min',
+                      Icons.access_time,
+                      AppTheme.primaryColor,
+                    ),
                   if (_receipt!['driver_name'] != null)
-                    _buildInfoRow('Driver', _receipt!['driver_name'], Icons.person, AppTheme.primaryColor),
+                    _buildInfoRow(
+                      'Driver',
+                      _receipt!['driver_name'],
+                      Icons.person,
+                      AppTheme.primaryColor,
+                    ),
                   if (_receipt!['vehicle_info'] != null)
-                    _buildInfoRow('Vehicle', _receipt!['vehicle_info'], Icons.directions_car, AppTheme.primaryColor),
-                  
+                    _buildInfoRow(
+                      'Vehicle',
+                      _receipt!['vehicle_info'],
+                      Icons.directions_car,
+                      AppTheme.primaryColor,
+                    ),
+
                   const SizedBox(height: 24),
-                  
+
                   // Fare breakdown
                   _buildSectionTitle('Fare Breakdown'),
                   const SizedBox(height: 12),
                   if (_receipt!['fare_breakdown'] != null)
-                    FareBreakdownWidget(breakdown: FareBreakdown.fromJson(_receipt!['fare_breakdown']))
+                    FareBreakdownWidget(
+                      breakdown: FareBreakdown.fromJson(
+                        _receipt!['fare_breakdown'],
+                      ),
+                    )
                   else
                     _buildSimpleFareBreakdown(),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Payment info
                   _buildSectionTitle('Payment'),
                   const SizedBox(height: 12),
-                  _buildInfoRow('Method', _receipt!['payment_method'] ?? 'Wallet', Icons.payment, AppTheme.primaryColor),
-                  _buildInfoRow('Status', _receipt!['payment_status'] ?? 'Completed', Icons.check_circle, Colors.green),
-                  
+                  _buildInfoRow(
+                    'Method',
+                    _receipt!['payment_method'] ?? 'Wallet',
+                    Icons.payment,
+                    AppTheme.primaryColor,
+                  ),
+                  _buildInfoRow(
+                    'Status',
+                    _receipt!['payment_status'] ?? 'Completed',
+                    Icons.check_circle,
+                    Colors.green,
+                  ),
+
                   const SizedBox(height: 32),
-                  
+
                   // Footer
                   Center(
                     child: Column(
                       children: [
                         Text(
                           'Thank you for riding with SmartMove!',
-                          style: TextStyle(fontSize: 16, color: Colors.grey[600], fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'SmartSoko • SmartMove Module',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[400],
+                          ),
                         ),
                       ],
                     ),
@@ -220,11 +302,20 @@ class _RideReceiptScreenState extends State<RideReceiptScreen> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
+      ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value, IconData icon, Color iconColor) {
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    IconData icon,
+    Color iconColor,
+  ) {
     return Row(
       children: [
         Container(
@@ -240,8 +331,17 @@ class _RideReceiptScreenState extends State<RideReceiptScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-              Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+              Text(
+                label,
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ],
           ),
         ),
@@ -259,9 +359,16 @@ class _RideReceiptScreenState extends State<RideReceiptScreen> {
       ),
       child: Column(
         children: [
-          _buildFareRow('Trip Fare', _receipt!['total_fare']?.toString() ?? 'N/A'),
+          _buildFareRow(
+            'Trip Fare',
+            _receipt!['total_fare']?.toString() ?? 'N/A',
+          ),
           const Divider(),
-          _buildFareRow('Total', _receipt!['total_fare']?.toString() ?? 'N/A', isTotal: true),
+          _buildFareRow(
+            'Total',
+            _receipt!['total_fare']?.toString() ?? 'N/A',
+            isTotal: true,
+          ),
         ],
       ),
     );
@@ -296,15 +403,15 @@ class _RideReceiptScreenState extends State<RideReceiptScreen> {
 
   void _shareReceipt() {
     // Share receipt via system share
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Receipt shared!')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Receipt shared!')));
   }
 
   void _downloadReceipt() {
     // Download PDF receipt
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Downloading receipt...')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Downloading receipt...')));
   }
 }

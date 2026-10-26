@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import '../../models/smartmove/ride_request.dart';
-import '../../utils/app_theme.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:smartsoko/models/smartmove/ride_request.dart';
+import 'package:smartsoko/utils/app_theme.dart';
 
 class DriverCard extends StatelessWidget {
   final String driverName;
@@ -28,10 +28,14 @@ class DriverCard extends StatelessWidget {
         CircleAvatar(
           radius: 28,
           backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
-          child: const Icon(Icons.person, color: AppTheme.primaryColor, size: 28),
+          child: const Icon(
+            Icons.person,
+            color: AppTheme.primaryColor,
+            size: 28,
+          ),
         ),
         const SizedBox(width: 16),
-        
+
         // Driver info
         Expanded(
           child: Column(
@@ -41,13 +45,19 @@ class DriverCard extends StatelessWidget {
                 children: [
                   Text(
                     driverName,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Icon(Icons.star, color: Colors.amber, size: 16),
                   Text(
                     driverRating.toStringAsFixed(1),
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
@@ -59,7 +69,7 @@ class DriverCard extends StatelessWidget {
             ],
           ),
         ),
-        
+
         // Action buttons
         Row(
           mainAxisSize: MainAxisSize.min,
@@ -82,7 +92,11 @@ class DriverCard extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: const Icon(Icons.chat, color: AppTheme.primaryColor, size: 20),
+                icon: const Icon(
+                  Icons.chat,
+                  color: AppTheme.primaryColor,
+                  size: 20,
+                ),
                 onPressed: onChat,
                 tooltip: 'Chat with Driver',
               ),
@@ -136,7 +150,10 @@ class ETACard extends StatelessWidget {
                 ),
                 Text(
                   '$duration min',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
                 Text(
                   '${distance.toStringAsFixed(1)} km',
@@ -214,16 +231,32 @@ class FareBreakdownWidget extends StatelessWidget {
       ),
       child: Column(
         children: [
-          if (breakdown.baseFare > 0) _buildRow('Base fare', breakdown.formattedBaseFare),
-          if (breakdown.distanceFare > 0) _buildRow('Distance', breakdown.formattedDistanceFare),
-          if (breakdown.timeFare > 0) _buildRow('Time', breakdown.formattedTimeFare),
-          if (breakdown.waitingFare > 0) _buildRow('Waiting', breakdown.formattedWaitingFare),
-          if (breakdown.airportFee > 0) _buildRow('Airport fee', breakdown.formattedAirportFee),
-          if (breakdown.nightSurcharge > 0) _buildRow('Night surcharge', breakdown.formattedNightSurcharge),
-          if (breakdown.peakSurcharge > 0) _buildRow('Peak surcharge', breakdown.formattedPeakSurcharge),
-          if (breakdown.promoDiscount > 0) _buildRow('Promo discount', '-${_format(breakdown.promoDiscount)}', Colors.green),
+          if (breakdown.baseFare > 0)
+            _buildRow('Base fare', breakdown.formattedBaseFare),
+          if (breakdown.distanceFare > 0)
+            _buildRow('Distance', breakdown.formattedDistanceFare),
+          if (breakdown.timeFare > 0)
+            _buildRow('Time', breakdown.formattedTimeFare),
+          if (breakdown.waitingFare > 0)
+            _buildRow('Waiting', breakdown.formattedWaitingFare),
+          if (breakdown.airportFee > 0)
+            _buildRow('Airport fee', breakdown.formattedAirportFee),
+          if (breakdown.nightSurcharge > 0)
+            _buildRow('Night surcharge', breakdown.formattedNightSurcharge),
+          if (breakdown.peakSurcharge > 0)
+            _buildRow('Peak surcharge', breakdown.formattedPeakSurcharge),
+          if (breakdown.promoDiscount > 0)
+            _buildRow(
+              'Promo discount',
+              '-${_format(breakdown.promoDiscount)}',
+              Colors.green,
+            ),
           const Divider(),
-          _buildRow('Platform fee', '-${_format(breakdown.platformFee)}', Colors.grey[600]),
+          _buildRow(
+            'Platform fee',
+            '-${_format(breakdown.platformFee)}',
+            Colors.grey[600],
+          ),
           const Divider(thickness: 2),
           _buildRow('Total', breakdown.formattedTotalFare, null, true),
         ],
@@ -231,14 +264,33 @@ class FareBreakdownWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildRow(String label, String value, [Color? color, bool bold = false]) {
+  Widget _buildRow(
+    String label,
+    String value, [
+    Color? color,
+    bool bold = false,
+  ]) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: color ?? Colors.grey[700], fontWeight: bold ? FontWeight.bold : FontWeight.w500, fontSize: bold ? 15 : 13)),
-          Text(value, style: TextStyle(color: color ?? Colors.black87, fontWeight: bold ? FontWeight.bold : FontWeight.w600, fontSize: bold ? 15 : 13)),
+          Text(
+            label,
+            style: TextStyle(
+              color: color ?? Colors.grey[700],
+              fontWeight: bold ? FontWeight.bold : FontWeight.w500,
+              fontSize: bold ? 15 : 13,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              color: color ?? Colors.black87,
+              fontWeight: bold ? FontWeight.bold : FontWeight.w600,
+              fontSize: bold ? 15 : 13,
+            ),
+          ),
         ],
       ),
     );
@@ -274,20 +326,31 @@ class DriverRideCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.green[50],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                    child: Text(
+                  child: Text(
                     'Ride Request',
-                    style: TextStyle(fontSize: 12, color: Colors.green[700], fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.green[700],
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 const Spacer(),
                 Text(
                   'TZS ${rideRequest.estimatedFare?.toString() ?? '?'}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primaryColor),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: AppTheme.primaryColor,
+                  ),
                 ),
               ],
             ),
@@ -341,7 +404,9 @@ class DriverRideCard extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
                       side: BorderSide(color: Colors.red[200]!),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: const Text('Reject'),
                   ),
@@ -353,7 +418,9 @@ class DriverRideCard extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryColor,
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: const Text('Accept'),
                   ),

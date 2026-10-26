@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/auth_service.dart';
-import '../../services/shop_service.dart';
-import '../../services/analytics_service.dart';
-import '../../models/shop.dart';
-import '../sme_onboarding_screen.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/services/shop_service.dart';
+import 'package:smartsoko/services/analytics_service.dart';
+import 'package:smartsoko/models/shop.dart';
+import 'package:smartsoko/screens/sme_onboarding_screen.dart';
 import 'merchant_main_screen.dart';
 
 class MerchantLoginScreen extends StatefulWidget {
@@ -51,15 +51,11 @@ class _MerchantLoginScreenState extends State<MerchantLoginScreen> {
 
       if (shop != null) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const MerchantMainScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const MerchantMainScreen()),
         );
       } else {
         final result = await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const SMEOnboardingScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const SMEOnboardingScreen()),
         );
 
         if (result == true && mounted) {
@@ -76,10 +72,7 @@ class _MerchantLoginScreenState extends State<MerchantLoginScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Hitilafu: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Hitilafu: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -93,7 +86,7 @@ class _MerchantLoginScreenState extends State<MerchantLoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Form(
             key: _formKey,
@@ -101,26 +94,19 @@ class _MerchantLoginScreenState extends State<MerchantLoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(
-                  Icons.store,
-                  size: 80,
-                  color: Colors.orange,
-                ),
+                const Icon(Icons.store, size: 80, color: Colors.orange),
                 const SizedBox(height: 24),
                 const Text(
                   'SmartSoko - Merchant',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Ingia ili usimamie biashara yako',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 48),
@@ -134,8 +120,16 @@ class _MerchantLoginScreenState extends State<MerchantLoginScreen> {
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
+                    final phone = value?.trim() ?? '';
+                    if (phone.isEmpty) {
                       return 'Tafadhali jaza namba ya simu';
+                    }
+                    final cleaned = phone.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+                    final tanzanianPhone = RegExp(
+                      r'^(0[567]\d{8}|\+255[567]\d{8})$',
+                    );
+                    if (!tanzanianPhone.hasMatch(cleaned)) {
+                      return 'Tafadhali weka namba ya simu sahihi';
                     }
                     return null;
                   },
@@ -170,7 +164,9 @@ class _MerchantLoginScreenState extends State<MerchantLoginScreen> {
                     if (result == true && mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Biashara imesajiliwa! Sasa unaweza kuingia.'),
+                          content: Text(
+                            'Biashara imesajiliwa! Sasa unaweza kuingia.',
+                          ),
                           backgroundColor: Colors.green,
                         ),
                       );

@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../models/shop.dart';
-import '../../models/sme_models.dart';
-import '../../services/sme_service.dart';
+import 'package:smartsoko/models/shop.dart';
+import 'package:smartsoko/models/sme_models.dart';
+import 'package:smartsoko/services/sme_service.dart';
 
 class SMEStaffScreen extends StatefulWidget {
   final Shop shop;
@@ -37,7 +37,10 @@ class _SMEStaffScreenState extends State<SMEStaffScreen> {
                   const SizedBox(height: 16),
                   const Text('No staff members yet'),
                   const SizedBox(height: 8),
-                  Text('Add staff to manage your business', style: TextStyle(color: Colors.grey[600])),
+                  Text(
+                    'Add staff to manage your business',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
                 ],
               ),
             );
@@ -54,9 +57,12 @@ class _SMEStaffScreenState extends State<SMEStaffScreen> {
                     backgroundColor: s.role.icon == Icons.admin_panel_settings
                         ? Colors.orange[200]
                         : Colors.blue[200],
-                    child: Icon(s.role.icon, color: s.role.icon == Icons.admin_panel_settings
-                        ? Colors.orange[700]
-                        : Colors.blue[700]),
+                    child: Icon(
+                      s.role.icon,
+                      color: s.role.icon == Icons.admin_panel_settings
+                          ? Colors.orange[700]
+                          : Colors.blue[700],
+                    ),
                   ),
                   title: Text(s.name),
                   subtitle: Text('${s.role.displayName} • ${s.phone}'),
@@ -64,15 +70,22 @@ class _SMEStaffScreenState extends State<SMEStaffScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: s.isActive ? Colors.green[100] : Colors.red[100],
+                          color: s.isActive
+                              ? Colors.green[100]
+                              : Colors.red[100],
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           s.isActive ? 'Active' : 'Inactive',
                           style: TextStyle(
-                            color: s.isActive ? Colors.green[800] : Colors.red[800],
+                            color: s.isActive
+                                ? Colors.green[800]
+                                : Colors.red[800],
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
@@ -81,9 +94,18 @@ class _SMEStaffScreenState extends State<SMEStaffScreen> {
                       PopupMenuButton<String>(
                         onSelected: (action) => _handleStaffAction(s, action),
                         itemBuilder: (context) => [
-                          const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                          const PopupMenuItem(value: 'deactivate', child: Text('Deactivate')),
-                          const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Text('Edit'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'deactivate',
+                            child: Text('Deactivate'),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Text('Delete'),
+                          ),
                         ],
                       ),
                     ],
@@ -166,15 +188,18 @@ class _SMEStaffScreenState extends State<SMEStaffScreen> {
             ),
             ElevatedButton(
               onPressed: () async {
-                if (nameController.text.isEmpty || phoneController.text.isEmpty) return;
-                await _smeService.addStaff(Staff(
-                  id: '',
-                  shopId: widget.shop.id,
-                  name: nameController.text.trim(),
-                  phone: phoneController.text.trim(),
-                  role: selectedRole,
-                  joinedAt: DateTime.now(),
-                ));
+                if (nameController.text.isEmpty || phoneController.text.isEmpty)
+                  return;
+                await _smeService.addStaff(
+                  Staff(
+                    id: '',
+                    shopId: widget.shop.id,
+                    name: nameController.text.trim(),
+                    phone: phoneController.text.trim(),
+                    role: selectedRole,
+                    joinedAt: DateTime.now(),
+                  ),
+                );
                 Navigator.pop(context);
               },
               child: const Text('Add'),
@@ -233,11 +258,14 @@ class _SMEStaffScreenState extends State<SMEStaffScreen> {
             ),
             ElevatedButton(
               onPressed: () async {
-                await _smeService.updateStaff(staff.id, staff.copyWith(
-                  name: nameController.text.trim(),
-                  phone: phoneController.text.trim(),
-                  role: selectedRole,
-                ));
+                await _smeService.updateStaff(
+                  staff.id,
+                  staff.copyWith(
+                    name: nameController.text.trim(),
+                    phone: phoneController.text.trim(),
+                    role: selectedRole,
+                  ),
+                );
                 Navigator.pop(context);
               },
               child: const Text('Save'),

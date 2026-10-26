@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../models/order.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:smartsoko/models/order.dart';
 
 class OrderStatusTimeline extends StatelessWidget {
   final Order order;

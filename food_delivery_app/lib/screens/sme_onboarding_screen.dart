@@ -1,12 +1,12 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../models/shop.dart';
-import '../../services/shop_service.dart';
-import '../../services/auth_service.dart';
-import '../../services/image_upload_service.dart';
+import 'package:smartsoko/models/shop.dart';
+import 'package:smartsoko/services/shop_service.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/services/image_upload_service.dart';
 import 'location_picker_screen.dart';
 
 class SMEOnboardingScreen extends StatefulWidget {
@@ -58,16 +58,63 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
 
   // Categories based on shop type
   final Map<ShopType, List<String>> _categories = {
-    ShopType.grocery: ['Supermarket', 'Duka la Vyakula', 'Duka la Mboga', 'Duka la Matunda'],
-    ShopType.electronics: ['Simu', 'Kompyuta', 'Vifaa vya Nyumbani', 'Accessories'],
-    ShopType.clothing: ['Nguo za Kiume', 'Nguo za Kike', 'Nguo za Watoto', 'Nguo za Jumla'],
-    ShopType.pharmacy: ['Dawa', 'Vitamini', 'Bidhaa za Afya', 'Dawa za Kienyeji'],
-    ShopType.hardware: ['Vifaa vya Ujenzi', 'Paint', 'Mabati', 'Vifaa vya Umeme'],
-    ShopType.beauty: ['Vipodozi', 'Nywele', 'Bidhaa za Ngozi', 'Huduma za Urembo'],
-    ShopType.restaurant: ['Chakula cha Haraka', 'Chakula cha Jioni', 'Vyakula vya Tanzania', 'Fast Food'],
-    ShopType.fish: ['Samaki wa Bahari', 'Samaki wa Maziwa', 'Samaki Fresh', 'Samaki Waliopikwa'],
+    ShopType.grocery: [
+      'Supermarket',
+      'Duka la Vyakula',
+      'Duka la Mboga',
+      'Duka la Matunda',
+    ],
+    ShopType.electronics: [
+      'Simu',
+      'Kompyuta',
+      'Vifaa vya Nyumbani',
+      'Accessories',
+    ],
+    ShopType.clothing: [
+      'Nguo za Kiume',
+      'Nguo za Kike',
+      'Nguo za Watoto',
+      'Nguo za Jumla',
+    ],
+    ShopType.pharmacy: [
+      'Dawa',
+      'Vitamini',
+      'Bidhaa za Afya',
+      'Dawa za Kienyeji',
+    ],
+    ShopType.hardware: [
+      'Vifaa vya Ujenzi',
+      'Paint',
+      'Mabati',
+      'Vifaa vya Umeme',
+    ],
+    ShopType.beauty: [
+      'Vipodozi',
+      'Nywele',
+      'Bidhaa za Ngozi',
+      'Huduma za Urembo',
+    ],
+    ShopType.restaurant: [
+      'Chakula cha Haraka',
+      'Chakula cha Jioni',
+      'Vyakula vya Tanzania',
+      'Fast Food',
+    ],
+    ShopType.fish: [
+      'Samaki wa Bahari',
+      'Samaki wa Maziwa',
+      'Samaki Fresh',
+      'Samaki Waliopikwa',
+    ],
     ShopType.farming: ['Mboga', 'Mazao', 'Mbegu', 'Mbolea', 'Dawa za Shamba'],
-    ShopType.dairy: ['Maziwa', 'Mtindi', 'Yogurt', 'Siagi', 'Jibini', 'Maziwa ya Mbuzi'],
+    ShopType.dairy: [
+      'Maziwa',
+      'Mtindi',
+      'Yogurt',
+      'Siagi',
+      'Jibini',
+      'Maziwa ya Mbuzi',
+    ],
     ShopType.other: ['Biashara Nyingine'],
   };
 
@@ -165,10 +212,7 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
               const SizedBox(height: 20),
               const Text(
                 'Chagua Picha ya Biashara',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
               ListTile(
@@ -281,7 +325,7 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
             _businessImage!,
             shopId,
           );
-          
+
           // Update shop with image URL
           final updatedShop = shop.copyWith(
             imageUrl: imageUrl,
@@ -381,10 +425,7 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
               ),
               Text(
                 _getStepTitle(_currentStep),
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: Colors.grey[600], fontSize: 14),
               ),
             ],
           ),
@@ -428,18 +469,12 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
           children: [
             const Text(
               'Taarifa za Biashara',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Jaza taarifa za biashara yako',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
             ),
             const SizedBox(height: 24),
 
@@ -502,10 +537,7 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
                 ),
               ),
               items: (_categories[_selectedType] ?? []).map((category) {
-                return DropdownMenuItem(
-                  value: category,
-                  child: Text(category),
-                );
+                return DropdownMenuItem(value: category, child: Text(category));
               }).toList(),
               onChanged: (value) {
                 setState(() {
@@ -551,8 +583,8 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
                   color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _businessImage != null 
-                        ? Colors.orange 
+                    color: _businessImage != null
+                        ? Colors.orange
                         : Colors.grey[300]!,
                     width: _businessImage != null ? 2 : 1,
                   ),
@@ -613,11 +645,18 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.edit, color: Colors.white, size: 16),
+                                  Icon(
+                                    Icons.edit,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
                                   SizedBox(width: 4),
                                   Text(
                                     'Badilisha',
-                                    style: TextStyle(color: Colors.white, fontSize: 12),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -658,10 +697,7 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
             const SizedBox(height: 8),
             Text(
               'Picha nzuri ya biashara yako inasaidia wateja kukutafuta kwa urahisi',
-              style: TextStyle(
-                color: Colors.grey[500],
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey[500], fontSize: 12),
             ),
           ],
         ),
@@ -679,18 +715,12 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
           children: [
             const Text(
               'Mahali pa Biashara',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Weka anwani ya biashara yako',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
             ),
             const SizedBox(height: 24),
 
@@ -819,8 +849,8 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
                               ],
                             ),
                             child: Text(
-                              _selectedAddress.isNotEmpty 
-                                  ? _selectedAddress 
+                              _selectedAddress.isNotEmpty
+                                  ? _selectedAddress
                                   : 'Gusa kuchagua mahali',
                               style: const TextStyle(fontSize: 12),
                               textAlign: TextAlign.center,
@@ -857,7 +887,11 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.edit_location, color: Colors.white, size: 16),
+                            Icon(
+                              Icons.edit_location,
+                              color: Colors.white,
+                              size: 16,
+                            ),
                             SizedBox(width: 4),
                             Text(
                               'Gusa kubadilisha',
@@ -905,10 +939,7 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
                     '• Toa anwani kamili ikiwa ni pamoja na mtaa na jengo\n'
                     '• Hakikisha mahali panapatikana kwa urahisi\n'
                     '• GPS itasaidia wateja kupata biashara yako',
-                    style: TextStyle(
-                      color: Colors.amber[800],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.amber[800], fontSize: 14),
                   ),
                 ],
               ),
@@ -929,18 +960,12 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
           children: [
             const Text(
               'Taarifa za Mawasiliano',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Weka namna wateja wanavyoweza kuwasiliana nawe',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
             ),
             const SizedBox(height: 24),
 
@@ -1040,10 +1065,7 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
                     '• WhatsApp inaruhusu wateja kuagiza moja kwa moja\n'
                     '• Instagram inaonyesha bidhaa zako kwa picha\n'
                     '• Facebook inasaidia kufikia wateja wengi',
-                    style: TextStyle(
-                      color: Colors.green[800],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.green[800], fontSize: 14),
                   ),
                 ],
               ),
@@ -1064,18 +1086,12 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
           children: [
             const Text(
               'Njia za Malipo',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Chagua njia za malipo unazokubali',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
             ),
             const SizedBox(height: 24),
 
@@ -1139,10 +1155,7 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
                       '• M-Pesa itawezesha malipo ya moja kwa moja\n'
                       '• Pesa zitawekwa kwenye akaunti yako\n'
                       '• Ada ya M-Pesa itakuwa kwa mujibu wa taratibu',
-                      style: TextStyle(
-                        color: Colors.green[800],
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Colors.green[800], fontSize: 14),
                     ),
                   ],
                 ),
@@ -1166,9 +1179,7 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
       decoration: BoxDecoration(
         color: value ? color.withOpacity(0.1) : Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: value ? color : Colors.grey[300]!,
-        ),
+        border: Border.all(color: value ? color : Colors.grey[300]!),
       ),
       child: CheckboxListTile(
         secondary: Icon(icon, color: value ? color : Colors.grey),
@@ -1188,9 +1199,7 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
         value: value,
         onChanged: onChanged,
         activeColor: color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -1205,18 +1214,12 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
           children: [
             const Text(
               'Usafirishaji',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Chagua njia za kupokea bidhaa',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
             ),
             const SizedBox(height: 24),
 
@@ -1280,10 +1283,7 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
                       '• Watafutaji wetu watakuja kuchukua bidhaa\n'
                       '• Ada ya usafirishaji itategemea umbali\n'
                       '• Mteja ataona ada kabla ya kuagiza',
-                      style: TextStyle(
-                        color: Colors.blue[800],
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Colors.blue[800], fontSize: 14),
                     ),
                   ],
                 ),
@@ -1318,10 +1318,7 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
                   const SizedBox(height: 8),
                   Text(
                     'Unaweza kubadilisha saa za kufanya kazi baada ya kusajili. Kwa sasa, biashara yako itaonyesha "Funguliwa" kwa wakati wote.',
-                    style: TextStyle(
-                      color: Colors.amber[800],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.amber[800], fontSize: 14),
                   ),
                 ],
               ),
@@ -1344,9 +1341,7 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
       decoration: BoxDecoration(
         color: value ? color.withOpacity(0.1) : Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: value ? color : Colors.grey[300]!,
-        ),
+        border: Border.all(color: value ? color : Colors.grey[300]!),
       ),
       child: CheckboxListTile(
         secondary: Icon(icon, color: value ? color : Colors.grey),
@@ -1366,9 +1361,7 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
         value: value,
         onChanged: onChanged,
         activeColor: color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -1383,18 +1376,12 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
           children: [
             const Text(
               'Masharti na Vigezo',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Soma na ukubali masharti yetu',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
             ),
             const SizedBox(height: 24),
 
@@ -1414,17 +1401,17 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
                     _buildTermsSection(
                       '1. Masharti ya Jumla',
                       'Kwa kusajili biashara yako, unakubali kufuata masharti yetu ya huduma. '
-                      'Biashara yako itaonyeshwa kwa wateja kupitia programu hii.',
+                          'Biashara yako itaonyeshwa kwa wateja kupitia programu hii.',
                     ),
                     _buildTermsSection(
                       '2. Taarifa za Biashara',
                       'Unakubali kutoa taarifa sahihi na za kweli kuhusu biashara yako. '
-                      'Taarifa feki zinaweza kusababisha kufutwa kwa akaunti yako.',
+                          'Taarifa feki zinaweza kusababisha kufutwa kwa akaunti yako.',
                     ),
                     _buildTermsSection(
                       '3. Malipo',
                       'Malipo yatashughulikiwa kupitia M-Pesa au njia zingine zilizoorodheshwa. '
-                      'Ada ya huduma itakatwa kwa mujibu wa makubaliano.',
+                          'Ada ya huduma itakatwa kwa mujibu wa makubaliano.',
                     ),
                     _buildTermsSection(
                       '4. Usafirishaji',
@@ -1433,12 +1420,12 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
                     _buildTermsSection(
                       '5. Sera ya Faragha',
                       'Taarifa zako zitahifanyiwa kwa mujibu wa sera yetu ya faragha. '
-                      'Hatutashiriki taarifa zako bila idhini yako.',
+                          'Hatutashiriki taarifa zako bila idhini yako.',
                     ),
                     _buildTermsSection(
                       '6. Mwisho wa Huduma',
                       'Unaweza kufuta akaunti yako wakati wowote. Sisi pia tunahifadhi haki ya kusimamisha huduma '
-                      'ikiwa kuna ukiukwaji wa masharti.',
+                          'ikiwa kuna ukiukwaji wa masharti.',
                     ),
                   ],
                 ),
@@ -1523,18 +1510,12 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 4),
           Text(
             content,
-            style: TextStyle(
-              color: Colors.grey[700],
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.grey[700], fontSize: 14),
           ),
         ],
       ),
@@ -1550,18 +1531,13 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
             width: 100,
             child: Text(
               '$label:',
-              style: TextStyle(
-                color: Colors.green[700],
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.green[700], fontSize: 14),
             ),
           ),
           Expanded(
             child: Text(
               value.isNotEmpty ? value : '-',
-              style: const TextStyle(
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontSize: 14),
             ),
           ),
         ],
@@ -1603,8 +1579,8 @@ class _SMEOnboardingScreenState extends State<SMEOnboardingScreen> {
               onPressed: _isLoading
                   ? null
                   : _currentStep == _totalSteps - 1
-                      ? _submitForm
-                      : _nextStep,
+                  ? _submitForm
+                  : _nextStep,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 padding: const EdgeInsets.symmetric(vertical: 16),

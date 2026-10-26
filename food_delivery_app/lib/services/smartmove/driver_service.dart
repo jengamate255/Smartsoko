@@ -1,11 +1,11 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../supabase_service.dart';
-import '../../models/smartmove/ride.dart';
-import '../../models/smartmove/ride_request.dart';
-import '../../models/smartmove/driver_profile.dart';
-import '../../models/smartmove/driver_earnings.dart';
+import 'package:smartsoko/services/supabase_service.dart';
+import 'package:smartsoko/models/smartmove/ride.dart';
+import 'package:smartsoko/models/smartmove/ride_request.dart';
+import 'package:smartsoko/models/smartmove/driver_profile.dart';
+import 'package:smartsoko/models/smartmove/driver_earnings.dart';
 
 class SmartMoveDriverService {
   final SupabaseService _supabaseService = SupabaseService();

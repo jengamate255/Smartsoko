@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../models/restaurant.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:smartsoko/models/restaurant.dart';
 
 class MenuItemRow extends StatelessWidget {
   final MenuItem menuItem;

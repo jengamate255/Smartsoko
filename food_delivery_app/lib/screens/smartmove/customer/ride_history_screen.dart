@@ -1,25 +1,26 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'ride_booking_screen.dart';
-import '../../../models/smartmove/ride.dart';
-import '../../../models/smartmove/ride_request.dart';
-import '../../../models/smartmove/fare_breakdown.dart';
-import '../../../services/smartmove/ride_service.dart';
-import '../../../services/supabase_service.dart';
-import '../../../utils/app_theme.dart';
-import '../../../widgets/smartmove/driver_card.dart';
+import 'package:smartsoko/models/smartmove/ride.dart';
+import 'package:smartsoko/models/smartmove/ride_request.dart';
+import 'package:smartsoko/models/smartmove/fare_breakdown.dart';
+import 'package:smartsoko/services/smartmove/ride_service.dart';
+import 'package:smartsoko/services/supabase_service.dart';
+import 'package:smartsoko/utils/app_theme.dart';
+import 'package:smartsoko/widgets/smartmove/driver_card.dart';
 
-class RideHistoryScreen extends StatefulWidget  {
+class RideHistoryScreen extends StatefulWidget {
   const RideHistoryScreen({super.key});
 
   @override
   State<RideHistoryScreen> createState() => _RideHistoryScreenState();
 }
 
-class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTickerProviderStateMixin {
+class _RideHistoryScreenState extends State<RideHistoryScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _rideService = SmartMoveRideService();
-  
+
   List<Ride> _completedRides = [];
   List<Ride> _cancelledRides = [];
   List<Ride> _scheduledRides = [];
@@ -43,17 +44,24 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
     try {
       final userId = SupabaseService().client.auth.currentUser!.id;
       final rides = await _rideService.getCustomerRideHistory(userId);
-      
+
       if (mounted) {
         setState(() {
-          _completedRides = rides.where((r) => r.status == RideStatus.completed).toList();
-          _cancelledRides = rides.where((r) => r.status == RideStatus.cancelled).toList();
-          _scheduledRides = rides.where((r) => 
-            r.scheduledFor != null && 
-            r.scheduledFor!.isAfter(DateTime.now()) &&
-            r.status != RideStatus.completed &&
-            r.status != RideStatus.cancelled
-          ).toList();
+          _completedRides = rides
+              .where((r) => r.status == RideStatus.completed)
+              .toList();
+          _cancelledRides = rides
+              .where((r) => r.status == RideStatus.cancelled)
+              .toList();
+          _scheduledRides = rides
+              .where(
+                (r) =>
+                    r.scheduledFor != null &&
+                    r.scheduledFor!.isAfter(DateTime.now()) &&
+                    r.status != RideStatus.completed &&
+                    r.status != RideStatus.cancelled,
+              )
+              .toList();
           _isLoading = false;
         });
       }
@@ -107,7 +115,9 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
             ),
             const SizedBox(height: 16),
             Text(
-              isCompleted ? 'No completed rides yet' : 'No ${_tabController.index == 1 ? 'scheduled' : 'cancelled'} rides',
+              isCompleted
+                  ? 'No completed rides yet'
+                  : 'No ${_tabController.index == 1 ? 'scheduled' : 'cancelled'} rides',
               style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
             if (!isCompleted) ...[
@@ -140,7 +150,11 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
 
   Widget _buildRideCard(Ride ride, bool isCompleted) {
     final dateFormat = DateFormat('MMM d, yyyy • h:mm a');
-    final currencyFormat = NumberFormat.currency(locale: 'sw_TZ', symbol: 'TZS ', decimalDigits: 0);
+    final currencyFormat = NumberFormat.currency(
+      locale: 'sw_TZ',
+      symbol: 'TZS',
+      decimalDigits: 0,
+    );
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -203,9 +217,9 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
                     ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Route
               Row(
                 children: [
@@ -225,7 +239,13 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
                               ),
                             ),
                             const SizedBox(width: 8),
-                            const Text('Pickup', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                            const Text(
+                              'Pickup',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 4),
@@ -233,7 +253,10 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
                           padding: const EdgeInsets.only(left: 12),
                           child: Text(
                             ride.pickupAddress,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -241,7 +264,7 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
                       ],
                     ),
                   ),
-                  
+
                   // Line
                   Container(
                     width: 1,
@@ -249,7 +272,7 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
                     color: Colors.grey[300],
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                   ),
-                  
+
                   // Dropoff
                   Expanded(
                     child: Column(
@@ -266,7 +289,13 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
                               ),
                             ),
                             const SizedBox(width: 8),
-                            const Text('Drop-off', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                            const Text(
+                              'Drop-off',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 4),
@@ -274,7 +303,10 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
                           padding: const EdgeInsets.only(left: 12),
                           child: Text(
                             ride.dropoffAddress,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -284,7 +316,7 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
                   ),
                 ],
               ),
-              
+
               if (isCompleted && ride.actualDistanceKm != null) ...[
                 const SizedBox(height: 12),
                 Divider(color: Colors.grey[200]),
@@ -294,24 +326,40 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
                     if (ride.actualDistanceKm != null) ...[
                       Icon(Icons.route, size: 16, color: Colors.grey[600]),
                       const SizedBox(width: 4),
-                      Text('${ride.actualDistanceKm!.toStringAsFixed(1)} km', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                      Text(
+                        '${ride.actualDistanceKm!.toStringAsFixed(1)} km',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
                       const SizedBox(width: 16),
                     ],
                     if (ride.actualDurationMinutes != null) ...[
-                      Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                      Icon(
+                        Icons.access_time,
+                        size: 16,
+                        color: Colors.grey[600],
+                      ),
                       const SizedBox(width: 4),
-                      Text('${ride.actualDurationMinutes} min', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                      Text(
+                        '${ride.actualDurationMinutes} min',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
                     ],
                     const Spacer(),
                     if (ride.customerRating != null) ...[
                       Icon(Icons.star, size: 16, color: Colors.amber),
                       const SizedBox(width: 4),
-                      Text(ride.customerRating!.toStringAsFixed(1), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+                      Text(
+                        ride.customerRating!.toStringAsFixed(1),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ],
                   ],
                 ),
               ],
-              
+
               // Actions for scheduled rides
               if (!isCompleted && ride.scheduledFor != null) ...[
                 const SizedBox(height: 12),
@@ -325,7 +373,9 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppTheme.primaryColor,
                           side: BorderSide(color: AppTheme.primaryColor),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                         child: const Text('Reschedule'),
                       ),
@@ -337,7 +387,9 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.red,
                           side: const BorderSide(color: Colors.red),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                         child: const Text('Cancel'),
                       ),
@@ -385,30 +437,64 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
                 const SizedBox(height: 20),
                 Text(
                   'Ride Details',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 20),
-                
-                _buildDetailRow('Status', ride.statusDisplayName, _getStatusColor(ride.status)),
-                _buildDetailRow('Date', DateFormat('MMMM d, yyyy • h:mm a').format(ride.createdAt)),
+
+                _buildDetailRow(
+                  'Status',
+                  ride.statusDisplayName,
+                  _getStatusColor(ride.status),
+                ),
+                _buildDetailRow(
+                  'Date',
+                  DateFormat('MMMM d, yyyy â€¢ h:mm a').format(ride.createdAt),
+                ),
                 if (ride.scheduledFor != null)
-                  _buildDetailRow('Scheduled For', DateFormat('MMMM d, yyyy • h:mm a').format(ride.scheduledFor!)),
+                  _buildDetailRow(
+                    'Scheduled For',
+                    DateFormat(
+                      'MMMM d, yyyy â€¢ h:mm a',
+                    ).format(ride.scheduledFor!),
+                  ),
                 _buildDetailRow('Pickup', ride.pickupAddress),
                 _buildDetailRow('Drop-off', ride.dropoffAddress),
                 if (ride.actualDistanceKm != null)
-                  _buildDetailRow('Distance', '${ride.actualDistanceKm!.toStringAsFixed(1)} km'),
+                  _buildDetailRow(
+                    'Distance',
+                    '${ride.actualDistanceKm!.toStringAsFixed(1)} km',
+                  ),
                 if (ride.actualDurationMinutes != null)
-                  _buildDetailRow('Duration', '${ride.actualDurationMinutes} min'),
+                  _buildDetailRow(
+                    'Duration',
+                    '${ride.actualDurationMinutes} min',
+                  ),
                 if (ride.totalFare != null)
-                  _buildDetailRow('Total Fare', NumberFormat.currency(locale: 'sw_TZ', symbol: 'TZS ', decimalDigits: 0).format(ride.totalFare!), AppTheme.primaryColor, true),
-                
+                  _buildDetailRow(
+                    'Total Fare',
+                    NumberFormat.currency(
+                      locale: 'sw_TZ',
+                      symbol: 'TZS',
+                      decimalDigits: 0,
+                    ).format(ride.totalFare!),
+                    AppTheme.primaryColor,
+                    true,
+                  ),
+
                 if (ride.fareBreakdown.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  const Text('Fare Breakdown', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                  const Text(
+                    'Fare Breakdown',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  ),
                   const SizedBox(height: 8),
-                  FareBreakdownWidget(breakdown: FareBreakdown.fromJson(ride.fareBreakdown)),
+                  FareBreakdownWidget(
+                    breakdown: FareBreakdown.fromJson(ride.fareBreakdown),
+                  ),
                 ],
-                
+
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
@@ -417,7 +503,9 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryColor,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: const Text('Close', style: TextStyle(fontSize: 16)),
                   ),
@@ -430,7 +518,12 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
     );
   }
 
-  Widget _buildDetailRow(String label, String value, [Color? color, bool isBold = false]) {
+  Widget _buildDetailRow(
+    String label,
+    String value, [
+    Color? color,
+    bool isBold = false,
+  ]) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -438,7 +531,10 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
         children: [
           SizedBox(
             width: 100,
-            child: Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
           ),
           Expanded(
             child: Text(
@@ -457,25 +553,39 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
 
   Color _getStatusColor(RideStatus status) {
     switch (status) {
-      case RideStatus.completed: return Colors.green;
-      case RideStatus.cancelled: return Colors.red;
-      case RideStatus.inProgress: return Colors.blue;
-      case RideStatus.driverArrived: return Colors.orange;
-      case RideStatus.driverEnRoute: return Colors.blue;
-      case RideStatus.assigned: return Colors.purple;
-      case RideStatus.disputed: return Colors.red;
+      case RideStatus.completed:
+        return Colors.green;
+      case RideStatus.cancelled:
+        return Colors.red;
+      case RideStatus.inProgress:
+        return Colors.blue;
+      case RideStatus.driverArrived:
+        return Colors.orange;
+      case RideStatus.driverEnRoute:
+        return Colors.blue;
+      case RideStatus.assigned:
+        return Colors.purple;
+      case RideStatus.disputed:
+        return Colors.red;
     }
   }
 
   IconData _getStatusIcon(RideStatus status) {
     switch (status) {
-      case RideStatus.completed: return Icons.check_circle;
-      case RideStatus.cancelled: return Icons.cancel;
-      case RideStatus.inProgress: return Icons.directions_car;
-      case RideStatus.driverArrived: return Icons.location_on;
-      case RideStatus.driverEnRoute: return Icons.navigation;
-      case RideStatus.assigned: return Icons.person;
-      case RideStatus.disputed: return Icons.report;
+      case RideStatus.completed:
+        return Icons.check_circle;
+      case RideStatus.cancelled:
+        return Icons.cancel;
+      case RideStatus.inProgress:
+        return Icons.directions_car;
+      case RideStatus.driverArrived:
+        return Icons.location_on;
+      case RideStatus.driverEnRoute:
+        return Icons.navigation;
+      case RideStatus.assigned:
+        return Icons.person;
+      case RideStatus.disputed:
+        return Icons.report;
     }
   }
 
@@ -488,9 +598,14 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Cancel Scheduled Ride'),
-        content: const Text('Are you sure you want to cancel this scheduled ride?'),
+        content: const Text(
+          'Are you sure you want to cancel this scheduled ride?',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Keep')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Keep'),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -499,10 +614,13 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> with SingleTicker
         ],
       ),
     );
-    
+
     if (confirmed == true) {
       // Cancel the ride
-      await _rideService.cancelRideRequest(ride.rideRequestId, SupabaseService().client.auth.currentUser!.id);
+      await _rideService.cancelRideRequest(
+        ride.rideRequestId,
+        SupabaseService().client.auth.currentUser!.id,
+      );
       _loadRideHistory();
     }
   }

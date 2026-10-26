@@ -1,7 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+﻿import 'package:smartsoko/utils/uuid_utils.dart';
 
 enum MpesaTransactionStatus { pending, success, failed }
 
+/// An M-Pesa payment, backed by the Supabase `payments` table.
+///
+/// The table has no column for the payer's phone number or the M-Pesa
+/// identifiers, so those are carried in `metadata` (jsonb).
 class Payment {
   final String id;
   final String orderId;
@@ -29,38 +33,63 @@ class Payment {
     this.completedAt,
   });
 
-  factory Payment.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  factory Payment.fromMap(Map<String, dynamic> data) {
+    final metadata = _asStringMap(data['metadata']);
     return Payment(
-      id: doc.id,
-      orderId: data['orderId'] ?? '',
-      userId: data['userId'] ?? '',
-      amount: (data['amount'] ?? 0).toDouble(),
-      phone: data['phone'] ?? '',
-      mpesaCheckoutId: data['mpesaCheckoutId'],
-      mpesaReceiptNumber: data['mpesaReceiptNumber'],
+      id: data['id']?.toString() ?? '',
+      orderId: data['order_id']?.toString() ?? '',
+      userId: data['customer_id']?.toString() ?? '',
+      amount: (data['amount'] as num?)?.toDouble() ?? 0,
+      phone: metadata['phone']?.toString() ?? '',
+      mpesaCheckoutId:
+          metadata['mpesa_checkout_id']?.toString() ??
+          data['transaction_ref']?.toString(),
+      mpesaReceiptNumber: metadata['mpesa_receipt_number']?.toString(),
       status: MpesaTransactionStatus.values.firstWhere(
         (e) => e.name == data['status'],
         orElse: () => MpesaTransactionStatus.pending,
       ),
-      errorMessage: data['errorMessage'],
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
+      errorMessage: (metadata['error_message'] ?? data['notes'])?.toString(),
+      createdAt: _parseDate(data['created_at']) ?? DateTime.now(),
+      completedAt: _parseDate(metadata['completed_at']),
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  /// Payload for the `payments` table.
+  ///
+  /// `id` and `updated_at` are always left to the database. `order_id` and
+  /// `customer_id` are uuid FKs, so anything that is not a uuid is sent as null
+  /// rather than rejected by Postgres.
+  Map<String, dynamic> toMap() {
     return {
-      'orderId': orderId,
-      'userId': userId,
-      'amount': amount,
-      'phone': phone,
-      'mpesaCheckoutId': mpesaCheckoutId,
-      'mpesaReceiptNumber': mpesaReceiptNumber,
+      'order_id': isUuid(orderId) ? orderId : null,
+      'customer_id': isUuid(userId) ? userId : null,
+      'amount': amount.round(),
+      'method': 'mpesa',
       'status': status.name,
-      'errorMessage': errorMessage,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'completedAt': completedAt != null ? Timestamp.fromDate(completedAt!) : null,
+      'transaction_ref': mpesaCheckoutId ?? mpesaReceiptNumber,
+      'notes': errorMessage,
+      'metadata': {
+        'phone': phone,
+        if (mpesaCheckoutId != null) 'mpesa_checkout_id': mpesaCheckoutId,
+        if (mpesaReceiptNumber != null)
+          'mpesa_receipt_number': mpesaReceiptNumber,
+        if (errorMessage != null) 'error_message': errorMessage,
+        if (completedAt != null)
+          'completed_at': completedAt!.toUtc().toIso8601String(),
+      },
+      'created_at': createdAt.toUtc().toIso8601String(),
     };
+  }
+
+  static Map<String, dynamic> _asStringMap(Object? value) {
+    if (value is Map) return value.cast<String, dynamic>();
+    return const {};
+  }
+
+  static DateTime? _parseDate(Object? value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    return DateTime.tryParse(value.toString());
   }
 }

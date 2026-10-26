@@ -1,15 +1,12 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../widgets/shimmer_loading.dart';
+import 'package:smartsoko/widgets/shimmer_loading.dart';
 import 'product_detail_screen.dart';
 
 class ProductListingScreen extends StatefulWidget {
   final String category;
-  
-  const ProductListingScreen({
-    super.key,
-    required this.category,
-  });
+
+  const ProductListingScreen({super.key, required this.category});
 
   @override
   State<ProductListingScreen> createState() => _ProductListingScreenState();
@@ -17,13 +14,8 @@ class ProductListingScreen extends StatefulWidget {
 
 class _ProductListingScreenState extends State<ProductListingScreen> {
   String _selectedFilter = 'All Fruits';
-  
-  final List<String> _filters = [
-    'All Fruits',
-    'Local',
-    'Tropical',
-    'Berries',
-  ];
+
+  final List<String> _filters = ['All Fruits', 'Local', 'Tropical', 'Berries'];
 
   final List<Map<String, dynamic>> _products = [
     {
@@ -31,7 +23,8 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
       'price': 'TSh 5,000',
       'unit': '4 units',
       'description': 'Hass Variety',
-      'image': 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400',
+      'image':
+          'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400',
       'offset': 0.0,
     },
     {
@@ -39,7 +32,8 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
       'price': 'TSh 2,000',
       'unit': '1 bunch',
       'description': 'Local Farm',
-      'image': 'https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=400',
+      'image':
+          'https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=400',
       'offset': 32.0,
     },
     {
@@ -47,7 +41,8 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
       'price': 'TSh 3,500',
       'unit': '3 units',
       'description': 'Coast Region',
-      'image': 'https://images.unsplash.com/photo-1553279768-865429fa0078?w=400',
+      'image':
+          'https://images.unsplash.com/photo-1553279768-865429fa0078?w=400',
       'offset': -32.0,
     },
     {
@@ -55,7 +50,8 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
       'price': 'TSh 3,000',
       'unit': '500g',
       'description': 'Sweet & Tangy',
-      'image': 'https://images.unsplash.com/photo-1595475207225-428b62bda831?w=400',
+      'image':
+          'https://images.unsplash.com/photo-1595475207225-428b62bda831?w=400',
       'offset': 0.0,
     },
     {
@@ -63,7 +59,8 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
       'price': 'TSh 8,000',
       'unit': '250g box',
       'description': 'Highland Farms',
-      'image': 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400',
+      'image':
+          'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400',
       'offset': -16.0,
     },
     {
@@ -71,7 +68,8 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
       'price': 'TSh 2,500',
       'unit': '6 units',
       'description': 'Highland Grown',
-      'image': 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400',
+      'image':
+          'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400',
       'offset': 16.0,
     },
   ];
@@ -94,7 +92,11 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
             ),
             title: Row(
               children: [
-                const Icon(Icons.location_on, color: Color(0xFF012D1D), size: 20),
+                const Icon(
+                  Icons.location_on,
+                  color: Color(0xFF012D1D),
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 const Text(
                   'Organic Curator',
@@ -181,16 +183,13 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
                 mainAxisSpacing: 48,
                 childAspectRatio: 0.65,
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final product = _products[index];
-                  return Transform.translate(
-                    offset: Offset(0, product['offset']),
-                    child: _buildProductCard(product),
-                  );
-                },
-                childCount: _products.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final product = _products[index];
+                return Transform.translate(
+                  offset: Offset(0, product['offset']),
+                  child: _buildProductCard(product),
+                );
+              }, childCount: _products.length),
             ),
           ),
         ],
@@ -213,9 +212,7 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
         );
       },
       child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -226,9 +223,7 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
                   ClipPath(
                     clipper: _CustomMaskClipper(),
                     child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5F3EF),
-                      ),
+                      decoration: BoxDecoration(color: const Color(0xFFF5F3EF)),
                       child: CachedNetworkImage(
                         imageUrl: product['image'],
                         fit: BoxFit.cover,
@@ -238,10 +233,8 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
                           width: double.infinity,
                           height: double.infinity,
                         ),
-                        errorWidget: (context, url, error) => const Icon(
-                          Icons.image_not_supported,
-                          size: 50,
-                        ),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.image_not_supported, size: 50),
                       ),
                     ),
                   ),
@@ -344,10 +337,7 @@ class _ProductListingScreenState extends State<ProductListingScreen> {
                       const SizedBox(width: 8),
                       Text(
                         '• ${product['description']}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -367,7 +357,7 @@ class _CustomMaskClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     final path = Path();
     const radius = 48.0;
-    
+
     path.moveTo(radius, 0);
     path.lineTo(size.width - radius, 0);
     path.quadraticBezierTo(size.width, 0, size.width, radius);
@@ -382,7 +372,7 @@ class _CustomMaskClipper extends CustomClipper<Path> {
     path.quadraticBezierTo(0, size.height, 0, size.height - radius);
     path.lineTo(0, radius);
     path.quadraticBezierTo(0, 0, radius, 0);
-    
+
     return path;
   }
 
@@ -480,11 +470,7 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.sort,
-                        size: 18,
-                        color: Colors.grey[700],
-                      ),
+                      Icon(Icons.sort, size: 18, color: Colors.grey[700]),
                       const SizedBox(width: 8),
                       Text(
                         'Sort',

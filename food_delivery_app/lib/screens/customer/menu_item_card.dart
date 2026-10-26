@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../models/restaurant.dart';
-import '../../utils/constants.dart';
+import 'package:smartsoko/models/restaurant.dart';
+import 'package:smartsoko/utils/constants.dart';
 
 class MenuItemCard extends StatelessWidget {
   final MenuItem menuItem;

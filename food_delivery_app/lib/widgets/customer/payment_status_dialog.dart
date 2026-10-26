@@ -1,6 +1,6 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../models/order.dart';
+import 'package:smartsoko/models/order.dart';
 
 enum PaymentDialogStatus { success, failed, timeout }
 

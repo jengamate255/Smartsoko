@@ -1,5 +1,5 @@
-import 'dart:async';
-import '../supabase_service.dart';
+﻿import 'dart:async';
+import 'package:smartsoko/services/supabase_service.dart';
 
 class SmartMoveMaintenanceService {
   final SupabaseService _supabaseService = SupabaseService();

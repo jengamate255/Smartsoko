@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../models/shop.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:smartsoko/models/shop.dart';
 
 class ProductRow extends StatelessWidget {
   final Product product;

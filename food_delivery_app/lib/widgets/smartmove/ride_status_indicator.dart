@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../utils/app_theme.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:smartsoko/utils/app_theme.dart';
 
 class RideStatusIndicator extends StatelessWidget {
   final dynamic status;

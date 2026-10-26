@@ -1,7 +1,7 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/restaurant.dart';
+import 'package:smartsoko/models/restaurant.dart';
 
 /// A single cart line — MenuItem snapshot + quantity.
 /// The full item is stored so the cart screen and checkout render
@@ -15,14 +15,14 @@ class CartLine {
   double get lineTotal => item.price * quantity;
 
   Map<String, dynamic> toJson() => {
-        'item': item.toJson(),
-        'quantity': quantity,
-      };
+    'item': item.toJson(),
+    'quantity': quantity,
+  };
 
   static CartLine fromJson(Map<String, dynamic> j) => CartLine(
-        item: MenuItem.fromJson(j['item']),
-        quantity: (j['quantity'] as num).toInt(),
-      );
+    item: MenuItem.fromJson(j['item']),
+    quantity: (j['quantity'] as num).toInt(),
+  );
 }
 
 /// App-wide persistent cart (survives navigation AND app restarts via
@@ -50,8 +50,7 @@ class CartService extends ChangeNotifier {
   int quantityOf(String itemId) => _lines[itemId]?.quantity ?? 0;
 
   /// true if the item can be added without switching restaurants.
-  bool canAdd(String restaurantId) =>
-      isEmpty || _restaurantId == restaurantId;
+  bool canAdd(String restaurantId) => isEmpty || _restaurantId == restaurantId;
 
   /// Set the restaurant context (called when the cart is empty or cleared).
   void setRestaurant(Restaurant restaurant) {
@@ -111,7 +110,7 @@ class CartService extends ChangeNotifier {
     _restaurantDeliveryFee = 0;
   }
 
-  // ── persistence ────────────────────────────────────────────────────────
+  // â”€â”€ persistence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   Future<void> _save() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -135,8 +134,8 @@ class CartService extends ChangeNotifier {
       final payload = jsonDecode(raw) as Map<String, dynamic>;
       _restaurantId = payload['restaurantId'] as String?;
       _restaurantName = payload['restaurantName'] as String?;
-      _restaurantDeliveryFee =
-          ((payload['deliveryFee'] as num?) ?? 0).toDouble();
+      _restaurantDeliveryFee = ((payload['deliveryFee'] as num?) ?? 0)
+          .toDouble();
       _lines.clear();
       for (final l in (payload['lines'] as List? ?? [])) {
         final line = CartLine.fromJson(l as Map<String, dynamic>);
