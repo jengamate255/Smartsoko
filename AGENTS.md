@@ -33,7 +33,8 @@ npm.cmd run dev      # NODE_ENV=development
 
 Windows note: this environment blocks `npm.ps1` (PowerShell execution policy), so
 use `npm.cmd`. You can also run `node server/server-production.js` from
-`food_delivery_app`. The server listens on `http://localhost:3000`; check
+`food_delivery_app`. The server listens on `http://localhost:3001` (PORT comes
+from `food_delivery_app/.env`, which sets `PORT=3001`); check
 `GET /health` for status.
 
 ## Conventions

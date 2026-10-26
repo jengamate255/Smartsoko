@@ -1,0 +1,51 @@
+# Render Blueprint — SmartSoko production API
+# Deploy: Render dashboard -> New + -> Blueprint -> pick this repo.
+# All `sync: false` values are prompted once at creation; paste them from
+# food_delivery_app/.env (see the deployment checklist).
+services:
+  - type: web
+    name: smartsoko-api
+    runtime: docker
+    dockerfilePath: food_delivery_app/Dockerfile
+    dockerContext: food_delivery_app
+    plan: free
+    region: frankfurt
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # NOTE: do NOT copy SKIP_FIREBASE from the local .env — production must
+      # run full-Firebase mode (Firestore is the native apps' data plane).
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT_BASE64
+        sync: false
+      - key: PESAPAL_ENV
+        sync: false
+      - key: PESAPAL_CONSUMER_KEY
+        sync: false
+      - key: PESAPAL_CONSUMER_SECRET
+        sync: false
+      - key: PESAPAL_CALLBACK_BASE
+        sync: false
+      - key: SMS_PROVIDER
+        sync: false
+      - key: BEEM_API_KEY
+        sync: false
+      - key: BEEM_API_SECRET
+        sync: false
+      - key: BEEM_SENDER_ID
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: BACKUP_DIR
+        value: /tmp/backups
+      - key: SKIP_SENTRY
+        value: "true"
