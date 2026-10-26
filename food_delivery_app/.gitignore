@@ -20,6 +20,8 @@ migrate_working_dir/
 .env
 .env.local
 .env.*.local
+# Firebase iOS config (injected from CI secret, never committed)
+ios/Runner/GoogleService-Info.plist
 
 # Flutter/Dart/Pub related
 **/doc/api/
