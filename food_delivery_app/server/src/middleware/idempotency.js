@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const config = require('../config');
+const { sendError } = require('../utils/api-messages');
 
 // Exclusive file creation serializes reservations across Node workers on this
 // host. Keep this server-only directory on persistent storage when restarting.
@@ -53,19 +54,19 @@ const idempotency = (options = {}) => (req, res, next) => {
   if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) return next();
   try {
     const supplied = req.headers[config.idempotency.header.toLowerCase()];
-    if (supplied && (typeof supplied !== 'string' || supplied.length > 200)) return res.status(400).json({ success: false, error: 'Invalid idempotency key' });
+    if (supplied && (typeof supplied !== 'string' || supplied.length > 200)) return sendError(res, req, 400, 'IDEMPOTENCY_KEY_INVALID');
     const store = options.store || getStore();
     const key = generateKey(req);
     const fingerprint = crypto.createHash('sha256').update(JSON.stringify([req.body, supplied ? null : (req.idempotencyScope || null)])).digest('hex');
     const { claimed, entry } = store.claim(key, fingerprint);
     if (!claimed) {
-      if (!entry || entry.fingerprint !== fingerprint) return res.status(409).json({ success: false, error: 'Checkout key was already used for different items' });
+      if (!entry || entry.fingerprint !== fingerprint) return sendError(res, req, 409, 'IDEMPOTENCY_KEY_CONFLICT');
       if (entry.state === 'complete') {
         res.setHeader('Idempotency-Replayed', 'true');
         return res.status(entry.status).json(entry.body);
       }
       res.setHeader('Retry-After', '2');
-      return res.status(409).json({ success: false, error: 'This checkout is already processing. Retry the same checkout shortly.' });
+      return sendError(res, req, 409, 'IDEMPOTENCY_IN_PROGRESS');
     }
     const originalJson = res.json.bind(res);
     res.json = body => {
@@ -78,7 +79,7 @@ const idempotency = (options = {}) => (req, res, next) => {
     return next();
   } catch (error) {
     console.error('Idempotency storage error:', error.message);
-    return res.status(503).json({ success: false, error: 'Checkout is temporarily unavailable' });
+    return sendError(res, req, 503, 'IDEMPOTENCY_UNAVAILABLE');
   }
 };
 module.exports = { idempotency, getStore, generateKey, IdempotencyStore };

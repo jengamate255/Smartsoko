@@ -1,55 +1,60 @@
 name: smartsoko
-description: "SmartSoko - Your Local Marketplace with M-Pesa Payments"
+description: 'SmartSoko - Your Local Marketplace with M-Pesa Payments'
 publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.10.0
+    sdk: ^3.10.0
 
 dependencies:
-  flutter:
-    sdk: flutter
-  cupertino_icons: ^1.0.8
-  firebase_core: ^3.12.1
-  cloud_firestore: ^5.6.12
-  firebase_storage: ^12.4.9
-  firebase_auth: ^5.5.1
-  firebase_crashlytics: ^4.3.0
-  firebase_analytics: ^11.4.0
-  image_picker: ^1.1.2
-  google_maps_flutter: ^2.12.1
-  geolocator: ^13.0.2
-  geocoding: ^3.0.0
-  permission_handler: ^11.3.1
-  provider: ^6.1.2
-  http: ^1.2.2
-  intl: ^0.19.0
-  flutter_dotenv: ^5.2.1
-  logger: ^2.5.0
-  connectivity_plus: ^6.1.2
-  cached_network_image: ^3.4.1
-  shimmer: ^3.0.0
-  url_launcher: ^6.3.1
-  flutter_local_notifications: ^18.0.1
-  supabase_flutter: ^2.6.0
-  google_fonts: ^6.2.1
-  json_annotation: ^4.12.0
-  mapbox_maps_flutter: ^2.26.0
-  flutter_map: ^7.0.2
-  latlong2: ^0.9.1
-  csv: ^6.0.0
-  file_picker: ^8.1.7
-  shared_preferences: ^2.3.2
+    flutter:
+        sdk: flutter
+    flutter_localizations:
+        sdk: flutter
+    cupertino_icons: ^1.0.8
+    firebase_core: ^3.12.1
+    cloud_firestore: ^5.6.12
+    firebase_storage: ^12.4.9
+    firebase_auth: ^5.5.1
+    firebase_crashlytics: ^4.3.0
+    firebase_analytics: ^11.4.0
+    image_picker: ^1.1.2
+    google_maps_flutter: ^2.12.1
+    geolocator: ^13.0.2
+    geocoding: ^3.0.0
+    permission_handler: ^11.3.1
+    provider: ^6.1.2
+    http: ^1.2.2
+    intl: ^0.20.3
+    flutter_dotenv: ^5.2.1
+    logger: ^2.5.0
+    connectivity_plus: ^6.1.2
+    cached_network_image: ^3.4.1
+    shimmer: ^3.0.0
+    url_launcher: ^6.3.1
+    flutter_local_notifications: ^18.0.1
+    supabase_flutter: ^2.6.0
+    google_fonts: ^6.2.1
+    json_annotation: ^4.12.0
+    mapbox_maps_flutter: ^2.26.0
+    flutter_map: ^7.0.2
+    latlong2: ^0.9.1
+    csv: ^6.0.0
+    file_picker: ^8.1.7
+    shared_preferences: ^2.3.2
+    uuid: ^4.6.0
+    fl_chart: ^0.69.2
+    google_sign_in: ^6.2.2
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^6.0.0
-  json_serializable: ^6.9.0
-  build_runner: ^2.4.0
+    flutter_test:
+        sdk: flutter
+    flutter_lints: ^6.0.0
+    json_serializable: ^6.9.0
+    build_runner: ^2.4.0
 
 flutter:
-  uses-material-design: true
-  
-  assets:
-    - .env
+    uses-material-design: true
+
+    assets:
+        - assets/config/.env

@@ -12,8 +12,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.smartsoko.customer.R
 import com.smartsoko.customer.data.model.Order
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -25,14 +27,15 @@ fun OrderDetailScreen(
     onBack: () -> Unit
 ) {
     val dateFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
+    val orderLabel = stringResource(R.string.order)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Order Details") },
+                title = { Text(stringResource(R.string.order_details)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -64,7 +67,7 @@ fun OrderDetailScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            order.sellerName.ifEmpty { "Order" },
+                            order.sellerName.ifEmpty { orderLabel },
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -89,7 +92,7 @@ fun OrderDetailScreen(
             Spacer(Modifier.height(20.dp))
 
             Text(
-                "Order Items",
+                stringResource(R.string.order_items),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -113,7 +116,7 @@ fun OrderDetailScreen(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(item.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                             Text(
-                                "${item.quantity} x tsh %.2f".format(item.price),
+                                stringResource(R.string.quantity_x_amount, item.quantity, "tsh %.2f".format(item.price)),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -140,7 +143,7 @@ fun OrderDetailScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Delivery Fee", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.delivery_fee), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text("tsh %.2f".format(order.deliveryFee), style = MaterialTheme.typography.bodySmall)
                     }
                     Spacer(Modifier.height(6.dp))
@@ -150,7 +153,7 @@ fun OrderDetailScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Total", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.total), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         Text(order.formattedTotal, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                     }
                 }
@@ -173,7 +176,7 @@ fun OrderDetailScreen(
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            "Delivery Address",
+                            stringResource(R.string.delivery_address),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -204,14 +207,18 @@ fun OrderDetailScreen(
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            "Payment",
+                            stringResource(R.string.payment),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        "Method: ${order.paymentMethod.ifEmpty { "\u2014" }}\nStatus: ${order.paymentStatus.ifEmpty { "\u2014" }}",
+                        stringResource(
+                            R.string.payment_method_and_status,
+                            order.paymentMethod.ifEmpty { "\u2014" },
+                            order.paymentStatus.ifEmpty { "\u2014" }
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

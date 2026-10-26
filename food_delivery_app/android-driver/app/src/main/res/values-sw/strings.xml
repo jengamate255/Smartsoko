@@ -1,0 +1,141 @@
+<resources>
+    <string name="app_name">SmartSoko Driver</string>
+
+    <!-- Shared / navigation -->
+    <string name="logo">Logo</string>
+    <string name="or_divider">AU</string>
+    <string name="back">Rudi</string>
+    <string name="orders">Maagizo</string>
+    <string name="deliveries">Ufikishaji</string>
+    <string name="earnings">Mapato</string>
+    <string name="profile">Wasifu</string>
+    <string name="order_number">Agizo #%1$s</string>
+
+    <!-- Money / order summary -->
+    <string name="delivery_fee">Ada ya usafirishaji</string>
+    <string name="total">Jumla</string>
+
+    <!-- Login -->
+    <string name="driver_portal">Lango la Madereva</string>
+    <string name="welcome_back">Karibu Tena</string>
+    <string name="sign_in_to_earn">Ingia ili uanze kupata mapato</string>
+    <string name="email_or_phone">Barua pepe au Simu</string>
+    <string name="email_placeholder">mf. jina@mfano.com</string>
+    <string name="password">Nenosiri</string>
+    <string name="password_required">Nenosiri linahitajika</string>
+    <string name="show_password">Onyesha nenosiri</string>
+    <string name="hide_password">Ficha nenosiri</string>
+    <string name="forgot_password">Umesahau Nenosiri?</string>
+    <string name="sign_in">Ingia</string>
+    <string name="sign_in_with_google">Ingia kwa Google</string>
+    <string name="create_account_prompt">Huna akaunti? Fungua Akaunti</string>
+    <string name="google_signin_no_token">Google imeshindwa kutoa tokeni ya kuingia.</string>
+
+    <!-- Forgot password -->
+    <string name="reset_password">Weka Upya Nenosiri</string>
+    <string name="reset_email_sent">Barua Pepe ya Upya Imetumwa!</string>
+    <string name="check_email_inbox">Angalia kasha lako la barua pepe kwa maagizo ya kuweka upya nenosiri lako.</string>
+    <string name="back_to_sign_in">Rudi kwenye Kuingia</string>
+    <string name="forgot_password_instructions">Weka anwani yako ya barua pepe na tutakutumia maagizo ya kuweka upya nenosiri lako.</string>
+    <string name="email">Barua pepe</string>
+    <string name="send_reset_email">Tuma Barua ya Upya</string>
+
+    <!-- Orders -->
+    <string name="available_orders">Maagizo Yanayopatikana</string>
+    <string name="refresh">Onyesha Upya</string>
+    <string name="no_orders_available">Hakuna maagizo yanayopatikana</string>
+    <string name="new_orders_appear_here">Maagizo mapya yataonekana hapa</string>
+    <string name="accept_order">Kubali Agizo</string>
+    <string name="status_pending">Inasubiri</string>
+    <string name="status_accepted">Imekubaliwa</string>
+    <string name="status_picked_up">Imekusanywa</string>
+    <string name="status_ready">Imetayarishwa</string>
+    <string name="status_delivered">Imefikishwa</string>
+    <string name="status_completed">Imekamilika</string>
+    <string name="status_cancelled">Imeghairiwa</string>
+    <string name="status_rejected">Imekataliwa</string>
+
+    <!-- Earnings -->
+    <string name="today">Leo</string>
+    <string name="this_week">Wiki Hii</string>
+    <string name="all_time">Muda Wote</string>
+    <string name="total_earned">Jumla Uliyopata (10%)</string>
+    <string name="deliveries_done">Ufikishaji Uliokamilika</string>
+    <string name="completed_deliveries">Zilizofikishwa</string>
+    <string name="no_completed_deliveries">Hakuna ufikishaji uliokamilika bado</string>
+    <string name="completed_deliveries_here">Ufikishaji uliokamilika utaonekana hapa</string>
+    <string name="paid">Imelipwa</string>
+
+    <!-- Order detail -->
+    <string name="order_items">Bidhaa za Agizo</string>
+    <string name="no_item_details">Hakuna maelezo ya bidhaa</string>
+    <string name="placed_on">Iliagizwa %1$s</string>
+    <string name="updated_on">Imebadilishwa %1$s</string>
+    <string name="customer_details">Maelezo ya Mteja</string>
+    <string name="phone_prefix">Simu: %1$s</string>
+    <string name="qty_prefix">Idadi: %1$d</string>
+    <string name="delivery_info">Maelezo ya Usafirishaji</string>
+    <string name="call">Piga Simu</string>
+    <string name="navigate">Elekeza</string>
+    <string name="notes_prefix">Maelezo ya Ziada: %1$s</string>
+    <string name="decline">Kataa</string>
+    <string name="navigate_to_customer">Elekeza kwa Mteja</string>
+    <string name="mark_as_picked_up">Weka Alama: Imekusanywa</string>
+    <string name="release_order">Siwezi — Rejesha Agizo</string>
+    <string name="mark_as_delivered">Weka Alama: Imefikishwa</string>
+
+    <!-- Delivery map -->
+    <string name="delivery_map">Ramani ya Usafirishaji</string>
+    <string name="deliver_to">Fikisha Kwa</string>
+    <string name="no_address_provided">Hakuna anwani iliyotolewa</string>
+    <string name="open_in_maps">Fungua kwenye Ramani</string>
+    <string name="coordinates_format">Koordineti: %1$.5f, %2$.5f</string>
+    <string name="no_gps_coordinates">Agizo hili halina koordineti za GPS. Mpige simu mteja ukihitaji maelekezo.</string>
+    <string name="call_customer">Mpige Mteja Simu</string>
+
+    <!-- Profile -->
+    <string name="sign_out">Ondoka</string>
+    <string name="sign_out_confirm">Una hakika unataka kuondoka?</string>
+    <string name="cancel">Ghairi</string>
+    <string name="online_status">Hali ya Mtandaoni</string>
+    <string name="online_accepting">Mtandaoni — unakubali ufikishaji</string>
+    <string name="offline_not_accepting">Haupo mtandaoni — hukubali ufikishaji</string>
+    <string name="driver_information">Maelezo ya Dereva</string>
+    <string name="edit_profile_description">Hariri wasifu</string>
+    <string name="name">Jina</string>
+    <string name="phone">Simu</string>
+    <string name="vehicle_type">Aina ya Gari</string>
+    <string name="vehicle_plate">Namba ya Gusi</string>
+    <string name="rating">Ukadiriaji</string>
+    <string name="rating_format">%1$.1f (maoni %2$d)</string>
+    <string name="loading_driver_info">Inapakia maelezo ya dereva...</string>
+    <string name="account">Akaunti</string>
+    <string name="edit_profile">Hariri Wasifu</string>
+    <string name="name_required">Jina linahitajika</string>
+    <string name="save">Hifadhi</string>
+    <string name="vehicle_type_example">Aina ya Gari (mf. Motosikeli)</string>
+
+    <!-- Sign up -->
+    <string name="create_account">Fungua Akaunti</string>
+    <string name="email_star">Barua pepe *</string>
+    <string name="password_star">Nenosiri *</string>
+    <string name="confirm_password_star">Thibitisha Nenosiri *</string>
+    <string name="full_name_star">Jina Kamili *</string>
+    <string name="phone_star">Simu *</string>
+    <string name="vehicle_type_star">Aina ya Gari *</string>
+    <string name="vehicle_plate_star">Namba ya Gusi *</string>
+    <string name="confirm_password_required">Tafadhali thibitisha nenosiri lako</string>
+    <string name="passwords_do_not_match">Manenosiri hayalingani</string>
+    <string name="already_have_account">Tayari una akaunti? Ingia</string>
+
+    <!-- Permissions / errors -->
+    <string name="location_permission_required">Ruhusa ya eneo inahitajika ili uwe mtandaoni — wateja wanafuatilia ufikishaji wako</string>
+
+    <!-- Notifications -->
+    <string name="new_delivery_title">Ufikishaji Mpya</string>
+    <string name="new_delivery_body">Una ufikishaji mpya</string>
+    <string name="notification_channel_orders">Arifa za Maagizo ya Madereva</string>
+    <string name="notification_channel_orders_description">Arifa za ufikishaji mpya</string>
+    <string name="notification_channel_location">Ufuatiliaji wa usafirishaji</string>
+    <string name="location_notification_text">Unashiriki eneo lako ukiwa mtandaoni</string>
+</resources>

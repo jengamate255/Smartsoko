@@ -16,12 +16,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.smartsoko.driver.R
 import com.smartsoko.driver.ui.components.*
 import com.smartsoko.driver.util.Validators
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -53,6 +55,8 @@ fun LoginScreen(
     var googleError by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
+    val passwordRequired = stringResource(R.string.password_required)
+    val googleNoTokenError = stringResource(R.string.google_signin_no_token)
 
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -63,7 +67,7 @@ fun LoginScreen(
             val token = account?.idToken
             if (token == null) {
                 android.util.Log.e("GoogleSignIn", "signed in but no idToken; account=${account?.email}")
-                googleError = "Google sign-in returned no ID token."
+                googleError = googleNoTokenError
             } else {
                 onGoogleSignIn(token)
             }
@@ -75,7 +79,7 @@ fun LoginScreen(
 
     fun validate(): Boolean {
         emailError = Validators.emailError(email)
-        passwordError = if (password.isBlank()) "Password is required" else null
+        passwordError = if (password.isBlank()) passwordRequired else null
         return emailError == null && passwordError == null
     }
 
@@ -101,7 +105,7 @@ fun LoginScreen(
         )
 
         Text(
-            text = "Driver Portal",
+            text = stringResource(R.string.driver_portal),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 28.dp)
@@ -109,7 +113,7 @@ fun LoginScreen(
 
         SmartCard {
             Text(
-                text = "Welcome Back",
+                text = stringResource(R.string.welcome_back),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -117,7 +121,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Sign in to start earning",
+                text = stringResource(R.string.sign_in_to_earn),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 20.dp)
@@ -171,8 +175,8 @@ fun LoginScreen(
                     email = it
                     if (attemptedSubmit) emailError = Validators.emailError(it)
                 },
-                label = { Text("Email or Phone") },
-                placeholder = { Text("e.g. name@example.com") },
+                label = { Text(stringResource(R.string.email_or_phone)) },
+                placeholder = { Text(stringResource(R.string.email_placeholder)) },
                 leadingIcon = {
                     Icon(Icons.Default.Email, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 },
@@ -195,9 +199,9 @@ fun LoginScreen(
                 value = password,
                 onValueChange = {
                     password = it
-                    if (attemptedSubmit) passwordError = if (it.isBlank()) "Password is required" else null
+                    if (attemptedSubmit) passwordError = if (it.isBlank()) passwordRequired else null
                 },
-                label = { Text("Password") },
+                label = { Text(stringResource(R.string.password)) },
                 placeholder = { Text("••••••••") },
                 leadingIcon = {
                     Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -206,7 +210,7 @@ fun LoginScreen(
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                            contentDescription = if (passwordVisible) stringResource(R.string.hide_password) else stringResource(R.string.show_password)
                         )
                     }
                 },
@@ -233,12 +237,12 @@ fun LoginScreen(
                 horizontalArrangement = Arrangement.End
             ) {
                 TextButton(onClick = onForgotPassword) {
-                    Text("Forgot Password?", color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.forgot_password), color = MaterialTheme.colorScheme.primary)
                 }
             }
 
             PrimaryButton(
-                text = "Sign In",
+                text = stringResource(R.string.sign_in),
                 isLoading = isLoading,
                 onClick = {
                     attemptedSubmit = true
@@ -255,7 +259,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             SecondaryButton(
-                text = "Sign in with Google",
+                text = stringResource(R.string.sign_in_with_google),
                 enabled = !isLoading,
                 leadingIcon = {
                     Icon(
@@ -279,7 +283,7 @@ fun LoginScreen(
 
         TextButton(onClick = onSignUp) {
             Text(
-                "Don't have an account? Create Account",
+                stringResource(R.string.create_account_prompt),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary
             )

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SmartSoko Merchant</string>
+    <string name="title_orders">Maagizo</string>
+    <string name="title_products">Bidhaa</string>
+    <string name="product_image">Picha ya Bidhaa</string>
+    <string name="product_name">Jina la Bidhaa</string>
+    <string name="product_price">Bei</string>
+    <string name="product_description">Maelezo</string>
+    <string name="title_analytics">Uchambuzi</string>
+    <string name="title_settings">Mipangilio</string>
+    <string name="navigation_drawer_open">Fungua menyu ya upande</string>
+    <string name="navigation_drawer_close">Funga menyu ya upande</string>
+
+    <!-- Order Status -->
+    <string name="status_pending">Inasubiri</string>
+    <string name="status_accepted">Imekubaliwa</string>
+    <string name="status_ready">Tayari</string>
+    <string name="status_delivered">Imewasilishwa</string>
+    <string name="status_completed">Imekamilisha</string>
+    <string name="status_cancelled">Imeghairiwa</string>
+    <string name="status_rejected">Imekataliwa</string>
+
+    <!-- Actions -->
+    <string name="action_accept">Kubali</string>
+    <string name="action_reject">Kataa</string>
+    <string name="action_ready">Weka Tayari</string>
+    <string name="action_delivered">Weka Imewasilishwa</string>
+    <string name="action_view_details">Tazama Maelezo</string>
+
+    <!-- Login -->
+    <string name="tagline">Dhibiri Biashara Yako</string>
+    <string name="label_email">Barua Pepe</string>
+    <string name="label_password">Nenosiri</string>
+    <string name="action_forgot_password">Umesahau Nenosiri?</string>
+    <string name="action_sign_in">Ingia</string>
+    <string name="error_enter_email_first">Weka barua pepe yako kwanza</string>
+    <string name="msg_password_reset_sent">Barua pepe ya kubadilisha nenosiri imetumwa</string>
+    <string name="error_failed_prefix">Imeshindwa: %1$s</string>
+    <string name="error_email_required">Barua pepe inahitajika</string>
+    <string name="error_password_required">Nenosiri linahitajika</string>
+    <string name="error_auth_failed">Uthibitishaji umeshindwa: %1$s</string>
+    <string name="error_access_denied_merchant">Ufikiaji umekataliwa. Akaunti hii hairuhusiwi kama mfanyabiashara.</string>
+    <string name="error_user_profile_not_found">Wasifu wa mtumiaji haujapatikana.</string>
+    <string name="error_checking_role">Hitilafu wakati wa kuangalia jukumu: %1$s</string>
+
+    <!-- Order labels and details -->
+    <string name="label_status">Hali</string>
+    <string name="label_customer">Mteja</string>
+    <string name="label_delivery_address">Anwani ya Uwasilishaji</string>
+    <string name="label_items">Vipengee</string>
+    <string name="label_payment_method">Njia ya Malipo</string>
+    <string name="label_order_time">Wakati wa Oda</string>
+    <string name="label_total">Jumla</string>
+    <string name="label_total_colon">Jumla:</string>
+    <string name="order_number_format">Oda #%1$s</string>
+    <string name="action_close">Funga</string>
+    <string name="no_items">Hakuna vipengee</string>
+    <string name="unknown_customer">Mteja Asiyetambulikana</string>
+    <string name="no_phone">Hakuna simu</string>
+    <string name="unknown_time">Wakati usiojulikana</string>
+    <string name="label_unknown">Haijulikani</string>
+    <string name="label_sort_by">Panga kwa:</string>
+    <string name="empty_no_orders">Hakuna maagizo yaliyopatikana</string>
+    <string name="filter_all">Zote</string>
+    <string name="tab_active">Inendelea</string>
+    <string name="action_mark_as_ready">Weka Tayari</string>
+    <string name="action_mark_as_delivered">Weka Imewasilishwa</string>
+    <string name="msg_order_accepted">Oda imekubaliwa</string>
+    <string name="msg_order_rejected">Oda imekataliwa</string>
+    <string name="msg_order_marked_ready">Oda imewekwa Tayari</string>
+    <string name="msg_order_marked_delivered">Oda imewekwa Imewasilishwa</string>
+
+    <!-- Analytics -->
+    <string name="label_total_revenue">Jumla ya Mapato</string>
+    <string name="label_total_orders">Jumla ya Maagizo</string>
+    <string name="label_sales_chart">Chati ya Mauzo</string>
+    <string name="chart_coming_soon">Chati itakuwa hivi karibuni</string>
+
+    <!-- Products -->
+    <string name="action_add_product">Ongeza Bidhaa</string>
+    <string name="action_edit_product">Hariri Bidhaa</string>
+    <string name="desc_edit_product">Hariri bidhaa</string>
+    <string name="hint_product_name">Jina la bidhaa *</string>
+    <string name="hint_price_tsh">Bei (TSh) *</string>
+    <string name="hint_stock_qty">Kiasi cha hifadhi</string>
+    <string name="hint_category">Kundi</string>
+    <string name="hint_image_url">URL ya picha (si lazima)</string>
+    <string name="label_available_for_sale">Inapatikana kwa mauzo</string>
+    <string name="action_delete">Futa</string>
+    <string name="action_save_product">Hifadhi Bidhaa</string>
+    <string name="filter_available">Zinazopatikana</string>
+    <string name="filter_out_of_stock">Zimeisha Hifadhini</string>
+    <string name="hint_search_products">Tafuta jina la bidhaa au kundi</string>
+    <string name="empty_no_products">Hakuna bidhaa zilizopatikana</string>
+    <string name="empty_no_products_hint">Gonga \"Ongeza Bidhaa\" kuunda ya kwanza</string>
+    <string name="badge_low_stock">HIFADHI NDOGO</string>
+    <string name="label_sold_out">Zimeisha</string>
+    <string name="label_stock">Hifadhi</string>
+    <string name="no_category">Hakuna kundi</string>
+    <string name="units_format">vitengo %1$d</string>
+    <string name="units_left_format">%1$d vitengo vimebaki</string>
+    <string name="error_required">Inahitajika</string>
+    <string name="error_valid_price">Weka bei sahihi</string>
+    <string name="error_enter_number">Weka nambari</string>
+
+    <!-- Settings / navigation -->
+    <string name="label_store_information">Maelezo ya Duka</string>
+    <string name="label_store_name">Jina la Duka</string>
+    <string name="your_store_name">Jina la Duka Lako</string>
+    <string name="your_store">Duka Lako</string>
+    <string name="action_edit_store_details">Hariri Maelezo ya Duka</string>
+    <string name="label_account">Akaunti</string>
+    <string name="action_logout">Ondoka</string>
+    <string name="dialog_edit_store_name">Hariri jina la duka</string>
+    <string name="action_cancel">Ghairi</string>
+    <string name="action_save">Hifadhi</string>
+    <string name="error_enter_store_name">Weka jina la duka</string>
+    <string name="msg_store_updated">Duka limesasishwa</string>
+    <string name="error_save_store_retry">Haikuweza kuhifadhi. Angalia muunganisho wako na ujaribu tena.</string>
+    <string name="msg_logged_out">Umetoka kwenye akaunti</string>
+    <string name="error_no_store_found">Hakuna duka lililopatikana kwa akaunti hii</string>
+    <string name="error_loading_store">Hitilafu kupakia duka: %1$s</string>
+    <string name="error_loading_orders">Hitilafu kupakia maagizo: %1$s</string>
+
+    <!-- Sort Options -->
+    <string-array name="sort_options">
+        <item>Mpya Kwanza</item>
+        <item>Za Zamani Kwanza</item>
+        <item>Kiasi: Kutoka Kubwa Hadi Ndogo</item>
+        <item>Kiasi: Kutoka Ndogo Hadi Kubwa</item>
+    </string-array>
+</resources>

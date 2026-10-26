@@ -45,7 +45,7 @@ public class ProductEditorDialog {
         MaterialButton btnSave = dialog.findViewById(R.id.btn_save);
         MaterialButton btnDelete = dialog.findViewById(R.id.btn_delete);
 
-        title.setText(isNew ? "Add product" : "Edit product");
+        title.setText(isNew ? R.string.action_add_product : R.string.action_edit_product);
         if (!isNew) {
             etName.setText(product.getName());
             etPrice.setText(String.valueOf(product.getPrice()));
@@ -68,14 +68,14 @@ public class ProductEditorDialog {
             String name = etName.getText().toString().trim();
             String priceStr = etPrice.getText().toString().trim();
             if (TextUtils.isEmpty(name)) {
-                etName.setError("Required");
+                etName.setError(context.getString(R.string.error_required));
                 return;
             }
             double price;
             try {
                 price = Double.parseDouble(priceStr);
             } catch (NumberFormatException e) {
-                etPrice.setError("Enter a valid price");
+                etPrice.setError(context.getString(R.string.error_valid_price));
                 return;
             }
             int stockQty = 0;
@@ -84,7 +84,7 @@ public class ProductEditorDialog {
                 try {
                     stockQty = (int) Double.parseDouble(stockStr);
                 } catch (NumberFormatException e) {
-                    etStock.setError("Enter a number");
+                    etStock.setError(context.getString(R.string.error_enter_number));
                     return;
                 }
             }

@@ -11,9 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.smartsoko.customer.R
 
 val SmartRadius = RoundedCornerShape(20.dp)
 val SmartRadiusSmall = RoundedCornerShape(12.dp)
@@ -46,7 +48,7 @@ fun BrandBadge(
         ) {
             Icon(
                 icon,
-                contentDescription = "Logo",
+                contentDescription = stringResource(R.string.logo),
                 modifier = Modifier.size((size * 0.55f).dp),
                 tint = Color.White
             )
@@ -169,7 +171,7 @@ fun OrDivider(modifier: Modifier = Modifier) {
     ) {
         HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
         Text(
-            text = "OR",
+            text = stringResource(R.string.or_divider),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

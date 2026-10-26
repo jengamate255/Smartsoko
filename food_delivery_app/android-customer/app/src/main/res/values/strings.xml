@@ -1,3 +1,132 @@
 <resources>
     <string name="app_name">Food Delivery Customer</string>
+
+    <!-- Shared / navigation -->
+    <string name="logo">Logo</string>
+    <string name="or_divider">OR</string>
+    <string name="back">Back</string>
+    <string name="home">Home</string>
+    <string name="cart">Cart</string>
+    <string name="orders">Orders</string>
+    <string name="profile">Profile</string>
+    <string name="order">Order</string>
+
+    <!-- Money / order summary -->
+    <string name="subtotal">Subtotal</string>
+    <string name="delivery_fee">Delivery Fee</string>
+    <string name="total">Total</string>
+    <string name="delivery_amount_tsh">Delivery %1$s</string>
+    <string name="quantity_x_amount">%1$d x %2$s</string>
+
+    <!-- Cart -->
+    <string name="cart_is_empty">Your cart is empty</string>
+    <string name="browse_restaurants">Browse Restaurants</string>
+    <string name="remove">Remove</string>
+    <string name="decrease_quantity">Decrease</string>
+    <string name="increase_quantity">Increase</string>
+
+    <!-- Checkout -->
+    <string name="checkout">Checkout</string>
+    <string name="delivery_address">Delivery Address</string>
+    <string name="payment_method">Payment Method</string>
+    <string name="place_order">Place Order</string>
+
+    <!-- Forgot password -->
+    <string name="reset_password">Reset Password</string>
+    <string name="reset_email_sent">Reset Email Sent!</string>
+    <string name="check_email_inbox">Check your email inbox for instructions to reset your password.</string>
+    <string name="back_to_sign_in">Back to Sign In</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="forgot_password_instructions">Enter your email address and we\'ll send you instructions to reset your password.</string>
+    <string name="email">Email</string>
+    <string name="send_reset_email">Send Reset Email</string>
+
+    <!-- Home -->
+    <string name="search_restaurants">Search restaurants</string>
+    <string name="no_restaurants_match">No restaurants match your search</string>
+    <string name="no_restaurants_available">No restaurants available</string>
+
+    <!-- Login -->
+    <string name="order_from_local_sellers">Order from local sellers</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="sign_in_to_continue">Sign in to continue ordering</string>
+    <string name="email_or_phone">Email or Phone</string>
+    <string name="email_placeholder">e.g. name@example.com</string>
+    <string name="password">Password</string>
+    <string name="password_required">Password is required</string>
+    <string name="show_password">Show password</string>
+    <string name="hide_password">Hide password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="sign_in_with_phone">Sign in with Phone</string>
+    <string name="create_account_prompt">Don\'t have an account? Create Account</string>
+
+    <!-- OTP verification -->
+    <string name="phone_login">Phone Login</string>
+    <string name="verify_phone">Verify Phone</string>
+    <string name="enter_your_phone_number">Enter your phone number</string>
+    <string name="enter_phone_number">Enter Phone Number</string>
+    <string name="we_will_send_code">We\'ll send you a verification code</string>
+    <string name="enter_verification_code">Enter Verification Code</string>
+    <string name="code_sent_to_phone">We\'ve sent a 6-digit code to your phone</string>
+    <string name="dev_mode">Dev Mode</string>
+    <string name="your_verification_code">Your verification code: %1$s</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="send_code">Send Code</string>
+    <string name="verification_code">Verification Code</string>
+    <string name="verify">Verify</string>
+    <string name="resend_code">Resend Code</string>
+    <string name="code_required">Verification code is required</string>
+    <string name="code_six_digits">Code must be 6 digits</string>
+    <string name="code_digits_only">Code must contain only digits</string>
+
+    <!-- Order detail -->
+    <string name="order_details">Order Details</string>
+    <string name="order_items">Order Items</string>
+    <string name="payment">Payment</string>
+    <string name="payment_method_and_status">Method: %1$s\nStatus: %2$s</string>
+
+    <!-- Orders -->
+    <string name="no_orders_yet">No orders yet</string>
+    <string name="orders_will_appear_here">Your orders will appear here</string>
+    <string name="status_pending">Pending</string>
+    <string name="status_accepted">Accepted</string>
+    <string name="status_ready">Ready</string>
+    <string name="status_delivered">Delivered</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_cancelled">Cancelled</string>
+    <string name="status_rejected">Rejected</string>
+
+    <!-- Product detail -->
+    <string name="add_to_cart">Add to Cart</string>
+    <string name="description">Description</string>
+
+    <!-- Profile -->
+    <string name="sign_out">Sign Out</string>
+    <string name="sign_out_confirm">Are you sure you want to sign out?</string>
+    <string name="cancel">Cancel</string>
+    <string name="personal_information">Personal Information</string>
+    <string name="edit">Edit</string>
+    <string name="name">Name</string>
+    <string name="phone">Phone</string>
+    <string name="address">Address</string>
+    <string name="save">Save</string>
+    <string name="account">Account</string>
+
+    <!-- Restaurant menu -->
+    <string name="no_items_available">No items available</string>
+    <string name="add">Add</string>
+
+    <!-- Sign up -->
+    <string name="create_account">Create Account</string>
+    <string name="your_information">Your Information</string>
+    <string name="email_star">Email *</string>
+    <string name="password_star">Password *</string>
+    <string name="confirm_password_star">Confirm Password *</string>
+    <string name="full_name_star">Full Name *</string>
+    <string name="phone_star">Phone *</string>
+    <string name="delivery_address_star">Delivery Address *</string>
+    <string name="passwords_do_not_match">Passwords do not match</string>
+    <string name="confirm_password_required">Please confirm your password</string>
+    <string name="already_have_account">Already have an account? Sign In</string>
 </resources>

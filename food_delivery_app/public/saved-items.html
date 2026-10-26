@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="sw">
 <head>
   <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -8,10 +8,15 @@
   <style>
     body{margin:0;background:#f7f9f6;color:#18392c;font:16px/1.5 system-ui,sans-serif}header,main{max-width:960px;margin:auto;padding:24px}nav{display:flex;gap:24px;flex-wrap:wrap}a{color:#064e3b}h1{font-size:36px}article{background:white;border:1px solid #dce5dc;border-radius:16px;padding:24px;margin:16px 0}button{background:#064e3b;color:white;border:0;border-radius:24px;padding:12px 20px;cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid #d3a044;outline-offset:4px}.row{display:flex;gap:24px;justify-content:space-between;align-items:center;flex-wrap:wrap}
   </style>
+  <link rel="stylesheet" href="/css/shopping-shell.css?v=1">
+  <script src="js/i18n.js?v=1" defer></script>
+  <script src="/js/shopping-shell.js?v=1" defer></script>
+  <link rel="manifest" href="/manifest.json">
+
 </head>
 <body>
-  <header><nav aria-label="Main"><a href="/home">SmartSoko</a><a href="/discovery">Browse products</a><a href="/profile">My account</a><a href="/cart">Cart</a></nav></header>
-  <main><h1>Saved items</h1><p>Products saved on this device.</p><section id="savedItems" aria-live="polite">Loading saved items…</section></main>
+  <header><nav aria-label="Main"><a href="/home">SmartSoko</a><a href="/discovery" data-i18n="nav.discover">Browse products</a><a href="/profile" data-i18n="nav.profile">My account</a><a href="/cart" data-i18n="nav.cart">Cart</a></nav></header>
+  <main><h1 data-i18n="savedItems.title">Saved items</h1><p data-i18n="savedItems.description">Products saved on this device.</p><section id="savedItems" aria-live="polite">Loading saved items…</section></main>
   <script src="/js/saved-items.js"></script>
 </body>
 </html>

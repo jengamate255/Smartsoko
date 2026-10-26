@@ -13,10 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.smartsoko.customer.R
 import com.smartsoko.customer.data.model.Merchant
 import com.smartsoko.customer.ui.components.*
 
@@ -33,7 +35,7 @@ fun HomeScreen(
         OutlinedTextField(
             value = searchQuery,
             onValueChange = onSearchQueryChange,
-            placeholder = { Text("Search restaurants") },
+            placeholder = { Text(stringResource(R.string.search_restaurants)) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             singleLine = true,
             shape = SmartRadiusSmall,
@@ -59,7 +61,7 @@ fun HomeScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    if (searchQuery.isNotEmpty()) "No restaurants match your search" else "No restaurants available",
+                    if (searchQuery.isNotEmpty()) stringResource(R.string.no_restaurants_match) else stringResource(R.string.no_restaurants_available),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -163,7 +165,7 @@ fun RestaurantCard(restaurant: Merchant, onClick: () -> Unit) {
                         color = MaterialTheme.colorScheme.surfaceVariant
                     ) {
                         Text(
-                            text = "Delivery tsh %.2f".format(restaurant.deliveryFee),
+                            text = stringResource(R.string.delivery_amount_tsh, "tsh %.2f".format(restaurant.deliveryFee)),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)

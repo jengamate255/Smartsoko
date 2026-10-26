@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html class="light" lang="sw">
 <head>
   <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"/>
@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="design-system.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script type="module" src="config/firebase-config.js?v=5"></script>
-  <script type="module" src="config/cross-platform-service.js?v=4"></script>
+  <script type="module" src="config/cross-platform-service.js?v=5"></script>
   <script src="config/mapbox-config.js" defer></script>
   <script src='https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.js' defer></script>
   <link href='https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css' rel='stylesheet' />
@@ -84,9 +84,14 @@
     .os-transition { transition: all 0.2s ease; }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="js/i18n.js?v=1" defer></script>
   <link rel="stylesheet" href="css/stitch-site.css?v=5">
   <script src="js/stitch-site.js?v=2" defer></script>
   <link rel="stylesheet" href="css/site-uniform.css?v=1">
+  <link rel="stylesheet" href="/css/shopping-shell.css?v=1">
+  <script src="/js/shopping-shell.js?v=1" defer></script>
+  <link rel="manifest" href="/manifest.json">
+
 </head>
 <body class="ss-uniform stitch-site ss-commerce ss-track bg-[var(--os-bg)] text-[var(--os-text)] min-h-screen pt-20 animate-premium" data-stitch-page="track-order">
 
@@ -113,7 +118,7 @@
       <div class="flex items-center justify-between flex-wrap gap-3">
         <div class="flex items-center gap-3">
           <div>
-            <h1 class="font-headline-md text-headline-md font-bold text-primary">Track Order</h1>
+            <h1 class="font-headline-md text-headline-md font-bold text-primary" data-i18n="orders.trackOrder">Track Order</h1>
             <p class="text-body-sm text-on-surface-variant" id="orderIdDisplay">Order #---</p>
           </div>
         </div>
@@ -131,7 +136,7 @@
               <span class="material-symbols-outlined text-3xl text-primary">schedule</span>
             </div>
             <div>
-              <p class="text-sm text-gray-500">Estimated Delivery</p>
+              <p class="text-sm text-gray-500" data-i18n="track.estimatedDelivery">Estimated Delivery</p>
               <p class="text-2xl font-bold text-primary" id="estimatedTime">--:--</p>
               <p class="text-sm text-gray-400" id="estimatedDate">...</p>
             </div>
@@ -140,7 +145,7 @@
 
         <!-- Delivery Progress -->
         <div class="os-section-card p-6">
-          <h2 class="font-bold text-lg mb-6 text-gray-900">Delivery Progress</h2>
+          <h2 class="font-bold text-lg mb-6 text-gray-900" data-i18n="track.deliveryProgress">Delivery Progress</h2>
           <div class="space-y-6" id="progressSteps">
             <!-- Step 1: Order Placed -->
             <div class="flex gap-4 relative">
@@ -149,7 +154,7 @@
                 <span class="material-symbols-outlined text-sm">check</span>
               </div>
               <div>
-                <p class="font-semibold text-gray-900">Order Placed</p>
+                <p class="font-semibold text-gray-900" data-i18n="orders.orderPlaced">Order Placed</p>
                 <p class="text-sm text-gray-500" id="time-1">--</p>
               </div>
             </div>
@@ -161,8 +166,8 @@
                 <span class="material-symbols-outlined text-sm">restaurant</span>
               </div>
               <div>
-                <p class="font-semibold text-gray-900" id="text-2">Order Confirmed</p>
-                <p class="text-sm text-gray-500" id="time-2">Waiting...</p>
+                <p class="font-semibold text-gray-900" id="text-2" data-i18n="orders.confirmed">Order Confirmed</p>
+                <p class="text-sm text-gray-500" id="time-2" data-i18n="track.waiting">Waiting...</p>
               </div>
             </div>
 
@@ -173,8 +178,8 @@
                 <span class="material-symbols-outlined text-sm">soup_kitchen</span>
               </div>
               <div>
-                <p class="font-semibold text-gray-900" id="text-3">Preparing</p>
-                <p class="text-sm text-gray-500" id="time-3">Waiting...</p>
+                <p class="font-semibold text-gray-900" id="text-3" data-i18n="orders.preparing">Preparing</p>
+                <p class="text-sm text-gray-500" id="time-3" data-i18n="track.waiting">Waiting...</p>
               </div>
             </div>
 
@@ -185,8 +190,8 @@
                 <span class="material-symbols-outlined text-sm">package</span>
               </div>
               <div>
-                <p class="font-semibold text-gray-900" id="text-4">Ready for Pickup</p>
-                <p class="text-sm text-gray-500" id="time-4">Waiting...</p>
+                <p class="font-semibold text-gray-900" id="text-4" data-i18n="track.readyForPickup">Ready for Pickup</p>
+                <p class="text-sm text-gray-500" id="time-4" data-i18n="track.waiting">Waiting...</p>
               </div>
             </div>
 
@@ -197,13 +202,13 @@
                 <span class="material-symbols-outlined text-sm">local_shipping</span>
               </div>
               <div>
-                <p class="font-semibold text-gray-900" id="text-5">On the Way</p>
-                <p class="text-sm text-gray-500" id="time-5">Waiting...</p>
+                <p class="font-semibold text-gray-900" id="text-5" data-i18n="orders.onTheWay">On the Way</p>
+                <p class="text-sm text-gray-500" id="time-5" data-i18n="track.waiting">Waiting...</p>
                 <div id="driverInfo" class="mt-2 hidden">
                   <div class="flex items-center gap-2 bg-green-50 p-2 rounded-lg">
                     <div class="w-8 h-8 bg-green-700 rounded-full flex items-center justify-center text-white text-sm font-bold" id="driverInitial">D</div>
                     <div>
-                      <p class="text-sm font-medium" id="driverName">Driver Name</p>
+                      <p class="text-sm font-medium" id="driverName" data-i18n="track.driverName">Driver Name</p>
                       <p class="text-xs text-gray-500" id="driverPhone">+255...</p>
                     </div>
                   </div>
@@ -217,8 +222,8 @@
                 <span class="material-symbols-outlined text-sm">home</span>
               </div>
               <div>
-                <p class="font-semibold text-gray-900" id="text-6">Delivered</p>
-                <p class="text-sm text-gray-500" id="time-6">Waiting...</p>
+                <p class="font-semibold text-gray-900" id="text-6" data-i18n="orders.delivered">Delivered</p>
+                <p class="text-sm text-gray-500" id="time-6" data-i18n="track.waiting">Waiting...</p>
               </div>
             </div>
           </div>
@@ -226,18 +231,18 @@
 
         <!-- Order Summary -->
         <div class="os-section-card p-6">
-          <h2 class="font-bold text-lg mb-4 text-gray-900">Order Summary</h2>
+          <h2 class="font-bold text-lg mb-4 text-gray-900" data-i18n="checkout.orderSummary">Order Summary</h2>
           <div id="orderItems" class="space-y-2 mb-4">
             <div class="skeleton skeleton-text" style="width:100%"></div>
             <div class="skeleton skeleton-text-sm" style="width:80%"></div>
           </div>
           <div class="border-t border-gray-100 pt-4 space-y-2">
-            <div class="flex justify-between text-sm"><span class="text-gray-500">Subtotal</span><span id="subtotal" class="font-medium">TSh 0</span></div>
-            <div class="flex justify-between text-sm"><span class="text-gray-500">Delivery Fee</span><span id="deliveryFee" class="font-medium">TSh 0</span></div>
-            <div class="flex justify-between font-bold text-lg pt-2 border-t border-gray-100"><span>Total</span><span class="text-primary" id="total">TSh 0</span></div>
+            <div class="flex justify-between text-sm"><span class="text-gray-500" data-i18n="cart.subtotal">Subtotal</span><span id="subtotal" class="font-medium">TSh 0</span></div>
+            <div class="flex justify-between text-sm"><span class="text-gray-500" data-i18n="cart.deliveryFee">Delivery Fee</span><span id="deliveryFee" class="font-medium">TSh 0</span></div>
+            <div class="flex justify-between font-bold text-lg pt-2 border-t border-gray-100"><span data-i18n="orders.total">Total</span><span class="text-primary" id="total">TSh 0</span></div>
           </div>
           <button onclick="buyAgain()" id="buyAgainBtn" class="hidden w-full mt-4 os-btn-secondary">
-            <span class="material-symbols-outlined text-[16px] align-middle mr-1">replay</span> Buy Again
+            <span class="material-symbols-outlined text-[16px] align-middle mr-1">replay</span> <span data-i18n="track.buyAgain">Buy Again</span>
           </button>
         </div>
       </div>
@@ -249,7 +254,7 @@
           <div class="p-4 border-b bg-green-50">
             <div class="flex items-center gap-2">
               <span class="material-symbols-outlined text-primary filled-icon">location_on</span>
-              <h2 class="font-bold text-green-800">Delivery Location</h2>
+              <h2 class="font-bold text-green-800" data-i18n="track.deliveryLocation">Delivery Location</h2>
             </div>
           </div>
           <div class="p-5">
@@ -267,7 +272,7 @@
                 <span class="material-symbols-outlined text-blue-600">person</span>
               </div>
               <div>
-                <p class="text-sm text-gray-500">Contact</p>
+                <p class="text-sm text-gray-500" data-i18n="track.contact">Contact</p>
                 <p class="font-medium" id="customerContact">--</p>
               </div>
             </div>
@@ -279,7 +284,7 @@
           <div class="p-4 border-b bg-green-50">
             <div class="flex items-center gap-2">
               <span class="material-symbols-outlined text-green-600 filled-icon">receipt_long</span>
-              <h2 class="font-bold text-green-800">Order Confirmation</h2>
+              <h2 class="font-bold text-green-800" data-i18n="track.orderConfirmation">Order Confirmation</h2>
             </div>
           </div>
           <div class="p-5">
@@ -288,10 +293,10 @@
               <div class="skeleton skeleton-text-sm" style="width:80%"></div>
             </div>
             <div class="border-t border-dashed pt-4 space-y-2">
-              <div class="flex justify-between text-sm"><span class="text-gray-500">Subtotal</span><span id="subtotalRight">TSh 0</span></div>
-              <div class="flex justify-between text-sm"><span class="text-gray-500">Delivery Fee</span><span id="deliveryFeeRight">TSh 0</span></div>
-              <div class="flex justify-between text-sm"><span class="text-gray-500">Payment</span><span class="font-medium text-gray-800" id="paymentMethodDisplay">--</span></div>
-              <div class="flex justify-between font-bold text-lg pt-2 border-t"><span>Total</span><span class="text-primary" id="totalRight">TSh 0</span></div>
+              <div class="flex justify-between text-sm"><span class="text-gray-500" data-i18n="cart.subtotal">Subtotal</span><span id="subtotalRight">TSh 0</span></div>
+              <div class="flex justify-between text-sm"><span class="text-gray-500" data-i18n="cart.deliveryFee">Delivery Fee</span><span id="deliveryFeeRight">TSh 0</span></div>
+              <div class="flex justify-between text-sm"><span class="text-gray-500" data-i18n="orders.paymentMethod">Payment</span><span class="font-medium text-gray-800" id="paymentMethodDisplay">--</span></div>
+              <div class="flex justify-between font-bold text-lg pt-2 border-t"><span data-i18n="orders.total">Total</span><span class="text-primary" id="totalRight">TSh 0</span></div>
             </div>
           </div>
         </div>
@@ -299,8 +304,8 @@
         <!-- Confirm Delivery Button -->
         <div class="bg-gradient-to-br from-green-700 to-green-900 rounded-xl shadow-lg p-6 text-center">
           <span class="material-symbols-outlined text-4xl text-white mb-3 filled-icon">check_circle</span>
-          <h2 class="font-headline-md text-lg font-bold text-white mb-1">Order Delivered?</h2>
-          <p class="text-white/80 text-sm mb-4">Confirm that you have received your order</p>
+          <h2 class="font-headline-md text-lg font-bold text-white mb-1" data-i18n="track.orderDeliveredQ">Order Delivered?</h2>
+          <p class="text-white/80 text-sm mb-4" data-i18n="track.confirmHint">Confirm that you have received your order</p>
           <button onclick="confirmDelivery()" id="confirmDeliveryBtn" class="os-btn-primary w-full">
             Confirm Delivery
           </button>
@@ -309,7 +314,7 @@
         <!-- Live Map -->
         <div class="os-section-card overflow-hidden">
           <div class="p-4 border-b flex justify-between items-center">
-            <h2 class="font-bold text-gray-900">Live Location</h2>
+            <h2 class="font-bold text-gray-900" data-i18n="track.liveLocation">Live Location</h2>
             <div class="flex items-center gap-2">
               <div id="driverStatus" class="w-2 h-2 rounded-full bg-gray-400"></div>
               <span class="text-sm text-gray-500" id="driverStatusText">Offline</span>
@@ -320,7 +325,7 @@
 
         <!-- Delivery Address -->
         <div class="bg-white rounded-xl shadow p-6">
-          <h3 class="font-bold text-lg mb-4">Delivery Address</h3>
+          <h3 class="font-bold text-lg mb-4" data-i18n="cart.deliveryAddress">Delivery Address</h3>
           <div class="flex items-start gap-3">
             <span class="material-symbols-outlined text-gray-400">location_on</span>
             <div>
@@ -332,10 +337,10 @@
 
         <!-- Contact Driver -->
         <div id="contactDriver" class="os-section-card p-5 hidden">
-          <h2 class="font-bold text-lg mb-4 text-on-background">Contact Driver</h2>
+          <h2 class="font-bold text-lg mb-4 text-on-background" data-i18n="orders.contactDriver">Contact Driver</h2>
           <div class="flex gap-3">
-            <a id="callDriver" href="#" class="flex-1 os-btn-primary">Call</a>
-            <button onclick="chatWithDriver()" class="flex-1 os-btn-secondary">Chat</button>
+            <a id="callDriver" href="#" class="flex-1 os-btn-primary" data-i18n="track.call">Call</a>
+            <button onclick="chatWithDriver()" class="flex-1 os-btn-secondary" data-i18n="chat.title">Chat</button>
           </div>
         </div>
       </div>
@@ -347,11 +352,11 @@
         <div class="os-icon-circle-xl bg-primary-container/30 mx-auto mb-4 flex items-center justify-center">
           <span class="material-symbols-outlined text-5xl text-primary filled-icon">check_circle</span>
         </div>
-        <h2 class="font-headline-md text-xl font-bold text-on-background mb-2">Delivery Confirmed!</h2>
-        <p class="text-on-surface-variant mb-6">Thank you for your order. Enjoy your meal!</p>
+        <h2 class="font-headline-md text-xl font-bold text-on-background mb-2" data-i18n="track.confirmedToast">Delivery Confirmed!</h2>
+        <p class="text-on-surface-variant mb-6" data-i18n="track.thankYou">Thank you for your order. Enjoy your meal!</p>
         <div class="flex gap-3">
-          <a href="/customer" class="flex-1 os-btn-primary">Order More</a>
-          <a href="/orders" class="flex-1 os-btn-secondary">My Orders</a>
+          <a href="/customer" class="flex-1 os-btn-primary" data-i18n="track.orderMore">Order More</a>
+          <a href="/orders" class="flex-1 os-btn-secondary" data-i18n="orders.title">My Orders</a>
         </div>
       </div>
     </div>
@@ -361,7 +366,7 @@
     // Get order ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const orderId = urlParams.get('orderId') || 'demo-order';
-    document.getElementById('orderIdDisplay').textContent = `Order #${orderId.slice(-6).toUpperCase()}`;
+    document.getElementById('orderIdDisplay').textContent = `${typeof t === 'function' ? t('track.orderNumber') : 'Order #'}${orderId.slice(-6).toUpperCase()}`;
 
     // Map variables
     let map;
@@ -377,6 +382,27 @@
 
     // Status flow
     const statusFlow = ['pending', 'confirmed', 'preparing', 'ready_for_delivery', 'dispatched', 'delivered'];
+
+    // Localised status labels (js/i18n.js)
+    const statusLabelKeys = {
+      pending: 'track.pending',
+      confirmed: 'orders.confirmed',
+      preparing: 'orders.preparing',
+      ready_for_delivery: 'orders.ready',
+      assigned: 'orders.ready',
+      dispatched: 'orders.onTheWay',
+      picked_up: 'orders.onTheWay',
+      in_transit: 'orders.onTheWay',
+      delivered: 'orders.delivered',
+      completed: 'orders.delivered',
+      cancelled: 'orders.cancelled'
+    };
+
+    function statusLabel(status) {
+      const key = statusLabelKeys[status];
+      if (key && typeof t === 'function') return t(key);
+      return String(status || '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
 
     function pickNumber(...values) {
       for (const value of values) {
@@ -404,6 +430,10 @@
     document.addEventListener('DOMContentLoaded', () => {
       initMap();
       loadOrderDetails();
+      // The confirm button's label is rewritten by confirmDelivery(), so it is set here
+      // instead of through data-i18n.
+      const confirmBtn = document.getElementById('confirmDeliveryBtn');
+      if (confirmBtn) confirmBtn.textContent = t('track.confirmDelivery', 'Confirm Delivery');
       document.addEventListener('data-service-ready', () => loadOrderDetails(), { once: true });
       document.addEventListener('firebase-initialized', () => loadOrderDetails(), { once: true });
     });
@@ -440,7 +470,7 @@
           });
         }
         const data = await svc.get('orders', orderId);
-        if (!data) throw new Error('Order not found');
+        if (!data) throw new Error(t('track.notFound', 'Order not found'));
         if (window.trackingTemplate) {
           document.querySelector('main').innerHTML = window.trackingTemplate; window.trackingTemplate = null;
           if (map) { map.remove(); map = null; }
@@ -482,9 +512,9 @@
         if (main && !orderData) {
           if (!window.trackingTemplate) window.trackingTemplate = main.innerHTML;
           main.replaceChildren();
-          const title = document.createElement('h1'); title.textContent = 'Delivery updates'; title.className = 'text-2xl font-bold mb-4';
+          const title = document.createElement('h1'); title.textContent = t('track.deliveryUpdates', 'Delivery updates'); title.className = 'text-2xl font-bold mb-4';
           const message = document.createElement('p'); message.textContent = error.message;
-          const link = document.createElement('a'); link.href = '/customer-orders'; link.textContent = 'My Orders'; link.className = 'inline-block mt-6 text-green-800 underline';
+          const link = document.createElement('a'); link.href = '/customer-orders'; link.textContent = t('orders.title'); link.className = 'inline-block mt-6 text-green-800 underline';
           main.append(title, message, link);
         }
       }
@@ -497,13 +527,13 @@
       const orderIdDisplay = document.getElementById('orderIdDisplay');
       if (orderIdDisplay && orderData.id) {
         const short = String(orderData.id).replace(/^ORD-/, '');
-        orderIdDisplay.textContent = 'Order #' + (short.length > 10 ? short.slice(0, 8).toUpperCase() : short.toUpperCase());
+        orderIdDisplay.textContent = t('track.orderNumber') + (short.length > 10 ? short.slice(0, 8).toUpperCase() : short.toUpperCase());
       }
 
       // Update status badge
       orderData.status = orderData.status || 'pending';
       const statusBadge = document.getElementById('statusBadge');
-      statusBadge.textContent = orderData.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      statusBadge.textContent = statusLabel(orderData.status);
 
       const statusColors = {
         pending: 'os-badge-pending',
@@ -538,7 +568,7 @@
           if (lineEl) lineEl.classList.add('active');
           if (textEl) textEl.classList.add('text-primary');
           if (timeEl && i <= currentStatusIndex + 1) {
-            timeEl.textContent = 'Completed';
+            timeEl.textContent = t('common.completed', 'Completed');
           }
         }
       }
@@ -549,7 +579,7 @@
           <span>${item.quantity}x ${String(item.name || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</span>
           <span class="font-medium">TSh ${((item.price + (item.variationDelta || 0)) * item.quantity).toLocaleString()}</span>
         </div>
-      `).join('') : '<p class="text-gray-500">No items</p>';
+      `).join('') : `<p class="text-gray-500">${t('track.noItems')}</p>`;
 
       document.getElementById('orderItems').innerHTML = itemsHtml;
       document.getElementById('orderItemsRight').innerHTML = itemsHtml;
@@ -563,11 +593,11 @@
       document.getElementById('totalRight').textContent = `TSh ${(orderData.total || 0).toLocaleString()}`;
 
       // Update delivery address
-      document.getElementById('deliveryAddress').textContent = orderData.customerAddress || orderData.deliveryAddress || 'Address not available';
+      document.getElementById('deliveryAddress').textContent = orderData.customerAddress || orderData.deliveryAddress || t('track.noAddress', 'Address not available');
       if (orderData.deliveryLat !== null && orderData.deliveryLng !== null) {
         document.getElementById('deliveryCoords').textContent = `GPS: ${orderData.deliveryLat.toFixed(6)}, ${orderData.deliveryLng.toFixed(6)}`;
       } else {
-        document.getElementById('deliveryCoords').textContent = 'No GPS coordinates available';
+        document.getElementById('deliveryCoords').textContent = t('track.noGps', 'No GPS coordinates available');
       }
       const customerPhone = orderData.customerPhone || orderData.contactPhone || 'N/A';
       const customerName = orderData.customerName || 'Customer';
@@ -577,9 +607,12 @@
       const paymentLine = document.getElementById('paymentMethodDisplay');
       if (paymentLine) {
         const methodMap = {
-          mpesa: 'M-Pesa', tigo: 'Tigo Pesa', airtel: 'Airtel Money', halopesa: 'HaloPesa', cod: 'Cash on Delivery', pesapal: 'Pay Online (PesaPal)', ntzs: 'nTZS Wallet'
+          mpesa: 'M-Pesa', tigo: 'Tigo Pesa', airtel: 'Airtel Money', halopesa: 'HaloPesa',
+          cod: t('orders.cashOnDelivery', 'Cash on Delivery'),
+          pesapal: t('checkout.payOnline', 'Pay Online (PesaPal)'),
+          ntzs: t('orders.ntzsWallet', 'nTZS Wallet')
         };
-        const method = methodMap[orderData.paymentMethod] || 'Cash on Delivery';
+        const method = methodMap[orderData.paymentMethod] || t('orders.cashOnDelivery', 'Cash on Delivery');
         const masked = orderData.paymentNumber ? ' • ' + String(orderData.paymentNumber).replace(/(.{4}).*(.{2})$/, '$1••••$2') : '';
         paymentLine.textContent = `${method}${masked}`;
         if (orderData.paymentRef) {
@@ -621,7 +654,7 @@
 
         customerMarker = new mapboxgl.Marker(customerEl)
           .setLngLat([orderData.deliveryLng, orderData.deliveryLat])
-          .setPopup(new mapboxgl.Popup().setHTML('<strong>Delivery Location</strong>'))
+          .setPopup(new mapboxgl.Popup().setHTML(`<strong>${t('track.deliveryLocation')}</strong>`))
           .addTo(map);
 
         map.setCenter([orderData.deliveryLng, orderData.deliveryLat]);
@@ -692,7 +725,7 @@
 
           driverMarker = new mapboxgl.Marker(driverEl)
             .setLngLat([longitude, latitude])
-            .setPopup(new mapboxgl.Popup().setHTML(`<strong>${driverData.name || 'Driver'}</strong><br>On the way`))
+            .setPopup(new mapboxgl.Popup().setHTML(`<strong>${driverData.name || 'Driver'}</strong><br>${t('orders.onTheWay')}`))
             .addTo(map);
         } else {
           driverMarker.setLngLat([longitude, latitude]);
@@ -704,11 +737,11 @@
 
         if (isOnline) {
           statusDot.className = 'w-2 h-2 rounded-full bg-green-500 pulse-ring';
-          statusText.textContent = 'Live Tracking';
+          statusText.textContent = t('track.liveTracking', 'Live Tracking');
           statusText.className = 'text-sm text-green-600 font-medium';
         } else {
           statusDot.className = 'w-2 h-2 rounded-full bg-gray-400';
-          statusText.textContent = 'Offline';
+          statusText.textContent = t('chat.offline');
           statusText.className = 'text-sm text-gray-500';
         }
 
@@ -793,7 +826,7 @@
           updateOrderDisplay();
           if (driverChanged) setupRealtimeTracking();
           if (statusChanged && orderData.status !== 'pending') {
-            showNotification('Order status updated: ' + String(orderData.status).replace(/_/g, ' ').toUpperCase());
+            showNotification(t('track.statusUpdated', 'Order status updated:') + ' ' + String(orderData.status).replace(/_/g, ' ').toUpperCase());
           }
         }, (err) => {
           console.warn('Order status listener unavailable:', err.message);
@@ -808,7 +841,7 @@
       
       const btn = document.getElementById('confirmDeliveryBtn');
       btn.disabled = true;
-      btn.innerHTML = '<span class="material-symbols-outlined animate-spin inline-block mr-2 align-middle">progress_activity</span> Confirming...';
+      btn.innerHTML = '<span class="material-symbols-outlined animate-spin inline-block mr-2 align-middle">progress_activity</span> ' + t('track.confirming', 'Confirming...');
 
       try {
         const db = window.db;
@@ -831,11 +864,11 @@
           stepEl.classList.add('bg-green-600', 'text-white');
           if (lineEl) lineEl.classList.add('active');
           if (textEl) textEl.classList.add('text-primary');
-          if (timeEl) timeEl.textContent = 'Completed';
+          if (timeEl) timeEl.textContent = t('common.completed', 'Completed');
         }
         
         const statusBadge = document.getElementById('statusBadge');
-        statusBadge.textContent = 'DELIVERED';
+        statusBadge.textContent = t('orders.delivered').toUpperCase();
         statusBadge.className = 'px-3 py-1 rounded-full text-sm font-medium bg-green-200 text-green-900';
         
         // Show rich delivery confirmation modal
@@ -852,10 +885,10 @@
         }
       } catch (error) {
         console.error('Error confirming delivery:', error);
-        showNotification('Error confirming delivery. Please try again.');
+        showNotification(t('track.confirmError', 'Error confirming delivery. Please try again.'));
       }
       btn.disabled = false;
-      btn.textContent = 'Confirm Delivery';
+      btn.textContent = t('track.confirmDelivery', 'Confirm Delivery');
     }
 
     function showNotification(message) {

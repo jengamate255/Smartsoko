@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sw">
 <head>
+  <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SmartSoko - My Wallet</title>
@@ -25,16 +26,25 @@
     .spin { animation: nspin 1s linear infinite; }
     @keyframes nspin { to { transform: rotate(360deg); } }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/stitch-site.css?v=5">
+  <script src="js/i18n.js?v=1" defer></script>
+  <script src="js/stitch-site.js?v=2" defer></script>
+  <link rel="stylesheet" href="css/site-uniform.css?v=1">
+  <link rel="stylesheet" href="/css/shopping-shell.css?v=1">
+  <script src="/js/shopping-shell.js?v=1" defer></script>
+  <link rel="manifest" href="/manifest.json">
+
 </head>
-<body>
+<body class="ss-uniform stitch-site ss-commerce ss-wallet" data-stitch-page="wallet">
   <header class="sticky top-0 z-40 bg-[#064e3b] text-white">
     <div class="max-w-5xl mx-auto px-4 h-16 flex items-center gap-4">
-      <a href="home.html" class="flex items-center gap-2 hover:opacity-90" aria-label="Back to home">
+      <a href="home.html" class="flex items-center gap-2 hover:opacity-90" aria-label="Back to home" data-i18n-aria-label="common.backToHome">
         <span class="material-symbols-outlined">arrow_back</span>
       </a>
       <div class="flex-1">
-        <h1 class="font-bold text-lg leading-tight">My Wallet</h1>
-        <p class="text-xs text-white/70">Balance, payments and withdrawals</p>
+        <h1 class="font-bold text-lg leading-tight" data-i18n="wallet.title">My Wallet</h1>
+        <p class="text-xs text-white/70" data-i18n="wallet.subtitle">Balance, payments and withdrawals</p>
       </div>
       <a href="profile.html" class="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors" aria-label="Profile">
         <span class="material-symbols-outlined">person</span>
@@ -46,19 +56,17 @@
     <!-- nTZS deposit status banner (shown after checkout redirects here) -->
     <div id="ntzsBanner" class="hidden mb-4"></div>
 
-    <div id="demoBanner" class="hidden mb-4 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-800">
-      Demo mode: live backend not connected — showing sample data.
-    </div>
+    <div id="walletError" class="hidden mb-4 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200" role="alert"><span data-i18n="wallet.unavailable">Wallet unavailable. Please check your connection and sign in again.</span> <button type="button" onclick="location.reload()" data-i18n="common.retry">Try again</button></div>
 
-    <div id="walletStats"></div>
+    <div id="walletStats"><p role="status">Loading wallet…</p></div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="ss-wallet-ledger bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-        <h2 class="font-bold text-gray-900">Recent Transactions</h2>
+        <h2 class="font-bold text-gray-900" data-i18n="wallet.recentTransactions">Recent Transactions</h2>
         <button onclick="window.WalletManager.showWithdrawModal()"
           class="flex items-center gap-2 px-4 py-2 bg-[#064e3b] text-white rounded-lg text-sm font-bold hover:opacity-90 transition-opacity">
           <span class="material-symbols-outlined text-base">payments</span>
-          Withdraw
+          <span data-i18n="wallet.withdraw">Withdraw</span>
         </button>
       </div>
       <div id="walletTx"></div>
@@ -112,7 +120,7 @@
           <div class="ntzs-card bg-white rounded-xl shadow-sm p-4 flex items-center gap-3">
             <span class="material-symbols-outlined spin text-purple-600">progress_activity</span>
             <div class="flex-1">
-              <p class="font-bold text-sm text-gray-900">nTZS deposit in progress</p>
+              <p class="font-bold text-sm text-gray-900">${t('wallet.depositProgress')}</p>
               <p class="text-xs text-gray-500">Deposit <code>${depositId}</code>${orderId ? ` · order <code>${orderId}</code>` : ''} — complete the mobile-money prompt if you haven't yet.</p>
             </div>
             ${ntzsStatusPill(detail || 'pending')}
@@ -132,9 +140,9 @@
           <div class="bg-white rounded-xl shadow-sm p-4 flex items-start gap-3" style="border-left:4px solid #dc2626;">
             <span class="material-symbols-outlined text-red-600">error</span>
             <div class="flex-1">
-              <p class="font-bold text-sm text-gray-900">nTZS deposit failed</p>
+              <p class="font-bold text-sm text-gray-900">${t('wallet.depositFailed')}</p>
               <p class="text-xs text-gray-500">${detail || 'The deposit could not be completed. You can retry checkout or contact support.'}</p>
-              <button onclick="location.href='/checkout'" class="mt-2 px-4 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 transition-colors">Retry Checkout</button>
+              <button onclick="location.href='/checkout'" class="mt-2 px-4 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 transition-colors">${t('wallet.retryCheckout')}</button>
             </div>
             ${ntzsStatusPill(detail || 'failed')}
           </div>`;
@@ -178,11 +186,11 @@
       // Timed out polling — leave the pending card up with a hint
       const el = document.getElementById('ntzsBanner');
       el.insertAdjacentHTML('beforeend',
-        '<p class="text-xs text-gray-400 mt-2 ml-1">Still pending after a few minutes — refresh this page to check again.</p>');
+        '<p class="text-xs text-gray-400 mt-2 ml-1">' + t('wallet.pendingHint') + '</p>');
     }
 
     // ─── Wallet data ───
-    (async function () {
+    async function loadWallet() {
       // nTZS params take priority
       const params = new URLSearchParams(location.search);
       if (params.get('ntzs') === 'deposit' && params.get('depositId')) {
@@ -195,17 +203,20 @@
         data = await window.WalletManager.getWallet();
         tx = (await window.WalletManager.getTransactions()).transactions || [];
       } catch (e) {
-        data = { wallet: { balance: 45200, pending: 8600, totalEarned: 184500, totalWithdrawn: 138900 } };
-        tx = [
-          { id: 't3', type: 'bonus', amount: 5000, description: 'New user welcome bonus', status: 'completed', createdAt: new Date(Date.now() - 2 * 86400000).toISOString() },
-          { id: 't2', type: 'order_payment', amount: 12500, description: 'Order #SMK-1028 payment', status: 'completed', createdAt: new Date(Date.now() - 5 * 86400000).toISOString() },
-          { id: 't1', type: 'withdrawal', amount: 30000, description: 'Withdrawal to M-Pesa 0712 345 678', status: 'completed', createdAt: new Date(Date.now() - 9 * 86400000).toISOString() }
-        ];
-        document.getElementById('demoBanner').classList.remove('hidden');
+        document.getElementById('walletError').classList.remove('hidden');
+        document.getElementById('walletStats').replaceChildren();
+        document.getElementById('walletTx').replaceChildren();
+        return;
       }
+      document.getElementById('walletError').classList.add('hidden');
       window.WalletManager.renderWallet('walletStats', data);
       window.WalletManager.renderTransactions('walletTx', tx);
-    })();
+    }
+  </script>
+  <script type="module">
+    import { auth } from '/config/firebase-config.js?v=5';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+    onAuthStateChanged(auth, () => loadWallet());
   </script>
 </body>
 </html>

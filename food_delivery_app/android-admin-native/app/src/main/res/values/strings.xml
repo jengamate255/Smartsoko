@@ -17,4 +17,93 @@
     <string name="error_auth">Authentication failed</string>
     <string name="error_network">Network error</string>
     <string name="error_unknown">An unknown error occurred</string>
+
+    <!-- Login screen -->
+    <string name="admin_panel">Admin Panel</string>
+
+    <!-- Dashboard -->
+    <string name="revenue">Revenue</string>
+    <string name="pending">Pending</string>
+    <string name="quick_actions">Quick Actions</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_filter">Filter</string>
+    <string name="cd_refresh">Refresh</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_search">Search</string>
+    <string name="cd_add_note">Add Note</string>
+    <string name="cd_add_product">Add Product</string>
+    <string name="cd_delete">Delete</string>
+    <string name="cd_activate">Activate</string>
+    <string name="cd_suspend">Suspend</string>
+    <string name="cd_new_ticket">New Ticket</string>
+
+    <!-- Orders -->
+    <string name="orders_count">%1$d order(s)</string>
+    <string name="order_number">Order #%1$s</string>
+    <string name="guest">Guest</string>
+    <string name="order_details">Order Details</string>
+    <string name="label_customer">"Customer: "</string>
+    <string name="label_amount">"Amount: "</string>
+    <string name="label_delivery">"Delivery: "</string>
+    <string name="label_created">"Created: "</string>
+    <string name="items_count">Items (%1$d)</string>
+    <string name="fallback_item">Item</string>
+    <string name="timeline">Timeline</string>
+    <string name="no_events_yet">No events yet</string>
+    <string name="internal_notes">Internal Notes</string>
+    <string name="no_notes">No notes</string>
+    <string name="add_internal_note">Add Internal Note</string>
+    <string name="note_placeholder">Note...</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Products -->
+    <string name="search_products">Search products...</string>
+    <string name="products_count">%1$d product(s)</string>
+    <string name="unknown">Unknown</string>
+    <string name="stock_count">Stock: %1$d</string>
+    <string name="new_product">New Product</string>
+    <string name="field_name_required">Name *</string>
+    <string name="field_price_required">Price *</string>
+    <string name="description">Description</string>
+    <string name="field_stock">Stock</string>
+    <string name="field_unit">Unit</string>
+    <string name="create">Create</string>
+    <string name="product_details">Product Details</string>
+    <string name="details">Details</string>
+    <string name="label_stock">"Stock: "</string>
+    <string name="label_unit">"Unit: "</string>
+    <string name="label_available">"Available: "</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    <!-- Support -->
+    <string name="sla_open">Open</string>
+    <string name="sla_progress">Progress</string>
+    <string name="sla_resolved">Resolved</string>
+    <string name="sla_breached">Breached</string>
+    <string name="sla_avg_time">Avg Time</string>
+    <string name="tickets_count">%1$d ticket(s)</string>
+    <string name="no_subject">No subject</string>
+    <string name="assigned_to">" • Assigned: %1$s"</string>
+    <string name="new_support_ticket">New Support Ticket</string>
+    <string name="field_subject_required">Subject *</string>
+    <string name="field_description_required">Description *</string>
+    <string name="customer_name">Customer Name</string>
+    <string name="customer_email">Customer Email</string>
+    <string name="priority">Priority</string>
+
+    <!-- Users -->
+    <string name="search_users">Search users...</string>
+    <string name="retry">Retry</string>
+    <string name="users_count">%1$d user(s)</string>
+    <string name="user_details">User Details</string>
+    <string name="status_suspended">Suspended</string>
+    <string name="status_active">Active</string>
+    <string name="contact_info">Contact Info</string>
+    <string name="recent_activity">Recent Activity</string>
+    <string name="no_recent_activity">No recent activity</string>
+    <string name="orders_section_count">Orders (%1$d)</string>
+    <string name="no_orders">No orders</string>
 </resources>

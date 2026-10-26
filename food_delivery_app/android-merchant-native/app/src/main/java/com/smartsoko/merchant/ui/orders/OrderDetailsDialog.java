@@ -49,13 +49,14 @@ public class OrderDetailsDialog extends DialogFragment {
         TextView tvOrderTime = view.findViewById(R.id.tv_order_time);
 
         if (order != null) {
-            tvOrderId.setText("Order #" + order.getId());
+            tvOrderId.setText(getString(R.string.order_number_format, order.getId()));
             tvCustomerName.setText(order.getCustomerName());
             tvCustomerPhone.setText(order.getCustomerPhone());
             tvAddress.setText(order.getDeliveryAddress());
-            tvItems.setText(order.getFormattedItems());
+            boolean noItems = order.getItems() == null || order.getItems().isEmpty();
+            tvItems.setText(noItems ? getString(R.string.no_items) : order.getFormattedItems());
             tvTotal.setText(String.format("TSh %.2f", order.getTotalAmount() != null ? order.getTotalAmount() : 0));
-            tvStatus.setText(order.getStatusDisplayName());
+            tvStatus.setText(OrdersAdapter.localizedStatus(requireContext(), order.getStatus()));
             tvStatus.setTextColor(order.getStatusColor());
             tvPaymentMethod.setText(order.getPaymentMethod() != null ? order.getPaymentMethod() : "N/A");
             if (order.getCreatedAt() != null) {
@@ -64,7 +65,7 @@ public class OrderDetailsDialog extends DialogFragment {
         }
 
         builder.setView(view)
-                .setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
+                .setPositiveButton(R.string.action_close, (dialog, which) -> dialog.dismiss());
 
         return builder.create();
     }

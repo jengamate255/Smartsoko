@@ -1,6 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 class AppLocalizations {
+  AppLocalizations([this.languageCode = defaultLanguageCode]);
+
+  /// Kiswahili is the product language; English is the secondary locale.
+  static const String defaultLanguageCode = 'sw';
+
+  final String languageCode;
+
+  static const List<Locale> supportedLocales = [Locale('sw'), Locale('en')];
+
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = [
+    AppLocalizationsDelegate(),
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ];
+
+  static AppLocalizations of(BuildContext context) =>
+      Localizations.of<AppLocalizations>(context, AppLocalizations) ??
+      AppLocalizations();
+
   static const Map<String, Map<String, String>> _translations = {
     'en': {
       'home': 'Home',
@@ -170,6 +191,46 @@ class AppLocalizations {
       'payment_success': 'Payment Successful',
       'payment_failed': 'Payment Failed',
       'payment_pending': 'Payment Pending',
+      'continue': 'Continue',
+      'skip_demo': 'Skip (Demo)',
+      'enter_phone_to_continue': 'Enter your phone number to continue',
+      'cart_is_empty': 'Cart is empty',
+      'place_order': 'Place Order',
+      'delivery_address': 'Delivery Address',
+      'cash_on_delivery': 'Cash on Delivery',
+      'pay_online': 'Pay Online (PesaPal)',
+      'payment_confirmed': 'Payment confirmed',
+      'payment_incomplete': 'Payment incomplete',
+      'sign_in_required': 'Sign-in required',
+      'try_again_payment': 'Try paying again',
+      'popular_restaurants': 'Popular Restaurants',
+      'no_restaurants_found': 'No restaurants found',
+      'curated_for_you': 'Curated for You',
+      'fresh_local_food': 'Fresh organic food from local gardens',
+      'account_settings': 'Account Settings',
+      'my_account': 'My Account',
+      'personal_information': 'Personal Information',
+      'saved_addresses': 'Saved Addresses',
+      'payment_methods': 'Payment Methods',
+      'help_support': 'Help & Support',
+      'privacy_policy': 'Privacy Policy',
+      'sign_out': 'Sign Out',
+      'user_session_expired': 'User session expired',
+      'login_again': 'Login Again',
+      'no_orders_yet': 'No orders yet',
+      'sign_in_to_see_orders': 'Sign in to see your orders',
+      'choose_language': 'Choose language',
+      'general': 'General',
+      'closed_now': 'CLOSED',
+      'ride': 'Ride',
+      'category_all': 'All',
+      'category_vegetables': 'Vegetables',
+      'category_fruits': 'Fruits',
+      'category_dairy': 'Dairy',
+      'category_bakery': 'Bakery',
+      'category_honey': 'Honey',
+      'minutes_short': 'min',
+      'order_number': 'Order',
     },
     'sw': {
       'home': 'Nyumbani',
@@ -339,24 +400,90 @@ class AppLocalizations {
       'payment_success': 'Malipo Yamefanikiwa',
       'payment_failed': 'Malipo Yameshindikana',
       'payment_pending': 'Malipo Yanasubiri',
+      'continue': 'Endelea',
+      'skip_demo': 'Ruka (Onyesho)',
+      'enter_phone_to_continue': 'Weka nambari yako ya simu ili uendelee',
+      'cart_is_empty': 'Kikapu ni kitupu',
+      'place_order': 'Weka Agizo',
+      'delivery_address': 'Anwani ya Usafirishaji',
+      'cash_on_delivery': 'Lipa Wakati wa Kufikia',
+      'pay_online': 'Lipa Mtandaoni (PesaPal)',
+      'payment_confirmed': 'Malipo yamethibitishwa',
+      'payment_incomplete': 'Malipo hayajakamilika',
+      'sign_in_required': 'Lazima uingie',
+      'try_again_payment': 'Jaribu kulipa tena',
+      'popular_restaurants': 'Migahawa Maarufu',
+      'no_restaurants_found': 'Hakuna migahawa iliyopatikana',
+      'curated_for_you': 'Iliyochaguliwa Kwako',
+      'fresh_local_food': 'Chakula cha asili kutoka kwa mashamba ya karibu',
+      'account_settings': 'Mipangilio ya Akaunti',
+      'my_account': 'Akaunti Yangu',
+      'personal_information': 'Maelezo Binafsi',
+      'saved_addresses': 'Anwani Zilizohifadhiwa',
+      'payment_methods': 'Njia za Malipo',
+      'help_support': 'Msaada na Usaidizi',
+      'privacy_policy': 'Sera ya Faragha',
+      'sign_out': 'Ondoka',
+      'user_session_expired': 'Kipindi cha mtumiaji kimeisha',
+      'login_again': 'Ingia Tena',
+      'no_orders_yet': 'Hakuna maagizo bado',
+      'sign_in_to_see_orders': 'Ingia ili uone maagizo yako',
+      'choose_language': 'Chagua lugha',
+      'general': 'Jumla',
+      'closed_now': 'IMEFUNGWA',
+      'ride': 'Safari',
+      'category_all': 'Zote',
+      'category_vegetables': 'Mboga',
+      'category_fruits': 'Matunda',
+      'category_dairy': 'Maziwa',
+      'category_bakery': 'Mikate',
+      'category_honey': 'Asali',
+      'minutes_short': 'dak',
+      'order_number': 'Agizo',
     },
   };
 
-  static String translate(String key, {String language = 'en'}) {
+  String t(String key) => translate(key, language: languageCode);
+
+  static String translate(String key, {String language = defaultLanguageCode}) {
     return _translations[language]?[key] ?? _translations['en']?[key] ?? key;
   }
 
-  static String t(String key, {String language = 'en'}) {
+  static String tr(String key, {String language = defaultLanguageCode}) {
     return translate(key, language: language);
   }
 }
 
+/// Screen-side accessor: `context.tr('cart')` resolves against the active
+/// MaterialApp locale, which starts as Kiswahili.
+extension AppLocalizationsContext on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this);
+
+  String tr(String key) => l10n.t(key);
+}
+
+class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+  const AppLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => AppLocalizations.supportedLocales
+      .map((l) => l.languageCode)
+      .contains(locale.languageCode);
+
+  @override
+  Future<AppLocalizations> load(Locale locale) async =>
+      AppLocalizations(locale.languageCode);
+
+  @override
+  bool shouldReload(AppLocalizationsDelegate old) => false;
+}
+
 class LanguageService extends ChangeNotifier {
-  String _currentLanguage = 'en';
+  String _currentLanguage = AppLocalizations.defaultLanguageCode;
 
   String get currentLanguage => _currentLanguage;
 
-  String t(String key) => AppLocalizations.t(key, language: _currentLanguage);
+  String t(String key) => AppLocalizations.tr(key, language: _currentLanguage);
 
   Future<void> setLanguage(String lang) async {
     if (_translations.containsKey(lang)) {

@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -34,10 +35,10 @@ fun ForgotPasswordScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Reset Password") },
+                title = { Text(stringResource(R.string.reset_password)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -66,30 +67,30 @@ fun ForgotPasswordScreen(
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = "Reset Email Sent!",
+                    text = stringResource(R.string.reset_email_sent),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
                 Text(
-                    text = "Check your email inbox for instructions to reset your password.",
+                    text = stringResource(R.string.check_email_inbox),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(bottom = 32.dp),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
                 PrimaryButton(
-                    text = "Back to Sign In",
+                    text = stringResource(R.string.back_to_sign_in),
                     onClick = onBack
                 )
             } else {
                 Text(
-                    text = "Forgot Password?",
+                    text = stringResource(R.string.forgot_password),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 32.dp, bottom = 16.dp)
                 )
                 Text(
-                    text = "Enter your email address and we'll send you instructions to reset your password.",
+                    text = stringResource(R.string.forgot_password_instructions),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 32.dp),
@@ -122,7 +123,7 @@ fun ForgotPasswordScreen(
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Email") },
+                    label = { Text(stringResource(R.string.email)) },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Done
@@ -135,7 +136,7 @@ fun ForgotPasswordScreen(
                 )
 
                 PrimaryButton(
-                    text = "Send Reset Email",
+                    text = stringResource(R.string.send_reset_email),
                     onClick = {
                         onResetPassword(email)
                     },
@@ -146,7 +147,7 @@ fun ForgotPasswordScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 PrimaryButton(
-                    text = "Back to Sign In",
+                    text = stringResource(R.string.back_to_sign_in),
                     onClick = onBack
                 )
             }

@@ -9,9 +9,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.smartsoko.admin.R
 import androidx.compose.runtime.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,20 +29,20 @@ fun UserDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("User Details", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.user_details), fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary),
                 navigationIcon = {
                     IconButton(onClick = { /* navController.popBackStack() */ }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onPrimary)
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.cd_back), tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
                 actions = {
                     if (uiState.isSuspended != false) {
-                        IconButton(onClick = { viewModel.activateUser() }) { Icon(Icons.Default.CheckCircle, contentDescription = "Activate", tint = MaterialTheme.colorScheme.onPrimary) }
+                        IconButton(onClick = { viewModel.activateUser() }) { Icon(Icons.Default.CheckCircle, contentDescription = stringResource(R.string.cd_activate), tint = MaterialTheme.colorScheme.onPrimary) }
                     } else {
-                        IconButton(onClick = { viewModel.suspendUser() }) { Icon(Icons.Default.Block, contentDescription = "Suspend", tint = MaterialTheme.colorScheme.onPrimary) }
+                        IconButton(onClick = { viewModel.suspendUser() }) { Icon(Icons.Default.Block, contentDescription = stringResource(R.string.cd_suspend), tint = MaterialTheme.colorScheme.onPrimary) }
                     }
-                    IconButton(onClick = { viewModel.deleteUser() }) { Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onPrimary) }
+                    IconButton(onClick = { viewModel.deleteUser() }) { Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.cd_delete), tint = MaterialTheme.colorScheme.onPrimary) }
                 }
             )
         }
@@ -76,7 +78,7 @@ fun UserDetailScreen(
                                         Text(uiState.role, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
                                     }
                                     Surface(shape = MaterialTheme.shapes.small, color = if (uiState.isSuspended == true) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer) {
-                                        Text(if (uiState.isSuspended == true) "Suspended" else "Active", modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
+                                        Text(if (uiState.isSuspended == true) stringResource(R.string.status_suspended) else stringResource(R.string.status_active), modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
                                     }
                                 }
                             }
@@ -88,7 +90,7 @@ fun UserDetailScreen(
                 item {
                     Card(shape = MaterialTheme.shapes.large) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Contact Info", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.contact_info), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                             Spacer(modifier = Modifier.height(12.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Default.Phone, contentDescription = null, modifier = Modifier.size(18.dp)); Spacer(modifier = Modifier.width(8.dp)); Text(uiState.phone.ifEmpty { "—" }) }
                             Spacer(modifier = Modifier.height(8.dp))
@@ -101,10 +103,10 @@ fun UserDetailScreen(
                 item {
                     Card(shape = MaterialTheme.shapes.large) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Recent Activity", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.recent_activity), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                             Spacer(modifier = Modifier.height(8.dp))
                             if (uiState.activities.isEmpty()) {
-                                Text("No recent activity", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(stringResource(R.string.no_recent_activity), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             } else {
                                 val items = uiState.activities.take(5)
                                 for (event in items) {
@@ -126,16 +128,16 @@ fun UserDetailScreen(
                 item {
                     Card(shape = MaterialTheme.shapes.large) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Orders (${uiState.orders.size})", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.orders_section_count, uiState.orders.size), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                             Spacer(modifier = Modifier.height(8.dp))
                             if (uiState.orders.isEmpty()) {
-                                Text("No orders", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(stringResource(R.string.no_orders), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             } else {
                                 val recentOrders = uiState.orders.take(3)
                                 for (order in recentOrders) {
                                     Row(modifier = Modifier.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                                         Column(modifier = Modifier.weight(1f)) {
-                                            Text("Order #${(order.id ?: "").takeLast(8)}", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
+                                            Text(stringResource(R.string.order_number, (order.id ?: "").takeLast(8)), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
                                             Text(order.createdAt ?: "", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                         }
                                         Text("TSh ${String.format("%.0f", order.totalAmount ?: 0.0)}", style = MaterialTheme.typography.bodySmall)

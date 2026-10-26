@@ -13,9 +13,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.smartsoko.customer.R
 import com.smartsoko.customer.data.model.Merchant
 import com.smartsoko.customer.data.model.Product
 import com.smartsoko.customer.ui.components.*
@@ -35,7 +37,7 @@ fun RestaurantMenuScreen(
                 title = { Text(restaurant.name) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -113,7 +115,7 @@ fun RestaurantMenuScreen(
                             )
                             Spacer(Modifier.width(12.dp))
                             Text(
-                                "Delivery tsh %.2f".format(restaurant.deliveryFee),
+                                stringResource(R.string.delivery_amount_tsh, "tsh %.2f".format(restaurant.deliveryFee)),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -128,7 +130,7 @@ fun RestaurantMenuScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "No items available",
+                        stringResource(R.string.no_items_available),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -223,7 +225,7 @@ fun MenuProductCard(product: Product, onClick: () -> Unit, onAddToCart: () -> Un
                     onClick = onAddToCart,
                     shape = SmartPill
                 ) {
-                    Text("Add")
+                    Text(stringResource(R.string.add))
                 }
             }
         }

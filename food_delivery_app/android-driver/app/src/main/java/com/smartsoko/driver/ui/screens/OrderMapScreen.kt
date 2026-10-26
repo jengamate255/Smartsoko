@@ -13,8 +13,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.smartsoko.driver.R
 import com.smartsoko.driver.data.model.Order
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,10 +30,10 @@ fun OrderMapScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Delivery Map") },
+                title = { Text(stringResource(R.string.delivery_map)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -60,7 +62,7 @@ fun OrderMapScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Deliver to",
+                        text = stringResource(R.string.deliver_to),
                         style = MaterialTheme.typography.labelLarge
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -71,7 +73,7 @@ fun OrderMapScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = order.deliveryAddress.ifBlank { "No address provided" },
+                            text = order.deliveryAddress.ifBlank { stringResource(R.string.no_address_provided) },
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -108,15 +110,15 @@ fun OrderMapScreen(
                 ) {
                     Icon(Icons.Default.Navigation, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Open in Maps")
+                    Text(stringResource(R.string.open_in_maps))
                 }
                 Text(
-                    text = "Coordinates: %.5f, %.5f".format(lat, lon),
+                    text = stringResource(R.string.coordinates_format, lat, lon),
                     style = MaterialTheme.typography.bodySmall
                 )
             } else {
                 Text(
-                    text = "This order has no GPS coordinates. Call the customer if you need directions.",
+                    text = stringResource(R.string.no_gps_coordinates),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error
                 )
@@ -137,7 +139,7 @@ fun OrderMapScreen(
                 ) {
                     Icon(Icons.Default.Phone, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Call customer")
+                    Text(stringResource(R.string.call_customer))
                 }
             }
         }

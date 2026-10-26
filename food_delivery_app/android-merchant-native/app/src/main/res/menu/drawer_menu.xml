@@ -4,27 +4,27 @@
         <item
             android:id="@+id/nav_drawer_orders"
             android:icon="@drawable/ic_orders"
-            android:title="Orders" />
+            android:title="@string/title_orders" />
         <item
             android:id="@+id/nav_drawer_products"
             android:icon="@drawable/ic_products"
-            android:title="Products" />
+            android:title="@string/title_products" />
         <item
             android:id="@+id/nav_drawer_analytics"
             android:icon="@drawable/ic_analytics"
-            android:title="Analytics" />
+            android:title="@string/title_analytics" />
         <item
             android:id="@+id/nav_drawer_settings"
             android:icon="@drawable/ic_settings"
-            android:title="Settings" />
+            android:title="@string/title_settings" />
     </group>
 
-    <item android:title="Account">
+    <item android:title="@string/label_account">
         <menu>
             <item
                 android:id="@+id/nav_drawer_logout"
                 android:icon="@drawable/ic_logout"
-                android:title="Logout" />
+                android:title="@string/action_logout" />
         </menu>
     </item>
 </menu>

@@ -62,14 +62,14 @@ public class LoginActivity extends AppCompatActivity {
         findViewById(R.id.tv_forgot_password).setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
             if (email.isEmpty()) {
-                etEmail.setError("Enter your email first");
+                etEmail.setError(getString(R.string.error_enter_email_first));
                 return;
             }
             firebaseAuth.sendPasswordResetEmail(email)
                     .addOnSuccessListener(aVoid ->
-                            Toast.makeText(this, "Password reset email sent", Toast.LENGTH_SHORT).show())
+                            Toast.makeText(this, R.string.msg_password_reset_sent, Toast.LENGTH_SHORT).show())
                     .addOnFailureListener(e ->
-                            Toast.makeText(this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                            Toast.makeText(this, getString(R.string.error_failed_prefix, e.getMessage()), Toast.LENGTH_SHORT).show());
         });
     }
 
@@ -78,13 +78,13 @@ public class LoginActivity extends AppCompatActivity {
         String password = etPassword.getText().toString().trim();
 
         if (email.isEmpty()) {
-            etEmail.setError("Email is required");
+            etEmail.setError(getString(R.string.error_email_required));
             etEmail.requestFocus();
             return;
         }
 
         if (password.isEmpty()) {
-            etPassword.setError("Password is required");
+            etPassword.setError(getString(R.string.error_password_required));
             etPassword.requestFocus();
             return;
         }
@@ -101,7 +101,7 @@ public class LoginActivity extends AppCompatActivity {
                             checkUserRole(user.getUid());
                         }
                     } else {
-                        tvError.setText("Authentication failed: " + task.getException().getMessage());
+                        tvError.setText(getString(R.string.error_auth_failed, task.getException().getMessage()));
                         tvError.setVisibility(View.VISIBLE);
                     }
                 });
@@ -119,18 +119,18 @@ public class LoginActivity extends AppCompatActivity {
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             finish();
                         } else {
-                            tvError.setText("Access denied. This account is not authorized as a merchant.");
+                            tvError.setText(R.string.error_access_denied_merchant);
                             tvError.setVisibility(View.VISIBLE);
                             firebaseAuth.signOut();
                         }
                     } else {
-                        tvError.setText("User profile not found.");
+                        tvError.setText(R.string.error_user_profile_not_found);
                         tvError.setVisibility(View.VISIBLE);
                     }
                 })
                 .addOnFailureListener(e -> {
                     showLoading(false);
-                    tvError.setText("Error checking role: " + e.getMessage());
+                    tvError.setText(getString(R.string.error_checking_role, e.getMessage()));
                     tvError.setVisibility(View.VISIBLE);
                 });
     }

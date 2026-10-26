@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/analytics_service.dart';
+import 'package:smartsoko/services/analytics_service.dart';
+import 'package:smartsoko/utils/app_localizations.dart';
 import 'discovery_screen.dart';
 import 'home_screen.dart';
 import 'orders_screen.dart';
 import 'profile_screen.dart';
-import '../smartmove/customer/ride_booking_screen.dart';
+import 'package:smartsoko/screens/smartmove/customer/ride_booking_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -81,31 +82,31 @@ class _MainScreenState extends State<MainScreen> {
             },
             indicatorColor: const Color(0xFFC1ECD4),
             labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-            destinations: const [
+            destinations: [
               NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home),
-                label: 'Home',
+                icon: const Icon(Icons.home_outlined),
+                selectedIcon: const Icon(Icons.home),
+                label: context.tr('home'),
               ),
               NavigationDestination(
-                icon: Icon(Icons.search_outlined),
-                selectedIcon: Icon(Icons.search),
-                label: 'Search',
+                icon: const Icon(Icons.search_outlined),
+                selectedIcon: const Icon(Icons.search),
+                label: context.tr('search'),
               ),
               NavigationDestination(
-                icon: Icon(Icons.directions_car_outlined),
-                selectedIcon: Icon(Icons.directions_car),
-                label: 'Ride',
+                icon: const Icon(Icons.directions_car_outlined),
+                selectedIcon: const Icon(Icons.directions_car),
+                label: context.tr('ride'),
               ),
               NavigationDestination(
-                icon: Icon(Icons.receipt_outlined),
-                selectedIcon: Icon(Icons.receipt),
-                label: 'Orders',
+                icon: const Icon(Icons.receipt_outlined),
+                selectedIcon: const Icon(Icons.receipt),
+                label: context.tr('orders'),
               ),
               NavigationDestination(
-                icon: Icon(Icons.person_outline),
-                selectedIcon: Icon(Icons.person),
-                label: 'Profile',
+                icon: const Icon(Icons.person_outline),
+                selectedIcon: const Icon(Icons.person),
+                label: context.tr('profile'),
               ),
             ],
           ),

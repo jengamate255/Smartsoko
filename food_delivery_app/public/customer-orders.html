@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="sw">
 <head>
   <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -15,57 +15,70 @@
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/stitch-site.css?v=5">
+  <script src="js/i18n.js?v=1" defer></script>
   <script src="js/stitch-site.js?v=2" defer></script>
   <link rel="stylesheet" href="css/site-uniform.css?v=1">
+  <link rel="stylesheet" href="/css/shopping-shell.css?v=1">
+  <script src="/js/shopping-shell.js?v=1" defer></script>
+  <link rel="stylesheet" href="/css/smart-shopping.css?v=1">
+  <script src="/js/smart-shopping-entry.js?v=1" defer></script>
+  <link rel="manifest" href="/manifest.json">
+
 </head>
 <body class="ss-uniform stitch-site ss-commerce ss-orders" data-stitch-page="customer-orders">
-  <header><nav aria-label="Main"><a href="/home">SmartSoko</a><a href="/discovery">Keep shopping</a><a href="/cart">Cart</a></nav></header>
-  <main><div class="intro"><div class="eyebrow">Your marketplace</div><h1>My orders</h1><p>Follow your deliveries and revisit your recent purchases.</p></div>
-    <section id="orderHistory" aria-label="Order history" aria-live="polite"><div class="state"><h2>Your orders, in one place.</h2><p>Sign in to see your purchases and delivery updates.</p><a class="button" href="/login?redirect=%2Fcustomer-orders">Sign in</a></div></section>
+  <header><nav aria-label="Main"><a href="/home">SmartSoko</a><a href="/discovery" data-i18n="nav.discover">Keep shopping</a><a href="/cart" data-i18n="nav.cart">Cart</a></nav></header>
+  <main><div class="intro"><div class="eyebrow" data-i18n="customerOrders.eyebrow">Your marketplace</div><h1 data-i18n="orders.title">My orders</h1><p data-i18n="customerOrders.subtitle">Follow your deliveries and revisit your recent purchases.</p></div>
+    <section id="orderHistory" aria-label="Order history" aria-live="polite"><div class="state"><h2 data-i18n="customerOrders.onePlace">Your orders, in one place.</h2><p data-i18n="customerOrders.signInPrompt">Sign in to see your purchases and delivery updates.</p><a class="button" href="/login?redirect=%2Fcustomer-orders" data-i18n="auth.signIn">Sign in</a></div></section>
   </main>
   <script>
     const historyContainer = document.getElementById('orderHistory');
     function orderNode(tag, text, className) { const node = document.createElement(tag); node.textContent = text; if (className) node.className = className; return node; }
     async function loadCustomerOrders(user) {
       if (!user) return;
-      historyContainer.replaceChildren(orderNode('p', 'Loading your orders…'));
+      historyContainer.replaceChildren(orderNode('p', t('common.loading', 'Loading your orders…')));
       try {
-        const svc = window.crossPlatformService;
-        if (!svc || !svc.isReady()) {
-          await new Promise(resolve => {
-            document.addEventListener('data-service-ready', resolve, { once: true });
-            setTimeout(resolve, 5000);
-          });
-        }
-        const orders = await svc.list('orders', {
-          where: [['customerId', '==', user.uid]],
-          orderBy: { field: 'createdAt', direction: 'desc' },
-          limit: 100
+        const token = await user.getIdToken();
+        const response = await fetch('/api/v1/orders', {
+          headers: { Authorization: 'Bearer ' + token },
+          cache: 'no-store',
+          signal: AbortSignal.timeout(15000)
         });
+        if (response.status === 401 || response.status === 403) throw new Error('Please sign in again to view your orders.');
+        if (!response.ok) throw new Error('Orders are temporarily unavailable. Please try again.');
+        const payload = await response.json();
+        if (!payload.success || !Array.isArray(payload.orders)) throw new Error('Orders are temporarily unavailable. Please try again.');
+        const orders = payload.orders;
         historyContainer.replaceChildren();
         if (!orders || !orders.length) {
-          const state = orderNode('div', '', 'state'); state.append(orderNode('h2', 'Your first order starts here.'), orderNode('p', 'Explore local shops and find something fresh.'));
+          const state = orderNode('div', '', 'state'); state.append(orderNode('h2', t('customerOrders.firstOrder', 'Your first order starts here.')), orderNode('p', t('customerOrders.exploreShops', 'Explore local shops and find something fresh.')));
           const link = orderNode('a', 'Explore the marketplace', 'button'); link.href = '/discovery'; state.append(link); historyContainer.append(state); return;
         }
         const sortedOrders = orders.sort((a,b) => Date.parse(b.createdAt || b.created_at || 0) - Date.parse(a.createdAt || a.created_at || 0));
         for (const order of sortedOrders) {
           const card = document.createElement('article'), top = orderNode('div', '', 'row');
-          top.append(orderNode('h2', 'Order #' + String(order.id).slice(-8)), orderNode('span', String(order.status || 'pending').replaceAll('_', ' '), 'status'));
-          const date = new Date(order.createdAt || order.created_at); const time = orderNode('time', isNaN(date) ? 'Order received' : date.toLocaleDateString(undefined, {day:'numeric',month:'long',year:'numeric'}));
+          top.append(orderNode('h2', t('track.orderNumber', 'Order #') + String(order.id).slice(-8)), orderNode('span', String(order.status || 'pending').replaceAll('_', ' '), 'status'));
+          const date = new Date(order.createdAt || order.created_at); const time = orderNode('time', isNaN(date) ? t('orders.orderReceived', 'Order received') : date.toLocaleDateString(undefined, {day:'numeric',month:'long',year:'numeric'}));
           const items = document.createElement('ul'); for (const item of order.items || []) items.append(orderNode('li', (item.quantity || 1) + ' × ' + (item.name || 'Product')));
-          const footer = orderNode('footer', '', 'row');footer.append(orderNode('span', 'TSh ' + Number(order.total || 0).toLocaleString(), 'total'));
-          const tracking = orderNode('a', 'View delivery updates');tracking.href = '/track-order?orderId=' + encodeURIComponent(order.id);footer.append(tracking);
+          const footer = orderNode('footer', '', 'row');footer.append(orderNode('span', t('common.tsh', 'TSh') + ' ' + Number(order.total || 0).toLocaleString(), 'total'));
+          const tracking = orderNode('a', t('orders.trackOrder', 'View delivery updates'));tracking.href = '/track-order?orderId=' + encodeURIComponent(order.id);footer.append(tracking);
           card.append(top, time, items, footer);historyContainer.append(card);
         }
       } catch (error) {
-        const state = orderNode('div', '', 'state');state.append(orderNode('h2', 'We could not load your orders.'), orderNode('p', error.message));const retry = orderNode('button', 'Try again');retry.type='button';retry.onclick=()=>loadCustomerOrders(user);state.append(retry);historyContainer.replaceChildren(state);
+        const state = orderNode('div', '', 'state');state.append(orderNode('h2', t('customerOrders.loadError', 'We could not load your orders.')), orderNode('p', t('customerOrders.tryAgainHint', 'Please try again. If the problem continues, sign in again.')));const retry = orderNode('button', t('common.retry', 'Try again'));retry.type='button';retry.onclick=()=>loadCustomerOrders(user);state.append(retry);historyContainer.replaceChildren(state);
       }
     }
   </script>
   <script type="module">
     import { auth } from '/config/firebase-config.js?v=5';
     import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
-    onAuthStateChanged(auth, user => { if (user) loadCustomerOrders(user); });
+    onAuthStateChanged(auth, user => {
+      if (user) loadCustomerOrders(user);
+      else {
+        const state = orderNode('div', '', 'state');
+        state.append(orderNode('h2', t('customerOrders.onePlace', 'Your orders, in one place.')), orderNode('p', t('customerOrders.signInPrompt', 'Sign in to see your purchases and delivery updates.')));
+        const link = orderNode('a', t('auth.signIn', 'Sign in'), 'button'); link.href = '/login?redirect=%2Fcustomer-orders'; state.append(link); historyContainer.replaceChildren(state);
+      }
+    });
   </script>
 </body>
 </html>

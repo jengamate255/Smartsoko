@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.smartsoko.admin.R
 
 @Composable
 fun LoginScreen(
@@ -40,13 +42,13 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text("SmartSoko", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-            Text("Admin Panel", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.admin_panel), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.height(48.dp))
 
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it; viewModel.clearError() },
-                label = { Text("Email") },
+                label = { Text(stringResource(R.string.email_hint)) },
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -57,7 +59,7 @@ fun LoginScreen(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it; viewModel.clearError() },
-                label = { Text("Password") },
+                label = { Text(stringResource(R.string.password_hint)) },
                 leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -80,7 +82,7 @@ fun LoginScreen(
                 onClick = { if (!uiState.isLoading) viewModel.login(email, password) },
                 modifier = Modifier.fillMaxWidth().height(50.dp)
             ) {
-                Text(if (uiState.isLoading) "Signing in..." else "Sign In", style = MaterialTheme.typography.titleSmall)
+                Text(if (uiState.isLoading) stringResource(R.string.logging_in) else stringResource(R.string.login_button), style = MaterialTheme.typography.titleSmall)
             }
         }
     }

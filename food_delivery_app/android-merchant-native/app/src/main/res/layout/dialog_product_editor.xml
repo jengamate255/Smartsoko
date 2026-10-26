@@ -13,7 +13,7 @@
             android:id="@+id/tv_dialog_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add product"
+            android:text="@string/action_add_product"
             android:textColor="@color/text_primary"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -23,7 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="Product name *"
+            android:hint="@string/hint_product_name"
             android:importantForAutofill="no"
             android:inputType="textCapWords"
             android:maxLines="1" />
@@ -40,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                android:hint="Price (TSh) *"
+                android:hint="@string/hint_price_tsh"
                 android:importantForAutofill="no"
                 android:inputType="numberDecimal"
                 android:maxLines="1" />
@@ -50,7 +50,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Stock qty"
+                android:hint="@string/hint_stock_qty"
                 android:importantForAutofill="no"
                 android:inputType="number"
                 android:maxLines="1" />
@@ -61,7 +61,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="Category"
+            android:hint="@string/hint_category"
             android:importantForAutofill="no"
             android:inputType="textCapWords"
             android:maxLines="1" />
@@ -71,7 +71,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="Image URL (optional)"
+            android:hint="@string/hint_image_url"
             android:importantForAutofill="no"
             android:inputType="textUri"
             android:maxLines="1" />
@@ -82,7 +82,7 @@
             android:layout_height="80dp"
             android:layout_marginTop="8dp"
             android:gravity="top"
-            android:hint="Description"
+            android:hint="@string/product_description"
             android:importantForAutofill="no"
             android:inputType="textMultiLine" />
 
@@ -92,7 +92,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:checked="true"
-            android:text="Available for sale" />
+            android:text="@string/label_available_for_sale" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -106,7 +106,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Delete"
+                android:text="@string/action_delete"
                 android:textColor="@color/error"
                 android:visibility="gone" />
 
@@ -116,7 +116,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
                 android:backgroundTint="@color/primary"
-                android:text="Save product"
+                android:text="@string/action_save_product"
                 android:textColor="@color/white" />
         </LinearLayout>
     </LinearLayout>

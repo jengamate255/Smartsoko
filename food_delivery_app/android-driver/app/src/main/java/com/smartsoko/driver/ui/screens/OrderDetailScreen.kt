@@ -17,10 +17,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import android.content.Intent
 import android.net.Uri
+import com.smartsoko.driver.R
 import com.smartsoko.driver.data.model.Order
 import com.smartsoko.driver.data.model.OrderItem
 import com.smartsoko.driver.data.model.OrderStatus
@@ -44,10 +46,10 @@ fun OrderDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Order #${order.id.take(8)}") },
+                title = { Text(stringResource(R.string.order_number, order.id.take(8))) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -75,7 +77,7 @@ fun OrderDetailScreen(
 
             item {
                 Text(
-                    "Order Items",
+                    stringResource(R.string.order_items),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 4.dp)
@@ -85,7 +87,7 @@ fun OrderDetailScreen(
             if (order.items.isEmpty()) {
                 item {
                     Text(
-                        "No item details available",
+                        stringResource(R.string.no_item_details),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -152,14 +154,14 @@ private fun DriverStatusHeader(order: Order, dateFormat: SimpleDateFormat) {
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = "Placed on ${dateFormat.format(order.createdAt)}",
+                text = stringResource(R.string.placed_on, dateFormat.format(order.createdAt)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             if (order.updatedAt != order.createdAt) {
                 Text(
-                    text = "Updated on ${dateFormat.format(order.updatedAt)}",
+                    text = stringResource(R.string.updated_on, dateFormat.format(order.updatedAt)),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -177,7 +179,7 @@ private fun DriverCustomerInfoCard(order: Order) {
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
-                "Customer Details",
+                stringResource(R.string.customer_details),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 12.dp)
@@ -201,7 +203,7 @@ private fun DriverCustomerInfoCard(order: Order) {
                 Column {
                     Text(order.customerName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                     Text(
-                        "Phone: ${order.customerPhone}",
+                        stringResource(R.string.phone_prefix, order.customerPhone),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -247,7 +249,7 @@ private fun DriverOrderItemCard(item: OrderItem) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                 Text(
-                    "Qty: ${item.quantity}",
+                    stringResource(R.string.qty_prefix, item.quantity),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -272,7 +274,7 @@ private fun DriverDeliveryInfoCard(order: Order) {
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
-                "Delivery Info",
+                stringResource(R.string.delivery_info),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 12.dp)
@@ -305,7 +307,7 @@ private fun DriverDeliveryInfoCard(order: Order) {
                 ) {
                     Icon(Icons.Default.Phone, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Call")
+                    Text(stringResource(R.string.call))
                 }
                 // Navigate to dropoff address
                 Button(
@@ -322,7 +324,7 @@ private fun DriverDeliveryInfoCard(order: Order) {
                 ) {
                     Icon(Icons.Default.Navigation, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Navigate")
+                    Text(stringResource(R.string.navigate))
                 }
             }
 
@@ -333,7 +335,7 @@ private fun DriverDeliveryInfoCard(order: Order) {
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                 ) {
                     Text(
-                        "Notes: ${order.deliveryNotes}",
+                        stringResource(R.string.notes_prefix, order.deliveryNotes),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(10.dp)
@@ -349,7 +351,7 @@ private fun DriverDeliveryInfoCard(order: Order) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Delivery Fee", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.delivery_fee), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text("tsh %.2f".format(order.deliveryFee), style = MaterialTheme.typography.bodySmall)
             }
 
@@ -359,7 +361,7 @@ private fun DriverDeliveryInfoCard(order: Order) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Total", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.total), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(order.formattedTotal, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
             }
         }
@@ -379,7 +381,7 @@ private fun DriverOrderActions(
         when (status) {
             OrderStatus.PENDING, OrderStatus.READY -> {
                 PrimaryButton(
-                    text = "Accept Order",
+                    text = stringResource(R.string.accept_order),
                     onClick = onAccept,
                     leadingIcon = {
                         Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(20.dp))
@@ -389,12 +391,12 @@ private fun DriverOrderActions(
                     onClick = onDecline,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Decline")
+                    Text(stringResource(R.string.decline))
                 }
             }
             OrderStatus.ACCEPTED, OrderStatus.PICKEDUP -> {
                 PrimaryButton(
-                    text = "Navigate to Customer",
+                    text = stringResource(R.string.navigate_to_customer),
                     onClick = onNavigate,
                     leadingIcon = {
                         Icon(Icons.Default.Navigation, contentDescription = null, modifier = Modifier.size(20.dp))
@@ -402,7 +404,7 @@ private fun DriverOrderActions(
                 )
                 if (status == OrderStatus.ACCEPTED) {
                     PrimaryButton(
-                        text = "Mark as Picked Up",
+                        text = stringResource(R.string.mark_as_picked_up),
                         onClick = onPickedUp,
                         leadingIcon = {
                             Icon(Icons.Default.LocalShipping, contentDescription = null, modifier = Modifier.size(20.dp))
@@ -412,11 +414,11 @@ private fun DriverOrderActions(
                         onClick = onDecline,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Can't take it — release order")
+                        Text(stringResource(R.string.release_order))
                     }
                 } else {
                     PrimaryButton(
-                        text = "Mark as Delivered",
+                        text = stringResource(R.string.mark_as_delivered),
                         onClick = onDelivered,
                         leadingIcon = {
                             Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(20.dp))

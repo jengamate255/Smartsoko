@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html class="light" lang="sw">
 <head>
+  <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>SmartSoko - Orders Management</title>
@@ -14,7 +15,8 @@
   <link rel="stylesheet" href="design-system.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script type="module" src="config/firebase-config.js?v=5"></script>
-  <script type="module" src="config/cross-platform-service.js?v=4"></script>
+  <script type="module" src="config/cross-platform-service.js?v=5"></script>
+  <script src="js/i18n.js?v=1" defer></script>
   <script src="nav-component.js?v=5" defer></script>
   <script src="auth-check.js?v=5" defer></script>
   <style>
@@ -85,8 +87,14 @@
     .order-amount { font-weight: 700; font-size: 14px; color: var(--stitch-on-surface); }
   </style>
   <meta name="theme-color" content="#1B4332">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/stitch-site.css?v=5">
+  <script src="js/stitch-site.js?v=2" defer></script>
+  <link rel="stylesheet" href="css/site-uniform.css?v=1">
+  <link rel="manifest" href="/manifest.json">
+
 </head>
-<body class="font-body-md text-on-background bg-[#F8FAF6] min-h-screen">
+<body class="ss-uniform stitch-site ss-commerce ss-orders font-body-md text-on-background bg-[#F8FAF6] min-h-screen" data-stitch-page="orders">
 
   <!-- Top Header -->
   <header class="shadow-sm sticky top-0 z-40">
@@ -112,15 +120,15 @@
 
     <!-- Greeting (Mobile) -->
     <div class="md:hidden mt-6 mb-2">
-      <h2 class="font-headline-md smart-greeting" style="color: var(--stitch-on-surface);">Welcome back, <span id="dsGreetingName">Merchant</span></h2>
-      <p class="font-body-sm mt-1" style="color: var(--stitch-on-surface-variant);">Monitor and process your orders.</p>
+      <h2 class="font-headline-md smart-greeting" style="color: var(--stitch-on-surface);"><span data-i18n="orders.welcomeBack">Welcome back,</span> <span id="dsGreetingName">Merchant</span></h2>
+      <p class="font-body-sm mt-1" style="color: var(--stitch-on-surface-variant);" data-i18n="orders.monitorSub">Monitor and process your orders.</p>
     </div>
 
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 py-6">
       <div class="hidden md:block">
-        <h1 class="font-headline-md text-headline-md font-bold text-primary">Orders Management</h1>
-        <p class="text-sm text-on-surface-variant mt-1">Monitor and process your marketplace orders</p>
+        <h1 class="font-headline-md text-headline-md font-bold text-primary" data-i18n="orders.managementTitle">Orders Management</h1>
+        <p class="text-sm text-on-surface-variant mt-1" data-i18n="orders.monitorSub">Monitor and process your marketplace orders</p>
       </div>
       <div class="flex items-center gap-3 flex-wrap">
         <button onclick="refreshOrders()" class="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm">
@@ -128,7 +136,7 @@
         </button>
         <button onclick="exportOrders()" class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 hover:opacity-90 transition-all shadow-md">
           <span class="material-symbols-outlined text-sm">download</span>
-          Export
+          <span data-i18n="common.export">Export</span>
         </button>
       </div>
     </div>
@@ -139,24 +147,24 @@
         <div class="flex-1 min-w-[200px]">
           <div class="relative">
             <span class="material-symbols-outlined text-gray-400 absolute left-3 top-1/2 -translate-y-1/2">search</span>
-            <input type="text" id="searchInput" placeholder="Search by order ID, customer..." aria-label="Search orders" class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-700/20 focus:border-green-700 outline-none transition-all" onkeyup="filterOrders()">
+            <input type="text" id="searchInput" placeholder="Search by order ID, customer..." aria-label="Search orders" data-i18n-placeholder="orders.searchPlaceholder" data-i18n-aria-label="orders.searchAria" class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-700/20 focus:border-green-700 outline-none transition-all" onkeyup="filterOrders()">
           </div>
         </div>
         <select id="statusFilter" class="border border-gray-200 rounded-lg px-4 py-2" onchange="filterOrders()">
-          <option value="">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="preparing">Preparing</option>
-          <option value="ready_for_delivery">Ready for Delivery</option>
-          <option value="dispatched">Dispatched</option>
-          <option value="delivered">Delivered</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="" data-i18n="orders.allStatus">All Status</option>
+          <option value="pending" data-i18n="common.pending">Pending</option>
+          <option value="confirmed" data-i18n="orders.confirmed">Confirmed</option>
+          <option value="preparing" data-i18n="orders.preparing">Preparing</option>
+          <option value="ready_for_delivery" data-i18n="orders.readyForDelivery">Ready for Delivery</option>
+          <option value="dispatched" data-i18n="orders.dispatched">Dispatched</option>
+          <option value="delivered" data-i18n="orders.delivered">Delivered</option>
+          <option value="cancelled" data-i18n="orders.cancelled">Cancelled</option>
         </select>
         <select id="dateFilter" class="border border-gray-200 rounded-lg px-4 py-2" onchange="filterOrders()">
-          <option value="all">All Time</option>
-          <option value="today">Today</option>
-          <option value="week">This Week</option>
-          <option value="month">This Month</option>
+          <option value="all" data-i18n="orders.allTime">All Time</option>
+          <option value="today" data-i18n="chat.today">Today</option>
+          <option value="week" data-i18n="orders.thisWeek">This Week</option>
+          <option value="month" data-i18n="orders.thisMonth">This Month</option>
         </select>
       </div>
     </div>
@@ -170,7 +178,7 @@
               <span class="material-symbols-outlined">receipt_long</span>
             </div>
           </div>
-          <p class="kpi-label">Total</p>
+          <p class="kpi-label" data-i18n="orders.total">Total</p>
           <p class="kpi-value" id="totalCount">0</p>
         </div>
         <div class="stitch-card kpi-card flex flex-col gap-1">
@@ -179,7 +187,7 @@
               <span class="material-symbols-outlined" style="color:#0EA5E9;">pending_actions</span>
             </div>
           </div>
-          <p class="kpi-label">Pending</p>
+          <p class="kpi-label" data-i18n="common.pending">Pending</p>
           <p class="kpi-value" id="pendingCount">0</p>
         </div>
         <div class="stitch-card kpi-card flex flex-col gap-1">
@@ -188,7 +196,7 @@
               <span class="material-symbols-outlined" style="color:#022D1D;">check_circle</span>
             </div>
           </div>
-          <p class="kpi-label">Confirmed</p>
+          <p class="kpi-label" data-i18n="orders.confirmed">Confirmed</p>
           <p class="kpi-value" id="confirmedCount">0</p>
         </div>
         <div class="stitch-card kpi-card flex flex-col gap-1">
@@ -197,7 +205,7 @@
               <span class="material-symbols-outlined" style="color:#00210C;">restaurant</span>
             </div>
           </div>
-          <p class="kpi-label">Preparing</p>
+          <p class="kpi-label" data-i18n="orders.preparing">Preparing</p>
           <p class="kpi-value" id="preparingCount">0</p>
         </div>
         <div class="stitch-card kpi-card flex flex-col gap-1">
@@ -206,7 +214,7 @@
               <span class="material-symbols-outlined">local_shipping</span>
             </div>
           </div>
-          <p class="kpi-label">Delivered</p>
+          <p class="kpi-label" data-i18n="orders.delivered">Delivered</p>
           <p class="kpi-value" id="deliveredCount">0</p>
         </div>
       </div>
@@ -219,14 +227,14 @@
           <table class="w-full">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Order ID</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Customer</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Seller</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Items</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Total</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase" data-i18n="orders.orderId">Order ID</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase" data-i18n="auth.customer">Customer</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase" data-i18n="common.seller">Seller</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase" data-i18n="orders.items">Items</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase" data-i18n="orders.total">Total</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase" data-i18n="orders.status">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase" data-i18n="orders.date">Date</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase" data-i18n="common.actions">Actions</th>
               </tr>
             </thead>
             <tbody id="ordersTableBody" class="divide-y divide-gray-100">
@@ -247,8 +255,8 @@
         <div class="px-6 py-4 border-t flex items-center justify-between">
           <p class="text-sm text-gray-500">Showing <span id="showingStart">0</span> to <span id="showingEnd">0</span> of <span id="showingTotal">0</span> orders</p>
           <div class="flex gap-2">
-            <button onclick="prevPage()" id="prevBtn" class="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Previous</button>
-            <button onclick="nextPage()" id="nextBtn" class="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Next</button>
+            <button onclick="prevPage()" id="prevBtn" class="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled data-i18n="common.previous">Previous</button>
+            <button onclick="nextPage()" id="nextBtn" class="px-3 py-1 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled data-i18n="common.next">Next</button>
           </div>
         </div>
       </div>
@@ -257,7 +265,7 @@
     <!-- Orders List (Mobile) -->
     <div class="md:hidden max-w-[1280px] mx-auto px-4 pb-6">
       <div id="ordersMobileList" class="space-y-2"></div>
-      <button id="mobileLoadMore" onclick="nextPage()" class="hidden w-full mt-3 py-3 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all">Load more</button>
+      <button id="mobileLoadMore" onclick="nextPage()" class="hidden w-full mt-3 py-3 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all" data-i18n="discovery.loadMore">Load more</button>
     </div>
 
     <!-- Order Detail Modal -->
@@ -265,7 +273,7 @@
       <div class="bg-white rounded-xl max-w-2xl w-full my-8">
         <div class="px-6 py-4 border-b flex items-center justify-between">
           <div>
-            <h2 class="text-lg font-bold">Order Details</h2>
+            <h2 class="text-lg font-bold" data-i18n="orders.orderDetails">Order Details</h2>
             <p class="text-sm text-gray-500">#<span id="modalOrderId"></span></p>
           </div>
           <button onclick="closeModal()" class="p-2 hover:bg-gray-100 rounded-lg"><span class="material-symbols-outlined">close</span></button>
@@ -274,16 +282,16 @@
         <div class="px-6 py-4 space-y-6 max-h-[60vh] overflow-y-auto">
           <!-- Status -->
           <div>
-            <h3 class="font-semibold mb-3">Order Status</h3>
+            <h3 class="font-semibold mb-3" data-i18n="orders.orderStatus">Order Status</h3>
             <div class="flex items-center gap-2 flex-wrap">
               <select id="modalStatusSelect" class="border border-gray-200 rounded-lg px-4 py-2" onchange="updateOrderStatus()">
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="preparing">Preparing</option>
-                <option value="ready_for_delivery">Ready for Delivery</option>
-                <option value="dispatched">Dispatched</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="pending" data-i18n="common.pending">Pending</option>
+                <option value="confirmed" data-i18n="orders.confirmed">Confirmed</option>
+                <option value="preparing" data-i18n="orders.preparing">Preparing</option>
+                <option value="ready_for_delivery" data-i18n="orders.readyForDelivery">Ready for Delivery</option>
+                <option value="dispatched" data-i18n="orders.dispatched">Dispatched</option>
+                <option value="delivered" data-i18n="orders.delivered">Delivered</option>
+                <option value="cancelled" data-i18n="orders.cancelled">Cancelled</option>
               </select>
             </div>
           </div>
@@ -293,7 +301,7 @@
             <div class="bg-gray-50 rounded-lg p-4">
               <h3 class="font-semibold mb-2 flex items-center gap-2">
                 <span class="material-symbols-outlined text-sm">person</span>
-                Customer
+                <span data-i18n="auth.customer">Customer</span>
               </h3>
               <p class="font-medium" id="modalCustomerName">-</p>
               <p class="text-sm text-gray-600" id="modalCustomerPhone">-</p>
@@ -302,7 +310,7 @@
             <div class="bg-gray-50 rounded-lg p-4">
               <h3 class="font-semibold mb-2 flex items-center gap-2">
                 <span class="material-symbols-outlined text-sm">store</span>
-                Seller
+                <span data-i18n="common.seller">Seller</span>
               </h3>
               <p class="font-medium" id="modalSellerName">-</p>
               <p class="text-sm text-gray-600" id="modalSellerPhone">-</p>
@@ -313,7 +321,7 @@
           <div class="bg-gray-50 rounded-lg p-4">
             <h3 class="font-semibold mb-2 flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">location_on</span>
-              Delivery Address
+              <span data-i18n="orders.deliveryAddress">Delivery Address</span>
             </h3>
             <p id="modalDeliveryAddress">-</p>
           </div>
@@ -322,7 +330,7 @@
           <div>
             <h3 class="font-semibold mb-3 flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">receipt_long</span>
-              Order Items
+              <span data-i18n="orders.orderItems">Order Items</span>
             </h3>
             <div id="modalItems" class="space-y-2"></div>
           </div>
@@ -330,15 +338,15 @@
           <!-- Order Summary -->
           <div class="border-t pt-4">
             <div class="flex justify-between text-sm mb-1">
-              <span class="text-gray-600">Subtotal</span>
+              <span class="text-gray-600" data-i18n="cart.subtotal">Subtotal</span>
               <span id="modalSubtotal">-</span>
             </div>
             <div class="flex justify-between text-sm mb-1">
-              <span class="text-gray-600">Delivery Fee</span>
+              <span class="text-gray-600" data-i18n="cart.deliveryFee">Delivery Fee</span>
               <span id="modalDeliveryFee">-</span>
             </div>
             <div class="flex justify-between text-lg font-bold pt-2 border-t">
-              <span>Total</span>
+              <span data-i18n="orders.total">Total</span>
               <span id="modalTotal">-</span>
             </div>
           </div>
@@ -347,17 +355,17 @@
           <div>
             <h3 class="font-semibold mb-3 flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">schedule</span>
-              Timeline
+              <span data-i18n="orders.timeline">Timeline</span>
             </h3>
             <div id="modalTimeline" class="space-y-2 text-sm text-gray-600"></div>
           </div>
         </div>
 
         <div class="px-6 py-4 border-t flex gap-3 justify-end">
-          <button onclick="closeModal()" class="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">Close</button>
+          <button onclick="closeModal()" class="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50" data-i18n="common.close">Close</button>
           <button onclick="printOrder()" class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 flex items-center gap-2">
             <span class="material-symbols-outlined text-sm">print</span>
-            Print
+            <span data-i18n="common.print">Print</span>
           </button>
         </div>
       </div>
@@ -366,10 +374,10 @@
 
   <!-- Bottom Nav (Mobile) -->
   <nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe border-t border-gray-200 bg-white md:hidden z-50">
-    <a href="/home" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1"><span class="material-symbols-outlined">home</span><span class="text-[10px] font-semibold">Home</span></a>
-    <a href="/discovery" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1"><span class="material-symbols-outlined">search</span><span class="text-[10px] font-semibold">Browse</span></a>
-    <a href="/cart" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1"><span class="material-symbols-outlined">shopping_cart</span><span class="text-[10px] font-semibold">Cart</span></a>
-    <a href="/merchant" class="flex flex-col items-center justify-center bg-green-100 text-green-700 rounded-full px-3 py-1"><span class="material-symbols-outlined filled-icon">store</span><span class="text-[10px] font-semibold">Dashboard</span></a>
+    <a href="/home" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1"><span class="material-symbols-outlined">home</span><span class="text-[10px] font-semibold" data-i18n="nav.home">Home</span></a>
+    <a href="/discovery" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1"><span class="material-symbols-outlined">search</span><span class="text-[10px] font-semibold" data-i18n="home.browse">Browse</span></a>
+    <a href="/cart" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1"><span class="material-symbols-outlined">shopping_cart</span><span class="text-[10px] font-semibold" data-i18n="nav.cart">Cart</span></a>
+    <a href="/merchant" class="flex flex-col items-center justify-center bg-green-100 text-green-700 rounded-full px-3 py-1"><span class="material-symbols-outlined filled-icon">store</span><span class="text-[10px] font-semibold" data-i18n="nav.dashboard">Dashboard</span></a>
   </nav>
 
   <script>
@@ -385,6 +393,21 @@
       'delivered': 'pill-outline',
       'cancelled': 'pill-error'
     };
+
+    const statusLabels = {
+      'pending': ['common.pending', 'Pending'],
+      'confirmed': ['orders.confirmed', 'Confirmed'],
+      'preparing': ['orders.preparing', 'Preparing'],
+      'ready_for_delivery': ['orders.readyForDelivery', 'Ready for Delivery'],
+      'dispatched': ['orders.dispatched', 'Dispatched'],
+      'delivered': ['orders.delivered', 'Delivered'],
+      'cancelled': ['orders.cancelled', 'Cancelled']
+    };
+
+    function statusLabel(status) {
+      const key = statusLabels[status];
+      return key ? t(key[0], key[1]) : (status || 'pending');
+    }
 
     function escapeHtml(str) {
       return String(str || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -421,8 +444,8 @@
         renderOrders();
       } catch (error) {
         console.error('Error:', error);
-        tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-12 text-center text-red-500">Error loading orders</td></tr>';
-        if (mobileList) mobileList.innerHTML = '<div class="py-12 text-center text-red-500">Error loading orders</div>';
+        tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-12 text-center text-red-500">' + t('orders.loadError', 'Error loading orders') + '</td></tr>';
+        if (mobileList) mobileList.innerHTML = '<div class="py-12 text-center text-red-500">' + t('orders.loadError', 'Error loading orders') + '</div>';
       }
     }
 
@@ -480,9 +503,11 @@
       const loadMore = document.getElementById('mobileLoadMore');
       if (loadMore) loadMore.classList.add('hidden');
       if (pageOrders.length === 0) {
-        const emptyDesktop = '<tr><td colspan="8"><div class="empty-state"><span class="material-symbols-outlined empty-state-icon">receipt_long</span><div class="empty-state-title">' + (filteredOrders.length === 0 && allOrders.length === 0 ? 'No orders yet' : 'No matching orders') + '</div><div class="empty-state-message">' + (filteredOrders.length === 0 && allOrders.length === 0 ? 'Orders from customers will appear here once they start placing them.' : 'Try adjusting your search or filter criteria.') + '</div></div></td></tr>';
+        const emptyTitle = filteredOrders.length === 0 && allOrders.length === 0 ? t('orders.noOrders', 'No orders yet') : t('discovery.noResults', 'No matching orders');
+        const emptyMessage = filteredOrders.length === 0 && allOrders.length === 0 ? t('orders.emptyHint', 'Orders from customers will appear here once they start placing them.') : t('home.tryAdjusting', 'Try adjusting your search or filter criteria.');
+        const emptyDesktop = '<tr><td colspan="8"><div class="empty-state"><span class="material-symbols-outlined empty-state-icon">receipt_long</span><div class="empty-state-title">' + emptyTitle + '</div><div class="empty-state-message">' + emptyMessage + '</div></div></td></tr>';
         tbody.innerHTML = emptyDesktop;
-        if (mobileList) mobileList.innerHTML = '<div class="py-12 text-center"><span class="material-symbols-outlined" style="font-size:40px;color:var(--stitch-outline)">receipt_long</span><div class="mt-2 font-semibold" style="color:var(--stitch-on-surface)">' + (filteredOrders.length === 0 && allOrders.length === 0 ? 'No orders yet' : 'No matching orders') + '</div><div class="mt-1 text-sm" style="color:var(--stitch-on-surface-variant)">' + (filteredOrders.length === 0 && allOrders.length === 0 ? 'Orders from customers will appear here once they start placing them.' : 'Try adjusting your search or filter criteria.') + '</div></div>';
+        if (mobileList) mobileList.innerHTML = '<div class="py-12 text-center"><span class="material-symbols-outlined" style="font-size:40px;color:var(--stitch-outline)">receipt_long</span><div class="mt-2 font-semibold" style="color:var(--stitch-on-surface)">' + emptyTitle + '</div><div class="mt-1 text-sm" style="color:var(--stitch-on-surface-variant)">' + emptyMessage + '</div></div>';
       } else {
         tbody.innerHTML = pageOrders.map(order => {
           const statusClass = statusPills[order.status] || 'pill-outline';
@@ -496,19 +521,19 @@
                 <p class="text-sm text-gray-500">${escapeHtml(order.customerPhone || '')}</p>
               </td>
               <td class="px-6 py-4">${escapeHtml(order.sellerName || 'N/A')}</td>
-              <td class="px-6 py-4">${items} items</td>
+              <td class="px-6 py-4">${items} ${t('home.itemsCount', 'items')}</td>
               <td class="px-6 py-4 font-semibold">TSh ${(order.total || 0).toLocaleString()}</td>
-              <td class="px-6 py-4"><span class="pill ${statusClass}">${escapeHtml(order.status || 'pending')}</span></td>
+              <td class="px-6 py-4"><span class="pill ${statusClass}">${escapeHtml(statusLabel(order.status))}</span></td>
               <td class="px-6 py-4 text-gray-600 text-sm">${escapeHtml(date)}</td>
               <td class="px-6 py-4">
-                <button onclick="openOrderModal('${order.id}')" class="text-green-700 hover:underline text-sm">View Details</button>
+                <button onclick="openOrderModal('${order.id}')" class="text-green-700 hover:underline text-sm">${t('common.viewDetails', 'View Details')}</button>
               </td>
             </tr>`;
         }).join('');
 
         if (mobileList) {
           mobileList.innerHTML = pageOrders.map(order => {
-            const customerName = order.customerName || 'Customer';
+            const customerName = order.customerName || t('auth.customer', 'Customer');
             const initials = customerName.split(' ').map(w => w && w[0] ? w[0] : '').join('').slice(0, 2).toUpperCase() || 'CU';
             return `
               <div class="order-item" onclick="openOrderModal('${order.id}')">
@@ -520,7 +545,7 @@
                       <span class="order-id">#${escapeHtml(String(order.id).slice(-6))}</span>
                     </div>
                     <div class="flex items-center justify-between gap-2 mt-1.5">
-                      <span class="pill ${statusPills[order.status] || 'pill-outline'}">${escapeHtml(order.status || 'pending')}</span>
+                      <span class="pill ${statusPills[order.status] || 'pill-outline'}">${escapeHtml(statusLabel(order.status))}</span>
                       <span class="order-amount">TSh ${(order.total || 0).toLocaleString()}</span>
                     </div>
                   </div>
@@ -558,12 +583,12 @@
       const itemsHtml = (order.items || []).map(item => `
         <div class="flex justify-between items-center py-2 border-b last:border-0">
           <div>
-            <p class="font-medium">${item.name || 'Item'}</p>
-            <p class="text-sm text-gray-500">Qty: ${item.quantity || 1}</p>
+            <p class="font-medium">${item.name || t('cart.item', 'Item')}</p>
+            <p class="text-sm text-gray-500">${t('common.qty', 'Qty:')} ${item.quantity || 1}</p>
           </div>
           <p class="font-semibold">TSh ${(item.price * (item.quantity || 1) || 0).toLocaleString()}</p>
         </div>
-      `).join('') || '<p class="text-gray-500">No items</p>';
+      `).join('') || `<p class="text-gray-500">${t('track.noItems', 'No items')}</p>`;
       document.getElementById('modalItems').innerHTML = itemsHtml;
 
       const subtotal = order.subtotal || order.total || 0;
@@ -575,18 +600,18 @@
 
       const timeline = [];
       const toDate = v => v ? (v.toDate ? v.toDate() : new Date(v)) : null;
-      if (order.createdAt) timeline.push({ date: toDate(order.createdAt), text: 'Order placed' });
-      if (order.confirmedAt) timeline.push({ date: toDate(order.confirmedAt), text: 'Order confirmed' });
-      if (order.preparingAt) timeline.push({ date: toDate(order.preparingAt), text: 'Preparing' });
-      if (order.dispatchedAt) timeline.push({ date: toDate(order.dispatchedAt), text: 'Dispatched' });
-      if (order.deliveredAt) timeline.push({ date: toDate(order.deliveredAt), text: 'Delivered' });
+      if (order.createdAt) timeline.push({ date: toDate(order.createdAt), text: t('orders.orderPlaced', 'Order placed') });
+      if (order.confirmedAt) timeline.push({ date: toDate(order.confirmedAt), text: t('orders.confirmed', 'Order confirmed') });
+      if (order.preparingAt) timeline.push({ date: toDate(order.preparingAt), text: t('orders.preparing', 'Preparing') });
+      if (order.dispatchedAt) timeline.push({ date: toDate(order.dispatchedAt), text: t('orders.dispatched', 'Dispatched') });
+      if (order.deliveredAt) timeline.push({ date: toDate(order.deliveredAt), text: t('orders.delivered', 'Delivered') });
 
       const timelineHtml = timeline.length ? timeline.map(t => `
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 bg-green-700 rounded-full"></span>
           <span>${t.text} - ${t.date.toLocaleString()}</span>
         </div>
-      `).join('') : '<p class="text-gray-500">No timeline</p>';
+      `).join('') : '<p class="text-gray-500">' + t('orders.noTimeline', 'No timeline') + '</p>';
       document.getElementById('modalTimeline').innerHTML = timelineHtml;
 
       document.getElementById('orderModal').classList.remove('hidden');
@@ -603,19 +628,19 @@
       try {
         const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
         await updateDoc(doc(db, 'orders', currentOrderId), { status: newStatus, updatedAt: new Date() });
-        showNotification('Order status updated to ' + newStatus);
+        showNotification(t('track.statusUpdated', 'Order status updated to') + ' ' + statusLabel(newStatus));
         loadOrders();
       } catch (error) {
         console.error('Error:', error);
-        showNotification('Failed to update status');
+        showNotification(t('orders.statusUpdateFailed', 'Failed to update status'));
       }
     }
 
     function printOrder() { window.print(); }
 
     function exportOrders() {
-      if (!filteredOrders.length) { showNotification('No orders to export'); return; }
-      const headers = ['Order ID', 'Customer', 'Phone', 'Seller', 'Items', 'Total', 'Status', 'Date'];
+      if (!filteredOrders.length) { showNotification(t('orders.nothingToExport', 'No orders to export')); return; }
+      const headers = [t('orders.orderId', 'Order ID'), t('auth.customer', 'Customer'), t('common.phone', 'Phone'), t('common.seller', 'Seller'), t('orders.items', 'Items'), t('orders.total', 'Total'), t('orders.status', 'Status'), t('orders.date', 'Date')];
       const data = filteredOrders.map(o => [
         o.id, o.customerName || '', o.customerPhone || '', o.sellerName || '',
         o.items ? o.items.length : 0, o.total || 0, o.status || 'pending',

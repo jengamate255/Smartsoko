@@ -14,6 +14,7 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.IBinder
 import androidx.core.content.ContextCompat
+import com.smartsoko.driver.R
 import com.smartsoko.driver.data.repository.DriverRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -51,14 +52,14 @@ class DriverLocationService : Service(), LocationListener {
             manager.createNotificationChannel(
                 NotificationChannel(
                     CHANNEL_ID,
-                    "Delivery tracking",
+                    getString(R.string.notification_channel_location),
                     NotificationManager.IMPORTANCE_LOW
                 )
             )
         }
         val notification = Notification.Builder(this, CHANNEL_ID)
             .setContentTitle("SmartSoko Driver")
-            .setContentText("Sharing your location while online")
+            .setContentText(getString(R.string.location_notification_text))
             .setSmallIcon(android.R.drawable.ic_menu_mylocation)
             .setOngoing(true)
             .build()

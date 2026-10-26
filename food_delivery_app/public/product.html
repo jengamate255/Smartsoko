@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html class="light" lang="sw">
 <head>
   <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"/>
@@ -17,8 +17,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   <script type="module" src="config/firebase-config.js?v=5"></script>
-  <script type="module" src="config/cross-platform-service.js?v=4"></script>
+  <script type="module" src="config/cross-platform-service.js?v=5"></script>
   <script src="js/location-picker.js?v=5" defer></script>
+  <script src="js/i18n.js?v=1" defer></script>
   <script src="nav-component.js?v=6" defer></script>
 <style>
     .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display: inline-block; line-height: 1; vertical-align: middle; }
@@ -571,6 +572,12 @@
   <link rel="stylesheet" href="css/site-uniform.css?v=1">
   <link rel="stylesheet" href="css/shopping-experience.css?v=1">
   <script src="js/shopping-experience.js?v=1" defer></script>
+  <link rel="stylesheet" href="/css/shopping-shell.css?v=1">
+  <script src="/js/shopping-shell.js?v=1" defer></script>
+  <link rel="stylesheet" href="/css/smart-shopping.css?v=1">
+  <script src="/js/smart-shopping-entry.js?v=1" defer></script>
+  <link rel="manifest" href="/manifest.json">
+
 </head>
 <body class="ss-uniform stitch-site ss-commerce ss-product font-body-md text-on-surface bg-[#F8FAF6] min-h-screen" data-stitch-page="product">
 
@@ -595,19 +602,19 @@
           <a href="/discovery" class="text-on-surface-variant hover:text-primary transition-colors text-sm font-semibold">Marketplace</a>
           <a href="/home" class="text-on-surface-variant hover:text-primary transition-colors text-sm font-semibold">SME Directory</a>
           <a href="/home" class="text-on-surface-variant hover:text-primary transition-colors text-sm font-semibold">Trade Hub</a>
-          <a href="/home" class="text-on-surface-variant hover:text-primary transition-colors text-sm font-semibold">Support</a>
+          <a href="/home" class="text-on-surface-variant hover:text-primary transition-colors text-sm font-semibold" data-i18n="product.support">Support</a>
         </div>
         <button type="button" data-location-picker class="hidden md:flex items-center gap-1 text-on-surface-variant text-sm cursor-pointer hover:text-primary transition-colors bg-transparent border-0 p-0 text-left">
           <span class="material-symbols-outlined text-sm">location_on</span>
           <div>
-            <div class="text-xs opacity-70">Deliver to</div>
+            <div class="text-xs opacity-70" data-i18n="header.deliverTo">Deliver to</div>
             <div class="font-semibold" data-location-value>Dar es Salaam</div>
           </div>
         </button>
       </div>
       <div class="hidden lg:flex flex-1 justify-center">
         <div class="relative">
-          <input id="searchInputDesktop" type="text" placeholder="Search products, SMEs..." aria-label="Search products" class="w-64 bg-surface-container-low border-none rounded-full pl-4 pr-10 py-2.5 text-sm focus:ring-2 focus:ring-primary transition-all outline-none" oninput="syncSearch(this.value)"/>
+          <input id="searchInputDesktop" type="text" placeholder="Search products, SMEs..." data-i18n-placeholder="header.searchProductsSellers" aria-label="Search products" class="w-64 bg-surface-container-low border-none rounded-full pl-4 pr-10 py-2.5 text-sm focus:ring-2 focus:ring-primary transition-all outline-none" oninput="syncSearch(this.value)"/>
           <span class="material-symbols-outlined absolute right-3 top-2.5 text-on-surface-variant text-lg">search</span>
         </div>
       </div>
@@ -651,8 +658,8 @@
         <span class="material-symbols-outlined text-on-primary">auto_awesome</span>
       </div>
       <div class="flex-1 overflow-hidden">
-        <p class="text-[10px] font-bold text-primary uppercase tracking-widest">Smart Assistant</p>
-        <p class="text-on-surface-variant text-sm truncate">"Ask me anything about this product."</p>
+        <p class="text-[10px] font-bold text-primary uppercase tracking-widest" data-i18n="product.smartAssistant">Smart Assistant</p>
+        <p class="text-on-surface-variant text-sm truncate" data-i18n="product.askAnything">"Ask me anything about this product."</p>
       </div>
       <span class="material-symbols-outlined text-outline">chevron_right</span>
     </div>
@@ -662,9 +669,9 @@
 
     <!-- Breadcrumbs -->
     <nav class="ss-breadcrumb flex items-center gap-2 text-body-sm text-on-surface-variant mb-6 overflow-hidden min-w-0" aria-label="Breadcrumb">
-      <a class="hover:text-primary shrink-0" href="/home">Home</a>
+      <a class="hover:text-primary shrink-0" href="/home" data-i18n="nav.home">Home</a>
       <span class="material-symbols-outlined text-xs shrink-0">chevron_right</span>
-      <a class="hover:text-primary shrink-0" href="/discovery">Discover</a>
+      <a class="hover:text-primary shrink-0" href="/discovery" data-i18n="nav.discover">Discover</a>
       <span class="material-symbols-outlined text-xs shrink-0">chevron_right</span>
       <span class="font-medium text-on-surface truncate min-w-0" id="breadcrumbName" aria-current="page">Product</span>
     </nav>
@@ -681,10 +688,10 @@
           </button>
           <span id="discountBadge" class="absolute top-3 left-3 hidden bg-error text-white text-[12px] font-bold px-2.5 py-1 rounded-full uppercase tracking-tighter z-10"></span>
           <div class="absolute bottom-3 right-3 flex items-center gap-2 z-10">
-            <button id="shareBtn" onclick="shareProduct()" class="w-10 h-10 rounded-full bg-white/85 backdrop-blur-md flex items-center justify-center shadow-md active:scale-95 transition-transform" aria-label="Share product" title="Share product">
+            <button id="shareBtn" onclick="shareProduct()" class="w-10 h-10 rounded-full bg-white/85 backdrop-blur-md flex items-center justify-center shadow-md active:scale-95 transition-transform" aria-label="Share product" title="Share product" data-i18n-aria-label="product.share" data-i18n-title="product.share">
               <span class="material-symbols-outlined text-on-surface text-lg">share</span>
             </button>
-            <button id="wishlistBtn" onclick="toggleWishlist()" class="w-10 h-10 rounded-full bg-white/85 backdrop-blur-md flex items-center justify-center shadow-md active:scale-95 transition-transform" aria-label="Add to wishlist" title="Add to wishlist">
+            <button id="wishlistBtn" onclick="toggleWishlist()" class="w-10 h-10 rounded-full bg-white/85 backdrop-blur-md flex items-center justify-center shadow-md active:scale-95 transition-transform" aria-label="Add to wishlist" title="Add to wishlist" data-i18n-aria-label="product.wishlist" data-i18n-title="product.wishlist">
               <span class="material-symbols-outlined text-error text-lg" id="wishlistIcon">favorite</span>
             </button>
           </div>
@@ -717,7 +724,7 @@
         <div class="space-y-4">
           <div class="flex items-start justify-between gap-3">
             <span id="productCategory" class="bg-secondary text-on-secondary px-3 py-1.5 rounded-full text-[12px] font-bold tracking-widest uppercase w-fit"><span class="skeleton-text-sm"></span></span>
-            <button id="wishlistBtnTitle" onclick="toggleWishlist()" class="hidden lg:flex w-10 h-10 rounded-full border border-outline-variant bg-white items-center justify-center shadow-sm active:scale-90 transition-transform flex-shrink-0" aria-label="Add to wishlist">
+            <button id="wishlistBtnTitle" onclick="toggleWishlist()" class="hidden lg:flex w-10 h-10 rounded-full border border-outline-variant bg-white items-center justify-center shadow-sm active:scale-90 transition-transform flex-shrink-0" aria-label="Add to wishlist" data-i18n-aria-label="product.wishlist">
               <span class="material-symbols-outlined text-error text-lg" id="wishlistIconTitle">favorite</span>
             </button>
           </div>
@@ -730,10 +737,10 @@
           <span id="productPrice" class="font-headline text-2xl md:text-3xl lg:text-4xl font-extrabold text-primary"><span class="skeleton-heading"></span></span>
           <span id="productOldPrice" class="hidden text-outline text-sm line-through font-semibold"></span>
           <p id="productUnit" class="text-on-surface-variant text-sm font-medium">per unit</p>
-          <span id="stockPill" class="hidden bg-secondary text-on-secondary px-2 py-0.5 rounded text-[12px] font-bold uppercase tracking-wide">In Stock</span>
+          <span id="stockPill" class="hidden bg-secondary text-on-secondary px-2 py-0.5 rounded text-[12px] font-bold uppercase tracking-wide" data-i18n="product.inStock">In Stock</span>
         </div>
 
-        <p class="shopping-delivery-note">Delivery fees are confirmed at checkout after you select an address.</p>
+        <p class="shopping-delivery-note" data-i18n="product.feesAtCheckout">Delivery fees are confirmed at checkout after you select an address.</p>
         <!-- Rating & Stats -->
         <div class="sp-rating-row flex items-center gap-3 mt-4 flex-wrap">
            <button type="button" onclick="switchDetailTab('reviews')" class="flex items-center gap-1 bg-surface-container-low border border-outline-variant/30 px-3 py-1.5 rounded-full hover:border-primary transition-colors" aria-label="View customer reviews">
@@ -755,7 +762,7 @@
         <!-- Quick Info Grid -->
         <div class="sp-legacy-facts grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
           <div class="bg-surface-container-lowest border border-outline-variant/30 p-3 md:p-4 rounded-xl flex flex-col items-center justify-center text-center shadow-sm">
-            <span class="text-on-surface-variant text-[12px] md:text-[12px] font-bold uppercase tracking-wider">Delivery</span>
+            <span class="text-on-surface-variant text-[12px] md:text-[12px] font-bold uppercase tracking-wider" data-i18n="product.delivery">Delivery</span>
             <span class="font-headline text-sm md:text-base font-bold text-primary" id="deliveryInfo">25-35m</span>
           </div>
           <div class="bg-primary/10 p-3 md:p-4 rounded-xl flex flex-col items-center justify-center text-center">
@@ -763,31 +770,31 @@
             <span class="font-headline text-sm md:text-base font-bold text-primary" id="qualityInfo">Fresh</span>
           </div>
           <div class="bg-surface-container-lowest border border-outline-variant/30 p-3 md:p-4 rounded-xl flex flex-col items-center justify-center text-center shadow-sm">
-            <span class="text-on-surface-variant text-[12px] md:text-[12px] font-bold uppercase tracking-wider">Returns</span>
+            <span class="text-on-surface-variant text-[12px] md:text-[12px] font-bold uppercase tracking-wider" data-i18n="product.returns">Returns</span>
             <span class="font-headline text-sm md:text-base font-bold text-primary" id="returnsInfo">Easy</span>
           </div>
           <div class="bg-surface-container-lowest border border-outline-variant/30 p-3 md:p-4 rounded-xl flex flex-col items-center justify-center text-center shadow-sm">
-            <span class="text-on-surface-variant text-[12px] md:text-[12px] font-bold uppercase tracking-wider">Payment</span>
+            <span class="text-on-surface-variant text-[12px] md:text-[12px] font-bold uppercase tracking-wider" data-i18n="product.payment">Payment</span>
             <span class="font-headline text-sm md:text-base font-bold text-primary" id="paymentInfo">COD</span>
           </div>
         </div>
         <div class="sp-legacy-trust flex flex-wrap gap-2 mt-3 pt-3 border-t border-outline-variant/30">
           <span class="flex items-center gap-1.5 text-xs bg-secondary-container text-on-secondary-container px-3 py-1.5 rounded-full">
             <span class="material-symbols-outlined text-on-secondary-container text-[11px] filled-icon">verified</span>
-            <span class="font-semibold">Verified Seller</span>
+            <span class="font-semibold" data-i18n="product.verifiedSeller">Verified Seller</span>
           </span>
           <span class="flex items-center gap-1.5 text-xs bg-secondary-container text-on-secondary-container px-3 py-1.5 rounded-full">
             <span class="material-symbols-outlined text-on-secondary-container text-[11px]">local_shipping</span>
-            <span class="font-semibold">Free Delivery</span>
+            <span class="font-semibold" data-i18n="home.freeDelivery">Free Delivery</span>
           </span>
           <span class="flex items-center gap-1.5 text-xs bg-secondary-container text-on-secondary-container px-3 py-1.5 rounded-full">
             <span class="material-symbols-outlined text-on-secondary-container text-[11px]">shield</span>
-            <span class="font-semibold">Secure Pay</span>
+            <span class="font-semibold" data-i18n="product.securePay">Secure Pay</span>
           </span>
         </div>
         <div class="hidden lg:flex flex-col gap-3 mt-6">
-          <button onclick="buyNow()" class="w-full py-4 rounded-xl font-headline font-bold bg-primary hover:bg-primary-dark text-on-primary transition-colors shadow-lg shadow-primary/20">Buy Now</button>
-          <button onclick="addToCart()" class="w-full py-4 rounded-xl font-headline font-bold border-2 border-primary text-primary hover:bg-primary/5 transition-colors">Add to Cart</button>
+          <button onclick="buyNow()" class="w-full py-4 rounded-xl font-headline font-bold bg-primary hover:bg-primary-dark text-on-primary transition-colors shadow-lg shadow-primary/20" data-i18n="product.buyNow">Buy Now</button>
+          <button onclick="addToCart()" class="w-full py-4 rounded-xl font-headline font-bold border-2 border-primary text-primary hover:bg-primary/5 transition-colors" data-i18n="product.addToCart">Add to Cart</button>
         </div>
       </div>
     </div>
@@ -795,13 +802,13 @@
     <!-- Detail Tabs -->
     <div class="flex border-b border-outline-variant mt-8 overflow-x-auto hide-scrollbar px-4 md:px-0" id="detailTabs">
       <button id="tabBtn-description" onclick="switchDetailTab('description')" class="px-5 py-3.5 font-headline font-bold text-sm whitespace-nowrap border-b-2 border-primary text-primary transition-colors flex items-center gap-1.5">
-        <span class="material-symbols-outlined text-lg">description</span> Description
+        <span class="material-symbols-outlined text-lg">description</span> <span data-i18n="product.description">Description</span>
       </button>
       <button id="tabBtn-shipping" onclick="switchDetailTab('shipping')" class="px-5 py-3.5 font-headline font-bold text-sm whitespace-nowrap border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1.5">
-        <span class="material-symbols-outlined text-lg">local_shipping</span> Shipping & Returns
+        <span class="material-symbols-outlined text-lg">local_shipping</span> <span data-i18n="product.shippingReturns">Shipping &amp; Returns</span>
       </button>
       <button id="tabBtn-reviews" onclick="switchDetailTab('reviews')" class="px-5 py-3.5 font-headline font-bold text-sm whitespace-nowrap border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1.5">
-        <span class="material-symbols-outlined text-lg">rate_review</span> Customer Reviews <span class="text-xs font-semibold text-primary" id="tabReviewCount">0</span>
+        <span class="material-symbols-outlined text-lg">rate_review</span> <span data-i18n="product.reviews">Customer Reviews</span> <span class="text-xs font-semibold text-primary" id="tabReviewCount">0</span>
       </button>
     </div>
 
@@ -811,7 +818,7 @@
       <div class="sp-description-copy space-y-3">
         <h2 class="font-headline text-lg md:text-xl font-bold text-on-surface flex items-center gap-2">
           <span class="material-symbols-outlined text-primary text-xl md:text-2xl">description</span>
-          Description
+          <span data-i18n="product.description">Description</span>
           <span id="descCategoryChip" class="hidden ml-1 bg-secondary-container text-on-secondary-container text-[11px] font-bold px-2.5 py-1 rounded-full tracking-wide uppercase"></span>
         </h2>
         <div class="bg-white p-4 md:p-5 lg:p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -842,7 +849,7 @@
 
       <!-- More from this Seller -->
       <div class="space-y-4 hidden" id="moreProductsSection">
-        <h2 class="font-headline font-bold text-lg text-on-surface">More from this Seller</h2>
+        <h2 class="font-headline font-bold text-lg text-on-surface" data-i18n="product.moreFromSeller">More from this Seller</h2>
         <div id="moreProducts" class="flex gap-3 overflow-x-auto hide-scrollbar -mx-4 px-4 pb-2">
         </div>
       </div>
@@ -851,15 +858,15 @@
       <div class="sp-legacy-trust flex flex-wrap gap-2 mt-4 pt-4 border-t border-outline-variant/30">
         <span class="flex items-center gap-1.5 text-xs bg-secondary-container text-on-secondary-container px-3 py-1.5 rounded-full">
           <span class="material-symbols-outlined text-on-secondary-container text-[11px] filled-icon">verified</span>
-          <span class="font-semibold">Verified Seller</span>
+          <span class="font-semibold" data-i18n="product.verifiedSeller">Verified Seller</span>
         </span>
         <span class="flex items-center gap-1.5 text-xs bg-secondary-container text-on-secondary-container px-3 py-1.5 rounded-full">
           <span class="material-symbols-outlined text-on-secondary-container text-[11px]">local_shipping</span>
-          <span class="font-semibold">Free Delivery</span>
+          <span class="font-semibold" data-i18n="home.freeDelivery">Free Delivery</span>
         </span>
         <span class="flex items-center gap-1.5 text-xs bg-secondary-container text-on-secondary-container px-3 py-1.5 rounded-full">
           <span class="material-symbols-outlined text-on-secondary-container text-[11px]">shield</span>
-          <span class="font-semibold">Secure Pay</span>
+          <span class="font-semibold" data-i18n="product.securePay">Secure Pay</span>
         </span>
       </div>
       </div>
@@ -871,49 +878,49 @@
           <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
             <span class="material-symbols-outlined text-primary text-2xl">local_shipping</span>
           </div>
-          <h3 class="font-headline font-bold text-on-surface">Delivery</h3>
+          <h3 class="font-headline font-bold text-on-surface" data-i18n="product.delivery">Delivery</h3>
           <p class="text-sm text-on-surface-variant mt-2">Estimated delivery time: <span class="font-semibold text-primary" id="shippingDeliveryInfo">—</span></p>
         </div>
         <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-gray-100 text-center">
           <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
             <span class="material-symbols-outlined text-primary text-2xl">swap_horiz</span>
           </div>
-          <h3 class="font-headline font-bold text-on-surface">Returns</h3>
+          <h3 class="font-headline font-bold text-on-surface" data-i18n="product.returns">Returns</h3>
           <p class="text-sm text-on-surface-variant mt-2"><span class="font-semibold text-primary" id="shippingReturnsInfo">—</span> returns accepted on this item.</p>
         </div>
         <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-gray-100 text-center">
           <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
             <span class="material-symbols-outlined text-primary text-2xl">payments</span>
           </div>
-          <h3 class="font-headline font-bold text-on-surface">Payment</h3>
+          <h3 class="font-headline font-bold text-on-surface" data-i18n="product.payment">Payment</h3>
           <p class="text-sm text-on-surface-variant mt-2">Pay securely with <span class="font-semibold text-primary" id="shippingPaymentInfo">—</span>, Mobile Money & bank transfer.</p>
         </div>
       </div>
       <div class="bg-primary/5 border border-primary/20 rounded-2xl p-5 md:p-6">
         <div class="flex items-center gap-2 mb-3">
           <span class="material-symbols-outlined text-primary">verified_user</span>
-          <h3 class="font-headline font-bold text-on-surface">Order Protection</h3>
+          <h3 class="font-headline font-bold text-on-surface" data-i18n="product.orderProtection">Order Protection</h3>
         </div>
         <div class="space-y-3 text-sm text-on-surface-variant">
           <div class="flex items-start gap-3 p-3 bg-white/50 rounded-xl">
             <span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0 mt-0.5">check_circle</span>
             <div>
-              <p class="font-medium text-on-surface">Free delivery on orders over TZS 50,000</p>
+              <p class="font-medium text-on-surface" data-i18n="product.freeDeliveryOver">Free delivery on orders over TZS 50,000</p>
               <p class="text-xs text-on-surface-variant">Automatically applied at checkout</p>
             </div>
           </div>
           <div class="flex items-start gap-3 p-3 bg-white/50 rounded-xl">
             <span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0 mt-0.5">check_circle</span>
             <div>
-              <p class="font-medium text-on-surface">7-day easy returns for quality issues</p>
-              <p class="text-xs text-on-surface-variant">No questions asked, full refund</p>
+              <p class="font-medium text-on-surface" data-i18n="product.returnsEasy">7-day easy returns for quality issues</p>
+              <p class="text-xs text-on-surface-variant" data-i18n="product.noQuestions">No questions asked, full refund</p>
             </div>
           </div>
           <div class="flex items-start gap-3 p-3 bg-white/50 rounded-xl">
             <span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0 mt-0.5">check_circle</span>
             <div>
-              <p class="font-medium text-on-surface">Money-back guarantee from verified sellers</p>
-              <p class="text-xs text-on-surface-variant">Protected by SmartSoko buyer protection</p>
+              <p class="font-medium text-on-surface" data-i18n="product.moneyBack">Money-back guarantee from verified sellers</p>
+              <p class="text-xs text-on-surface-variant" data-i18n="product.buyerProtected">Protected by SmartSoko buyer protection</p>
             </div>
           </div>
         </div>
@@ -931,12 +938,12 @@
             <div class="flex justify-center gap-0.5 mt-2 text-amber-400" id="ratingBigStars"></div>
           </div>
           <div class="min-w-0">
-            <h2 class="font-headline text-lg md:text-xl font-bold text-primary">Customer Reviews</h2>
+            <h2 class="font-headline text-lg md:text-xl font-bold text-primary" data-i18n="product.reviews">Customer Reviews</h2>
             <p id="reviewsSummary" class="text-sm text-on-surface-variant mt-1">Loading reviews...</p>
           </div>
         </div>
         <button onclick="scrollToReviewForm()" id="writeReviewBtn" class="flex items-center gap-1.5 text-sm font-bold text-white bg-primary hover:bg-primary-dark px-4 py-2.5 rounded-full shadow-sm shadow-primary/20 transition-all active:scale-95 flex-shrink-0 md:w-auto w-full md:w-auto">
-          <span class="material-symbols-outlined text-[16px]">rate_review</span> Write a Review
+          <span class="material-symbols-outlined text-[16px]">rate_review</span> <span data-i18n="product.writeReview">Write a Review</span>
         </button>
       </div>
 
@@ -957,11 +964,11 @@
       <div id="reviewForm" class="hidden mt-8 bg-white border border-gray-100 rounded-2xl shadow-sm p-5 md:p-6">
         <h3 class="font-headline font-bold text-primary flex items-center gap-2 mb-1">
           <span class="material-symbols-outlined text-xl">rate_review</span>
-          Write a Review
+          <span data-i18n="product.writeReview">Write a Review</span>
         </h3>
-        <p class="text-sm text-on-surface-variant mb-4">Share your experience with this product.</p>
+        <p class="text-sm text-on-surface-variant mb-4" data-i18n="product.shareExperience">Share your experience with this product.</p>
         <form id="reviewFormElement" onsubmit="event.preventDefault(); submitReview();" class="space-y-4">
-          <div class="flex items-center gap-1 mb-4 text-3xl" id="reviewFormStars" role="radiogroup" aria-label="Star rating">
+          <div class="flex items-center gap-1 mb-4 text-3xl" id="reviewFormStars" role="radiogroup" aria-label="Star rating" data-i18n-aria-label="product.starRating">
             <button type="button" onclick="setReviewRating(1)" class="text-gray-300 hover:text-amber-400 transition-colors cursor-pointer" aria-label="1 star"><span class="material-symbols-outlined filled-icon">star</span></button>
             <button type="button" onclick="setReviewRating(2)" class="text-gray-300 hover:text-amber-400 transition-colors cursor-pointer" aria-label="2 stars"><span class="material-symbols-outlined filled-icon">star</span></button>
             <button type="button" onclick="setReviewRating(3)" class="text-gray-300 hover:text-amber-400 transition-colors cursor-pointer" aria-label="3 stars"><span class="material-symbols-outlined filled-icon">star</span></button>
@@ -970,18 +977,18 @@
             <input type="hidden" id="reviewRatingInput" name="rating" value="0">
           </div>
           <div>
-            <label for="reviewFormName" class="sr-only">Your name</label>
-            <input type="text" id="reviewFormName" name="name" placeholder="Your name" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none mb-3" required>
+            <label for="reviewFormName" class="sr-only" data-i18n="product.yourName">Your name</label>
+            <input type="text" id="reviewFormName" name="name" placeholder="Your name" data-i18n-placeholder="product.yourName" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none mb-3" required>
           </div>
           <div>
-            <label for="reviewFormComment" class="sr-only">Your review</label>
-            <textarea id="reviewFormComment" name="comment" rows="3" placeholder="What did you like or dislike?" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none mb-4" required></textarea>
+            <label for="reviewFormComment" class="sr-only" data-i18n="product.yourReview">Your review</label>
+            <textarea id="reviewFormComment" name="comment" rows="3" placeholder="What did you like or dislike?" data-i18n-placeholder="product.reviewPlaceholder" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none mb-4" required></textarea>
           </div>
           <div class="flex items-center gap-3">
             <button type="submit" id="reviewSubmitBtn" class="bg-primary hover:bg-primary-dark text-white font-bold text-sm px-6 py-3 rounded-full shadow-sm shadow-primary/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
               Submit Review
             </button>
-            <button type="button" onclick="closeReviewForm()" class="text-sm font-bold text-on-surface-variant hover:text-on-surface px-4 py-3 transition-colors">Cancel</button>
+            <button type="button" onclick="closeReviewForm()" class="text-sm font-bold text-on-surface-variant hover:text-on-surface px-4 py-3 transition-colors" data-i18n="common.cancel">Cancel</button>
           </div>
         </form>
       </div>
@@ -1025,7 +1032,7 @@
        </button>
        <button onclick="buyNow()" class="flex-shrink-0 bg-secondary text-on-secondary h-12 px-3 rounded-xl flex items-center justify-center gap-1 font-headline font-bold shadow-sm transition-all active:scale-[0.98]" aria-label="Buy this product now">
          <span class="material-symbols-outlined">bolt</span>
-         <span class="hidden sm:inline">Buy now</span>
+         <span class="hidden sm:inline" data-i18n="product.buyNow">Buy now</span>
        </button>
     </div>
   </div>
@@ -1137,7 +1144,7 @@
 <input type="number" id="editProductPrice" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none">
             </div>
             <div>
-              <label class="block text-sm font-bold text-gray-700 mb-1">Category</label>
+              <label class="block text-sm font-bold text-gray-700 mb-1" data-i18n="product.category">Category</label>
               <label for="editProductCategory" class="sr-only">Product category</label>
 <select id="editProductCategory" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
                 <option value="food">Prepared Food</option>
@@ -1153,13 +1160,13 @@
             </div>
           </div>
           <div>
-            <label class="block text-sm font-bold text-gray-700 mb-1">Description</label>
+            <label class="block text-sm font-bold text-gray-700 mb-1" data-i18n="product.description">Description</label>
             <textarea id="editProductDescription" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"></textarea>
           </div>
         </div>
       </div>
       <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
-        <button onclick="closeEditDetailsModal()" class="px-5 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-200 transition-colors">Cancel</button>
+        <button onclick="closeEditDetailsModal()" class="px-5 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-200 transition-colors" data-i18n="common.cancel">Cancel</button>
         <button onclick="saveProductDetails()" class="px-6 py-2 rounded-full font-bold text-white gradient-bg hover:opacity-90 shadow-md transition-all">Save Changes</button>
       </div>
     </div>
@@ -1220,7 +1227,7 @@
       }
 
       container.innerHTML = `
-        <p class="text-sm font-semibold text-gray-900 mb-3">Choose Option</p>
+        <p class="text-sm font-semibold text-gray-900 mb-3">${t('product.chooseOption')}</p>
         <div class="flex flex-wrap gap-2" id="variationButtons">
           ${product.variations.map((v, i) => `
             <button type="button" 
@@ -1347,8 +1354,8 @@
       // Friendly, actionable error state instead of a bare "Error" heading.
       const titleEl = document.getElementById('productName');
       const descEl = document.getElementById('productDescription');
-      if (titleEl) titleEl.textContent = "We couldn't find this product";
-      if (descEl) descEl.textContent = 'It may have been removed or the link is out of date. Browse the marketplace for something fresh!';
+      if (titleEl) titleEl.textContent = t('product.notFound', "We couldn't find this product");
+      if (descEl) descEl.textContent = t('product.notFoundHint', 'It may have been removed or is no longer available.');
       const cta = document.createElement('div');
       cta.style.cssText = 'margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;';
       const go = document.createElement('a');
@@ -1360,7 +1367,7 @@
       backHome.href = '/';
       backHome.className = 'inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold border-2 transition-colors hover:bg-primary/5';
       backHome.style.cssText = 'border-color:#1B4332;color:#1B4332;text-decoration:none;';
-      backHome.textContent = 'Go to homepage';
+      backHome.textContent = t('product.goHome', 'Go to homepage');
       cta.append(go, backHome);
       if (descEl && descEl.parentElement && !descEl.parentElement.querySelector('[data-error-cta]')) {
         cta.setAttribute('data-error-cta', '');
@@ -1389,14 +1396,14 @@
       }
       const wishIcon = document.getElementById('wishlistIcon');
       if (wishIcon) wishIcon.classList.toggle('filled-icon', getWishlist().includes(product.id));
-      document.getElementById('productSeller').textContent = 'by ' + (product.seller || 'SmartSoko');
+      document.getElementById('productSeller').textContent = t('product.soldBy') + ' ' + (product.seller || 'SmartSoko');
       document.getElementById('sellerName').textContent = product.seller || 'SmartSoko';
       document.getElementById('sellerProductsLink').href = product.sellerId ? '/discovery?sellerId=' + encodeURIComponent(product.sellerId) : '/discovery';
       const sellerMeta = document.getElementById('sellerMeta');
       if (sellerMeta) sellerMeta.textContent = `${product.sellerRating ? Number(product.sellerRating).toFixed(1) + ' seller rating' : 'Explore this shop’s products'}`;
       // document.getElementById('sellerSubtitle').textContent = product.category ? `${product.category} Seller` : 'Verified Seller'; // element removed
       const descEl = document.getElementById('productDescription');
-      const desc = product.description || 'No description available.';
+      const desc = product.description || t('product.noDescription', 'No description available.');
       descEl.textContent = desc;
       const chip = document.getElementById('descCategoryChip');
       if (chip) {
@@ -1413,8 +1420,8 @@
           descEl.style.webkitBoxOrient = 'vertical';
           descEl.style.overflow = 'hidden';
           showBtn.classList.remove('hidden');
-          const t = document.getElementById('descShowMoreText');
-          if (t) t.textContent = 'Read more';
+          const moreLabel = document.getElementById('descShowMoreText');
+          if (moreLabel) moreLabel.textContent = t('product.readMore', 'Read more');
           const icon = showBtn.querySelector('.material-symbols-outlined');
           if (icon) icon.textContent = 'expand_more';
         } else {
@@ -1430,7 +1437,9 @@
       document.getElementById('thumb3').src = images[2] || images[0] || 'images/default-product.svg';
 
       const unitNode = document.getElementById('productUnit');
-      unitNode.textContent = product.unit ? 'per ' + product.unit : '';
+      // product.perUnit holds the phrase "per unit" — swap the trailing word for the real unit.
+      const perUnitLabel = t('product.perUnit', 'per unit');
+      unitNode.textContent = product.unit ? perUnitLabel.replace(/unit$/, product.unit) : '';
       unitNode.hidden = !product.unit;
 
       // Rating & Reviews from backend (or defaults)
@@ -1489,7 +1498,7 @@
           const banner = document.createElement('div');
           banner.id = 'soldOutBanner';
           banner.className = 'fixed top-0 left-0 right-0 bg-red-600 text-white text-center py-2 px-4 z-50 text-sm font-medium';
-          banner.innerHTML = '<span class="material-symbols-outlined align-middle mr-1">sell</span>This item is currently unavailable';
+          banner.innerHTML = '<span class="material-symbols-outlined align-middle mr-1">sell</span>' + t('product.unavailable', 'This item is currently unavailable');
           document.body.prepend(banner);
         }
         [addToCartBtn, addToCartBtnMobile, addToCartBtnDesktop].forEach(btn => {
@@ -1539,6 +1548,7 @@
     async function loadReviews(productId) {
       const container = document.getElementById('reviewsContainer');
       const summary = document.getElementById('reviewsSummary');
+      if (summary) summary.textContent = t('product.reviewLoad', 'Loading reviews...');
       if (!container || !productId) return;
       container.innerHTML = `
         <div class="space-y-3">
@@ -1557,8 +1567,8 @@
           if (summary) summary.textContent = 'Be the first to share your experience';
           container.innerHTML = `<div class="text-center py-12 bg-white border border-gray-100 rounded-2xl shadow-sm">
             <span class="material-symbols-outlined text-5xl mb-3 block text-outline">reviews</span>
-            <p class="text-sm font-medium text-on-surface">No reviews yet. Be the first to review this product.</p>
-            <button onclick="scrollToReviewForm()" class="mt-4 bg-primary hover:bg-primary-dark text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-sm shadow-primary/20 transition-all active:scale-95">Write a Review</button>
+            <p class="text-sm font-medium text-on-surface">${t('product.beFirstReview')}</p>
+            <button onclick="scrollToReviewForm()" class="mt-4 bg-primary hover:bg-primary-dark text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-sm shadow-primary/20 transition-all active:scale-95"">${t('product.writeReview', 'Write a Review')}</button>
           </div>`;
           return;
         }
@@ -1575,14 +1585,14 @@
               <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-100 to-primary/20 flex items-center justify-center font-headline font-bold text-primary text-base flex-shrink-0">${initial}</div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <p class="font-semibold text-sm text-gray-900 truncate">${escapeHtml(r.customerName || r.userName || 'Customer')}</p>
+                  <p class="font-semibold text-sm text-gray-900 truncate">${escapeHtml(r.customerName || r.userName || t('auth.customer'))}</p>
                   ${isVerified ? `<span class="flex items-center gap-0.5 text-[10px] font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded-full"><span class="material-symbols-outlined text-[10px] filled-icon">verified</span>VERIFIED</span>` : ''}
                 </div>
                 <div class="flex items-center gap-1.5 mt-1">${stars}<span class="text-xs font-semibold text-on-surface-variant ml-0.5">${(r.rating || 0).toFixed(1)}</span></div>
               </div>
               <span class="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">${d ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}</span>
             </div>
-            <p class="text-on-surface-variant text-sm md:text-base leading-relaxed mt-2">${escapeHtml(r.comment || r.text || 'No comment provided.')}</p>
+            <p class="text-on-surface-variant text-sm md:text-base leading-relaxed mt-2">${escapeHtml(r.comment || r.text || t('product.noComment'))}</p>
             ${r.reply && r.reply.text ? `
               <div class="mt-3 bg-green-50 border-l-4 border-green-600 rounded-r-lg p-3">
                 <p class="text-xs font-bold text-green-800 mb-0.5"><span class="material-symbols-outlined text-xs align-middle filled-icon">storefront</span> ${escapeHtml(r.reply.sellerName || 'Seller')} replied</p>
@@ -1594,12 +1604,12 @@
         if (viewBtn) viewBtn.classList.remove('hidden');
       } catch (error) {
         console.warn('Reviews load failed:', error.message);
-        if (summary) summary.textContent = 'No reviews yet';
+        if (summary) summary.textContent = t('product.noReviewsYet');
         renderRatingSummary([], currentProduct?.rating || 0);
         container.innerHTML = `<div class="text-center py-12 bg-white border border-gray-100 rounded-2xl shadow-sm">
           <span class="material-symbols-outlined text-5xl mb-3 block text-outline">reviews</span>
-          <p class="text-sm font-medium text-on-surface">No reviews yet. Be the first to review this product.</p>
-          <button onclick="scrollToReviewForm()" class="mt-4 bg-primary hover:bg-primary-dark text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-sm shadow-primary/20 transition-all active:scale-95">Write a Review</button>
+          <p class="text-sm font-medium text-on-surface">${t('product.beFirstReview')}</p>
+          <button onclick="scrollToReviewForm()" class="mt-4 bg-primary hover:bg-primary-dark text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-sm shadow-primary/20 transition-all active:scale-95"">${t('product.writeReview', 'Write a Review')}</button>
         </div>`;
       }
     }
@@ -1646,7 +1656,7 @@
       const icon = document.querySelector('#descShowMoreBtn .material-symbols-outlined');
       const clamped = p.style.webkitLineClamp !== 'none';
       p.style.webkitLineClamp = clamped ? 'none' : '4';
-      if (btnText) btnText.textContent = clamped ? 'Read less' : 'Read more';
+      if (btnText) btnText.textContent = clamped ? t('product.readLess', 'Read less') : t('product.readMore', 'Read more');
       if (icon) icon.textContent = clamped ? 'expand_less' : 'expand_more';
     }
 
@@ -1691,6 +1701,9 @@
       if (!form) return;
       switchDetailTab('reviews');
       form.classList.remove('hidden');
+      // submitReview() rewrites this button's label, so it is localised here instead of via data-i18n.
+      const submitBtn = document.getElementById('reviewSubmitBtn');
+      if (submitBtn) submitBtn.textContent = t('product.submitReview', 'Submit Review');
       setTimeout(() => {
         form.scrollIntoView({ behavior: 'smooth', block: 'center' });
         const name = document.getElementById('reviewFormName');
@@ -1723,7 +1736,7 @@
           createdAt: cf.serverTimestamp ? cf.serverTimestamp() : new Date().toISOString()
         };
         await cf.addDoc(cf.collection('reviews'), payload);
-        showToast('Review submitted! Thank you.');
+        showToast(t('product.reviewSubmitted', 'Review submitted! Thank you.'));
         closeReviewForm();
         document.getElementById('reviewFormName').value = '';
         document.getElementById('reviewFormComment').value = '';
@@ -1735,7 +1748,7 @@
         showToast('Could not submit review: ' + (error.message || 'Unknown error'), 'error');
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Submit Review';
+        btn.textContent = t('product.submitReview', 'Submit Review');
       }
     }
 
@@ -1756,7 +1769,7 @@
           <div class="relative h-36 bg-gray-50">
             ${p.imageUrl ? `<img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.name)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onerror="this.onerror=null; this.src='images/default-product.svg';" loading="lazy" width="192" height="192">` : `<div class="w-full h-full flex items-center justify-center"><span class="material-symbols-outlined text-primary/30 text-4xl">inventory_2</span></div>`}
             ${badge}
-            <button onclick="event.preventDefault(); event.stopPropagation(); toggleWishlistId('${escapeHtml(p.id)}', this)" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/85 backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-transform" aria-label="Add to wishlist">
+            <button onclick="event.preventDefault(); event.stopPropagation(); toggleWishlistId('${escapeHtml(p.id)}', this)" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/85 backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-transform" aria-label="${t('product.wishlist', 'Add to wishlist')}">
               <span class="material-symbols-outlined text-on-surface-variant text-lg">favorite</span>
             </button>
           </div>
@@ -1840,7 +1853,7 @@
       const effectivePrice = basePrice + variationDelta;
       const total = effectivePrice * quantity;
       const textEl = document.getElementById('addToCartText');
-      if (textEl) textEl.textContent = `Add to Cart - TSh ${total.toLocaleString()}`;
+      if (textEl) textEl.textContent = `${t('product.addToCart')} - TSh ${total.toLocaleString()}`;
     }
 
     function renderStars(rating) {
@@ -1867,7 +1880,7 @@
     function addToCart() {
       if (!currentProduct) return;
       if (currentProduct.isAvailable === false) {
-        showToast('This item is currently unavailable', 'error');
+        showToast(t('product.unavailable', 'This item is currently unavailable'), 'error');
         return;
       }
       const rawImg = currentProduct.imageUrl || currentProduct.image || '';
@@ -2010,7 +2023,7 @@
           const previewImg = document.getElementById(`customPhotoPreviewImg${index + 1}`);
           const btnText = document.getElementById(`btnText${index + 1}`);
           if (previewContainer && previewImg) { previewImg.src = uploadedCustomPhotos[index]; previewContainer.classList.remove('hidden'); }
-          if (btnText) btnText.textContent = 'Change';
+          if (btnText) btnText.textContent = t('cart.change');
           showToast(`Photo ${index + 1} loaded. Click "Save All Photos" when ready.`);
         };
         reader.onerror = () => showToast('Error reading file');
@@ -2165,7 +2178,7 @@
         const snapshot = await withTimeout(cf.getDocs(q), 2500, 'all reviews load');
         const reviews = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         if (!reviews.length) {
-          list.innerHTML = '<p class="text-center text-sm text-on-surface-variant py-10">No reviews yet.</p>';
+          list.innerHTML = '<p class="text-center text-sm text-on-surface-variant py-10">' + t('product.noReviewsYet') + '</p>';
           return;
         }
         list.innerHTML = reviews.map(r => {
@@ -2180,14 +2193,14 @@
               <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-100 to-primary/20 flex items-center justify-center font-headline font-bold text-primary text-base flex-shrink-0">${initial}</div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <p class="font-semibold text-sm text-gray-900 truncate">${escapeHtml(r.customerName || r.userName || 'Customer')}</p>
+                  <p class="font-semibold text-sm text-gray-900 truncate">${escapeHtml(r.customerName || r.userName || t('auth.customer'))}</p>
                   ${isVerified ? `<span class="flex items-center gap-0.5 text-[10px] font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded-full"><span class="material-symbols-outlined text-[10px] filled-icon">verified</span>VERIFIED</span>` : ''}
                 </div>
                 <div class="flex items-center gap-1.5 mt-1">${stars}<span class="text-xs font-semibold text-on-surface-variant ml-0.5">${(r.rating || 0).toFixed(1)}</span></div>
               </div>
               <span class="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">${d ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}</span>
             </div>
-            <p class="text-on-surface-variant text-sm md:text-base leading-relaxed mt-2">${escapeHtml(r.comment || r.text || 'No comment provided.')}</p>
+            <p class="text-on-surface-variant text-sm md:text-base leading-relaxed mt-2">${escapeHtml(r.comment || r.text || t('product.noComment'))}</p>
             ${r.reply && r.reply.text ? `
               <div class="mt-3 bg-green-50 border-l-4 border-green-600 rounded-r-lg p-3">
                 <p class="text-xs font-bold text-green-800 mb-0.5"><span class="material-symbols-outlined text-xs align-middle filled-icon">storefront</span> ${escapeHtml(r.reply.sellerName || 'Seller')} replied</p>
@@ -2197,7 +2210,7 @@
         }).join('');
       } catch (error) {
         console.warn('All reviews failed:', error.message);
-        list.innerHTML = '<p class="text-center text-sm text-on-surface-variant py-10">Could not load reviews. Please try again.</p>';
+        list.innerHTML = '<p class="text-center text-sm text-on-surface-variant py-10">' + t('product.couldNotLoadReviews') + '</p>';
       }
     }
 
@@ -2270,10 +2283,10 @@
       setTimeout(() => {
         document.querySelectorAll('.skeleton-text, .skeleton-heading, .skeleton-thumbnail, #reviewsContainer .skeleton').forEach(el => el.remove());
         const desc = document.getElementById('productDescription');
-        if (desc && desc.querySelector('.skeleton')) desc.textContent = 'No description available.';
+        if (desc && desc.querySelector('.skeleton')) desc.textContent = t('product.noDescription', 'No description available.');
         const reviews = document.getElementById('reviewsContainer');
         if (reviews && !reviews.textContent.trim()) {
-          reviews.innerHTML = '<div class="text-center py-10 bg-white border border-gray-100 rounded-2xl shadow-sm"><span class="material-symbols-outlined text-4xl mb-3 block text-outline">reviews</span><p class="text-sm font-medium text-on-surface">No reviews yet. Be the first to review this product.</p></div>';
+          reviews.innerHTML = '<div class="text-center py-10 bg-white border border-gray-100 rounded-2xl shadow-sm"><span class="material-symbols-outlined text-4xl mb-3 block text-outline">reviews</span><p class="text-sm font-medium text-on-surface">' + t('product.beFirstReview') + '</p></div>';
         }
       }, 9000);
     });
@@ -2291,25 +2304,25 @@
           <p class="text-body-sm text-white/60">Your local marketplace for fresh food, groceries, and everyday essentials. Fast delivery across Dar es Salaam.</p>
         </div>
         <div>
-          <h4 class="font-semibold text-white mb-4">Quick Links</h4>
+          <h4 class="font-semibold text-white mb-4" data-i18n="product.quickLinks">Quick Links</h4>
           <ul class="space-y-2 text-body-sm text-white/60">
-            <li><a href="/home" class="hover:text-white transition-colors">Home</a></li>
-            <li><a href="/discovery" class="hover:text-white transition-colors">Discover</a></li>
-            <li><a href="/cart" class="hover:text-white transition-colors">Cart</a></li>
-            <li><a href="/login" class="hover:text-white transition-colors">Sign In</a></li>
+            <li><a href="/home" class="hover:text-white transition-colors" data-i18n="nav.home">Home</a></li>
+            <li><a href="/discovery" class="hover:text-white transition-colors" data-i18n="nav.discover">Discover</a></li>
+            <li><a href="/cart" class="hover:text-white transition-colors" data-i18n="cart.title">Cart</a></li>
+            <li><a href="/login" class="hover:text-white transition-colors" data-i18n="auth.signIn">Sign In</a></li>
           </ul>
         </div>
         <div>
-          <h4 class="font-semibold text-white mb-4">Support</h4>
+          <h4 class="font-semibold text-white mb-4" data-i18n="product.support">Support</h4>
           <ul class="space-y-2 text-body-sm text-white/60">
             <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
             <li><a href="#" class="hover:text-white transition-colors">Contact Us</a></li>
             <li><a href="#" class="hover:text-white transition-colors">FAQs</a></li>
-            <li><a href="#" class="hover:text-white transition-colors">Delivery Info</a></li>
+            <li><a href="#" class="hover:text-white transition-colors" data-i18n="product.deliveryInfo">Delivery Info</a></li>
           </ul>
         </div>
         <div>
-          <h4 class="font-semibold text-white mb-4">Connect</h4>
+          <h4 class="font-semibold text-white mb-4" data-i18n="product.connect">Connect</h4>
           <div class="flex gap-4 text-white/60">
             <a href="#" class="hover:text-white transition-colors" aria-label="Facebook"><span class="material-symbols-outlined text-xl">facebook</span></a>
             <a href="#" class="hover:text-white transition-colors" aria-label="Twitter"><span class="material-symbols-outlined text-xl">alternate_email</span></a>

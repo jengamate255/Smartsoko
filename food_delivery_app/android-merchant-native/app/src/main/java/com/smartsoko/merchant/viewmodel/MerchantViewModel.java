@@ -1,14 +1,17 @@
 package com.smartsoko.merchant.viewmodel;
 
+import android.app.Application;
+
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
+import com.smartsoko.merchant.R;
 import com.smartsoko.merchant.data.model.Order;
 import com.smartsoko.merchant.data.model.Product;
 import com.smartsoko.merchant.data.repository.MerchantRepository;
@@ -16,7 +19,7 @@ import com.smartsoko.merchant.data.repository.MerchantRepository;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MerchantViewModel extends ViewModel {
+public class MerchantViewModel extends AndroidViewModel {
 
     private final MerchantRepository repository;
     private final FirebaseFirestore firestore;
@@ -33,7 +36,8 @@ public class MerchantViewModel extends ViewModel {
     private ListenerRegistration ordersListener;
     private ListenerRegistration sellerListener;
 
-    public MerchantViewModel() {
+    public MerchantViewModel(Application application) {
+        super(application);
         repository = new MerchantRepository();
         firestore = FirebaseFirestore.getInstance();
     }
@@ -65,12 +69,12 @@ public class MerchantViewModel extends ViewModel {
 
                         listenToOrders(sellerDoc.getId());
                     } else {
-                        errorMessage.setValue("No store found for this account");
+                        errorMessage.setValue(getApplication().getString(R.string.error_no_store_found));
                     }
                 })
                 .addOnFailureListener(e -> {
                     isLoading.setValue(false);
-                    errorMessage.setValue("Error loading store: " + e.getMessage());
+                    errorMessage.setValue(getApplication().getString(R.string.error_loading_store, e.getMessage()));
                 });
     }
 
@@ -84,7 +88,7 @@ public class MerchantViewModel extends ViewModel {
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, error) -> {
                     if (error != null) {
-                        errorMessage.setValue("Error loading orders: " + error.getMessage());
+                        errorMessage.setValue(getApplication().getString(R.string.error_loading_orders, error.getMessage()));
                         return;
                     }
 
@@ -222,6 +226,14 @@ public class MerchantViewModel extends ViewModel {
     }
 
     // Getters
+    public com.google.android.gms.tasks.Task<Void> updateStoreName(String name) {
+        String id = storeId.getValue();
+        if (currentUid == null || id == null || name.trim().isEmpty()) {
+            return com.google.android.gms.tasks.Tasks.forException(new IllegalStateException("Sign in and load your store before saving"));
+        }
+        return firestore.collection("sellers").document(id).update("name", name.trim());
+    }
+
     public LiveData<String> getStoreName() { return storeName; }
     public LiveData<String> getStoreId() { return storeId; }
     public LiveData<List<Order>> getOrders() { return orders; }

@@ -81,7 +81,8 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.Produc
         void bind(Product product) {
             name.setText(product.getName());
             String cat = product.getCategory();
-            category.setText(cat == null || cat.isEmpty() ? "No category" : cat);
+            category.setText(cat == null || cat.isEmpty()
+                    ? itemView.getContext().getString(R.string.no_category) : cat);
             price.setText(String.format(Locale.US, "TSh %.2f", product.getPrice()));
 
             boolean unavailable = !product.isAvailable();
@@ -92,16 +93,16 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.Produc
 
             if (unavailable) {
                 badge.setVisibility(View.GONE);
-                stock.setText("0 units");
+                stock.setText(itemView.getContext().getString(R.string.units_format, 0));
                 stock.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.text_secondary));
             } else if (qty > 0 && qty <= 10) {
                 badge.setVisibility(View.VISIBLE);
-                badge.setText("LOW STOCK");
-                stock.setText(qty + " units left");
+                badge.setText(R.string.badge_low_stock);
+                stock.setText(itemView.getContext().getString(R.string.units_left_format, qty));
                 stock.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.error));
             } else if (qty > 10) {
                 badge.setVisibility(View.GONE);
-                stock.setText(qty + " units");
+                stock.setText(itemView.getContext().getString(R.string.units_format, qty));
                 stock.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.primary));
             } else {
                 // available but no tracked stock quantity

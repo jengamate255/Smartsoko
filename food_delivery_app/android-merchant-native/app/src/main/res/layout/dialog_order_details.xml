@@ -22,7 +22,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Status"
+            android:text="@string/label_status"
             android:textSize="12sp"
             android:textColor="@color/text_hint" />
 
@@ -30,7 +30,7 @@
             android:id="@+id/tv_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pending"
+            android:text="@string/status_pending"
             android:textSize="16sp"
             android:textStyle="bold"
             android:paddingHorizontal="16dp"
@@ -42,7 +42,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Customer"
+            android:text="@string/label_customer"
             android:textSize="12sp"
             android:textColor="@color/text_hint" />
 
@@ -66,7 +66,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Delivery Address"
+            android:text="@string/label_delivery_address"
             android:textSize="12sp"
             android:textColor="@color/text_hint" />
 
@@ -82,7 +82,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Items"
+            android:text="@string/label_items"
             android:textSize="12sp"
             android:textColor="@color/text_hint" />
 
@@ -98,7 +98,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Payment Method"
+            android:text="@string/label_payment_method"
             android:textSize="12sp"
             android:textColor="@color/text_hint" />
 
@@ -114,7 +114,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Order Time"
+            android:text="@string/label_order_time"
             android:textSize="12sp"
             android:textColor="@color/text_hint" />
 
@@ -142,7 +142,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Total"
+                android:text="@string/label_total"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_primary" />

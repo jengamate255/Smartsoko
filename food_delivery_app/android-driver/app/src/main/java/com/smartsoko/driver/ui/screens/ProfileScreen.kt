@@ -14,8 +14,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.smartsoko.driver.R
 import com.smartsoko.driver.data.model.Driver
 import com.smartsoko.driver.ui.components.*
 
@@ -33,19 +35,19 @@ fun ProfileScreen(
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
-            title = { Text("Sign Out") },
-            text = { Text("Are you sure you want to sign out?") },
+            title = { Text(stringResource(R.string.sign_out)) },
+            text = { Text(stringResource(R.string.sign_out_confirm)) },
             confirmButton = {
                 TextButton(onClick = {
                     showLogoutDialog = false
                     onSignOut()
                 }) {
-                    Text("Sign Out", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.sign_out), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -70,7 +72,7 @@ fun ProfileScreen(
             .padding(16.dp)
     ) {
         Text(
-            "Profile",
+            stringResource(R.string.profile),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 20.dp)
@@ -119,9 +121,9 @@ fun ProfileScreen(
                     }
                     Spacer(Modifier.width(14.dp))
                     Column {
-                        Text("Online Status", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.online_status), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                         Text(
-                            if (driver?.isOnline == true) "Online - accepting deliveries" else "Offline - not accepting deliveries",
+                            if (driver?.isOnline == true) stringResource(R.string.online_accepting) else stringResource(R.string.offline_not_accepting),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -159,7 +161,7 @@ fun ProfileScreen(
                     }
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        "Driver Information",
+                        stringResource(R.string.driver_information),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -167,7 +169,7 @@ fun ProfileScreen(
                 IconButton(onClick = { showEditDialog = true }, enabled = driver != null) {
                     Icon(
                         Icons.Default.Edit,
-                        contentDescription = "Edit profile",
+                        contentDescription = stringResource(R.string.edit_profile_description),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -178,17 +180,17 @@ fun ProfileScreen(
             Spacer(Modifier.height(8.dp))
 
             driver?.let {
-                DriverInfoRow(label = "Name", value = it.name)
-                DriverInfoRow(label = "Phone", value = it.phone)
-                DriverInfoRow(label = "Email", value = it.email)
-                DriverInfoRow(label = "Vehicle Type", value = it.vehicleType)
-                DriverInfoRow(label = "Vehicle Plate", value = it.vehiclePlate)
+                DriverInfoRow(label = stringResource(R.string.name), value = it.name)
+                DriverInfoRow(label = stringResource(R.string.phone), value = it.phone)
+                DriverInfoRow(label = stringResource(R.string.email), value = it.email)
+                DriverInfoRow(label = stringResource(R.string.vehicle_type), value = it.vehicleType)
+                DriverInfoRow(label = stringResource(R.string.vehicle_plate), value = it.vehiclePlate)
                 if (it.rating > 0.0) {
-                    DriverInfoRow(label = "Rating", value = "%.1f (%d reviews)".format(it.rating, it.reviewCount))
+                    DriverInfoRow(label = stringResource(R.string.rating), value = stringResource(R.string.rating_format, it.rating, it.reviewCount))
                 }
             } ?: run {
                 Text(
-                    "Loading driver information...",
+                    stringResource(R.string.loading_driver_info),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -199,14 +201,14 @@ fun ProfileScreen(
 
         SmartCard {
             Text(
-                "Account",
+                stringResource(R.string.account),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
             SecondaryButton(
-                text = "Sign Out",
+                text = stringResource(R.string.sign_out),
                 onClick = { showLogoutDialog = true },
                 leadingIcon = {
                     Icon(Icons.Default.ExitToApp, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -228,19 +230,20 @@ private fun EditProfileDialog(
     var vehicleType by remember { mutableStateOf(driver.vehicleType) }
     var vehiclePlate by remember { mutableStateOf(driver.vehiclePlate) }
     var nameError by remember { mutableStateOf<String?>(null) }
+    val nameRequired = stringResource(R.string.name_required)
 
     AlertDialog(
         onDismissRequest = { if (!isLoading) onDismiss() },
-        title = { Text("Edit Profile") },
+        title = { Text(stringResource(R.string.edit_profile)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = {
                         name = it
-                        nameError = if (it.isBlank()) "Name is required" else null
+                        nameError = if (it.isBlank()) nameRequired else null
                     },
-                    label = { Text("Name") },
+                    label = { Text(stringResource(R.string.name)) },
                     isError = nameError != null,
                     supportingText = nameError?.let { { Text(it) } },
                     singleLine = true
@@ -248,19 +251,19 @@ private fun EditProfileDialog(
                 OutlinedTextField(
                     value = phone,
                     onValueChange = { phone = it },
-                    label = { Text("Phone") },
+                    label = { Text(stringResource(R.string.phone)) },
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = vehicleType,
                     onValueChange = { vehicleType = it },
-                    label = { Text("Vehicle Type (e.g. Motorcycle)") },
+                    label = { Text(stringResource(R.string.vehicle_type_example)) },
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = vehiclePlate,
                     onValueChange = { vehiclePlate = it },
-                    label = { Text("Vehicle Plate") },
+                    label = { Text(stringResource(R.string.vehicle_plate)) },
                     singleLine = true
                 )
             }
@@ -269,7 +272,7 @@ private fun EditProfileDialog(
             TextButton(
                 onClick = {
                     if (name.isBlank()) {
-                        nameError = "Name is required"
+                        nameError = nameRequired
                     } else {
                         onSave(name.trim(), phone.trim(), vehicleType.trim(), vehiclePlate.trim()) { }
                     }
@@ -280,11 +283,11 @@ private fun EditProfileDialog(
                     CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
                     Spacer(Modifier.width(8.dp))
                 }
-                Text("Save")
+                Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, enabled = !isLoading) { Text("Cancel") }
+            TextButton(onClick = onDismiss, enabled = !isLoading) { Text(stringResource(R.string.cancel)) }
         }
     )
 }

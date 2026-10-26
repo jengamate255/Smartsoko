@@ -25,7 +25,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Sort by:"
+            android:text="@string/label_sort_by"
             android:textSize="14sp"
             android:textColor="@color/text_secondary" />
 
@@ -68,7 +68,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="No orders found"
+                    android:text="@string/empty_no_orders"
                     android:textSize="18sp"
                     android:textColor="@color/text_secondary"
                     android:layout_marginTop="16dp" />

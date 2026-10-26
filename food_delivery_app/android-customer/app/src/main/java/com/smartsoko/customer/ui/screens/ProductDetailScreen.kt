@@ -11,9 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.smartsoko.customer.R
 import com.smartsoko.customer.data.model.Product
 import com.smartsoko.customer.ui.components.*
 
@@ -32,7 +34,7 @@ fun ProductDetailScreen(
                 title = { Text(product.name) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -73,7 +75,7 @@ fun ProductDetailScreen(
                     }
 
                     PrimaryButton(
-                        text = "Add to Cart",
+                        text = stringResource(R.string.add_to_cart),
                         onClick = { onAddToCart(product, quantity) },
                         modifier = Modifier.weight(1f)
                     )
@@ -134,7 +136,7 @@ fun ProductDetailScreen(
                 }
                 Spacer(Modifier.height(16.dp))
                 if (product.description.isNotEmpty()) {
-                    Text("Description", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.description), style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(4.dp))
                     Text(
                         product.description,

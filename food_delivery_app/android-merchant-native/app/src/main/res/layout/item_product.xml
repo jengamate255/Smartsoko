@@ -33,7 +33,7 @@
                 android:background="@drawable/bg_badge_error"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="3dp"
-                android:text="LOW STOCK"
+                android:text="@string/badge_low_stock"
                 android:textColor="@color/white"
                 android:textSize="10sp"
                 android:textStyle="bold"
@@ -53,7 +53,7 @@
                     android:background="@color/surface"
                     android:paddingHorizontal="14dp"
                     android:paddingVertical="5dp"
-                    android:text="Sold out"
+                    android:text="@string/label_sold_out"
                     android:textColor="@color/text_primary"
                     android:textSize="13sp"
                     android:textStyle="bold" />
@@ -79,7 +79,7 @@
                     android:layout_weight="1"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="Product"
+                    android:text="@string/title_products"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -89,7 +89,7 @@
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Edit product"
+                    android:contentDescription="@string/desc_edit_product"
                     android:padding="4dp"
                     android:src="@drawable/ic_edit"
                     app:tint="@color/primary" />
@@ -120,7 +120,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Stock"
+                        android:text="@string/label_stock"
                         android:textColor="@color/text_secondary"
                         android:textSize="10sp" />
 
@@ -144,7 +144,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Price"
+                        android:text="@string/product_price"
                         android:textColor="@color/text_secondary"
                         android:textSize="10sp" />
 

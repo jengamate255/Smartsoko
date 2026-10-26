@@ -1,3 +1,141 @@
 <resources>
     <string name="app_name">SmartSoko Driver</string>
+
+    <!-- Shared / navigation -->
+    <string name="logo">Logo</string>
+    <string name="or_divider">OR</string>
+    <string name="back">Back</string>
+    <string name="orders">Orders</string>
+    <string name="deliveries">Deliveries</string>
+    <string name="earnings">Earnings</string>
+    <string name="profile">Profile</string>
+    <string name="order_number">Order #%1$s</string>
+
+    <!-- Money / order summary -->
+    <string name="delivery_fee">Delivery Fee</string>
+    <string name="total">Total</string>
+
+    <!-- Login -->
+    <string name="driver_portal">Driver Portal</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="sign_in_to_earn">Sign in to start earning</string>
+    <string name="email_or_phone">Email or Phone</string>
+    <string name="email_placeholder">e.g. name@example.com</string>
+    <string name="password">Password</string>
+    <string name="password_required">Password is required</string>
+    <string name="show_password">Show password</string>
+    <string name="hide_password">Hide password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="create_account_prompt">Don\'t have an account? Create Account</string>
+    <string name="google_signin_no_token">Google sign-in returned no ID token.</string>
+
+    <!-- Forgot password -->
+    <string name="reset_password">Reset Password</string>
+    <string name="reset_email_sent">Reset Email Sent!</string>
+    <string name="check_email_inbox">Check your email inbox for instructions to reset your password.</string>
+    <string name="back_to_sign_in">Back to Sign In</string>
+    <string name="forgot_password_instructions">Enter your email address and we\'ll send you instructions to reset your password.</string>
+    <string name="email">Email</string>
+    <string name="send_reset_email">Send Reset Email</string>
+
+    <!-- Orders -->
+    <string name="available_orders">Available Orders</string>
+    <string name="refresh">Refresh</string>
+    <string name="no_orders_available">No orders available</string>
+    <string name="new_orders_appear_here">New orders will appear here</string>
+    <string name="accept_order">Accept Order</string>
+    <string name="status_pending">Pending</string>
+    <string name="status_accepted">Accepted</string>
+    <string name="status_picked_up">Picked Up</string>
+    <string name="status_ready">Ready</string>
+    <string name="status_delivered">Delivered</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_cancelled">Cancelled</string>
+    <string name="status_rejected">Rejected</string>
+
+    <!-- Earnings -->
+    <string name="today">Today</string>
+    <string name="this_week">This Week</string>
+    <string name="all_time">All Time</string>
+    <string name="total_earned">Total Earned (10%)</string>
+    <string name="deliveries_done">Deliveries Done</string>
+    <string name="completed_deliveries">Completed Deliveries</string>
+    <string name="no_completed_deliveries">No completed deliveries yet</string>
+    <string name="completed_deliveries_here">Completed deliveries will appear here</string>
+    <string name="paid">Paid</string>
+
+    <!-- Order detail -->
+    <string name="order_items">Order Items</string>
+    <string name="no_item_details">No item details available</string>
+    <string name="placed_on">Placed on %1$s</string>
+    <string name="updated_on">Updated on %1$s</string>
+    <string name="customer_details">Customer Details</string>
+    <string name="phone_prefix">Phone: %1$s</string>
+    <string name="qty_prefix">Qty: %1$d</string>
+    <string name="delivery_info">Delivery Info</string>
+    <string name="call">Call</string>
+    <string name="navigate">Navigate</string>
+    <string name="notes_prefix">Notes: %1$s</string>
+    <string name="decline">Decline</string>
+    <string name="navigate_to_customer">Navigate to Customer</string>
+    <string name="mark_as_picked_up">Mark as Picked Up</string>
+    <string name="release_order">Can\'t take it — release order</string>
+    <string name="mark_as_delivered">Mark as Delivered</string>
+
+    <!-- Delivery map -->
+    <string name="delivery_map">Delivery Map</string>
+    <string name="deliver_to">Deliver to</string>
+    <string name="no_address_provided">No address provided</string>
+    <string name="open_in_maps">Open in Maps</string>
+    <string name="coordinates_format">Coordinates: %1$.5f, %2$.5f</string>
+    <string name="no_gps_coordinates">This order has no GPS coordinates. Call the customer if you need directions.</string>
+    <string name="call_customer">Call customer</string>
+
+    <!-- Profile -->
+    <string name="sign_out">Sign Out</string>
+    <string name="sign_out_confirm">Are you sure you want to sign out?</string>
+    <string name="cancel">Cancel</string>
+    <string name="online_status">Online Status</string>
+    <string name="online_accepting">Online - accepting deliveries</string>
+    <string name="offline_not_accepting">Offline - not accepting deliveries</string>
+    <string name="driver_information">Driver Information</string>
+    <string name="edit_profile_description">Edit profile</string>
+    <string name="name">Name</string>
+    <string name="phone">Phone</string>
+    <string name="vehicle_type">Vehicle Type</string>
+    <string name="vehicle_plate">Vehicle Plate</string>
+    <string name="rating">Rating</string>
+    <string name="rating_format">%1$.1f (%2$d reviews)</string>
+    <string name="loading_driver_info">Loading driver information...</string>
+    <string name="account">Account</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="name_required">Name is required</string>
+    <string name="save">Save</string>
+    <string name="vehicle_type_example">Vehicle Type (e.g. Motorcycle)</string>
+
+    <!-- Sign up -->
+    <string name="create_account">Create Account</string>
+    <string name="email_star">Email *</string>
+    <string name="password_star">Password *</string>
+    <string name="confirm_password_star">Confirm Password *</string>
+    <string name="full_name_star">Full Name *</string>
+    <string name="phone_star">Phone *</string>
+    <string name="vehicle_type_star">Vehicle Type *</string>
+    <string name="vehicle_plate_star">Vehicle Plate *</string>
+    <string name="confirm_password_required">Please confirm your password</string>
+    <string name="passwords_do_not_match">Passwords do not match</string>
+    <string name="already_have_account">Already have an account? Sign In</string>
+
+    <!-- Permissions / errors -->
+    <string name="location_permission_required">Location permission is required to go online — customers track your delivery</string>
+
+    <!-- Notifications -->
+    <string name="new_delivery_title">New Delivery</string>
+    <string name="new_delivery_body">You have a new delivery</string>
+    <string name="notification_channel_orders">Driver Order Notifications</string>
+    <string name="notification_channel_orders_description">New delivery alerts</string>
+    <string name="notification_channel_location">Delivery tracking</string>
+    <string name="location_notification_text">Sharing your location while online</string>
 </resources>

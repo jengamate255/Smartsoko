@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html class="light" lang="sw">
 <head>
+  <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>SmartSoko - Create Account</title>
@@ -12,7 +13,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script type="module" src="config/firebase-config.js?v=5"></script>
-  <script type="module" src="config/cross-platform-service.js?v=4"></script>
+  <script type="module" src="config/cross-platform-service.js?v=5"></script>
   <!-- Pre-load auth/firestore functions (preserves click gesture for Google OAuth popup) -->
   <script type="module">
     import { GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
@@ -37,6 +38,7 @@
       } catch (e) { /* ignore */ }
     })();
   </script>
+  <script src="js/i18n.js?v=1" defer></script>
   <script src="js/onboarding-guard.js?v=5" defer></script>
   <style>
     .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display: inline-block; line-height: 1; vertical-align: middle; }
@@ -51,8 +53,14 @@
     .shake { animation: shake .4s ease-in-out; }
   </style>
   <meta name="theme-color" content="#1B4332">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/stitch-site.css?v=5">
+  <script src="js/stitch-site.js?v=2" defer></script>
+  <link rel="stylesheet" href="css/site-uniform.css?v=1">
+  <link rel="manifest" href="/manifest.json">
+
 </head>
-<body class="bg-[#F8FAF6] text-gray-900 flex items-start sm:items-center justify-center min-h-screen py-10 sm:py-4 px-4 relative overflow-y-auto">
+<body class="ss-uniform stitch-site ss-auth bg-[#F8FAF6] text-gray-900 flex items-start sm:items-center justify-center min-h-screen py-10 sm:py-4 px-4 relative overflow-y-auto" data-stitch-page="signup">
 
   <!-- Decorative floating leaves -->
   <div class="absolute top-10 left-8 opacity-20 pointer-events-none leaf">
@@ -79,8 +87,8 @@
         <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
           <span class="material-symbols-outlined text-2xl text-green-700 filled-icon">person_add</span>
         </div>
-        <h1 class="font-headline-md text-xl font-extrabold text-green-800 tracking-tight">Create Account</h1>
-        <p class="text-gray-500 text-sm mt-1">Join SmartSoko marketplace</p>
+        <h1 data-i18n="auth.createAccount" class="font-headline-md text-xl font-extrabold text-green-800 tracking-tight">Create Account</h1>
+        <p data-i18n="signup.joinMarketplace" class="text-gray-500 text-sm mt-1">Join SmartSoko marketplace</p>
       </div>
     </div>
 
@@ -89,17 +97,17 @@
       
       <!-- Full Name -->
       <div>
-        <label for="fullName" class="block text-sm font-semibold text-gray-800/80 mb-1.5">Full Name</label>
+        <label for="fullName" data-i18n="auth.fullName" class="block text-sm font-semibold text-gray-800/80 mb-1.5">Full Name</label>
         <div class="relative">
           <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg">person</span>
-          <input type="text" id="fullName" placeholder="Enter your full name" 
+          <input type="text" id="fullName" data-i18n-placeholder="auth.fullName" placeholder="Enter your full name" 
             class="w-full pl-10 pr-4 py-3 bg-gray-50 rounded-xl border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-green-700/20 focus:border-green-700 outline-none transition-all" required>
         </div>
       </div>
 
       <!-- Email -->
       <div>
-        <label for="email" class="block text-sm font-semibold text-gray-800/80 mb-1.5">Email Address</label>
+        <label for="email" data-i18n="auth.email" class="block text-sm font-semibold text-gray-800/80 mb-1.5">Email Address</label>
         <div class="relative">
           <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg">email</span>
           <input type="email" id="email" placeholder="your@email.com" 
@@ -109,7 +117,7 @@
 
       <!-- Phone -->
       <div>
-        <label for="phone" class="block text-sm font-semibold text-gray-800/80 mb-1.5">Phone Number</label>
+        <label for="phone" data-i18n="auth.phoneNumber" class="block text-sm font-semibold text-gray-800/80 mb-1.5">Phone Number</label>
         <div class="relative">
           <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg">phone</span>
           <input type="tel" id="phone" placeholder="+255 XXX XXX XXX" 
@@ -119,7 +127,7 @@
 
       <!-- Password -->
       <div>
-        <label for="password" class="block text-sm font-semibold text-gray-800/80 mb-1.5">Password</label>
+        <label for="password" data-i18n="auth.password" class="block text-sm font-semibold text-gray-800/80 mb-1.5">Password</label>
         <div class="relative">
           <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg">lock</span>
           <input type="password" id="password" placeholder="Create a strong password" 
@@ -135,15 +143,15 @@
           </div>
           <span id="passwordStrengthText" class="text-xs text-gray-500">Weak</span>
         </div>
-        <p class="text-xs text-gray-500 mt-1">Min 8 chars, 1 uppercase, 1 number, 1 special char</p>
+        <p data-i18n="signup.passwordRule" class="text-xs text-gray-500 mt-1">Min 8 chars, 1 uppercase, 1 number, 1 special char</p>
       </div>
 
       <!-- Confirm Password -->
       <div>
-        <label for="confirmPassword" class="block text-sm font-semibold text-gray-800/80 mb-1.5">Confirm Password</label>
+        <label for="confirmPassword" data-i18n="auth.confirmPassword" class="block text-sm font-semibold text-gray-800/80 mb-1.5">Confirm Password</label>
         <div class="relative">
           <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg">lock_reset</span>
-          <input type="password" id="confirmPassword" placeholder="Confirm your password" 
+          <input type="password" id="confirmPassword" data-i18n-placeholder="auth.confirmPassword" placeholder="Confirm your password" 
             class="w-full pl-10 pr-12 py-3 bg-gray-50 rounded-xl border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-green-700/20 focus:border-green-700 outline-none transition-all" required>
           <button type="button" onclick="togglePassword('confirmPassword')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
             <span class="material-symbols-outlined text-lg" id="confirmPasswordToggle">visibility_off</span>
@@ -153,20 +161,20 @@
 
       <!-- Account Type -->
       <div>
-        <label class="block text-sm font-semibold text-gray-800/80 mb-2">I want to</label>
+        <label class="block text-sm font-semibold text-gray-800/80 mb-2" data-i18n="signup.iWantTo">I want to</label>
         <div class="grid grid-cols-2 gap-3">
           <label class="cursor-pointer">
             <input type="radio" name="accountType" value="customer" class="peer sr-only" checked>
             <div class="p-3 bg-gray-50 rounded-xl border-2 border-gray-200 peer-checked:border-green-700 peer-checked:bg-green-100 transition-all text-center">
               <span class="material-symbols-outlined text-2xl text-gray-400 peer-checked:text-green-700 mb-1">shopping_bag</span>
-              <p class="text-sm font-medium peer-checked:text-green-700">Buy Products</p>
+              <p class="text-sm font-medium peer-checked:text-green-700" data-i18n="signup.buyProducts">Buy Products</p>
             </div>
           </label>
           <label class="cursor-pointer">
             <input type="radio" name="accountType" value="merchant" class="peer sr-only">
             <div class="p-3 bg-gray-50 rounded-xl border-2 border-gray-200 peer-checked:border-green-700 peer-checked:bg-green-100 transition-all text-center">
               <span class="material-symbols-outlined text-2xl text-gray-400 peer-checked:text-green-700 mb-1">store</span>
-              <p class="text-sm font-medium peer-checked:text-green-700">Sell Products</p>
+              <p class="text-sm font-medium peer-checked:text-green-700" data-i18n="signup.sellProducts">Sell Products</p>
             </div>
           </label>
         </div>
@@ -175,7 +183,7 @@
       <!-- Terms -->
       <label class="flex items-start gap-2 cursor-pointer">
         <input type="checkbox" id="agreeTerms" class="mt-0.5 w-4 h-4 rounded border-gray-200 text-green-700 focus:ring-green-700/20">
-        <span class="text-xs text-gray-600">I agree to the <a href="#" class="text-green-700 hover:underline">Terms of Service</a> and <a href="#" class="text-green-700 hover:underline">Privacy Policy</a></span>
+        <span class="text-xs text-gray-600"><span data-i18n="auth.agreeTerms">I agree to the </span><a href="#" class="text-green-700 hover:underline" data-i18n="auth.termsOfService">Terms of Service</a> <a href="#" class="text-green-700 hover:underline" data-i18n="auth.andPrivacy">and Privacy Policy</a></span>
       </label>
 
       <!-- Error message -->
@@ -193,7 +201,7 @@
       <!-- Create Account Button -->
       <button onclick="createAccount()" id="signupBtn" 
         class="w-full bg-green-700 text-white font-semibold py-3.5 rounded-xl hover:bg-green-800 active:scale-[0.98] transition-all shadow-lg shadow-green-700/20 flex items-center justify-center gap-2">
-        <span>Create Account</span>
+        <span data-i18n="auth.createAccount">Create Account</span>
         <span class="material-symbols-outlined text-lg">arrow_forward</span>
       </button>
 
@@ -203,7 +211,7 @@
           <div class="w-full border-t border-gray-200"></div>
         </div>
         <div class="relative flex justify-center">
-          <span class="bg-white px-4 text-xs text-gray-500 font-medium">Or sign up with</span>
+          <span class="bg-white px-4 text-xs text-gray-500 font-medium" data-i18n="auth.orContinueWith">Or sign up with</span>
         </div>
       </div>
 
@@ -211,13 +219,13 @@
       <button onclick="signUpWithGoogle()" id="googleBtn"
         class="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 active:scale-[0.98] transition-all">
         <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        <span class="text-sm font-medium">Continue with Google</span>
+        <span class="text-sm font-medium" data-i18n="auth.signInGoogle">Continue with Google</span>
       </button>
 
       <!-- Login Link -->
       <p class="text-center text-sm text-gray-600 pt-2">
-        Already have an account? 
-        <a href="/login" class="text-green-700 font-semibold hover:underline">Sign in</a>
+        <span data-i18n="auth.hasAccount">Already have an account?</span>
+        <a href="/login" class="text-green-700 font-semibold hover:underline" data-i18n="auth.signIn">Sign in</a>
       </p>
     </div>
   </div>
@@ -228,9 +236,9 @@
       <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
         <span class="material-symbols-outlined text-3xl text-green-600 filled-icon">check_circle</span>
       </div>
-      <h3 class="font-headline-md text-xl font-bold text-gray-900 mb-2">Account Created!</h3>
-      <p class="text-gray-500 text-sm mb-6">Your account has been created successfully. Please check your email to verify your account.</p>
-      <button onclick="window.location.href='/login'" 
+      <h3 data-i18n="signup.accountCreated" class="font-headline-md text-xl font-bold text-gray-900 mb-2">Account Created!</h3>
+      <p class="text-gray-500 text-sm mb-6">Your account has been created successfully. Check your inbox for a verification email. You can now continue to sign in.</p>
+      <button onclick="window.location.href='/login'" data-i18n="auth.signIn"
         class="w-full bg-green-700 text-white font-semibold py-3 rounded-xl hover:bg-green-800 transition-all">
         Go to Sign In
       </button>
@@ -238,6 +246,7 @@
   </div>
 
   <script>
+    let signupInProgress = false;
     // Toggle password visibility
     function togglePassword(fieldId) {
       const field = document.getElementById(fieldId);
@@ -306,15 +315,17 @@
       if (password.length < 8) return showError('Password must be at least 8 characters');
       if (!password.match(/[A-Z]/)) return showError('Password must contain at least one uppercase letter');
       if (!password.match(/[0-9]/)) return showError('Password must contain at least one number');
+      if (!password.match(/[^A-Za-z0-9]/)) return showError('Password must contain at least one special character');
       if (password !== confirmPassword) return showError('Passwords do not match');
       if (!agreeTerms) return showError('Please agree to the Terms of Service');
       
       const btn = document.getElementById('signupBtn');
       btn.disabled = true;
+      signupInProgress = true;
       btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span><span>Creating account...</span>';
       
       try {
-        const { getAuth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+        const { getAuth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
         const { doc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
         
         const auth = window.auth || getAuth();
@@ -331,6 +342,7 @@
           phone: phone,
           role: accountType,
           emailVerified: false,
+          createdAt: new Date().toISOString(),
           onboardingComplete: false,
           onboardingVersion: window.SmartSokoOnboarding ? window.SmartSokoOnboarding.ONBOARDING_VERSION : 1
         };
@@ -388,6 +400,7 @@
         
         // Send email verification
         await sendEmailVerification(user);
+        await signOut(auth);
         
         // Show success modal
         document.getElementById('successModal').classList.remove('hidden');
@@ -405,7 +418,7 @@
         
         showError(errorMessages[err.code] || err.message || 'Failed to create account. Please try again.');
         btn.disabled = false;
-        btn.innerHTML = '<span>Create Account</span><span class="material-symbols-outlined text-lg">arrow_forward</span>';
+        btn.innerHTML = '<span>' + t('auth.createAccount') + '</span><span class="material-symbols-outlined text-lg">arrow_forward</span>';
       }
     }
 
@@ -503,7 +516,7 @@
       if (!auth) return;
       
       auth.onAuthStateChanged((user) => {
-        if (user) {
+        if (user && !signupInProgress) {
           // User is already signed in, redirect to appropriate page
           const db = window.db;
           if (!db) return;

@@ -13,10 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.smartsoko.customer.R
 import com.smartsoko.customer.data.model.CartItem
 import com.smartsoko.customer.ui.components.*
 
@@ -56,13 +58,13 @@ fun CartScreen(
                     }
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        "Your cart is empty",
+                        stringResource(R.string.cart_is_empty),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                     Spacer(Modifier.height(8.dp))
                     PrimaryButton(
-                        text = "Browse Restaurants",
+                        text = stringResource(R.string.browse_restaurants),
                         onClick = onContinueShopping
                     )
                 }
@@ -97,7 +99,7 @@ fun CartScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Subtotal", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.subtotal), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text("tsh %.2f".format(cartTotal), style = MaterialTheme.typography.bodyMedium)
                     }
                     Spacer(modifier = Modifier.height(4.dp))
@@ -105,7 +107,7 @@ fun CartScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Delivery Fee", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.delivery_fee), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text("tsh %.2f".format(deliveryFee), style = MaterialTheme.typography.bodyMedium)
                     }
                     HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
@@ -113,7 +115,7 @@ fun CartScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Total", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.total), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         Text(
                             "tsh %.2f".format(cartTotal + deliveryFee),
                             style = MaterialTheme.typography.titleMedium,
@@ -123,7 +125,7 @@ fun CartScreen(
                     }
                     Spacer(Modifier.height(16.dp))
                     PrimaryButton(
-                        text = "Checkout",
+                        text = stringResource(R.string.checkout),
                         onClick = onCheckout
                     )
                 }
@@ -202,7 +204,7 @@ fun CartItemCard(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant
                         )
                     ) {
-                        Icon(Icons.Default.Remove, contentDescription = "Decrease", modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.decrease_quantity), modifier = Modifier.size(16.dp))
                     }
                     Text(
                         text = item.quantity.toString(),
@@ -217,11 +219,11 @@ fun CartItemCard(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         )
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Increase", modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.increase_quantity), modifier = Modifier.size(16.dp))
                     }
                     Spacer(Modifier.weight(1f))
                     TextButton(onClick = onRemove) {
-                        Text("Remove", color = MaterialTheme.colorScheme.error)
+                        Text(stringResource(R.string.remove), color = MaterialTheme.colorScheme.error)
                     }
                 }
             }

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,6 +31,7 @@ import com.smartsoko.customer.ui.screens.HomeScreen
 import com.smartsoko.customer.ui.screens.LoginScreen
 import com.smartsoko.customer.ui.screens.OrderDetailScreen
 import com.smartsoko.customer.ui.screens.OrdersScreen
+import com.smartsoko.customer.ui.screens.OtpVerificationScreen
 import com.smartsoko.customer.ui.screens.ProductDetailScreen
 import com.smartsoko.customer.ui.screens.ProfileScreen
 import com.smartsoko.customer.ui.screens.RestaurantMenuScreen
@@ -55,6 +57,7 @@ class MainActivity : ComponentActivity() {
 
                 var isSigningUp by remember { mutableStateOf(false) }
                 var isResettingPassword by remember { mutableStateOf(false) }
+                var isVerifyingOtp by remember { mutableStateOf(false) }
                 var selectedRestaurant by remember { mutableStateOf<Merchant?>(null) }
                 var selectedProduct by remember { mutableStateOf<Product?>(null) }
                 var isCheckingOut by remember { mutableStateOf(false) }
@@ -93,6 +96,44 @@ class MainActivity : ComponentActivity() {
                             onBack = { isResettingPassword = false },
                             onClearError = { viewModel.clearError() }
                         )
+                    } else if (isVerifyingOtp) {
+                        OtpVerificationScreen(
+                            phoneNumber = uiState.otpPhone,
+                            isLoading = uiState.isLoading,
+                            error = uiState.error,
+                            devCode = uiState.otpDevCode,
+                            onSendOtp = { phone ->
+                                viewModel.sendOtp(
+                                    phone = phone,
+                                    onSuccess = {},
+                                    onError = {}
+                                )
+                            },
+                            onVerify = { code ->
+                                uiState.otpPhone?.let { phone ->
+                                    viewModel.verifyOtp(
+                                        phone = phone,
+                                        code = code,
+                                        onSuccess = { isVerifyingOtp = false },
+                                        onError = {}
+                                    )
+                                }
+                            },
+                            onResend = {
+                                uiState.otpPhone?.let { phone ->
+                                    viewModel.sendOtp(
+                                        phone = phone,
+                                        onSuccess = {},
+                                        onError = {}
+                                    )
+                                }
+                            },
+                            onBack = {
+                                isVerifyingOtp = false
+                                viewModel.clearOtpState()
+                            },
+                            onClearError = { viewModel.clearError() }
+                        )
                     } else {
                         LoginScreen(
                             isLoading = uiState.isLoading,
@@ -106,6 +147,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             },
                             onGoogleSignIn = { idToken -> viewModel.signInWithGoogle(idToken) },
+                            onPhoneSignIn = { isVerifyingOtp = true },
                             onSignUp = { isSigningUp = true },
                             onForgotPassword = { isResettingPassword = true },
                             onClearError = { viewModel.clearError() }
@@ -235,8 +277,8 @@ fun CustomerApp(
                 tonalElevation = 3.dp
             ) {
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                    label = { Text("Home") },
+                    icon = { Icon(Icons.Default.Home, contentDescription = stringResource(R.string.home)) },
+                    label = { Text(stringResource(R.string.home)) },
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 }
                 )
@@ -245,20 +287,20 @@ fun CustomerApp(
                         if (cartCount > 0) {
                             Badge { Text(cartCount.toString()) }
                         }
-                    }) { Icon(Icons.Default.ShoppingCart, contentDescription = "Cart") } },
-                    label = { Text("Cart") },
+                    }) { Icon(Icons.Default.ShoppingCart, contentDescription = stringResource(R.string.cart)) } },
+                    label = { Text(stringResource(R.string.cart)) },
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 }
                 )
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.ReceiptLong, contentDescription = "Orders") },
-                    label = { Text("Orders") },
+                    icon = { Icon(Icons.Default.ReceiptLong, contentDescription = stringResource(R.string.orders)) },
+                    label = { Text(stringResource(R.string.orders)) },
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 }
                 )
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
-                    label = { Text("Profile") },
+                    icon = { Icon(Icons.Default.Person, contentDescription = stringResource(R.string.profile)) },
+                    label = { Text(stringResource(R.string.profile)) },
                     selected = selectedTab == 3,
                     onClick = { selectedTab = 3 }
                 )

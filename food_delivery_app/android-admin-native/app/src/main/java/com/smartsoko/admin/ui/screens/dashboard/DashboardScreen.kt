@@ -12,9 +12,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.smartsoko.admin.R
 
 data class NavItem(val label: String, val icon: ImageVector, val onClick: () -> Unit)
 
@@ -34,20 +36,20 @@ fun DashboardScreen(
     LaunchedEffect(Unit) { viewModel.loadDashboard() }
 
     val navItems = listOf(
-        NavItem("Users", Icons.Default.People, onNavigateToUsers),
-        NavItem("Orders", Icons.Default.ShoppingCart, onNavigateToOrders),
-        NavItem("Products", Icons.Default.Inventory2, onNavigateToProducts),
-        NavItem("Support", Icons.Default.SupportAgent, onNavigateToSupport),
-        NavItem("Settings", Icons.Default.Settings, onNavigateToSettings)
+        NavItem(stringResource(R.string.users), Icons.Default.People, onNavigateToUsers),
+        NavItem(stringResource(R.string.orders), Icons.Default.ShoppingCart, onNavigateToOrders),
+        NavItem(stringResource(R.string.products), Icons.Default.Inventory2, onNavigateToProducts),
+        NavItem(stringResource(R.string.support), Icons.Default.SupportAgent, onNavigateToSupport),
+        NavItem(stringResource(R.string.settings), Icons.Default.Settings, onNavigateToSettings)
     )
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Dashboard", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.dashboard), fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary),
                 actions = {
-                    IconButton(onClick = onLogout) { Icon(Icons.Default.Logout, contentDescription = "Logout", tint = MaterialTheme.colorScheme.onPrimary) }
+                    IconButton(onClick = onLogout) { Icon(Icons.Default.Logout, contentDescription = stringResource(R.string.logout), tint = MaterialTheme.colorScheme.onPrimary) }
                 }
             )
         }
@@ -59,17 +61,17 @@ fun DashboardScreen(
                 // Stats row
                 val stats = uiState.stats
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StatCard("Orders", "${stats?.ordersToday ?: 0}", Icons.Default.Receipt, Modifier.weight(1f))
-                    StatCard("Revenue", "TSh ${String.format("%.0f", stats?.revenueToday ?: 0.0)}", Icons.Default.TrendingUp, Modifier.weight(1f))
+                    StatCard(stringResource(R.string.orders), "${stats?.ordersToday ?: 0}", Icons.Default.Receipt, Modifier.weight(1f))
+                    StatCard(stringResource(R.string.revenue), "TSh ${String.format("%.0f", stats?.revenueToday ?: 0.0)}", Icons.Default.TrendingUp, Modifier.weight(1f))
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StatCard("Users", "${stats?.activeUsers ?: 0}", Icons.Default.People, Modifier.weight(1f))
-                    StatCard("Pending", "${stats?.pendingOrders ?: 0}", Icons.Default.HourglassEmpty, Modifier.weight(1f))
+                    StatCard(stringResource(R.string.users), "${stats?.activeUsers ?: 0}", Icons.Default.People, Modifier.weight(1f))
+                    StatCard(stringResource(R.string.pending), "${stats?.pendingOrders ?: 0}", Icons.Default.HourglassEmpty, Modifier.weight(1f))
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
-                Text("Quick Actions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.quick_actions), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                 Spacer(modifier = Modifier.height(12.dp))
 
                 LazyVerticalGrid(columns = GridCells.Fixed(2), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {

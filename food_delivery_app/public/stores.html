@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="sw">
 <head>
+  <script src="/config/api-origin.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SmartSoko - Discover Local Stores</title>
@@ -202,39 +203,46 @@
       .stores-grid { grid-template-columns: 1fr; }
     }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/stitch-site.css?v=5">
+  <script src="js/i18n.js?v=1" defer></script>
+  <script src="js/stitch-site.js?v=2" defer></script>
+  <link rel="stylesheet" href="css/site-uniform.css?v=1">
+  <link rel="manifest" href="/manifest.json">
+
 </head>
-<body>
+<body class="ss-uniform stitch-site ss-commerce ss-food" data-stitch-page="stores">
   <div class="hero">
-    <h1>Discover Local Stores</h1>
-    <p>Find your favorite restaurants and shops near you</p>
+    <h1 data-i18n="stores.discover">Discover Local Stores</h1>
+    <p data-i18n="stores.subtitle">Find your favorite restaurants and shops near you</p>
     <div class="search-box">
       <input type="text" id="searchInput" placeholder="Search stores or categories..." oninput="handleSearch()">
-      <button onclick="performSearch()">Search</button>
+      <button onclick="performSearch()" data-i18n="common.search">Search</button>
     </div>
   </div>
   
   <div class="container">
     <div class="categories-section">
-      <h2 class="section-title">Categories</h2>
+      <h2 class="section-title" data-i18n="nav.categories">Categories</h2>
       <div class="categories-grid" id="categoriesGrid"></div>
     </div>
     
     <div class="quick-filters">
-      <div class="filter-chip active" onclick="setFilter('all', this)">All</div>
+      <div class="filter-chip active" onclick="setFilter('all', this)" data-i18n="cat.all">All</div>
       <div class="filter-chip" onclick="setFilter('rating', this)">Top Rated</div>
       <div class="filter-chip" onclick="setFilter('fast', this)">Fast Delivery</div>
-      <div class="filter-chip" onclick="setFilter('nearby', this)">Nearby</div>
+      <div class="filter-chip" onclick="setFilter('nearby', this)" data-i18n="stores.nearby">Nearby</div>
     </div>
     
     <div class="featured-section">
       <div id="featuredSection" style="display:none;">
-        <span class="featured-badge">â­ Featured</span>
+        <span class="featured-badge">â­ <span data-i18n="stores.featured">Featured</span></span>
         <div class="stores-grid" id="featuredGrid"></div>
       </div>
       
       <h2 class="section-title" id="storesTitle">All Stores</h2>
       <div class="stores-grid" id="storesGrid">
-        <div class="loading">Loading stores...</div>
+        <div class="loading" data-i18n="stores.loading">Loading stores...</div>
       </div>
     </div>
   </div>
@@ -365,10 +373,10 @@
       document.getElementById('featuredSection').style.display = featured.length > 0 ? 'block' : 'none';
       document.getElementById('featuredGrid').innerHTML = featured.map(store => renderStoreCard(store, true)).join('');
 
-      document.getElementById('storesTitle').textContent = currentCategory === 'All' ? 'All Stores' : currentCategory;
+      document.getElementById('storesTitle').textContent = currentCategory === 'All' ? t('stores.allStores') : currentCategory;
       document.getElementById('storesGrid').innerHTML = stores.length > 0 
         ? stores.map(store => renderStoreCard(store)).join('')
-        : '<div class="empty-state"><div class="icon">ðŸ”</div><p>No stores found</p></div>';
+        : '<div class="empty-state"><div class="icon">ðŸ”</div><p>' + t('stores.noStores') + '</p></div>';
     }
 
     function renderStoreCard(store, isFeatured = false) {
@@ -377,7 +385,7 @@
           <div class="store-image">
             ${store.imageEmoji}
             <div class="store-badge ${store.isOpen ? 'open' : 'closed'}">
-              ${store.isOpen ? 'âœ“ Open' : 'âœ• Closed'}
+              ${store.isOpen ? 'âœ“ ' + t('stores.open', 'Open') : 'âœ• ' + t('stores.closed', 'Closed')}
             </div>
           </div>
           <div class="store-info">
@@ -408,7 +416,7 @@
       window.location.href = `smartsoko-vendor.html?id=${storeId}`;
     }
 
-    init();
+    document.addEventListener('DOMContentLoaded', init, { once: true });
   </script>
 </body>
 </html>

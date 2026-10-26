@@ -10,7 +10,14 @@ const API = (() => {
   const defaultHeaders = {
     'Content-Type': 'application/json'
   };
-  
+
+  // The backend localizes its responses from this header
+  // (server/src/utils/api-messages.js); Kiswahili is the product default.
+  function languageHeaders() {
+    const lang = window.SmartSokoI18n?.getLang?.() || 'sw';
+    return { 'X-Language': lang };
+  }
+
   // Helper to handle responses
   async function handleResponse(response) {
     if (!response.ok) {
@@ -24,8 +31,8 @@ const API = (() => {
   async function request(endpoint, options = {}) {
     const url = `${baseURL}${endpoint}`;
     const config = {
-      headers: { ...defaultHeaders, ...options.headers },
-      ...options
+      ...options,
+      headers: { ...defaultHeaders, ...languageHeaders(), ...options.headers }
     };
     
     try {

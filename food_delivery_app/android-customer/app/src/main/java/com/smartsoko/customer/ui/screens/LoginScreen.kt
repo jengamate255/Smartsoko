@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -28,9 +29,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.smartsoko.customer.R
 
 private const val GOOGLE_WEB_CLIENT_ID = "727819507148-mercep.smartsoko.customer.firebase.googleapis.com"
 
@@ -40,6 +43,7 @@ fun LoginScreen(
     error: String?,
     onSignIn: (String, String) -> Unit,
     onGoogleSignIn: (String) -> Unit,
+    onPhoneSignIn: () -> Unit,
     onSignUp: () -> Unit,
     onForgotPassword: () -> Unit,
     onClearError: () -> Unit
@@ -52,6 +56,7 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    val passwordRequired = stringResource(R.string.password_required)
 
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -65,7 +70,7 @@ fun LoginScreen(
 
     fun validate(): Boolean {
         emailError = Validators.emailError(email)
-        passwordError = if (password.isBlank()) "Password is required" else null
+        passwordError = if (password.isBlank()) passwordRequired else null
         return emailError == null && passwordError == null
     }
 
@@ -91,7 +96,7 @@ fun LoginScreen(
         )
 
         Text(
-            text = "Order from local sellers",
+            text = stringResource(R.string.order_from_local_sellers),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 28.dp)
@@ -99,7 +104,7 @@ fun LoginScreen(
 
         SmartCard {
             Text(
-                text = "Welcome Back",
+                text = stringResource(R.string.welcome_back),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -107,7 +112,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Sign in to continue ordering",
+                text = stringResource(R.string.sign_in_to_continue),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 20.dp)
@@ -140,8 +145,8 @@ fun LoginScreen(
                     email = it
                     if (attemptedSubmit) emailError = Validators.emailError(it)
                 },
-                label = { Text("Email or Phone") },
-                placeholder = { Text("e.g. name@example.com") },
+                label = { Text(stringResource(R.string.email_or_phone)) },
+                placeholder = { Text(stringResource(R.string.email_placeholder)) },
                 leadingIcon = {
                     Icon(Icons.Default.Email, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 },
@@ -164,9 +169,9 @@ fun LoginScreen(
                 value = password,
                 onValueChange = {
                     password = it
-                    if (attemptedSubmit) passwordError = if (it.isBlank()) "Password is required" else null
+                    if (attemptedSubmit) passwordError = if (it.isBlank()) passwordRequired else null
                 },
-                label = { Text("Password") },
+                label = { Text(stringResource(R.string.password)) },
                 placeholder = { Text("••••••••") },
                 leadingIcon = {
                     Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -175,7 +180,7 @@ fun LoginScreen(
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                            contentDescription = if (passwordVisible) stringResource(R.string.hide_password) else stringResource(R.string.show_password)
                         )
                     }
                 },
@@ -202,12 +207,12 @@ fun LoginScreen(
                 horizontalArrangement = Arrangement.End
             ) {
                 TextButton(onClick = onForgotPassword) {
-                    Text("Forgot Password?", color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.forgot_password), color = MaterialTheme.colorScheme.primary)
                 }
             }
 
             PrimaryButton(
-                text = "Sign In",
+                text = stringResource(R.string.sign_in),
                 isLoading = isLoading,
                 onClick = {
                     attemptedSubmit = true
@@ -224,7 +229,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             SecondaryButton(
-                text = "Sign in with Google",
+                text = stringResource(R.string.sign_in_with_google),
                 enabled = !isLoading,
                 leadingIcon = {
                     Icon(
@@ -242,13 +247,28 @@ fun LoginScreen(
                     googleSignInLauncher.launch(googleSignInClient.signInIntent)
                 }
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            SecondaryButton(
+                text = stringResource(R.string.sign_in_with_phone),
+                enabled = !isLoading,
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Phone,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
+                onClick = onPhoneSignIn
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         TextButton(onClick = onSignUp) {
             Text(
-                "Don't have an account? Create Account",
+                stringResource(R.string.create_account_prompt),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary
             )

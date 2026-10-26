@@ -12,10 +12,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.smartsoko.admin.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,15 +36,15 @@ fun UsersScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Users", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.users), fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary),
                 actions = {
                     IconButton(onClick = { showSearch = !showSearch; if (!showSearch) { searchText = ""; viewModel.setSearchQuery("") } }) {
-                        Icon(Icons.Default.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.onPrimary)
+                        Icon(Icons.Default.Search, contentDescription = stringResource(R.string.cd_search), tint = MaterialTheme.colorScheme.onPrimary)
                     }
                     Box {
                         IconButton(onClick = { showFilterMenu = true }) {
-                            Icon(Icons.Default.FilterList, contentDescription = "Filter", tint = MaterialTheme.colorScheme.onPrimary)
+                            Icon(Icons.Default.FilterList, contentDescription = stringResource(R.string.cd_filter), tint = MaterialTheme.colorScheme.onPrimary)
                         }
                         DropdownMenu(expanded = showFilterMenu, onDismissRequest = { showFilterMenu = false }) {
                             listOf("all", "customer", "seller", "driver", "admin").forEach { role ->
@@ -55,7 +57,7 @@ fun UsersScreen(
                         }
                     }
                     IconButton(onClick = { viewModel.loadUsers() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = MaterialTheme.colorScheme.onPrimary)
+                        Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.cd_refresh), tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
             )
@@ -66,7 +68,7 @@ fun UsersScreen(
                 OutlinedTextField(
                     value = searchText,
                     onValueChange = { searchText = it; viewModel.setSearchQuery(it) },
-                    placeholder = { Text("Search users...") },
+                    placeholder = { Text(stringResource(R.string.search_users)) },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
@@ -83,14 +85,14 @@ fun UsersScreen(
                         Icon(Icons.Default.ErrorOutline, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.error)
                         Text(uiState.error!!, color = MaterialTheme.colorScheme.error)
                         Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedButton(onClick = { viewModel.loadUsers() }) { Text("Retry") }
+                        OutlinedButton(onClick = { viewModel.loadUsers() }) { Text(stringResource(R.string.retry)) }
                     }
                 }
             } else {
                 LazyColumn {
                     item {
                         Text(
-                            "${uiState.users.size} user(s)",
+                            stringResource(R.string.users_count, uiState.users.size),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -133,7 +135,7 @@ fun UserListItem(user: com.smartsoko.admin.data.remote.dto.UserDto, onClick: () 
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text((user.name ?: user.fullName ?: "Unknown"), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text((user.name ?: user.fullName ?: stringResource(R.string.unknown)), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(user.email ?: "", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.secondaryContainer) {

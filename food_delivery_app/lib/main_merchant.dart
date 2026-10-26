@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'utils/app_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'services/firebase_service.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -17,10 +18,10 @@ import 'utils/logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Set app configuration for Merchant App
   AppConfig.setAppType('merchant');
-  
+
   try {
     // Load environment variables (optional for development)
     try {
@@ -28,35 +29,29 @@ void main() async {
     } catch (e) {
       AppLogger.warning('Environment file not loaded, using default config');
     }
-    
+
     // Initialize Supabase (must be before Firebase for auth fallback)
     await SupabaseService().initialize();
-    
+
     // Initialize Firebase
-    await Firebase.initializeApp(
-      options: FirebaseOptions(
-        apiKey: AppConfig.firebaseConfig['apiKey'],
-        authDomain: AppConfig.firebaseConfig['authDomain'],
-        projectId: AppConfig.firebaseConfig['projectId'],
-        storageBucket: AppConfig.firebaseConfig['storageBucket'],
-        messagingSenderId: AppConfig.firebaseConfig['messagingSenderId'],
-        appId: AppConfig.firebaseConfig['appId'],
-        databaseURL: AppConfig.firebaseConfig['databaseURL'],
-      ),
-    );
-    
+    await initializeFirebase();
+
     // Configure Firestore offline persistence
     FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: true,
       cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
     );
-    
+
     // Configure Crashlytics
     FlutterError.onError = (errorDetails) {
       FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-      AppLogger.fatal('Flutter error', errorDetails.exception, errorDetails.stack);
+      AppLogger.fatal(
+        'Flutter error',
+        errorDetails.exception,
+        errorDetails.stack,
+      );
     };
-    
+
     runApp(const MerchantApp());
   } catch (e, stackTrace) {
     AppLogger.fatal('Failed to initialize app', e, stackTrace);
@@ -75,60 +70,79 @@ class MerchantApp extends StatelessWidget {
         Provider(create: (_) => OrderService()),
         Provider(create: (_) => RestaurantService()),
         Provider(create: (_) => ConnectivityService()),
+        ChangeNotifierProvider(create: (_) => LanguageService()),
       ],
-      child: MaterialApp(
-        title: 'Food Delivery - Merchant',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF064E3B),
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-          scaffoldBackgroundColor: const Color(0xFFF7F9FF),
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFF064E3B),
-            foregroundColor: Colors.white,
-            elevation: 0,
-            centerTitle: true,
-            titleTextStyle: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+      child: Consumer<LanguageService>(
+        builder: (_, language, _) => MaterialApp(
+          title: 'Food Delivery - Merchant',
+          debugShowCheckedModeBanner: false,
+          locale: Locale(language.currentLanguage),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF064E3B),
+              brightness: Brightness.light,
             ),
-          ),
-          cardTheme: CardTheme(
-            elevation: 0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          ),
-          inputDecorationTheme: InputDecorationTheme(
-            filled: true,
-            fillColor: Colors.grey[50],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF064E3B), width: 2),
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF064E3B),
+            useMaterial3: true,
+            scaffoldBackgroundColor: const Color(0xFFF7F9FF),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xFF064E3B),
               foregroundColor: Colors.white,
               elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              centerTitle: true,
+              titleTextStyle: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            cardTheme: CardThemeData(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              filled: true,
+              fillColor: Colors.grey[50],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: Color(0xFF064E3B),
+                  width: 2,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+            ),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF064E3B),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
           ),
+          home: const AuthWrapper(),
         ),
-        home: const AuthWrapper(),
       ),
     );
   }
@@ -140,7 +154,7 @@ class AuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authService = context.read<AuthService>();
-    
+
     return StreamBuilder(
       stream: authService.authStateChanges,
       builder: (context, snapshot) {
@@ -149,7 +163,7 @@ class AuthWrapper extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        
+
         if (snapshot.hasData && snapshot.data != null) {
           // Set Crashlytics user ID and role for crash reporting
           final user = snapshot.data!;
@@ -158,7 +172,7 @@ class AuthWrapper extends StatelessWidget {
           FirebaseCrashlytics.instance.setCustomKey('app_type', 'merchant');
           return const MerchantMainScreen();
         }
-        
+
         return const MerchantLoginScreen();
       },
     );
@@ -167,9 +181,9 @@ class AuthWrapper extends StatelessWidget {
 
 class ErrorApp extends StatelessWidget {
   final String error;
-  
+
   const ErrorApp({super.key, required this.error});
-  
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

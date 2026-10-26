@@ -1,0 +1,132 @@
+<resources>
+    <string name="app_name">Food Delivery Customer</string>
+
+    <!-- Shared / navigation -->
+    <string name="logo">Logo</string>
+    <string name="or_divider">AU</string>
+    <string name="back">Rudi</string>
+    <string name="home">Nyumbani</string>
+    <string name="cart">Kikapu</string>
+    <string name="orders">Maagizo</string>
+    <string name="profile">Wasifu</string>
+    <string name="order">Agizo</string>
+
+    <!-- Money / order summary -->
+    <string name="subtotal">Jumlisha</string>
+    <string name="delivery_fee">Ada ya usafirishaji</string>
+    <string name="total">Jumla</string>
+    <string name="delivery_amount_tsh">Usafirishaji %1$s</string>
+    <string name="quantity_x_amount">%1$d x %2$s</string>
+
+    <!-- Cart -->
+    <string name="cart_is_empty">Kikapu chako ni kitupu</string>
+    <string name="browse_restaurants">Vinukarisha Migahawa</string>
+    <string name="remove">Ondoa</string>
+    <string name="decrease_quantity">Punguza</string>
+    <string name="increase_quantity">Ongeza</string>
+
+    <!-- Checkout -->
+    <string name="checkout">Malipa</string>
+    <string name="delivery_address">Anwani ya usafirishaji</string>
+    <string name="payment_method">Njia ya malipo</string>
+    <string name="place_order">Weka Agizo</string>
+
+    <!-- Forgot password -->
+    <string name="reset_password">Weka Upya Nenosiri</string>
+    <string name="reset_email_sent">Barua Pepe ya Upya Imetumwa!</string>
+    <string name="check_email_inbox">Angalia kasha lako la barua pepe kwa maagizo ya kuweka upya nenosiri lako.</string>
+    <string name="back_to_sign_in">Rudi kwenye Kuingia</string>
+    <string name="forgot_password">Umesahau Nenosiri?</string>
+    <string name="forgot_password_instructions">Weka anwani yako ya barua pepe na tutakutumia maagizo ya kuweka upya nenosiri lako.</string>
+    <string name="email">Barua pepe</string>
+    <string name="send_reset_email">Tuma Barua ya Upya</string>
+
+    <!-- Home -->
+    <string name="search_restaurants">Tafuta migahawa</string>
+    <string name="no_restaurants_match">Hakuna migahawa inayolingana na utafutaji wako</string>
+    <string name="no_restaurants_available">Hakuna migahawa inayopatikana</string>
+
+    <!-- Login -->
+    <string name="order_from_local_sellers">Agiza kutoka kwa wauzaji wa ndani</string>
+    <string name="welcome_back">Karibu Tena</string>
+    <string name="sign_in_to_continue">Ingia ili endelea kuagiza</string>
+    <string name="email_or_phone">Barua pepe au Simu</string>
+    <string name="email_placeholder">mf. jina@mfano.com</string>
+    <string name="password">Nenosiri</string>
+    <string name="password_required">Nenosiri linahitajika</string>
+    <string name="show_password">Onyesha nenosiri</string>
+    <string name="hide_password">Ficha nenosiri</string>
+    <string name="sign_in">Ingia</string>
+    <string name="sign_in_with_google">Ingia kwa Google</string>
+    <string name="sign_in_with_phone">Ingia kwa Simu</string>
+    <string name="create_account_prompt">Huna akaunti? Fungua Akaunti</string>
+
+    <!-- OTP verification -->
+    <string name="phone_login">Kuingia kwa Simu</string>
+    <string name="verify_phone">Thibitisha Simu</string>
+    <string name="enter_your_phone_number">Weka nambari yako ya simu</string>
+    <string name="enter_phone_number">Weka Nambari ya Simu</string>
+    <string name="we_will_send_code">Tutakutumia msimbo wa uthibitisho</string>
+    <string name="enter_verification_code">Weka Msimbo wa Uthibitisho</string>
+    <string name="code_sent_to_phone">Tumekutumia msimbo wa tarakimu 6 kwenye simu yako</string>
+    <string name="dev_mode">Hali ya Majaribio</string>
+    <string name="your_verification_code">Msimbo wako wa uthibitisho: %1$s</string>
+    <string name="phone_number">Nambari ya Simu</string>
+    <string name="send_code">Tuma Msimbo</string>
+    <string name="verification_code">Msimbo wa Uthibitisho</string>
+    <string name="verify">Thibitisha</string>
+    <string name="resend_code">Tuma Msimbo Upya</string>
+    <string name="code_required">Msimbo wa uthibitisho unahitajika</string>
+    <string name="code_six_digits">Msimbo lazima uwe na tarakimu 6</string>
+    <string name="code_digits_only">Msimbo lazima uwe na tarakimu pekee</string>
+
+    <!-- Order detail -->
+    <string name="order_details">Maelezo ya Agizo</string>
+    <string name="order_items">Bidhaa za Agizo</string>
+    <string name="payment">Malipo</string>
+    <string name="payment_method_and_status">Njia: %1$s\nHali: %2$s</string>
+
+    <!-- Orders -->
+    <string name="no_orders_yet">Hakuna maagizo bado</string>
+    <string name="orders_will_appear_here">Maagizo yako yataonekana hapa</string>
+    <string name="status_pending">Inasubiri</string>
+    <string name="status_accepted">Imekubaliwa</string>
+    <string name="status_ready">Imetayarishwa</string>
+    <string name="status_delivered">Imefikishwa</string>
+    <string name="status_completed">Imekamilika</string>
+    <string name="status_cancelled">Imeghairiwa</string>
+    <string name="status_rejected">Imekataliwa</string>
+
+    <!-- Product detail -->
+    <string name="add_to_cart">Ongeza Kikapuni</string>
+    <string name="description">Maelezo</string>
+
+    <!-- Profile -->
+    <string name="sign_out">Ondoka</string>
+    <string name="sign_out_confirm">Una hakika unataka kuondoka?</string>
+    <string name="cancel">Ghairi</string>
+    <string name="personal_information">Maelezo ya Kibinafsi</string>
+    <string name="edit">Hariri</string>
+    <string name="name">Jina</string>
+    <string name="phone">Simu</string>
+    <string name="address">Anwani</string>
+    <string name="save">Hifadhi</string>
+    <string name="account">Akaunti</string>
+
+    <!-- Restaurant menu -->
+    <string name="no_items_available">Hakuna bidhaa zinazopatikana</string>
+    <string name="add">Ongeza</string>
+
+    <!-- Sign up -->
+    <string name="create_account">Fungua Akaunti</string>
+    <string name="your_information">Maelezo Yako</string>
+    <string name="email_star">Barua pepe *</string>
+    <string name="password_star">Nenosiri *</string>
+    <string name="confirm_password_star">Thibitisha Nenosiri *</string>
+    <string name="full_name_star">Jina Kamili *</string>
+    <string name="phone_star">Simu *</string>
+    <string name="delivery_address_star">Anwani ya Usafirishaji *</string>
+    <string name="passwords_do_not_match">Manenosiri hayalingani</string>
+    <string name="confirm_password_required">Tafadhali thibitisha nenosiri lako</string>
+    <string name="already_have_account">Tayari una akaunti? Ingia</string>
+</resources>

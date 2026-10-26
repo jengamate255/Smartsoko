@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SmartSoko Admin</string>
+    <string name="login_title">Ingia kama Msimamizi</string>
+    <string name="login_subtitle">Usimamizi wa Jukwaa la SmartSoko</string>
+    <string name="email_hint">Barua Pepe</string>
+    <string name="password_hint">Nenosiri</string>
+    <string name="login_button">Ingia</string>
+    <string name="logging_in">Inaingia...</string>
+    <string name="dashboard">Dashibodi</string>
+    <string name="users">Watumiaji</string>
+    <string name="orders">Maagizo</string>
+    <string name="products">Bidhaa</string>
+    <string name="support">Msaada</string>
+    <string name="settings">Mipangilio</string>
+    <string name="logout">Ondoka</string>
+    <string name="error_auth">Uthibitishaji umeshindwa</string>
+    <string name="error_network">Hitilafu ya mtandao</string>
+    <string name="error_unknown">Kimetokea hitilafu isiyojulikana</string>
+
+    <!-- Login screen -->
+    <string name="admin_panel">Paneli ya Msimamizi</string>
+
+    <!-- Dashboard -->
+    <string name="revenue">Mapato</string>
+    <string name="pending">Inasubiri</string>
+    <string name="quick_actions">Hatua za Haraka</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_filter">Chuja</string>
+    <string name="cd_refresh">Onyesha upya</string>
+    <string name="cd_back">Rudi nyuma</string>
+    <string name="cd_search">Tafuta</string>
+    <string name="cd_add_note">Ongeza kumbukumbu</string>
+    <string name="cd_add_product">Ongeza bidhaa</string>
+    <string name="cd_delete">Futa</string>
+    <string name="cd_activate">Amilisha</string>
+    <string name="cd_suspend">Simamisha</string>
+    <string name="cd_new_ticket">Tiketi mpya</string>
+
+    <!-- Orders -->
+    <string name="orders_count">Maagizo %1$d</string>
+    <string name="order_number">Agizo #%1$s</string>
+    <string name="guest">Mgeni</string>
+    <string name="order_details">Maelezo ya Agizo</string>
+    <string name="label_customer">"Mteja: "</string>
+    <string name="label_amount">"Kiasi: "</string>
+    <string name="label_delivery">"Uwasilishaji: "</string>
+    <string name="label_created">"Iliundwa: "</string>
+    <string name="items_count">Vipengee (%1$d)</string>
+    <string name="fallback_item">Kipengee</string>
+    <string name="timeline">Ratiba</string>
+    <string name="no_events_yet">Hakuna matukio bado</string>
+    <string name="internal_notes">Kumbukumbu za Ndani</string>
+    <string name="no_notes">Hakuna kumbukumbu</string>
+    <string name="add_internal_note">Ongeza Kumbukumbu ya Ndani</string>
+    <string name="note_placeholder">Kumbukumbu...</string>
+    <string name="save">Hifadhi</string>
+    <string name="cancel">Ghairi</string>
+
+    <!-- Products -->
+    <string name="search_products">Tafuta bidhaa...</string>
+    <string name="products_count">Bidhaa %1$d</string>
+    <string name="unknown">Haijulikani</string>
+    <string name="stock_count">Hisa: %1$d</string>
+    <string name="new_product">Bidhaa Mpya</string>
+    <string name="field_name_required">Jina *</string>
+    <string name="field_price_required">Bei *</string>
+    <string name="description">Maelezo</string>
+    <string name="field_stock">Hisa</string>
+    <string name="field_unit">Kipimo</string>
+    <string name="create">Unda</string>
+    <string name="product_details">Maelezo ya Bidhaa</string>
+    <string name="details">Maelezo</string>
+    <string name="label_stock">"Hisa: "</string>
+    <string name="label_unit">"Kipimo: "</string>
+    <string name="label_available">"Inapatikana: "</string>
+    <string name="yes">Ndiyo</string>
+    <string name="no">Hapana</string>
+
+    <!-- Support -->
+    <string name="sla_open">Wazi</string>
+    <string name="sla_progress">Inaendelea</string>
+    <string name="sla_resolved">Imetatuliwa</string>
+    <string name="sla_breached">Imekosa Muda</string>
+    <string name="sla_avg_time">Wastani wa Muda</string>
+    <string name="tickets_count">Tiketi %1$d</string>
+    <string name="no_subject">Hakuna mada</string>
+    <string name="assigned_to">" • Imepangiwa: %1$s"</string>
+    <string name="new_support_ticket">Tiketi Mpya ya Msaada</string>
+    <string name="field_subject_required">Mada *</string>
+    <string name="field_description_required">Maelezo *</string>
+    <string name="customer_name">Jina la Mteja</string>
+    <string name="customer_email">Barua Pepe ya Mteja</string>
+    <string name="priority">Kipaumbele</string>
+
+    <!-- Users -->
+    <string name="search_users">Tafuta watumiaji...</string>
+    <string name="retry">Jaribu tena</string>
+    <string name="users_count">Watumiaji %1$d</string>
+    <string name="user_details">Maelezo ya Mtumiaji</string>
+    <string name="status_suspended">Imesimamishwa</string>
+    <string name="status_active">Inayendelea</string>
+    <string name="contact_info">Maelezo ya Mawasiliano</string>
+    <string name="recent_activity">Shughuli za Hivi Majaribuni</string>
+    <string name="no_recent_activity">Hakuna shughuli za hivi majaribuni</string>
+    <string name="orders_section_count">Maagizo (%1$d)</string>
+    <string name="no_orders">Hakuna maagizo</string>
+</resources>

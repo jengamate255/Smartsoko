@@ -11,10 +11,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.smartsoko.customer.R
 import com.smartsoko.customer.ui.components.*
 import com.smartsoko.customer.util.Validators
 
@@ -47,13 +49,16 @@ fun SignUpScreen(
     var phoneError by remember { mutableStateOf<String?>(null) }
     var addressError by remember { mutableStateOf<String?>(null) }
     var attemptedSubmit by remember { mutableStateOf(false) }
+    val passwordRequired = stringResource(R.string.password_required)
+    val passwordsDontMatch = stringResource(R.string.passwords_do_not_match)
+    val confirmPasswordRequired = stringResource(R.string.confirm_password_required)
 
     fun validate(): Boolean {
         emailError = Validators.emailError(email)
-        passwordError = Validators.isValidPassword(password) ?: if (password.isBlank()) "Password is required" else null
+        passwordError = Validators.isValidPassword(password) ?: if (password.isBlank()) passwordRequired else null
         confirmPasswordError = when {
-            confirmPassword.isBlank() -> "Please confirm your password"
-            confirmPassword != password -> "Passwords do not match"
+            confirmPassword.isBlank() -> confirmPasswordRequired
+            confirmPassword != password -> passwordsDontMatch
             else -> null
         }
         nameError = Validators.requiredError(name, "Name")
@@ -66,10 +71,10 @@ fun SignUpScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Create Account") },
+                title = { Text(stringResource(R.string.create_account)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -112,7 +117,7 @@ fun SignUpScreen(
                 }
 
                 Text(
-                    text = "Your Information",
+                    text = stringResource(R.string.your_information),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
@@ -127,7 +132,7 @@ fun SignUpScreen(
                     email = it
                     if (attemptedSubmit) emailError = Validators.emailError(it)
                 },
-                label = { Text("Email *") },
+                label = { Text(stringResource(R.string.email_star)) },
                 isError = emailError != null,
                 supportingText = { if (emailError != null) Text(emailError!!, color = MaterialTheme.colorScheme.error) },
                 keyboardOptions = KeyboardOptions(
@@ -148,13 +153,13 @@ fun SignUpScreen(
                     if (attemptedSubmit) {
                         passwordError = Validators.isValidPassword(it)
                         if (confirmPassword.isNotBlank() && confirmPassword != it) {
-                            confirmPasswordError = "Passwords do not match"
+                            confirmPasswordError = passwordsDontMatch
                         } else {
                             confirmPasswordError = null
                         }
                     }
                 },
-                label = { Text("Password *") },
+                label = { Text(stringResource(R.string.password_star)) },
                 isError = passwordError != null,
                 supportingText = { if (passwordError != null) Text(passwordError!!, color = MaterialTheme.colorScheme.error) },
                 visualTransformation = PasswordVisualTransformation(),
@@ -175,13 +180,13 @@ fun SignUpScreen(
                     confirmPassword = it
                     if (attemptedSubmit) {
                         confirmPasswordError = when {
-                            it.isBlank() -> "Please confirm your password"
-                            it != password -> "Passwords do not match"
+                            it.isBlank() -> confirmPasswordRequired
+                            it != password -> passwordsDontMatch
                             else -> null
                         }
                     }
                 },
-                label = { Text("Confirm Password *") },
+                label = { Text(stringResource(R.string.confirm_password_star)) },
                 isError = confirmPasswordError != null,
                 supportingText = { if (confirmPasswordError != null) Text(confirmPasswordError!!, color = MaterialTheme.colorScheme.error) },
                 visualTransformation = PasswordVisualTransformation(),
@@ -202,7 +207,7 @@ fun SignUpScreen(
                     name = it
                     if (attemptedSubmit) nameError = Validators.requiredError(it, "Name")
                 },
-                label = { Text("Full Name *") },
+                label = { Text(stringResource(R.string.full_name_star)) },
                 isError = nameError != null,
                 supportingText = { if (nameError != null) Text(nameError!!, color = MaterialTheme.colorScheme.error) },
                 singleLine = true,
@@ -218,7 +223,7 @@ fun SignUpScreen(
                     phone = it
                     if (attemptedSubmit) phoneError = Validators.phoneError(it)
                 },
-                label = { Text("Phone *") },
+                label = { Text(stringResource(R.string.phone_star)) },
                 isError = phoneError != null,
                 supportingText = { if (phoneError != null) Text(phoneError!!, color = MaterialTheme.colorScheme.error) },
                 keyboardOptions = KeyboardOptions(
@@ -238,7 +243,7 @@ fun SignUpScreen(
                     address = it
                     if (attemptedSubmit) addressError = Validators.requiredError(it, "Address")
                 },
-                label = { Text("Delivery Address *") },
+                label = { Text(stringResource(R.string.delivery_address_star)) },
                 isError = addressError != null,
                 supportingText = { if (addressError != null) Text(addressError!!, color = MaterialTheme.colorScheme.error) },
                 keyboardOptions = KeyboardOptions(
@@ -251,7 +256,7 @@ fun SignUpScreen(
 
             // Sign Up button
             PrimaryButton(
-                text = "Create Account",
+                text = stringResource(R.string.create_account),
                 isLoading = isLoading,
                 onClick = {
                     attemptedSubmit = true
@@ -270,7 +275,7 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             TextButton(onClick = onBack) {
-                Text("Already have an account? Sign In", color = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.already_have_account), color = MaterialTheme.colorScheme.primary)
             }
             }
         }

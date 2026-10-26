@@ -9,10 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.smartsoko.admin.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,18 +31,18 @@ fun OrdersScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Orders", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.orders), fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary),
                 actions = {
                     Box {
-                        IconButton(onClick = { showFilterMenu = true }) { Icon(Icons.Default.FilterList, contentDescription = "Filter", tint = MaterialTheme.colorScheme.onPrimary) }
+                        IconButton(onClick = { showFilterMenu = true }) { Icon(Icons.Default.FilterList, contentDescription = stringResource(R.string.cd_filter), tint = MaterialTheme.colorScheme.onPrimary) }
                         DropdownMenu(expanded = showFilterMenu, onDismissRequest = { showFilterMenu = false }) {
                             listOf("all", "pending", "processing", "shipped", "delivered", "cancelled").forEach { s ->
                                 DropdownMenuItem(text = { Text(s.replaceFirstChar { it.uppercase() }) }, onClick = { viewModel.setStatusFilter(s); showFilterMenu = false })
                             }
                         }
                     }
-                    IconButton(onClick = { viewModel.loadOrders() }) { Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = MaterialTheme.colorScheme.onPrimary) }
+                    IconButton(onClick = { viewModel.loadOrders() }) { Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.cd_refresh), tint = MaterialTheme.colorScheme.onPrimary) }
                 }
             )
         }
@@ -49,7 +51,7 @@ fun OrdersScreen(
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) { LoadingIndicator() }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(padding)) {
-                item { Text("${uiState.orders.size} order(s)", modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                item { Text(stringResource(R.string.orders_count, uiState.orders.size), modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 items(uiState.orders, key = { it.id ?: "" }) { order ->
                     Card(
                         onClick = { order.id?.let { onOrderClick(it) } },
@@ -59,8 +61,8 @@ fun OrdersScreen(
                     ) {
                         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("Order #${(order.id ?: "").takeLast(8)}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                                Text(order.customerName ?: order.customerEmail ?: "Guest", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(stringResource(R.string.order_number, (order.id ?: "").takeLast(8)), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                                Text(order.customerName ?: order.customerEmail ?: stringResource(R.string.guest), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     val statusColor = when (order.status) {
                                         "delivered" -> MaterialTheme.colorScheme.primary

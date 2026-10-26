@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import { createRequire } from 'node:module';
+
+const nodeRequire = createRequire(import.meta.url);
 
 function setup({ profiles = [], sellers = [], decoded = {}, supabaseUser = null } = {}) {
   const updates = vi.fn();
@@ -36,6 +39,7 @@ function setup({ profiles = [], sellers = [], decoded = {}, supabaseUser = null 
       if (name === '@supabase/supabase-js') return { createClient: () => client };
       if (name === 'fs') return fs;
       if (name === 'path') return {};
+      if (name === '../utils/api-messages') return nodeRequire('../server/src/utils/api-messages');
       throw new Error(`Unexpected dependency: ${name}`);
     },
   };

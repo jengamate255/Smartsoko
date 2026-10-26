@@ -79,25 +79,25 @@ public class OrdersFragment extends Fragment {
             @Override
             public void onAcceptOrder(Order order) {
                 viewModel.acceptOrder(order.getId());
-                Toast.makeText(requireContext(), "Order accepted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), R.string.msg_order_accepted, Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onRejectOrder(Order order) {
                 viewModel.rejectOrder(order.getId());
-                Toast.makeText(requireContext(), "Order rejected", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), R.string.msg_order_rejected, Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onMarkReady(Order order) {
                 viewModel.markOrderReady(order.getId());
-                Toast.makeText(requireContext(), "Order marked as ready", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), R.string.msg_order_marked_ready, Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onMarkDelivered(Order order) {
                 viewModel.markOrderDelivered(order.getId());
-                Toast.makeText(requireContext(), "Order marked as delivered", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), R.string.msg_order_marked_delivered, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -111,10 +111,10 @@ public class OrdersFragment extends Fragment {
     }
 
     private void setupTabs() {
-        tabLayout.addTab(tabLayout.newTab().setText("All"));
-        tabLayout.addTab(tabLayout.newTab().setText("Pending"));
-        tabLayout.addTab(tabLayout.newTab().setText("Active"));
-        tabLayout.addTab(tabLayout.newTab().setText("Completed"));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.filter_all));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.status_pending));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_active));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.status_completed));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override

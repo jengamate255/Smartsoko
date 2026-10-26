@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html class="light" lang="sw">
 <head>
   <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"/>
@@ -16,12 +16,13 @@
   <link rel="stylesheet" href="design-system.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script type="module" src="config/firebase-config.js?v=5"></script>
-  <script type="module" src="config/cross-platform-service.js?v=4"></script>
+  <script type="module" src="config/cross-platform-service.js?v=5"></script>
   <script src="js/cart-service.js?v=5" defer></script>
   <script src="nav-component.js?v=5" defer></script>
   <script src="config/api-config.js?v=6" defer></script>
   <script src="config/mapbox-config.js" defer></script>
   <script type="module" src="js/order-confirmation.js"></script>
+  <script src="js/i18n.js?v=1" defer></script>
   <style>
     :root {
       --os-primary: #064E3B;
@@ -315,6 +316,10 @@
   <script src="js/stitch-site.js?v=2" defer></script>
   <link rel="stylesheet" href="css/site-uniform.css?v=1">
   <link rel="stylesheet" href="css/shopping-experience.css?v=1">
+  <link rel="stylesheet" href="/css/shopping-shell.css?v=1">
+  <script src="/js/shopping-shell.js?v=1" defer></script>
+  <link rel="manifest" href="/manifest.json">
+
 </head>
 <body class="ss-uniform stitch-site ss-commerce ss-checkout font-body-md text-on-background bg-[#F8FAF6] min-h-screen" data-stitch-page="checkout">
 
@@ -325,7 +330,7 @@
         <button onclick="window.history.back()" class="os-icon-circle-sm os-btn-ghost text-on-surface-variant">
           <span class="material-symbols-outlined text-primary">arrow_back</span>
         </button>
-        <h1 class="font-headline-md text-headline-md text-primary font-bold">Checkout</h1>
+        <h1 class="font-headline-md text-headline-md text-primary font-bold" data-i18n="checkout.title">Checkout</h1>
       </div>
       <div class="flex items-center gap-4">
         <span class="material-symbols-outlined text-on-surface-variant cursor-pointer os-btn-ghost">notifications</span>
@@ -344,8 +349,8 @@
       <div class="os-icon-circle-xl mx-auto mb-4 bg-surface-container-high flex items-center justify-center">
         <span class="material-symbols-outlined text-5xl text-on-surface-variant">shopping_cart</span>
       </div>
-      <h2 class="text-xl font-bold text-on-background mb-2">Your cart is empty</h2>
-      <p class="text-on-surface-variant mb-6">Add items to get started</p>
+      <h2 class="text-xl font-bold text-on-background mb-2" data-i18n="cart.empty">Your cart is empty</h2>
+      <p class="text-on-surface-variant mb-6" data-i18n="cart.startShopping">Add items to get started</p>
       <a href="/discovery" class="inline-flex items-center gap-2 os-btn-primary">
         <span class="material-symbols-outlined">storefront</span>
         Browse Sellers
@@ -385,10 +390,10 @@
                   <span class="material-symbols-outlined text-primary filled-icon">location_on</span>
                 </div>
                 <div>
-                  <h3 class="font-semibold text-on-background text-sm">Delivery Address</h3>
+                  <h3 class="font-semibold text-on-background text-sm" data-i18n="cart.deliveryAddress">Delivery Address</h3>
                 </div>
               </div>
-              <button onclick="editAddress()" class="os-btn-ghost text-primary text-sm font-medium">Edit</button>
+              <button onclick="editAddress()" class="os-btn-ghost text-primary text-sm font-medium" data-i18n="common.edit">Edit</button>
             </div>
             <p id="deliveryAddress" class="text-on-surface-variant text-sm ml-13">--</p>
             <p id="deliveryPhone" class="text-on-surface-variant text-sm mt-1 ml-13">--</p>
@@ -400,14 +405,14 @@
               <div class="os-icon-circle-md bg-primary-container\/30 flex items-center justify-center">
                 <span class="material-symbols-outlined text-primary filled-icon">account_balance_wallet</span>
               </div>
-              <h3 class="font-semibold text-on-background text-sm">Payment Method</h3>
+              <h3 class="font-semibold text-on-background text-sm" data-i18n="checkout.paymentMethod">Payment Method</h3>
             </div>
             <div class="space-y-2" id="paymentMethods">
               <div data-payment="pesapal" onclick="selectPayment('pesapal')" class="os-payment-option active">
                 <input type="radio" name="paymentMethod" value="pesapal" checked class="accent-orange-600" aria-label="Pay Online with PesaPal">
                 <span class="os-icon-circle-sm bg-orange-500 text-white text-xs font-bold flex items-center justify-center">PP</span>
                 <div class="flex-1">
-                  <p class="font-semibold text-on-background text-sm">Pay Online (PesaPal)</p>
+                  <p class="font-semibold text-on-background text-sm" data-i18n="checkout.mpesa">Pay Online (PesaPal)</p>
                   <p class="text-body-sm text-on-surface-variant">Card, M-Pesa, Tigo Pesa, Airtel & more</p>
                 </div>
               </div>
@@ -425,7 +430,7 @@
                 <input type="radio" name="paymentMethod" value="cod" class="accent-gray-600" aria-label="Cash on Delivery">
                 <span class="os-icon-circle-sm bg-gray-400 text-white text-xs font-bold flex items-center justify-center">$</span>
                 <div class="flex-1">
-                  <p class="font-semibold text-on-background text-sm">Cash on Delivery</p>
+                  <p class="font-semibold text-on-background text-sm" data-i18n="checkout.wallet">Cash on Delivery</p>
                   <p class="text-body-sm text-on-surface-variant">Pay the driver when your order arrives</p>
                 </div>
               </div>
@@ -445,7 +450,7 @@
           <!-- Cart Items -->
           <div class="os-section-card overflow-hidden">
             <div class="p-5 border-b os-border">
-              <h3 class="font-semibold text-on-background text-sm">Order items <a class="shopping-edit-basket" href="/cart">Edit basket →</a></h3>
+              <h3 class="font-semibold text-on-background text-sm" data-i18n="cart.items">Order items <a class="shopping-edit-basket" href="/cart">Edit basket →</a></h3>
             </div>
             <div id="checkoutItems" class="divide-y os-divider">
               <!-- Skeleton loaders -->
@@ -471,15 +476,15 @@
         <!-- Right Column: Order Summary -->
         <div class="lg:col-span-1">
           <div id="checkoutSummary" class="os-section-card p-5 sticky top-20">
-            <h3 class="font-semibold text-lg font-bold text-on-background mb-4">Order Summary</h3>
+            <h3 class="font-semibold text-lg font-bold text-on-background mb-4" data-i18n="checkout.orderSummary">Order Summary</h3>
             
             <div class="space-y-3 mb-4">
               <div class="flex justify-between text-body-sm">
-                <span class="text-on-surface-variant">Subtotal</span>
+                <span class="text-on-surface-variant" data-i18n="cart.subtotal">Subtotal</span>
                 <span class="font-medium text-on-background" id="summarySubtotal">TSh 0</span>
               </div>
               <div class="flex justify-between text-body-sm">
-                <span class="text-on-surface-variant">Delivery Fee</span>
+                <span class="text-on-surface-variant" data-i18n="cart.deliveryFee">Delivery Fee</span>
                 <span class="font-medium text-on-background" id="summaryDelivery">TSh 0</span>
               </div>
               <div class="flex justify-between text-body-sm">
@@ -492,19 +497,19 @@
               </div>
               <div class="border-t os-divider pt-3">
                 <div class="flex justify-between">
-                  <span class="font-semibold text-lg text-on-background">Total</span>
+                  <span class="font-semibold text-lg text-on-background" data-i18n="cart.grandTotal">Total</span>
                   <span class="font-bold text-xl text-primary" id="summaryTotal">TSh 0</span>
                 </div>
               </div>
             </div>
 
             <div class="mb-4">
-              <label for="promoCodeInput" class="os-label">Promo Code</label>
+              <label for="promoCodeInput" class="os-label" data-i18n="checkout.promoCode">Promo Code</label>
               <div class="flex gap-2">
                 <input type="text" id="promoCodeInput" placeholder="Promo code (e.g. KARIBU10)"
                   class="os-input flex-1 uppercase"
                   onkeydown="if(event.key === 'Enter') applyPromo()">
-                <button onclick="applyPromo()" class="os-btn-secondary text-sm font-semibold">Apply</button>
+                <button onclick="applyPromo()" class="os-btn-secondary text-sm font-semibold" data-i18n="checkout.apply">Apply</button>
               </div>
               <p id="promoStatus" class="text-body-sm mt-1.5 font-medium"></p>
             </div>
@@ -526,14 +531,14 @@
   <div id="addressModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center">
     <div class="os-section-card p-6 w-full max-w-md mx-4 shadow-xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="font-bold text-lg text-on-background">Delivery Address</h3>
+        <h3 class="font-bold text-lg text-on-background" data-i18n="cart.deliveryAddress">Delivery Address</h3>
         <button onclick="closeAddressModal()" class="os-btn-ghost os-icon-circle-sm">
           <span class="material-symbols-outlined text-on-surface-variant">close</span>
         </button>
       </div>
       <button onclick="useCurrentLocation()" id="locateBtn" class="os-btn-secondary w-full mb-4 py-3 px-4 flex items-center justify-center gap-2 text-primary font-medium">
         <span class="material-symbols-outlined">my_location</span>
-        <span>Use Current Location</span>
+        <span data-i18n="checkout.address">Use Current Location</span>
       </button>
       <div id="locateLoading" class="hidden mb-4 py-3 px-4 bg-surface-container-high rounded-xl flex items-center justify-center gap-2 text-on-surface-variant">
         <span class="material-symbols-outlined animate-spin">refresh</span>
@@ -541,21 +546,21 @@
       </div>
       <div class="space-y-4">
         <div>
-          <label for="addressInput" class="os-label">Address</label>
+          <label for="addressInput" class="os-label" data-i18n="checkout.address">Address</label>
           <input type="text" id="addressInput" class="os-input" placeholder="Enter your delivery address..." required aria-describedby="addressError">
         </div>
         <div>
-          <label for="phoneInput" class="os-label">Phone Number</label>
+          <label for="phoneInput" class="os-label" data-i18n="checkout.phone">Phone Number</label>
           <input type="tel" id="phoneInput" class="os-input" placeholder="Enter your phone number" required aria-describedby="phoneError">
         </div>
         <div>
-          <label for="nameInput" class="os-label">Name</label>
+          <label for="nameInput" class="os-label" data-i18n="auth.fullName">Name</label>
           <input type="text" id="nameInput" class="os-input" placeholder="Enter your full name" required aria-describedby="nameError">
         </div>
       </div>
       <div class="flex gap-3 mt-6">
-        <button onclick="closeAddressModal()" class="os-btn-secondary flex-1 py-3">Cancel</button>
-        <button onclick="saveAddress()" class="os-btn-primary flex-1 py-3">Save</button>
+        <button onclick="closeAddressModal()" class="os-btn-secondary flex-1 py-3" data-i18n="common.cancel">Cancel</button>
+        <button onclick="saveAddress()" class="os-btn-primary flex-1 py-3" data-i18n="common.save">Save</button>
       </div>
     </div>
   </div>
@@ -564,19 +569,19 @@
   <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe border-t os-border bg-surface shadow-[0_-4px_12px_rgba(0,0,0,0.06)] z-50">
     <a href="/home" class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 os-btn-ghost">
       <span class="material-symbols-outlined">home</span>
-      <span class="text-sm font-semibold">Home</span>
+      <span class="text-sm font-semibold" data-i18n="nav.home">Home</span>
     </a>
     <a href="/discovery" class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 os-btn-ghost">
       <span class="material-symbols-outlined">search</span>
-      <span class="text-sm font-semibold">Search</span>
+      <span class="text-sm font-semibold" data-i18n="nav.search">Search</span>
     </a>
     <a href="/cart" class="flex flex-col items-center justify-center text-primary bg-primary-container\/30 rounded-full px-3 py-1 os-btn-ghost">
       <span class="material-symbols-outlined filled-icon">shopping_cart</span>
-      <span class="text-sm font-semibold">Cart</span>
+      <span class="text-sm font-semibold" data-i18n="nav.cart">Cart</span>
     </a>
     <a href="/profile" class="flex flex-col items-center justify-center text-gray-500 px-3 py-1">
       <span class="material-symbols-outlined">person</span>
-      <span class="text-sm font-semibold">Profile</span>
+      <span class="text-sm font-semibold" data-i18n="nav.profile">Profile</span>
     </a>
   </nav>
 
@@ -653,7 +658,7 @@
         addrEl.textContent = address;
         phoneEl.textContent = phone;
       } else {
-        addrEl.textContent = 'Tap "Edit" to add your location';
+        addrEl.textContent = t('checkout.tapToEditAddress');
         phoneEl.textContent = '';
       }
     }
@@ -732,9 +737,9 @@
         editAddress();
       } else if (!address || address === 'No address set') detectLocation();
       else {
-        document.getElementById('locationStatus').textContent = 'Delivery address saved';
-        document.getElementById('locationSubtext').textContent = 'Your saved address will be used for delivery.';
-        document.getElementById('locationActionBtn').textContent = 'Use my location';
+        document.getElementById('locationStatus').textContent = t('checkout.addressSaved');
+        document.getElementById('locationSubtext').textContent = t('checkout.savedAddressUsed');
+        document.getElementById('locationActionBtn').textContent = t('checkout.useMyLocation');
       }
 
       if (typeof SmartNav !== 'undefined' && SmartNav.updateCartBadge) SmartNav.updateCartBadge();
@@ -794,18 +799,18 @@
       const statusEl = document.getElementById('promoStatus');
       const code = (input ? input.value : '').trim().toUpperCase();
       if (!code) {
-        if (statusEl) { statusEl.textContent = 'Enter a promo code'; statusEl.className = 'text-body-sm mt-1.5 font-medium text-error'; }
+        if (statusEl) { statusEl.textContent = t('checkout.enterPromo'); statusEl.className = 'text-body-sm mt-1.5 font-medium text-error'; }
         return;
       }
-      statusEl.textContent = 'Checking...';
+      statusEl.textContent = t('checkout.checkingPromo');
       statusEl.className = 'text-body-sm mt-1.5 font-medium text-on-surface-variant';
       appliedPromo = { code };
       if (await updateTotals()) {
-        statusEl.textContent = code + ' applied';
+        statusEl.textContent = code + ' ' + t('checkout.promoApplied');
         statusEl.className = 'text-body-sm mt-1.5 font-medium text-primary';
       } else {
         appliedPromo = null;
-        statusEl.textContent = 'Promo could not be applied';
+        statusEl.textContent = t('checkout.promoFailed');
         statusEl.className = 'text-body-sm mt-1.5 font-medium text-error';
         await updateTotals();
       }
@@ -853,9 +858,9 @@
         banner.style.borderColor = 'var(--os-primary)';
         icon.innerHTML = '<span class="material-symbols-outlined text-primary filled-icon">check_circle</span>';
         icon.style.background = 'var(--os-primary-container-alpha-12)';
-        status.textContent = 'Location detected';
+        status.textContent = t('checkout.locationDetected');
         status.style.color = 'var(--os-primary)';
-        subtext.textContent = `Delivery to: ${savedAddress.substring(0, 40)}${savedAddress.length > 40 ? '...' : ''}`;
+        subtext.textContent = `${t('checkout.deliveryTo')} ${savedAddress.substring(0, 40)}${savedAddress.length > 40 ? '...' : ''}`;
         subtext.style.color = 'var(--os-primary-alpha-70)';
         actionBtn.style.display = 'none';
         return;
@@ -866,9 +871,9 @@
         banner.style.borderColor = 'rgba(185, 28, 28, 0.3)';
         icon.innerHTML = '<span class="material-symbols-outlined text-error">warning</span>';
         icon.style.background = 'rgba(185, 28, 28, 0.2)';
-        status.textContent = 'Geolocation not supported';
+        status.textContent = t('checkout.geoUnsupported');
         status.style.color = 'var(--os-text-inverse)';
-        subtext.textContent = 'Your browser does not support location detection. Please enter address manually.';
+        subtext.textContent = t('checkout.geoUnsupportedHint');
         subtext.style.color = 'var(--os-text-inverse-alpha-90)';
         actionBtn.style.display = 'none';
         return;
@@ -876,9 +881,9 @@
 
       icon.innerHTML = '<span class="material-symbols-outlined text-primary animate-spin">my_location</span>';
       icon.style.background = 'var(--os-primary-container-alpha-12)';
-      status.textContent = 'Detecting your location...';
+      status.textContent = t('checkout.detecting');
       status.style.color = 'var(--os-primary)';
-      subtext.textContent = 'Please allow location access when prompted';
+      subtext.textContent = t('checkout.allowLocation');
       subtext.style.color = 'var(--os-primary-alpha-70)';
       actionBtn.style.display = 'block';
 
@@ -898,7 +903,7 @@
             banner.style.borderColor = 'var(--os-primary)';
             icon.innerHTML = '<span class="material-symbols-outlined text-primary filled-icon">check_circle</span>';
             icon.style.background = 'var(--os-primary-container-alpha-12)';
-            status.textContent = 'Location found!';
+            status.textContent = t('checkout.locationFound');
             status.style.color = 'var(--os-primary)';
             subtext.textContent = address.substring(0, 50) + (address.length > 50 ? '...' : '');
             subtext.style.color = 'var(--os-primary-alpha-70)';
@@ -910,9 +915,9 @@
             banner.style.borderColor = 'var(--os-warning)';
             icon.innerHTML = '<span class="material-symbols-outlined text-warning">location_on</span>';
             icon.style.background = 'var(--os-warning-container-alpha-12)';
-            status.textContent = 'Coordinates found, but no address';
+            status.textContent = t('checkout.coordsNoAddress');
             status.style.color = 'var(--os-warning)';
-            subtext.textContent = 'Please enter your address manually or tap Edit';
+            subtext.textContent = t('checkout.enterManually');
             subtext.style.color = 'var(--os-warning-alpha-70)';
             actionBtn.style.display = 'block';
           }
@@ -935,7 +940,7 @@
           banner.style.borderColor = 'rgba(185, 28, 28, 0.3)';
           icon.innerHTML = '<span class="material-symbols-outlined text-error">location_off</span>';
           icon.style.background = 'rgba(185, 28, 28, 0.2)';
-          status.textContent = 'Location unavailable';
+          status.textContent = t('checkout.locationUnavailable');
           status.style.color = 'var(--os-error)';
           subtext.textContent = message;
           subtext.style.color = 'rgba(185, 28, 28, 0.7)';
@@ -955,8 +960,10 @@
           if (response.ok) {
             const data = await response.json();
             if (data.features && data.features.length > 0) return data.features[0].place_name;
+          } else if (response.status === 422) {
+            // Token URL restrictions — fall back to Nominatim silently
           }
-        } catch (error) { console.warn('Mapbox reverse geocode failed:', error); }
+        } catch (error) { /* network error — fall back to Nominatim */ }
       }
 
       try {
@@ -1285,7 +1292,7 @@
         showNotification(error.message || 'Error placing order. Please try again.');
         btn.disabled = false;
         btn.classList.remove('glow-pulse', 'glow-pulse-slow');
-        btn.textContent = 'Place Order';
+        btn.textContent = t('cart.placeOrder');
       } finally { placingOrder = false; }
     }
 
@@ -1330,8 +1337,10 @@
               const [lng, lat] = data.features[0].center;
               return { lat, lng };
             }
+          } else if (response.status === 422) {
+            // Token URL restrictions — fall back to Nominatim silently
           }
-        } catch (error) { console.warn('Mapbox geocoding failed:', error); }
+        } catch (error) { /* network error — fall back to Nominatim */ }
       }
 
       try {

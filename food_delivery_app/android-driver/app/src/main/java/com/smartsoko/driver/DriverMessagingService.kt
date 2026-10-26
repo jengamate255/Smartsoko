@@ -31,8 +31,8 @@ class DriverMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-        val title = message.notification?.title ?: message.data["title"] ?: "New Delivery"
-        val body = message.notification?.body ?: message.data["body"] ?: "You have a new delivery"
+        val title = message.notification?.title ?: message.data["title"] ?: getString(R.string.new_delivery_title)
+        val body = message.notification?.body ?: message.data["body"] ?: getString(R.string.new_delivery_body)
         showNotification(title, body)
     }
 
@@ -43,10 +43,10 @@ class DriverMessagingService : FirebaseMessagingService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
-                "Driver Order Notifications",
+                getString(R.string.notification_channel_orders),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "New delivery alerts"
+                description = getString(R.string.notification_channel_orders_description)
             }
             notificationManager.createNotificationChannel(channel)
         }

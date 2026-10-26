@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/user.dart' as user_models;
-import '../../services/auth_service.dart';
+import 'package:smartsoko/models/user.dart' as user_models;
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/utils/app_localizations.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -13,7 +14,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFFBF9F5),
       appBar: AppBar(
-        title: const Text('My Account', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(context.tr('my_account'), style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xFF064E3B),
         elevation: 0,
@@ -31,8 +32,8 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('User session expired'),
-                  TextButton(onPressed: () => authService.signOut(), child: const Text('Login Again')),
+                  Text(context.tr('user_session_expired')),
+                  TextButton(onPressed: () => authService.signOut(), child: Text(context.tr('login_again'))),
                 ],
               ),
             );
@@ -88,21 +89,22 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 32),
 
               // Settings Section
-              const Text('Account Settings', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111827))),
+              Text(context.tr('account_settings'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111827))),
               const SizedBox(height: 16),
               _buildSettingsCard([
-                _buildListTile(Icons.person_outline, 'Personal Information', () {}),
-                _buildListTile(Icons.location_on_outlined, 'Saved Addresses', () {}),
-                _buildListTile(Icons.payment_outlined, 'Payment Methods', () {}),
+                _buildListTile(Icons.person_outline, context.tr('personal_information'), () {}),
+                _buildListTile(Icons.location_on_outlined, context.tr('saved_addresses'), () {}),
+                _buildListTile(Icons.payment_outlined, context.tr('payment_methods'), () {}),
               ]),
 
               const SizedBox(height: 24),
-              const Text('General', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111827))),
+              Text(context.tr('general'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111827))),
               const SizedBox(height: 16),
               _buildSettingsCard([
-                _buildListTile(Icons.help_outline, 'Help & Support', () {}),
+                _buildLanguageTile(context),
+                _buildListTile(Icons.help_outline, context.tr('help_support'), () {}),
                 _buildListTile(Icons.info_outline, 'About Organic Curator', () {}),
-                _buildListTile(Icons.policy_outlined, 'Privacy Policy', () {}),
+                _buildListTile(Icons.policy_outlined, context.tr('privacy_policy'), () {}),
               ]),
 
               const SizedBox(height: 40),
@@ -116,7 +118,7 @@ class ProfileScreen extends StatelessWidget {
                     backgroundColor: Colors.red[50],
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: const Text('Sign Out', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: Text(context.tr('sign_out'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(height: 60),
@@ -148,6 +150,32 @@ class ProfileScreen extends StatelessWidget {
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
       trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
       onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    );
+  }
+
+  Widget _buildLanguageTile(BuildContext context) {
+    final languageService = context.watch<LanguageService>();
+
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(color: const Color(0xFFF3F4F6), borderRadius: BorderRadius.circular(10)),
+        child: const Icon(Icons.language_outlined, size: 22, color: Color(0xFF064E3B)),
+      ),
+      title: Text(context.tr('language'), style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
+      trailing: DropdownButton<String>(
+        value: languageService.currentLanguage,
+        borderRadius: BorderRadius.circular(16),
+        underline: const SizedBox.shrink(),
+        items: const [
+          DropdownMenuItem(value: 'sw', child: Text('Kiswahili')),
+          DropdownMenuItem(value: 'en', child: Text('English')),
+        ],
+        onChanged: (language) {
+          if (language != null) context.read<LanguageService>().setLanguage(language);
+        },
+      ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     );
   }

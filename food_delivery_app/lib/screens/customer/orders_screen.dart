@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/order.dart' as models;
-import '../../models/user.dart' as user_models;
-import '../../services/order_service.dart';
-import '../../services/auth_service.dart';
+import 'package:smartsoko/models/order.dart' as models;
+import 'package:smartsoko/models/user.dart' as user_models;
+import 'package:smartsoko/services/order_service.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/utils/app_localizations.dart';
 import 'order_tracking_screen.dart';
 
 class OrdersScreen extends StatelessWidget {
@@ -15,17 +16,29 @@ class OrdersScreen extends StatelessWidget {
     final orderService = context.read<OrderService>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Orders'),
-      ),
+      appBar: AppBar(title: Text(context.tr('my_orders'))),
       body: FutureBuilder<user_models.User?>(
-        future: authService.getUser(authService.currentUser!.uid),
+        future: authService.currentUser == null
+            ? Future<user_models.User?>.value(null)
+            : authService.getUser(authService.currentUser!.uid),
         builder: (context, userSnapshot) {
-          if (!userSnapshot.hasData) {
+          if (userSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final user = userSnapshot.data!;
+          final user = userSnapshot.data;
+          if (user == null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.receipt_long, size: 64, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  Text(context.tr('sign_in_to_see_orders')),
+                ],
+              ),
+            );
+          }
 
           return StreamBuilder<List<models.Order>>(
             stream: orderService.getUserOrders(user.id),
@@ -37,13 +50,17 @@ class OrdersScreen extends StatelessWidget {
               final orders = snapshot.data ?? [];
 
               if (orders.isEmpty) {
-                return const Center(
+                return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.receipt_long, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text('No orders yet'),
+                      const Icon(
+                        Icons.receipt_long,
+                        size: 64,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(context.tr('no_orders_yet')),
                     ],
                   ),
                 );
@@ -109,11 +126,14 @@ class _OrderCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Order #${order.id.substring(0, 8)}',
+                    '${context.tr('order_number')} #${order.id.substring(0, 8)}',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: _getStatusColor(order.status).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(4),

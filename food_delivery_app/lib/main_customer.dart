@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'utils/app_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'services/firebase_service.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -13,7 +14,6 @@ import 'services/location_service.dart';
 import 'services/restaurant_service.dart';
 import 'services/connectivity_service.dart';
 import 'services/analytics_service.dart';
-import 'services/nestjs_api_service.dart';
 import 'services/supabase_service.dart';
 import 'services/cart_service.dart';
 import 'screens/customer/login_screen.dart';
@@ -22,10 +22,10 @@ import 'utils/logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Set app configuration for Customer App
   AppConfig.setAppType('customer');
-  
+
   try {
     // Load environment variables (optional for development)
     try {
@@ -33,35 +33,29 @@ void main() async {
     } catch (e) {
       AppLogger.warning('Environment file not loaded, using default config');
     }
-    
+
     // Initialize Supabase (must be before Firebase for auth fallback)
     await SupabaseService().initialize();
-    
+
     // Initialize Firebase
-    await Firebase.initializeApp(
-      options: FirebaseOptions(
-        apiKey: AppConfig.firebaseConfig['apiKey'],
-        authDomain: AppConfig.firebaseConfig['authDomain'],
-        projectId: AppConfig.firebaseConfig['projectId'],
-        storageBucket: AppConfig.firebaseConfig['storageBucket'],
-        messagingSenderId: AppConfig.firebaseConfig['messagingSenderId'],
-        appId: AppConfig.firebaseConfig['appId'],
-        databaseURL: AppConfig.firebaseConfig['databaseURL'],
-      ),
-    );
-    
+    await initializeFirebase();
+
     // Configure Firestore offline persistence
     FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: true,
       cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
     );
-    
+
     // Configure Crashlytics
     FlutterError.onError = (errorDetails) {
       FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-      AppLogger.fatal('Flutter error', errorDetails.exception, errorDetails.stack);
+      AppLogger.fatal(
+        'Flutter error',
+        errorDetails.exception,
+        errorDetails.stack,
+      );
     };
-    
+
     runApp(const CustomerApp());
   } catch (e, stackTrace) {
     AppLogger.fatal('Failed to initialize app', e, stackTrace);
@@ -83,21 +77,22 @@ class CustomerApp extends StatelessWidget {
         Provider(create: (_) => RestaurantService()),
         Provider(create: (_) => ConnectivityService()),
         Provider(create: (_) => AnalyticsService()),
-        ChangeNotifierProvider(
-          create: (_) => CartService()..loadSavedCart(),
-        ),
-        ProxyProvider<AuthService, NestJSApiService>(
-          update: (_, authService, __) => NestJSApiService(authService),
-        ),
+        ChangeNotifierProvider(create: (_) => CartService()..loadSavedCart()),
+        ChangeNotifierProvider(create: (_) => LanguageService()),
       ],
-      child: MaterialApp(
-        title: 'Food Delivery - Customer',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
-          useMaterial3: true,
+      child: Consumer<LanguageService>(
+        builder: (_, language, _) => MaterialApp(
+          title: 'Food Delivery - Customer',
+          debugShowCheckedModeBanner: false,
+          locale: Locale(language.currentLanguage),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
+            useMaterial3: true,
+          ),
+          home: const AuthWrapper(),
         ),
-        home: const AuthWrapper(),
       ),
     );
   }
@@ -109,7 +104,7 @@ class AuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authService = context.read<AuthService>();
-    
+
     return StreamBuilder(
       stream: authService.authStateChanges,
       builder: (context, snapshot) {
@@ -118,7 +113,7 @@ class AuthWrapper extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        
+
         if (snapshot.hasData && snapshot.data != null) {
           // Set Crashlytics user ID and role for crash reporting
           final user = snapshot.data!;
@@ -127,7 +122,7 @@ class AuthWrapper extends StatelessWidget {
           FirebaseCrashlytics.instance.setCustomKey('app_type', 'customer');
           return const MainScreen();
         }
-        
+
         return const LoginScreen();
       },
     );
@@ -136,9 +131,9 @@ class AuthWrapper extends StatelessWidget {
 
 class ErrorApp extends StatelessWidget {
   final String error;
-  
+
   const ErrorApp({super.key, required this.error});
-  
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

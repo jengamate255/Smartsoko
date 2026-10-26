@@ -68,7 +68,21 @@ public class SettingsFragment extends Fragment {
         });
 
         btnEditStore.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Edit Store - Coming Soon", Toast.LENGTH_SHORT).show();
+            android.widget.EditText name = new android.widget.EditText(requireContext());
+            name.setSingleLine(true);
+            name.setText(viewModel.getStoreName().getValue());
+            name.setHint(R.string.label_store_name);
+            androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle(R.string.dialog_edit_store_name).setView(name)
+                .setNegativeButton(R.string.action_cancel, null).setPositiveButton(R.string.action_save, null).create();
+            dialog.setOnShowListener(ignored -> dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(save -> {
+                if (name.getText().toString().trim().isEmpty()) { name.setError(getString(R.string.error_enter_store_name)); return; }
+                dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                viewModel.updateStoreName(name.getText().toString())
+                    .addOnSuccessListener(result -> { if (isAdded()) Toast.makeText(requireContext(), R.string.msg_store_updated, Toast.LENGTH_SHORT).show(); dialog.dismiss(); })
+                    .addOnFailureListener(error -> { dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setEnabled(true); name.setError(getString(R.string.error_save_store_retry)); });
+            }));
+            dialog.show();
         });
     }
 }

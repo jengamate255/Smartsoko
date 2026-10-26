@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/auth_service.dart';
-import '../../services/analytics_service.dart';
-import '../../config/app_config.dart';
-import '../../utils/validators.dart';
-import '../auth/role_selection_screen.dart';
+import 'package:smartsoko/services/auth_service.dart';
+import 'package:smartsoko/services/analytics_service.dart';
+import 'package:smartsoko/config/app_config.dart';
+import 'package:smartsoko/utils/validators.dart';
+import 'package:smartsoko/utils/app_localizations.dart';
+import 'package:smartsoko/screens/auth/role_selection_screen.dart';
 import 'main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -23,10 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     final analytics = context.read<AnalyticsService>();
-    analytics.logScreenView(
-      screenName: 'Login',
-      screenClass: 'LoginScreen',
-    );
+    analytics.logScreenView(screenName: 'Login', screenClass: 'LoginScreen');
   }
 
   @override
@@ -40,37 +38,38 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = true);
 
-     try {
-       final authService = context.read<AuthService>();
-       final normalizedPhone = authService.normalizePhone(_phoneController.text);
-        
-       // Check if user exists first
-       final existingUserDoc = await authService.firestore
-           .collection(AppConfig.usersCollection)
-           .where('phone', isEqualTo: normalizedPhone)
-           .limit(1)
-           .get();
+    try {
+      final authService = context.read<AuthService>();
+      final normalizedPhone = authService.normalizePhone(_phoneController.text);
 
-      if (existingUser != null) {
+      // Check if user exists first
+      final existingUserDoc = await authService.firestore
+          .collection(AppConfig.usersCollection)
+          .where('phone', isEqualTo: normalizedPhone)
+          .limit(1)
+          .get();
+
+      final existingUser = existingUserDoc.docs.isNotEmpty;
+
+      if (existingUser) {
         // Existing user - sign in directly
-        await authService.signInWithPhone(phone);
+        await authService.signInWithPhone(normalizedPhone);
       } else {
         // New user - navigate to role selection
         if (mounted) {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => RoleSelectionScreen(
-                phoneNumber: phone,
-              ),
+              builder: (context) =>
+                  RoleSelectionScreen(phoneNumber: normalizedPhone),
             ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('${context.tr('error')}: $e')));
       }
     } finally {
       if (mounted) {
@@ -91,39 +90,32 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(
-                  Icons.fastfood,
-                  size: 80,
-                  color: Color(0xFF064E3B),
-                ),
+                const Icon(Icons.fastfood, size: 80, color: Color(0xFF064E3B)),
                 const SizedBox(height: 24),
                 const Text(
                   'SmartSoko',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Enter your phone number to continue',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                  context.tr('enter_phone_to_continue'),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 48),
                 TextFormField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Phone Number',
+                  decoration: InputDecoration(
+                    labelText: context.tr('phone'),
                     hintText: '07XXXXXXXX',
-                    prefixIcon: Icon(Icons.phone),
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.phone),
+                    border: const OutlineInputBorder(),
                   ),
-                    validator: (value) => Validators.validatePhone(value),
+                  validator: (value) => Validators.validatePhone(value),
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
@@ -142,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text('Continue'),
+                      : Text(context.tr('continue')),
                 ),
                 const SizedBox(height: 16),
                 TextButton(
@@ -152,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                   },
                   child: Text(
-                    'Skip (Demo)',
+                    context.tr('skip_demo'),
                     style: TextStyle(color: Colors.grey[500], fontSize: 14),
                   ),
                 ),

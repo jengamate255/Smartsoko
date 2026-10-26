@@ -36,7 +36,7 @@
                 android:id="@+id/tv_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Pending"
+                android:text="@string/status_pending"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:paddingHorizontal="12dp"
@@ -136,7 +136,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Total:"
+                android:text="@string/label_total_colon"
                 android:textSize="14sp"
                 android:textColor="@color/text_secondary" />
 
@@ -165,7 +165,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Reject"
+                android:text="@string/action_reject"
                 android:textColor="@color/error"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_marginEnd="8dp" />
@@ -175,7 +175,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Accept"
+                android:text="@string/action_accept"
                 android:backgroundTint="@color/success"
                 android:layout_marginStart="8dp" />
 
@@ -193,7 +193,7 @@
                 android:id="@+id/btn_ready"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Mark as Ready"
+                android:text="@string/action_mark_as_ready"
                 android:backgroundTint="@color/accent" />
 
         </LinearLayout>
@@ -210,7 +210,7 @@
                 android:id="@+id/btn_delivered"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Mark as Delivered"
+                android:text="@string/action_mark_as_delivered"
                 android:backgroundTint="@color/info" />
 
         </LinearLayout>
@@ -220,7 +220,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="View Details"
+            android:text="@string/action_view_details"
             style="@style/Widget.MaterialComponents.Button.TextButton" />
 
     </LinearLayout>

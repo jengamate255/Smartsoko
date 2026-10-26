@@ -11,8 +11,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.smartsoko.driver.R
 import com.smartsoko.driver.data.model.Order
 import com.smartsoko.driver.data.model.OrderStatus
 import com.smartsoko.driver.ui.components.*
@@ -51,7 +53,7 @@ fun EarningsScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
-            text = "Earnings",
+            text = stringResource(R.string.earnings),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -66,7 +68,7 @@ fun EarningsScreen(
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            listOf("Today", "This Week", "All Time").forEachIndexed { index, label ->
+            listOf(stringResource(R.string.today), stringResource(R.string.this_week), stringResource(R.string.all_time)).forEachIndexed { index, label ->
                 FilterChip(
                     selected = filter == index,
                     onClick = { filter = index },
@@ -108,7 +110,7 @@ fun EarningsScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        "Total Earned (10%)",
+                        stringResource(R.string.total_earned),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -140,7 +142,7 @@ fun EarningsScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        "Deliveries Done",
+                        stringResource(R.string.deliveries_done),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -151,7 +153,7 @@ fun EarningsScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Completed Deliveries",
+            text = stringResource(R.string.completed_deliveries),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -166,13 +168,13 @@ fun EarningsScreen(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        "No completed deliveries yet",
+                        stringResource(R.string.no_completed_deliveries),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        "Completed deliveries will appear here",
+                        stringResource(R.string.completed_deliveries_here),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -199,7 +201,7 @@ fun EarningsScreen(
                         ) {
                             Column {
                                 Text(
-                                    "Order #${order.id.take(8)}",
+                                    stringResource(R.string.order_number, order.id.take(8)),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold
                                 )
@@ -232,7 +234,7 @@ fun EarningsScreen(
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
-                                        "Paid",
+                                        stringResource(R.string.paid),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Medium

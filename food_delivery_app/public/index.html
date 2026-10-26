@@ -1,5 +1,5 @@
-﻿<!DOCTYPE html>
-<html class="light" lang="en">
+<!DOCTYPE html>
+<html class="light" lang="sw">
 <head>
   <script src="/config/api-origin.js"></script>
   <meta charset="utf-8"/>
@@ -11,16 +11,10 @@
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#1B4332">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://www.gstatic.com">
   <link rel="preload" href="dist/tailwind.css" as="style">
   <link rel="stylesheet" href="dist/tailwind.css">
   <link rel="stylesheet" href="design-system.css">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-  <script type="module" src="config/firebase-config.js?v=5"></script>
-  <script type="module" src="config/cross-platform-service.js?v=4"></script>
   <script src="js/cart-service.js?v=5" defer></script>
   <script src="js/location-picker.js?v=5" defer></script>
   <script src="nav-component.js?v=5" defer></script>
@@ -283,14 +277,25 @@
       .lg\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
     }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;750;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/storefront-stitch.css?v=3">
   <link rel="stylesheet" href="css/site-uniform.css?v=1">
   <link rel="stylesheet" href="css/shopping-experience.css?v=1">
   <script src="js/shopping-experience.js?v=1" defer></script>
+  <script src="js/i18n.js?v=1" defer></script>
+  <link rel="stylesheet" href="/css/shopping-shell.css?v=1">
+  <script src="/js/shopping-shell.js?v=1" defer></script>
+  <link rel="stylesheet" href="/css/featured-shops.css?v=1">
+  <script src="/js/featured-shops.js?v=1" defer></script>
+  <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/material-symbols.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/images/stitch-harvest.png" as="image" fetchpriority="high">
+  <link rel="stylesheet" href="/css/smart-shopping.css?v=1">
+  <script src="/js/smart-shopping-entry.js?v=1" defer></script>
+  <link rel="manifest" href="/manifest.json">
+
 </head>
 <body class="ss-uniform stitch-storefront text-on-background min-h-screen pb-24 md:pb-0" style="background-color: var(--sk-canvas);">
-  <a href="#storefrontMain" class="skip-storefront">Skip to shopping</a>
+  <a href="#storefrontMain" class="skip-storefront" data-i18n="header.skipToShopping">Skip to shopping</a>
   <h1 class="sr-only" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">SmartSoko — Your Local Marketplace for Fresh Food, Groceries &amp; More</h1>
 
   <!-- Header -->
@@ -306,14 +311,14 @@
         <button type="button" data-location-picker class="hidden md:flex items-center gap-1 text-white/80 text-sm cursor-pointer hover:text-white transition-colors bg-transparent border-0 p-0 text-left">
           <span class="material-symbols-outlined text-sm">location_on</span>
           <div>
-            <div class="text-xs opacity-70">Deliver to</div>
+            <div class="text-xs opacity-70" data-i18n="header.deliverTo">Deliver to</div>
             <div class="font-semibold" data-location-value>Dar es Salaam</div>
           </div>
         </button>
       </div>
       <div class="hidden md:flex flex-1 max-w-md mx-8">
         <div class="relative w-full">
-          <input id="searchInputDesktop" aria-label="Search products" type="text" placeholder="Search products, brands and more..."
+          <input id="searchInputDesktop" aria-label="Search products" type="text" data-i18n-placeholder="header.searchProducts" placeholder="Search products, brands and more..."
             class="w-full h-10 pl-10 pr-4 rounded-full border-none bg-white/90 text-sm focus:ring-2 focus:ring-white/50 outline-none transition-all"
             oninput="syncSearch(this.value)"/>
           <span class="material-symbols-outlined absolute left-3 top-2.5 text-gray-400 text-lg">search</span>
@@ -324,7 +329,7 @@
           <span class="material-symbols-outlined">search</span>
         </button>
         <a href="/merchant" class="hidden sm:flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white pl-3 pr-4 py-2.5 rounded-full font-bold text-sm transition-all active:scale-95 no-underline shadow-lg shadow-orange-900/30" title="Open Seller Dashboard">
-          <span class="material-symbols-outlined text-base">storefront</span> Sell on SmartSoko
+          <span class="material-symbols-outlined text-base">storefront</span> <span data-i18n="nav.sellOnSmartSoko">Sell on SmartSoko</span>
         </a>
         <a href="/merchant" class="sm:hidden p-2 bg-orange-500 text-white rounded-full active:scale-90 transition-transform" aria-label="Sell on SmartSoko" title="Open Seller Dashboard">
           <span class="material-symbols-outlined">storefront</span>
@@ -337,20 +342,20 @@
     </div>
   </header>
 
-  <nav class="storefront-nav" aria-label="Shop departments">
-    <a href="/discovery"><span class="material-symbols-outlined" aria-hidden="true">grid_view</span>All departments</a>
-    <a href="/discovery?category=vegetables">Fresh produce</a>
-    <a href="/discovery?category=food">Food &amp; restaurants</a>
-    <a href="/discovery?category=groceries">Groceries</a>
-    <a href="/discovery?category=bakery">Bakery</a>
-    <span class="storefront-local">Your neighbourhood, delivered.</span>
+  <nav class="storefront-nav" aria-label="Shop departments" data-i18n-aria-label="nav.discover">
+    <a href="/discovery"><span class="material-symbols-outlined" aria-hidden="true">grid_view</span><span data-i18n="home.allDepartments">All departments</span></a>
+    <a href="/discovery?category=vegetables"><span data-i18n="cat.freshProduce">Fresh produce</span></a>
+    <a href="/discovery?category=food"><span data-i18n="cat.foodRestaurants">Food &amp; restaurants</span></a>
+    <a href="/discovery?category=groceries"><span data-i18n="cat.groceries">Groceries</span></a>
+    <a href="/discovery?category=bakery"><span data-i18n="cat.bakery">Bakery</span></a>
+    <span class="storefront-local" data-i18n="home.yourNeighbourhood">Your neighbourhood, delivered.</span>
   </nav>
   <main id="storefrontMain" tabindex="-1" class="max-w-[1280px] mx-auto px-4 md:px-12 pt-5 pb-24">
 
     <!-- Mobile Search -->
     <div class="md:hidden mb-4">
       <div class="relative">
-        <input id="searchInputMobile" aria-label="Search products" type="text" placeholder="Search products, brands and more..."
+        <input id="searchInputMobile" aria-label="Search products" type="text" data-i18n-placeholder="header.searchProducts" placeholder="Search products, brands and more..."
           class="w-full h-11 pl-10 pr-4 rounded-2xl border border-gray-200 bg-white text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-600 outline-none transition-all shadow-sm"
           oninput="syncSearch(this.value)"/>
         <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-gray-400 text-lg">search</span>
@@ -361,33 +366,33 @@
     <section class="hero-carousel mb-6">
       <div class="hero-slide active">
         <div class="hero-content relative">
-          <span style="background: #e2ecd6; color: #14532d;" class="inline-block px-3 py-1 rounded-full text-xs font-bold mb-2 tracking-wide">FRESH FINDS. LOCAL FAVOURITES.</span>
-          <h2 class="text-3xl md:text-5xl font-extrabold mb-2 leading-tight">A little local.<br>A lot to love.</h2>
-          <p class="text-lg mb-3 max-w-md" style="color: var(--sk-muted);">Fresh groceries and good food from your neighbourhood, brought to your door.</p>
+          <span style="background: #e2ecd6; color: #14532d;" class="inline-block px-3 py-1 rounded-full text-xs font-bold mb-2 tracking-wide" data-i18n="home.freshFinds">FRESH FINDS. LOCAL FAVOURITES.</span>
+          <h2 class="text-3xl md:text-5xl font-extrabold mb-2 leading-tight"><span data-i18n-html="home.littleLocal">A little local.<br>A lot to love.</span></h2>
+          <p class="text-lg mb-3 max-w-md" style="color: var(--sk-muted);"><span data-i18n="home.freshGroceriesDoor">Fresh groceries and good food from your neighbourhood, brought to your door.</span></p>
           <div class="trust-row flex items-center gap-3 mb-4 text-xs font-semibold" style="color: var(--sk-charcoal);">
-            <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm" style="color: var(--sk-green);">eco</span> Fresh essentials</span>
+            <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm" style="color: var(--sk-green);">eco</span> <span data-i18n="home.freshEssentials">Fresh essentials</span></span>
             <span aria-hidden="true">·</span>
-            <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm text-green-700">storefront</span> Local sellers</span>
+            <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm text-green-700">storefront</span> <span data-i18n="home.localSellers">Local sellers</span></span>
             <span aria-hidden="true">·</span>
-            <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm text-green-700">local_shipping</span> To your door</span>
+            <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm text-green-700">local_shipping</span> <span data-i18n="home.toYourDoor">To your door</span></span>
           </div>
-          <a href="/discovery" style="background: var(--sk-green); color:#fff;" class="inline-block px-8 py-3.5 rounded-full font-bold text-sm hover:opacity-90 transition shadow-lg no-underline">Explore the market →</a>
+          <a href="/discovery" style="background: var(--sk-green); color:#fff;" class="inline-block px-8 py-3.5 rounded-full font-bold text-sm hover:opacity-90 transition shadow-lg no-underline"><span data-i18n="home.exploreMarket">Explore the market →</span></a>
         </div>
       </div>
       <div class="hero-slide">
         <div class="hero-content relative">
-          <span class="inline-block bg-white text-orange-600 px-3 py-1 rounded-full text-xs font-bold mb-2 tracking-wide">New Arrivals</span>
-          <h2 class="text-3xl md:text-5xl font-bold mb-2 leading-tight">Local Restaurants<br>At Your Door</h2>
-          <p class="text-lg text-white/90 mb-4 max-w-md">Discover the best food from local sellers near you</p>
-          <a href="/discovery?category=food" style="background: var(--sk-green); color:#fff;" class="inline-block px-8 py-3.5 rounded-full font-bold text-sm hover:opacity-90 transition shadow-lg no-underline">Explore</a>
+          <span class="inline-block bg-white text-orange-600 px-3 py-1 rounded-full text-xs font-bold mb-2 tracking-wide" data-i18n="home.newArrivalsBadge">New Arrivals</span>
+          <h2 class="text-3xl md:text-5xl font-bold mb-2 leading-tight"><span data-i18n-html="home.localRestaurants">Local Restaurants<br>At Your Door</span></h2>
+          <p class="text-lg text-white/90 mb-4 max-w-md"><span data-i18n="home.discoverBestFood">Discover the best food from local sellers near you</span></p>
+          <a href="/discovery?category=food" style="background: var(--sk-green); color:#fff;" class="inline-block px-8 py-3.5 rounded-full font-bold text-sm hover:opacity-90 transition shadow-lg no-underline"><span data-i18n="home.explore">Explore</span></a>
         </div>
       </div>
       <div class="hero-slide">
         <div class="hero-content relative">
-          <span class="inline-block bg-white text-green-700 px-3 py-1 rounded-full text-xs font-bold mb-2 tracking-wide">Free Delivery</span>
-          <h2 class="text-3xl md:text-5xl font-bold mb-2 leading-tight">Daily Fresh Dairy<br>Products</h2>
-          <p class="text-lg text-white/90 mb-4 max-w-md">Milk, cheese, yogurt â€” delivered fresh daily</p>
-          <a href="/discovery?category=dairy" style="background: var(--sk-green); color:#fff;" class="inline-block px-8 py-3.5 rounded-full font-bold text-sm hover:opacity-90 transition shadow-lg no-underline">Order Now</a>
+          <span class="inline-block bg-white text-green-700 px-3 py-1 rounded-full text-xs font-bold mb-2 tracking-wide" data-i18n="home.freeDelivery">Free Delivery</span>
+          <h2 class="text-3xl md:text-5xl font-bold mb-2 leading-tight"><span data-i18n="home.dailyFreshDairy">Daily Fresh Dairy<br>Products</span></h2>
+          <p class="text-lg text-white/90 mb-4 max-w-md"><span data-i18n="home.milkCheeseYogurt">Milk, cheese, yogurt — delivered fresh daily</span></p>
+          <a href="/discovery?category=dairy" style="background: var(--sk-green); color:#fff;" class="inline-block px-8 py-3.5 rounded-full font-bold text-sm hover:opacity-90 transition shadow-lg no-underline"><span data-i18n="home.orderNow">Order Now</span></a>
         </div>
       </div>
       <div class="carousel-dots">
@@ -398,60 +403,60 @@
     </section>
 
     <div class="storefront-assurances" aria-label="Shopping with SmartSoko">
-      <div><span class="material-symbols-outlined" aria-hidden="true">eco</span><div><strong>Fresh, everyday essentials</strong><small>Good food starts close to home.</small></div></div>
-      <div><span class="material-symbols-outlined" aria-hidden="true">storefront</span><div><strong>Support your local sellers</strong><small>Discover shops in your community.</small></div></div>
-      <div><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span><div><strong>From market to doorstep</strong><small>More time for the things you love.</small></div></div>
+      <div><span class="material-symbols-outlined" aria-hidden="true">eco</span><div><strong data-i18n="home.freshEveryday">Fresh, everyday essentials</strong><small data-i18n="home.goodFoodStarts">Good food starts close to home.</small></div></div>
+      <div><span class="material-symbols-outlined" aria-hidden="true">storefront</span><div><strong data-i18n="home.supportLocalSellers">Support your local sellers</strong><small data-i18n="home.discoverShops">Discover shops in your community.</small></div></div>
+      <div><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span><div><strong data-i18n="home.marketToDoor">From market to doorstep</strong><small data-i18n="home.moreTime">More time for the things you love.</small></div></div>
     </div>
 
     <!-- Quick Categories -->
     <section class="mb-6">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-          <span class="material-symbols-outlined text-green-600 text-xl">category</span> Shop by Category
+          <span class="material-symbols-outlined text-green-600 text-xl">category</span> <span data-i18n="home.shopByCategory">Shop by Category</span>
         </h2>
       </div>
       <div class="cat-scroll hide-scrollbar px-4">
         <a href="/discovery?category=food" class="cat-pill">
           <div class="cat-circle"><img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=240&q=60" alt="Food" loading="lazy" decoding="async"></div>
-          <span class="cat-label">Food</span><span class="cat-count">320+ items</span>
+          <span class="cat-label"><span data-i18n="cat.food">Food</span></span><span class="cat-count">320+ items</span>
         </a>
         <a href="/discovery?category=dairy" class="cat-pill">
           <div class="cat-circle"><img src="https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=240&q=60" alt="Dairy" loading="lazy" decoding="async"></div>
-          <span class="cat-label">Dairy</span>
+          <span class="cat-label"><span data-i18n="cat.dairy">Dairy</span></span>
         </a>
         <a href="/discovery?category=fruits" class="cat-pill">
           <div class="cat-circle"><img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=240&q=60" alt="Fruits" loading="lazy" decoding="async"></div>
-          <span class="cat-label">Fruits</span><span class="cat-count">150+ items</span>
+          <span class="cat-label"><span data-i18n="cat.fruits">Fruits</span></span><span class="cat-count">150+ items</span>
         </a>
         <a href="/discovery?category=groceries" class="cat-pill">
           <div class="cat-circle"><img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=240&q=60" alt="Grocery" loading="lazy" decoding="async"></div>
-          <span class="cat-label">Grocery</span>
+          <span class="cat-label"><span data-i18n="cat.groceries">Grocery</span></span>
         </a>
         <a href="/discovery?category=bakery" class="cat-pill">
           <div class="cat-circle"><img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=240&q=60" alt="Bakery" loading="lazy" decoding="async"></div>
-          <span class="cat-label">Bakery</span><span class="cat-count">90+ items</span>
+          <span class="cat-label"><span data-i18n="cat.bakery">Bakery</span></span><span class="cat-count">90+ items</span>
         </a>
         <a href="/discovery?category=vegetables" class="cat-pill hidden md:flex">
           <div class="cat-circle"><img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=240&q=60" alt="Veggies" loading="lazy" decoding="async"></div>
-          <span class="cat-label">Veggies</span>
+          <span class="cat-label"><span data-i18n="home.veggies">Veggies</span></span>
         </a>
         <a href="/discovery?category=snacks" class="cat-pill hidden md:flex">
           <div class="cat-circle"><img src="https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=240&q=60" alt="Snacks" loading="lazy" decoding="async"></div>
-          <span class="cat-label">Snacks</span>
+          <span class="cat-label"><span data-i18n="home.snacks">Snacks</span></span>
         </a>
         <a href="/discovery?category=drinks" class="cat-pill hidden md:flex">
           <div class="cat-circle"><img src="https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=240&q=60" alt="Drinks" loading="lazy" decoding="async"></div>
-          <span class="cat-label">Drinks</span>
+          <span class="cat-label"><span data-i18n="home.drinks">Drinks</span></span>
         </a>
         <a href="/discovery?category=meat" class="cat-pill hidden md:flex">
           <div class="cat-circle"><img src="https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=240&q=60" alt="Meat" loading="lazy" decoding="async"></div>
-          <span class="cat-label">Meat</span>
+          <span class="cat-label"><span data-i18n="home.meat">Meat</span></span>
         </a>
         <a href="/discovery" class="cat-pill hidden md:flex">
           <div class="cat-circle" style="display:flex;align-items:center;justify-content:center;">
             <span class="material-symbols-outlined text-2xl" style="color: var(--sk-green);">grid_view</span>
           </div>
-          <span class="cat-label">All</span>
+          <span class="cat-label"><span data-i18n="cat.all">All</span></span>
         </a>
       </div>
     </section>
@@ -477,64 +482,21 @@
       </div>
     </section>
 
-    <!-- Featured Sellers -->
-    <section class="mb-8">
+    <!-- Real shops and scheduled placements are supplied by the server. -->
+    <section class="mb-8" id="featuredShopsSection" hidden>
       <div class="flex items-center justify-between mb-3">
-        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-          <span class="material-symbols-outlined text-green-600 text-xl">storefront</span> Featured Sellers
-        </h2>
-        <a href="/discovery" class="text-green-700 font-semibold text-sm flex items-center gap-1 no-underline">View all <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2"><span class="material-symbols-outlined text-green-600 text-xl" aria-hidden="true">storefront</span> Featured Shops</h2>
+        <a href="/discovery" class="text-green-700 font-semibold text-sm no-underline">View all</a>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <a href="/discovery?seller=Fresh+Mart" class="seller-card no-underline">
-          <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
-            <span class="material-symbols-outlined text-xl text-white">store</span>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-gray-800 text-sm">Fresh Mart</h3>
-            <div class="flex items-center gap-1 text-xs text-gray-500">
-              <span class="text-yellow-500">★</span> 4.8 · 1.2k reviews
-            </div>
-            <p class="text-xs text-green-600 mt-0.5 font-medium">25-35 min</p>
-          </div>
-          <span class="material-symbols-outlined text-gray-300">chevron_right</span>
-        </a>
-        <a href="/discovery?seller=Tasty+Kitchen" class="seller-card no-underline">
-          <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
-            <span class="material-symbols-outlined text-xl text-white">restaurant</span>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-gray-800 text-sm">Tasty Kitchen</h3>
-            <div class="flex items-center gap-1 text-xs text-gray-500">
-              <span class="text-yellow-500">★</span> 4.6 · 856 reviews
-            </div>
-            <p class="text-xs text-orange-600 mt-0.5 font-medium">30-45 min</p>
-          </div>
-          <span class="material-symbols-outlined text-gray-300">chevron_right</span>
-        </a>
-        <a href="/discovery?seller=Daily+Bread" class="seller-card no-underline">
-          <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
-            <span class="material-symbols-outlined text-xl text-white">bakery_dining</span>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-gray-800 text-sm">Daily Bread</h3>
-            <div class="flex items-center gap-1 text-xs text-gray-500">
-              <span class="text-yellow-500">★</span> 4.9 · 2.1k reviews
-            </div>
-            <p class="text-xs text-amber-600 mt-0.5 font-medium">20-30 min</p>
-          </div>
-          <span class="material-symbols-outlined text-gray-300">chevron_right</span>
-        </a>
-      </div>
+      <div id="featuredShopsGrid" aria-live="polite"></div>
     </section>
-
     <!-- Popular Products -->
     <section class="mb-8" id="popularSection">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-          <span class="material-symbols-outlined text-orange-500 text-xl">trending_up</span> Popular Products
+          <span class="material-symbols-outlined text-orange-500 text-xl">trending_up</span> <span data-i18n="home.popularProducts">Popular Products</span>
         </h2>
-        <a href="/discovery" class="text-green-700 font-semibold text-sm flex items-center gap-1 no-underline">See all <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+        <a href="/discovery" class="text-green-700 font-semibold text-sm flex items-center gap-1 no-underline"><span data-i18n="common.seeAll">See all</span> <span class="material-symbols-outlined text-sm">chevron_right</span></a>
       </div>
       <div id="popularProducts" class="product-grid">
         <!-- Skeleton loaders -->
@@ -549,9 +511,9 @@
     <section class="mb-8" id="recommendedSection">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-          <span class="material-symbols-outlined text-purple-500 text-xl">recommend</span> Recommended for You
+          <span class="material-symbols-outlined text-purple-500 text-xl">recommend</span> <span data-i18n="home.recommendedForYou">Recommended for You</span>
         </h2>
-        <a href="/discovery" class="text-green-700 font-semibold text-sm flex items-center gap-1 no-underline">See all <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+        <a href="/discovery" class="text-green-700 font-semibold text-sm flex items-center gap-1 no-underline"><span data-i18n="common.seeAll">See all</span> <span class="material-symbols-outlined text-sm">chevron_right</span></a>
       </div>
       <div id="recommendedProducts" class="product-grid">
         <div class="product-card"><span class="sr-only" aria-hidden="true">Loading product...</span><div class="aspect-square skeleton"></div><div class="p-3 space-y-2"><div class="skeleton-text"></div><div class="skeleton-text-sm"></div><div class="skeleton" style="height:20px;width:35%"></div></div></div>
@@ -568,8 +530,8 @@
           <span class="material-symbols-outlined text-xl text-white">receipt_long</span>
         </div>
         <div>
-          <h3 class="font-bold text-gray-800 text-sm">My Orders</h3>
-          <p class="text-xs text-gray-500">Track deliveries</p>
+          <h3 class="font-bold text-gray-800 text-sm"><span data-i18n="profile.myOrders">My Orders</span></h3>
+          <p class="text-xs text-gray-500"><span data-i18n="home.realTimeTracking">Track deliveries</span></p>
         </div>
       </a>
       <a href="/profile" class="quick-link no-underline">
@@ -577,8 +539,8 @@
           <span class="material-symbols-outlined text-xl text-white">person</span>
         </div>
         <div>
-          <h3 class="font-bold text-gray-800 text-sm">My Profile</h3>
-          <p class="text-xs text-gray-500">Manage account</p>
+          <h3 class="font-bold text-gray-800 text-sm"><span data-i18n="profile.title">My Profile</span></h3>
+          <p class="text-xs text-gray-500"><span data-i18n="profile.manageAccount">Manage account</span></p>
         </div>
       </a>
       <a href="/track-order" class="quick-link no-underline">
@@ -586,13 +548,13 @@
           <span class="material-symbols-outlined text-xl text-white">local_shipping</span>
         </div>
         <div>
-          <h3 class="font-bold text-gray-800 text-sm">Track Order</h3>
-          <p class="text-xs text-gray-500">Real-time tracking</p>
+          <h3 class="font-bold text-gray-800 text-sm"><span data-i18n="orders.trackOrder">Track Order</span></h3>
+          <p class="text-xs text-gray-500"><span data-i18n="home.realTimeTracking">Real-time tracking</span></p>
         </div>
       </a>
       <a href="#customer-service" class="quick-link sf-service-shortcut no-underline">
         <div class="quick-icon"><span class="material-symbols-outlined text-xl" aria-hidden="true">support_agent</span></div>
-        <div><h3 class="font-bold text-sm">Customer service</h3><p class="text-xs">We’re here to help</p></div>
+        <div><h3 class="font-bold text-sm"><span data-i18n="footer.customerService">Customer service</span></h3><p class="text-xs"><span data-i18n="home.hereToHelp">We’re here to help</span></p></div>
       </a>
     </section>
   </main>
@@ -602,20 +564,20 @@
     <div id="cartSidebar" class="absolute top-0 right-0 h-full w-full md:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]" aria-hidden="true">
       <div class="h-full flex flex-col">
         <div class="p-5 border-b border-gray-100 flex justify-between items-center">
-          <h2 class="text-xl font-bold text-green-800">Your Cart</h2>
+          <h2 class="text-xl font-bold text-green-800"><span data-i18n="home.yourCart">Your Cart</span></h2>
           <button onclick="toggleCart()" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
         <div id="cartItems" class="flex-1 overflow-y-auto p-5">
-          <p class="text-center text-gray-400 py-12">Your cart is empty</p>
+          <p class="text-center text-gray-400 py-12" data-i18n="cart.empty">Your cart is empty</p>
         </div>
         <div class="p-5 border-t border-gray-100">
           <div class="flex justify-between mb-3">
-            <span class="text-gray-500">Subtotal</span>
+            <span class="text-gray-500" data-i18n="cart.subtotal">Subtotal</span>
             <span id="cartTotal" class="font-bold text-green-800">TSh 0</span>
           </div>
-          <button onclick="checkout()" class="w-full gradient-bg text-white py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all active:scale-[0.98]">
+          <button onclick="checkout()" class="w-full gradient-bg text-white py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all active:scale-[0.98]" data-i18n="cart.checkout">
             Checkout
           </button>
         </div>
@@ -628,23 +590,23 @@
   <nav class="bottom-nav">
     <a href="/home" class="nav-item active">
       <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">home</span>
-      <span>Home</span>
+      <span data-i18n="nav.home">Home</span>
     </a>
     <a href="/discovery" class="nav-item">
       <span class="material-symbols-outlined">search</span>
-      <span>Browse</span>
+      <span data-i18n="home.browse">Browse</span>
     </a>
     <a href="/cart" class="nav-item relative">
       <div class="relative">
         <span class="material-symbols-outlined">shopping_cart</span>
         <span id="bottomCartBadge" style="background: var(--sk-amber);" class="absolute -top-1 -right-2 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
       </div>
-      <span>Cart</span>
+      <span data-i18n="nav.cart">Cart</span>
     </a>
-    <a href="#customer-service" class="nav-item"><span class="material-symbols-outlined" aria-hidden="true">support_agent</span><span>Support</span></a>
+    <a href="#customer-service" class="nav-item"><span class="material-symbols-outlined" aria-hidden="true">support_agent</span><span data-i18n="home.support">Support</span></a>
     <a href="/profile" class="nav-item">
       <span class="material-symbols-outlined">person</span>
-      <span>Profile</span>
+      <span data-i18n="nav.profile">Profile</span>
     </a>
   </nav>
 
@@ -663,13 +625,7 @@
       window.location.href = '/discovery?search=' + encodeURIComponent(query);
     }
     
-    if (window.crossPlatformService && window.crossPlatformService.isReady()) {
-      tryLoadProducts();
-    } else {
-      document.addEventListener('data-service-ready', () => {
-        tryLoadProducts();
-      }, { once: true });
-    }
+    document.addEventListener('DOMContentLoaded', tryLoadProducts, { once: true });
 
     document.addEventListener('DOMContentLoaded', () => {
       ['searchInputMobile', 'searchInputDesktop'].forEach(id => {
@@ -703,16 +659,23 @@
     function renderProducts(items, containerId) {
       const list = items.filter(p => p.isAvailable !== false);
       ShoppingUI.cards(document.getElementById(containerId), list);
-      if (!list.length) document.getElementById(containerId).textContent = 'No products available yet. Please check back soon.';
+      if (!list.length) document.getElementById(containerId).textContent = t('home.noProductsYet');
     }
     function renderFlashDeals(items) {
       const actualDeals = items.filter(p => p.originalPrice > p.price && p.price > 0);
       const selection = (actualDeals.length ? actualDeals : items).slice(0, 4);
-      document.getElementById('dealsHeading').textContent = actualDeals.length ? 'Fresh finds. Better prices.' : 'Fresh finds from your local market';
-      document.getElementById('dealsSubtitle').textContent = actualDeals.length ? 'Savings on everyday favourites' : 'A few good things to add to your basket';
+      document.getElementById('dealsHeading').textContent = actualDeals.length ? t('home.freshFindsBetter') : t('home.freshFromMarket');
+      document.getElementById('dealsSubtitle').textContent = actualDeals.length ? t('home.savingsEveryday') : t('home.goodThingsBasket');
       ShoppingUI.cards(document.getElementById('flashDealsGrid'), selection, true);
-      if (!selection.length) document.getElementById('flashDealsGrid').textContent = 'New products are on their way. Explore the marketplace.';
+      if (!selection.length) document.getElementById('flashDealsGrid').textContent = t('home.newProductsComing');
     }
+
+    document.addEventListener('smartsoko:langchange', () => {
+      if (!products.length) return;
+      renderProducts(products, 'popularProducts');
+      renderProducts(products.length > 4 ? products.slice(4, 8) : [...products].reverse(), 'recommendedProducts');
+      renderFlashDeals(products);
+    });
 
     function normalizeProduct(item) {
       return {
@@ -722,11 +685,11 @@
         rating: Number(item.rating || 0),
         reviewCount: Number(item.reviewCount || item.review_count || 0),
         stockQuantity: item.stockQuantity == null && item.stock_quantity == null && item.stock == null ? null : Number(item.stockQuantity ?? item.stock_quantity ?? item.stock),
-        name: item.name || item.product_name || 'Unnamed Item',
+        name: item.name || item.product_name || t('home.unnamedItem'),
         description: item.description || '',
         price: item.price || 0,
         imageUrl: item.imageUrl || item.image_url || item.image || '',
-        category: item.category || 'General',
+        category: item.category || t('home.general'),
         isAvailable: item.isAvailable !== false,
         sellerId: item.sellerId || item.seller_id || item.restaurantId || item.restaurant_id || '',
         seller: item.seller || item.sellerName || item.seller_name || item.restaurantName || item.restaurant_name || 'SmartSoko'
@@ -735,30 +698,25 @@
 
     async function loadProducts() {
       try {
-        // Wait for cross-platform service to be ready
-        let waitAttempts = 0;
-        while ((!window.crossPlatformService || !window.crossPlatformService.isReady()) && waitAttempts < 20) {
-          await new Promise(resolve => setTimeout(resolve, 250));
-          waitAttempts++;
-        }
-        
-        const svc = window.crossPlatformService;
-        if (!svc || !svc.isReady()) throw new Error('Data service not available after waiting');
-        const items = await svc.list('products', { limit: 100 });
+        const response = await fetch('/api/products?limit=100', { signal: AbortSignal.timeout(15000) });
+        if (!response.ok || !(response.headers.get('content-type') || '').includes('application/json')) throw new Error('Catalogue unavailable');
+        const payload = await response.json();
+        if (!payload.success || !Array.isArray(payload.data)) throw new Error('Catalogue unavailable');
+        const items = payload.data;
 
         if (!items || items.length === 0) {
           renderProducts([], 'popularProducts'); renderProducts([], 'recommendedProducts'); renderFlashDeals([]); return;
         }
 
         products = items.map(normalizeProduct).filter(p => p.isAvailable !== false);
-        renderProducts(products, 'popularProducts');
+        renderProducts(products.slice(0, 12), 'popularProducts');
         renderProducts(products.length > 4 ? products.slice(4, 8) : [...products].reverse(), 'recommendedProducts');
         renderFlashDeals(products);
       } catch (err) {
         console.error('Load error:', err);
-        document.getElementById('flashDealsGrid').textContent = 'Products could not load. Use Retry below to try again.';
-        document.getElementById('recommendedProducts').textContent = 'Products are temporarily unavailable.';
-        document.getElementById('popularProducts').innerHTML = `<div class="col-span-full text-center py-8"><p class="text-red-500 mb-2">Failed to load products</p><button onclick="loadProducts()" class="mt-3 px-5 py-2 gradient-bg text-white rounded-xl text-sm font-semibold">Retry</button></div>`;
+        document.getElementById('flashDealsGrid').textContent = t('home.productsCouldNotLoad');
+        document.getElementById('recommendedProducts').textContent = t('home.productsTemporarily');
+        document.getElementById('popularProducts').innerHTML = `<div class="col-span-full text-center py-8"><p class="text-red-500 mb-2">${t('home.failedLoadProducts')}</p><button onclick="loadProducts()" class="mt-3 px-5 py-2 gradient-bg text-white rounded-xl text-sm font-semibold">${t('common.retry')}</button></div>`;
       }
     }
 
@@ -767,7 +725,7 @@
       if (!product) return;
       const existing = cart.find(i => i.id === productId);
       if (Number.isFinite(product.stockQuantity) && product.stockQuantity >= 0 && (existing?.quantity || 0) >= product.stockQuantity) {
-        ShoppingUI.feedback(product, 'Only '+product.stockQuantity+' available. Review your basket quantity.'); return;
+        ShoppingUI.feedback(product, t('home.onlyAvailable')+' '+product.stockQuantity+' '+t('home.reviewBasket')); return;
       }
       if (existing) existing.quantity++; else cart.push({ ...product, quantity: 1 });
       saveCart();
@@ -895,15 +853,11 @@
       </div>
       <div class="sf-footer-bottom">
         <p>&copy; 2026 SmartSoko. All rights reserved.</p>
-        <div class="sf-social-group" aria-label="Social channels">
-          <span>Find us online</span>
-          <div class="sf-social-icons" aria-label="Social profile links coming soon">
-            <span class="sf-social-icon" role="img" aria-label="Facebook — profile link coming soon" title="Facebook — coming soon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M13.5 21v-8.2h2.8l.4-3.2h-3.2V7.5c0-.9.3-1.5 1.6-1.5h1.7V3.1c-.3 0-1.3-.1-2.5-.1-2.5 0-4.1 1.5-4.1 4.2v2.4H7.5v3.2h2.7V21h3.3Z"/></svg></span>
-            <span class="sf-social-icon" role="img" aria-label="X — profile link coming soon" title="X — coming soon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M18.9 3H22l-6.8 7.8L23 21h-6.1l-4.8-6.3L6.6 21H3.4l7.3-8.5L3 3h6.3l4.4 5.8L18.9 3Zm-1.1 16.2h1.7L8.4 4.7H6.6l11.2 14.5Z"/></svg></span>
-            <span class="sf-social-icon" role="img" aria-label="Instagram — profile link coming soon" title="Instagram — coming soon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></span>
-          </div>
-          <small>Official links coming soon</small>
+        <div class="sf-footer-legal">
+          <a href="/privacy">Sera ya Faragha</a>
+          <a href="/terms">Masharti ya Huduma</a>
         </div>
+
       </div>
     </div>
   </footer>

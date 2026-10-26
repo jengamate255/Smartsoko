@@ -1,5 +1,6 @@
 package com.smartsoko.merchant.ui.orders;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +41,33 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
     public void setOrders(List<Order> orders) {
         this.orders = orders;
         notifyDataSetChanged();
+    }
+
+    /**
+     * Display label for a raw backend status value. The status itself stays English
+     * (it is server data); only the label shown to the user is localized.
+     */
+    static String localizedStatus(Context context, String status) {
+        String key = status == null ? "" : status.toLowerCase();
+        switch (key) {
+            case "pending":
+                return context.getString(R.string.status_pending);
+            case "accepted":
+                return context.getString(R.string.status_accepted);
+            case "ready":
+            case "ready_for_delivery":
+                return context.getString(R.string.status_ready);
+            case "delivered":
+                return context.getString(R.string.status_delivered);
+            case "completed":
+                return context.getString(R.string.status_completed);
+            case "cancelled":
+                return context.getString(R.string.status_cancelled);
+            case "rejected":
+                return context.getString(R.string.status_rejected);
+            default:
+                return context.getString(R.string.label_unknown);
+        }
     }
 
     @NonNull
@@ -92,17 +120,21 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
         }
 
         void bind(Order order) {
-            tvOrderId.setText("Order #" + order.getId().substring(0, Math.min(8, order.getId().length())));
-            tvCustomerName.setText(order.getCustomerName() != null ? order.getCustomerName() : "Unknown Customer");
-            tvCustomerPhone.setText(order.getCustomerPhone() != null ? order.getCustomerPhone() : "No phone");
+            tvOrderId.setText(itemView.getContext().getString(
+                    R.string.order_number_format, order.getId().substring(0, Math.min(8, order.getId().length()))));
+            tvCustomerName.setText(order.getCustomerName() != null
+                    ? order.getCustomerName() : itemView.getContext().getString(R.string.unknown_customer));
+            tvCustomerPhone.setText(order.getCustomerPhone() != null
+                    ? order.getCustomerPhone() : itemView.getContext().getString(R.string.no_phone));
 
             if (order.getCreatedAt() != null) {
                 tvOrderTime.setText(dateFormat.format(order.getCreatedAt()));
             } else {
-                tvOrderTime.setText("Unknown time");
+                tvOrderTime.setText(R.string.unknown_time);
             }
 
-            tvItems.setText(order.getFormattedItems());
+            boolean noItems = order.getItems() == null || order.getItems().isEmpty();
+            tvItems.setText(noItems ? itemView.getContext().getString(R.string.no_items) : order.getFormattedItems());
 
             if (order.getTotalAmount() != null) {
                 tvTotal.setText(String.format("TSh %.2f", order.getTotalAmount()));
@@ -110,7 +142,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
                 tvTotal.setText("TSh 0.00");
             }
 
-            tvStatus.setText(order.getStatusDisplayName());
+            tvStatus.setText(localizedStatus(itemView.getContext(), order.getStatus()));
             tvStatus.setTextColor(order.getStatusColor());
 
             if (order.getDeliveryAddress() != null) {

@@ -27,7 +27,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Store Information"
+                    android:text="@string/label_store_information"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_primary"
@@ -36,7 +36,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Store Name"
+                    android:text="@string/label_store_name"
                     android:textSize="12sp"
                     android:textColor="@color/text_hint" />
 
@@ -44,7 +44,7 @@
                     android:id="@+id/tv_store_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Your Store Name"
+                    android:text="@string/your_store_name"
                     android:textSize="16sp"
                     android:textColor="@color/text_primary"
                     android:layout_marginBottom="12dp" />
@@ -52,7 +52,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Email"
+                    android:text="@string/label_email"
                     android:textSize="12sp"
                     android:textColor="@color/text_hint" />
 
@@ -69,7 +69,7 @@
                     android:id="@+id/btn_edit_store"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Edit Store Details"
+                    android:text="@string/action_edit_store_details"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
             </LinearLayout>
@@ -92,7 +92,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Account"
+                    android:text="@string/label_account"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_primary"
@@ -102,7 +102,7 @@
                     android:id="@+id/btn_logout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Logout"
+                    android:text="@string/action_logout"
                     android:textColor="@color/error"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     app:strokeColor="@color/error" />

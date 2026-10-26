@@ -9,8 +9,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.smartsoko.customer.R
 import com.smartsoko.customer.data.repository.Customer
 import com.smartsoko.customer.ui.components.*
 
@@ -45,19 +47,19 @@ fun ProfileScreen(
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
-            title = { Text("Sign Out") },
-            text = { Text("Are you sure you want to sign out?") },
+            title = { Text(stringResource(R.string.sign_out)) },
+            text = { Text(stringResource(R.string.sign_out_confirm)) },
             confirmButton = {
                 TextButton(onClick = {
                     showLogoutDialog = false
                     onSignOut()
                 }) {
-                    Text("Sign Out", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.sign_out), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -69,7 +71,7 @@ fun ProfileScreen(
             .padding(16.dp)
     ) {
         Text(
-            "Profile",
+            stringResource(R.string.profile),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 20.dp)
@@ -116,7 +118,7 @@ fun ProfileScreen(
                         }
                         Spacer(Modifier.width(12.dp))
                         Text(
-                            "Personal Information",
+                            stringResource(R.string.personal_information),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -125,7 +127,7 @@ fun ProfileScreen(
                         TextButton(onClick = { isEditing = true }) {
                             Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text("Edit")
+                            Text(stringResource(R.string.edit))
                         }
                     }
                 }
@@ -138,7 +140,7 @@ fun ProfileScreen(
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("Name") },
+                        label = { Text(stringResource(R.string.name)) },
                         singleLine = true,
                         shape = SmartRadiusSmall,
                         modifier = Modifier
@@ -148,7 +150,7 @@ fun ProfileScreen(
                     OutlinedTextField(
                         value = phone,
                         onValueChange = { phone = it },
-                        label = { Text("Phone") },
+                        label = { Text(stringResource(R.string.phone)) },
                         singleLine = true,
                         shape = SmartRadiusSmall,
                         modifier = Modifier
@@ -158,7 +160,7 @@ fun ProfileScreen(
                     OutlinedTextField(
                         value = address,
                         onValueChange = { address = it },
-                        label = { Text("Address") },
+                        label = { Text(stringResource(R.string.address)) },
                         shape = SmartRadiusSmall,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -169,7 +171,7 @@ fun ProfileScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         SecondaryButton(
-                            text = "Cancel",
+                            text = stringResource(R.string.cancel),
                             onClick = {
                                 isEditing = false
                                 name = customer?.name ?: ""
@@ -179,7 +181,7 @@ fun ProfileScreen(
                             modifier = Modifier.weight(1f)
                         )
                         PrimaryButton(
-                            text = "Save",
+                            text = stringResource(R.string.save),
                             onClick = {
                                 onSaveProfile(name, phone, address)
                                 isEditing = false
@@ -189,10 +191,10 @@ fun ProfileScreen(
                         )
                     }
                 } else {
-                    ProfileInfoRow(label = "Name", value = customer?.name ?: "\u2014")
-                    ProfileInfoRow(label = "Email", value = customer?.email ?: "\u2014")
-                    ProfileInfoRow(label = "Phone", value = customer?.phone ?: "\u2014")
-                    ProfileInfoRow(label = "Address", value = customer?.address ?: "\u2014")
+                    ProfileInfoRow(label = stringResource(R.string.name), value = customer?.name ?: "\u2014")
+                    ProfileInfoRow(label = stringResource(R.string.email), value = customer?.email ?: "\u2014")
+                    ProfileInfoRow(label = stringResource(R.string.phone), value = customer?.phone ?: "\u2014")
+                    ProfileInfoRow(label = stringResource(R.string.address), value = customer?.address ?: "\u2014")
                 }
             }
         }
@@ -202,13 +204,13 @@ fun ProfileScreen(
         SmartCard {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    "Account",
+                    stringResource(R.string.account),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
                 SecondaryButton(
-                    text = "Sign Out",
+                    text = stringResource(R.string.sign_out),
                     onClick = { showLogoutDialog = true },
                     modifier = Modifier.fillMaxWidth(),
                     leadingIcon = { Icon(Icons.Default.ExitToApp, contentDescription = null, modifier = Modifier.size(18.dp)) }

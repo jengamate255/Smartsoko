@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.content.ContextCompat
@@ -56,7 +57,7 @@ class MainActivity : ComponentActivity() {
                     viewModel.toggleOnline(pending)
                     handleLocationService(pending)
                 } else {
-                    viewModel.setError("Location permission is required to go online — customers track your delivery")
+                    viewModel.setError(getString(R.string.location_permission_required))
                 }
             }
         }
@@ -247,26 +248,26 @@ fun DriverApp(
                 tonalElevation = 3.dp
             ) {
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.List, contentDescription = "Orders") },
-                    label = { Text("Orders") },
+                    icon = { Icon(Icons.Default.List, contentDescription = stringResource(R.string.orders)) },
+                    label = { Text(stringResource(R.string.orders)) },
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 }
                 )
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.LocalShipping, contentDescription = "Deliveries") },
-                    label = { Text("Deliveries") },
+                    icon = { Icon(Icons.Default.LocalShipping, contentDescription = stringResource(R.string.deliveries)) },
+                    label = { Text(stringResource(R.string.deliveries)) },
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 }
                 )
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.BarChart, contentDescription = "Earnings") },
-                    label = { Text("Earnings") },
+                    icon = { Icon(Icons.Default.BarChart, contentDescription = stringResource(R.string.earnings)) },
+                    label = { Text(stringResource(R.string.earnings)) },
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 }
                 )
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Profile") },
-                    label = { Text("Profile") },
+                    icon = { Icon(Icons.Default.AccountCircle, contentDescription = stringResource(R.string.profile)) },
+                    label = { Text(stringResource(R.string.profile)) },
                     selected = selectedTab == 3,
                     onClick = { selectedTab = 3 }
                 )

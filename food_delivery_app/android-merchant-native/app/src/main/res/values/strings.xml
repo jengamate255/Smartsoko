@@ -28,6 +28,101 @@
     <string name="action_delivered">Mark Delivered</string>
     <string name="action_view_details">View Details</string>
 
+    <!-- Login -->
+    <string name="tagline">Manage your business</string>
+    <string name="label_email">Email</string>
+    <string name="label_password">Password</string>
+    <string name="action_forgot_password">Forgot Password?</string>
+    <string name="action_sign_in">Sign In</string>
+    <string name="error_enter_email_first">Enter your email first</string>
+    <string name="msg_password_reset_sent">Password reset email sent</string>
+    <string name="error_failed_prefix">Failed: %1$s</string>
+    <string name="error_email_required">Email is required</string>
+    <string name="error_password_required">Password is required</string>
+    <string name="error_auth_failed">Authentication failed: %1$s</string>
+    <string name="error_access_denied_merchant">Access denied. This account is not authorized as a merchant.</string>
+    <string name="error_user_profile_not_found">User profile not found.</string>
+    <string name="error_checking_role">Error checking role: %1$s</string>
+
+    <!-- Order labels and details -->
+    <string name="label_status">Status</string>
+    <string name="label_customer">Customer</string>
+    <string name="label_delivery_address">Delivery Address</string>
+    <string name="label_items">Items</string>
+    <string name="label_payment_method">Payment Method</string>
+    <string name="label_order_time">Order Time</string>
+    <string name="label_total">Total</string>
+    <string name="label_total_colon">Total:</string>
+    <string name="order_number_format">Order #%1$s</string>
+    <string name="action_close">Close</string>
+    <string name="no_items">No items</string>
+    <string name="unknown_customer">Unknown Customer</string>
+    <string name="no_phone">No phone</string>
+    <string name="unknown_time">Unknown time</string>
+    <string name="label_unknown">Unknown</string>
+    <string name="label_sort_by">Sort by:</string>
+    <string name="empty_no_orders">No orders found</string>
+    <string name="filter_all">All</string>
+    <string name="tab_active">Active</string>
+    <string name="action_mark_as_ready">Mark as Ready</string>
+    <string name="action_mark_as_delivered">Mark as Delivered</string>
+    <string name="msg_order_accepted">Order accepted</string>
+    <string name="msg_order_rejected">Order rejected</string>
+    <string name="msg_order_marked_ready">Order marked as ready</string>
+    <string name="msg_order_marked_delivered">Order marked as delivered</string>
+
+    <!-- Analytics -->
+    <string name="label_total_revenue">Total Revenue</string>
+    <string name="label_total_orders">Total Orders</string>
+    <string name="label_sales_chart">Sales Chart</string>
+    <string name="chart_coming_soon">Chart coming soon</string>
+
+    <!-- Products -->
+    <string name="action_add_product">Add product</string>
+    <string name="action_edit_product">Edit product</string>
+    <string name="desc_edit_product">Edit product</string>
+    <string name="hint_product_name">Product name *</string>
+    <string name="hint_price_tsh">Price (TSh) *</string>
+    <string name="hint_stock_qty">Stock qty</string>
+    <string name="hint_category">Category</string>
+    <string name="hint_image_url">Image URL (optional)</string>
+    <string name="label_available_for_sale">Available for sale</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_save_product">Save product</string>
+    <string name="filter_available">Available</string>
+    <string name="filter_out_of_stock">Out of stock</string>
+    <string name="hint_search_products">Search product name or category</string>
+    <string name="empty_no_products">No products found</string>
+    <string name="empty_no_products_hint">Tap \"Add product\" to create your first one</string>
+    <string name="badge_low_stock">LOW STOCK</string>
+    <string name="label_sold_out">Sold out</string>
+    <string name="label_stock">Stock</string>
+    <string name="no_category">No category</string>
+    <string name="units_format">%1$d units</string>
+    <string name="units_left_format">%1$d units left</string>
+    <string name="error_required">Required</string>
+    <string name="error_valid_price">Enter a valid price</string>
+    <string name="error_enter_number">Enter a number</string>
+
+    <!-- Settings / navigation -->
+    <string name="label_store_information">Store Information</string>
+    <string name="label_store_name">Store Name</string>
+    <string name="your_store_name">Your Store Name</string>
+    <string name="your_store">Your Store</string>
+    <string name="action_edit_store_details">Edit Store Details</string>
+    <string name="label_account">Account</string>
+    <string name="action_logout">Logout</string>
+    <string name="dialog_edit_store_name">Edit store name</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_save">Save</string>
+    <string name="error_enter_store_name">Enter a store name</string>
+    <string name="msg_store_updated">Store updated</string>
+    <string name="error_save_store_retry">Could not save. Check your connection and try again.</string>
+    <string name="msg_logged_out">Logged out</string>
+    <string name="error_no_store_found">No store found for this account</string>
+    <string name="error_loading_store">Error loading store: %1$s</string>
+    <string name="error_loading_orders">Error loading orders: %1$s</string>
+
     <!-- Sort Options -->
     <string-array name="sort_options">
         <item>Newest First</item>

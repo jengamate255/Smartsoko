@@ -16,45 +16,49 @@
  */
 
 const SmartNav = (() => {
+  function _t(key, fallback) {
+    return (window.SmartSokoI18n && window.SmartSokoI18n.t) ? window.SmartSokoI18n.t(key) : fallback;
+  }
+
   // â”€â”€ Configuration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const NAV_ITEMS = [
-    { id: 'home',      label: 'Home',      icon: 'home',           href: 'main.html' },
-    { id: 'discover',  label: 'Discover',   icon: 'explore',        href: 'discovery.html' },
-    { id: 'cart',      label: 'Cart',       icon: 'shopping_cart',  href: 'cart.html' },
-    { id: 'sell',      label: 'Sell',       icon: 'storefront',     href: '/merchant' },
-    { id: 'profile',   label: 'Profile',    icon: 'person',         href: 'profile.html' },
+    { id: 'home',      labelKey: 'nav.home',      label: 'Home',      icon: 'home',           href: 'main.html' },
+    { id: 'discover',  labelKey: 'nav.discover',   label: 'Discover',   icon: 'explore',        href: 'discovery.html' },
+    { id: 'cart',      labelKey: 'nav.cart',       label: 'Cart',       icon: 'shopping_cart',  href: 'cart.html' },
+    { id: 'sell',      labelKey: 'nav.sell',       label: 'Sell',       icon: 'storefront',     href: '/merchant' },
+    { id: 'profile',   labelKey: 'nav.profile',    label: 'Profile',    icon: 'person',         href: 'profile.html' },
   ];
 
   const DRIVER_NAV = [
-    { id: 'home',      label: 'Home',      icon: 'home',           href: 'main.html' },
-    { id: 'orders',    label: 'Orders',     icon: 'receipt_long',   href: 'driver.html' },
-    { id: 'earnings',  label: 'Earnings',   icon: 'payments',       href: 'driver.html' },
-    { id: 'profile',   label: 'Profile',    icon: 'person',         href: 'profile.html' },
+    { id: 'home',      labelKey: 'nav.home',      label: 'Home',      icon: 'home',           href: 'main.html' },
+    { id: 'orders',    labelKey: 'nav.orders',    label: 'Orders',     icon: 'receipt_long',   href: 'driver.html' },
+    { id: 'earnings',  labelKey: 'nav.earnings',  label: 'Earnings',   icon: 'payments',       href: 'driver.html' },
+    { id: 'profile',   labelKey: 'nav.profile',   label: 'Profile',    icon: 'person',         href: 'profile.html' },
   ];
 
 const MERCHANT_NAV = [
-  { id: 'home',      label: 'Home',      icon: 'home',           href: '/main' },
-  { id: 'orders',    label: 'Orders',     icon: 'receipt_long',   href: '/merchant' },
-  { id: 'products',  label: 'Products',   icon: 'inventory_2',    href: '/merchant' },
+  { id: 'home',      labelKey: 'nav.home',      label: 'Home',      icon: 'home',           href: '/main' },
+  { id: 'orders',    labelKey: 'nav.orders',    label: 'Orders',     icon: 'receipt_long',   href: '/merchant' },
+  { id: 'products',  labelKey: 'nav.products',  label: 'Products',   icon: 'inventory_2',    href: '/merchant' },
 ];
 
   const ADMIN_NAV = [
-    { id: 'home',      label: 'Home',      icon: 'home',           href: 'main.html' },
-    { id: 'dashboard', label: 'Dashboard',  icon: 'dashboard',      href: 'admin.html' },
-    { id: 'users',     label: 'Users',      icon: 'group',          href: 'admin.html' },
-    { id: 'profile',   label: 'Profile',    icon: 'person',         href: 'profile.html' },
+    { id: 'home',      labelKey: 'nav.home',      label: 'Home',      icon: 'home',           href: 'main.html' },
+    { id: 'dashboard', labelKey: 'nav.dashboard', label: 'Dashboard',  icon: 'dashboard',      href: 'admin.html' },
+    { id: 'users',     labelKey: 'nav.users',     label: 'Users',      icon: 'group',          href: 'admin.html' },
+    { id: 'profile',   labelKey: 'nav.profile',   label: 'Profile',    icon: 'person',         href: 'profile.html' },
   ];
 
   const CATEGORIES = [
-    { name: 'Food',      icon: 'lunch_dining',     color: '#064e3b', href: 'discovery.html?category=food' },
-    { name: 'Dairy',     icon: 'local_drink',       color: '#10b981', href: 'discovery.html?category=dairy' },
-    { name: 'Fruits',    icon: 'nutrition',         color: '#059669', href: 'discovery.html?category=fruits' },
-    { name: 'Groceries', icon: 'shopping_basket',   color: '#064e3b', href: 'discovery.html?category=groceries' },
-    { name: 'Bakery',    icon: 'bakery_dining',     color: '#f59e0b', href: 'discovery.html?category=bakery' },
+    { nameKey: 'cat.food',      name: 'Food',      icon: 'lunch_dining',     color: '#064e3b', href: 'discovery.html?category=food' },
+    { nameKey: 'cat.dairy',     name: 'Dairy',     icon: 'local_drink',       color: '#10b981', href: 'discovery.html?category=dairy' },
+    { nameKey: 'cat.fruits',    name: 'Fruits',    icon: 'nutrition',         color: '#059669', href: 'discovery.html?category=fruits' },
+    { nameKey: 'cat.groceries', name: 'Groceries', icon: 'shopping_basket',   color: '#064e3b', href: 'discovery.html?category=groceries' },
+    { nameKey: 'cat.bakery',    name: 'Bakery',    icon: 'bakery_dining',     color: '#f59e0b', href: 'discovery.html?category=bakery' },
   ];
 
   const QUICK_LINKS = [
-    { label: 'Admin Panel',   href: 'admin.html',  icon: 'admin_panel_settings' },
+    { labelKey: 'nav.adminPanel', label: 'Admin Panel',   href: 'admin.html',  icon: 'admin_panel_settings' },
   ];
 
   const SHARED_STYLES = `
@@ -268,6 +272,11 @@ const MERCHANT_NAV = [
     initScrollBehavior();
     initKeyboardNav();
     registerServiceWorker();
+
+    document.addEventListener('smartsoko:langchange', () => {
+      if (!config.skipTopbar) renderTopBar();
+      renderBottomNav();
+    });
   }
 
   // â”€â”€ Service Worker Registration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -334,20 +343,20 @@ const MERCHANT_NAV = [
         ${config.showSearch ? `
         <div class="sn-search">
           <span class="material-symbols-outlined sn-search-icon">search</span>
-          <input type="text" id="sn-search-input" placeholder="Search products, sellers..." aria-label="Search">
+          <input type="text" id="sn-search-input" placeholder="${_t('header.searchProductsSellers', 'Search products, sellers...')}" aria-label="${_t('nav.search', 'Search')}">
         </div>` : ''}
 
         <div class="sn-actions">
 
-          <a href="/merchant" class="sn-btn" style="background:#f97316;color:#fff;box-shadow:0 2px 8px rgba(249,115,22,0.35);" title="Open Seller Dashboard">
+          <a href="/merchant" class="sn-btn" style="background:#f97316;color:#fff;box-shadow:0 2px 8px rgba(249,115,22,0.35);" title="${_t('nav.sellOnSmartSoko', 'Open Seller Dashboard')}">
             <span class="material-symbols-outlined" style="font-size:1.15rem;font-variation-settings:'FILL' 1;">storefront</span>
-            <span class="sn-btn-label">Sell</span>
+            <span class="sn-btn-label">${_t('nav.sell', 'Sell')}</span>
           </a>
 
           ${config.showCart ? `
           <a href="cart.html" class="sn-btn sn-btn-ghost cart-icon" style="position:relative;">
             <span class="material-symbols-outlined" style="font-size:1.15rem;">shopping_cart</span>
-            <span class="sn-btn-label">Cart</span>
+            <span class="sn-btn-label">${_t('nav.cart', 'Cart')}</span>
             <span class="cart-badge-count" style="display:${cartCount > 0 ? 'flex' : 'none'}; background-color: #B91C1C; color: white;">${cartCount}</span>
           </a>` : ''}
 
@@ -413,37 +422,37 @@ const MERCHANT_NAV = [
           </button>
         </div>
         <div class="sn-drawer-nav">
-          <div class="sn-drawer-section">Main Menu</div>
+          <div class="sn-drawer-section">${_t('nav.mainMenu', 'Main Menu')}</div>
           ${roleNav.map(item => `
             <a href="${item.href}" class="sn-drawer-link ${item.id === config.activePage ? 'active' : ''}">
               <span class="material-symbols-outlined">${item.icon}</span>
-              ${item.label}
+              ${_t(item.labelKey, item.label)}
             </a>
           `).join('')}
           ${['merchant', 'admin', 'driver'].includes(config.role) ? `
             <a href="javascript:void(0)" onclick="try{ (window.logout ? window.logout() : window.location.replace('login.html?role=${config.role}')) }catch(e){ window.location.replace('login.html?role=${config.role}') }" class="sn-drawer-link" style="color:#dc2626;">
               <span class="material-symbols-outlined">logout</span>
-              Sign Out
+              ${_t('nav.signOut', 'Sign Out')}
             </a>` : ''}
           <div class="sn-drawer-divider"></div>
           <a href="/merchant" class="sn-drawer-link" style="background:#fff7ed;margin:0.25rem 1rem 0.5rem;color:#ea580c;font-weight:700;">
             <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">storefront</span>
-            Sell on SmartSoko
+            ${_t('nav.sellOnSmartSoko', 'Sell on SmartSoko')}
           </a>
           <div class="sn-drawer-divider"></div>
-          <div class="sn-drawer-section">Quick Links</div>
+          <div class="sn-drawer-section">${_t('nav.quickLinks', 'Quick Links')}</div>
           ${QUICK_LINKS.map(link => `
             <a href="${link.href}" class="sn-drawer-link">
               <span class="material-symbols-outlined">${link.icon}</span>
-              ${link.label}
+              ${_t(link.labelKey, link.label)}
             </a>
           `).join('')}
           <div class="sn-drawer-divider"></div>
-          <div class="sn-drawer-section">Categories</div>
+          <div class="sn-drawer-section">${_t('nav.categories', 'Categories')}</div>
           ${CATEGORIES.map(cat => `
             <a href="${cat.href}" class="sn-drawer-link">
               <span class="material-symbols-outlined" style="color:${cat.color}">${cat.icon}</span>
-              ${cat.name}
+              ${_t(cat.nameKey, cat.name)}
             </a>
           `).join('')}
         </div>
@@ -485,7 +494,7 @@ const MERCHANT_NAV = [
     nav.innerHTML = items.map(item => `
       <a href="${item.href}" class="sn-bottom-item ${item.id === config.activePage ? 'active' : ''}">
         <span class="material-symbols-outlined">${item.icon}</span>
-        ${item.label}
+        ${_t(item.labelKey, item.label)}
       </a>
     `).join('');
 
@@ -504,7 +513,7 @@ const MERCHANT_NAV = [
 
     const crumbs = config.breadcrumbs;
     bc.innerHTML = `
-      <a href="main.html">Home</a>
+      <a href="main.html">${_t('nav.home', 'Home')}</a>
       ${crumbs.map((crumb, i) => {
         const isLast = i === crumbs.length - 1;
         return `<span class="sn-bc-sep">/</span>${isLast

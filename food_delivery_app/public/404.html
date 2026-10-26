@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sw">
 <head>
+  <script src="/config/api-origin.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page Not Found — SmartSoko</title>
@@ -32,13 +33,20 @@
         a.btn:hover { background: #2D6A4F; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(27,67,50,.35); }
         @media (prefers-reduced-motion: reduce) { a.btn { transition: none; } a.btn:hover { transform: none; } }
     </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/stitch-site.css?v=5">
+  <script src="js/stitch-site.js?v=2" defer></script>
+  <script src="js/i18n.js?v=1" defer></script>
+  <link rel="stylesheet" href="css/site-uniform.css?v=1">
+  <link rel="manifest" href="/manifest.json">
+
 </head>
-<body>
+<body class="ss-uniform stitch-site " data-stitch-page="404">
     <main class="card">
         <div class="code">404</div>
-        <h1>This page took a wrong turn</h1>
-        <p>The page you're looking for doesn't exist or may have moved. Let's get you back to the fresh stuff.</p>
-        <a class="btn" href="/">Back to SmartSoko</a>
+        <h1 data-i18n="404.title">This page took a wrong turn</h1>
+        <p data-i18n="404.message">The page you're looking for doesn't exist or may have moved. Let's get you back to the fresh stuff.</p>
+        <a class="btn" href="/" data-i18n="404.backHome">Back to SmartSoko</a>
     </main>
 </body>
 </html>

@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void logout() {
         FirebaseAuth.getInstance().signOut();
-        Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.msg_logged_out, Toast.LENGTH_SHORT).show();
         startActivity(new Intent(this, LoginActivity.class));
         finish();
     }

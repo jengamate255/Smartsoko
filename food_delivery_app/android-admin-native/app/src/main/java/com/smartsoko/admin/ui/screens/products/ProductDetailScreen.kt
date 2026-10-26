@@ -9,9 +9,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.smartsoko.admin.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,11 +28,11 @@ fun ProductDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Product Details", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.product_details), fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary),
-                navigationIcon = { IconButton(onClick = { /* navController.popBackStack() */ }) { Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onPrimary) } },
+                navigationIcon = { IconButton(onClick = { /* navController.popBackStack() */ }) { Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.cd_back), tint = MaterialTheme.colorScheme.onPrimary) } },
                 actions = {
-                    IconButton(onClick = { viewModel.deleteProduct() }) { Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onPrimary) }
+                    IconButton(onClick = { viewModel.deleteProduct() }) { Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.cd_delete), tint = MaterialTheme.colorScheme.onPrimary) }
                 }
             )
         }
@@ -64,11 +66,11 @@ fun ProductDetailScreen(
                 item {
                     Card(shape = MaterialTheme.shapes.large) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Details", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.details), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                             Spacer(modifier = Modifier.height(12.dp))
-                            Row { Text("Stock: ", style = MaterialTheme.typography.bodySmall); Text("${uiState.stock}", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium, color = if (uiState.stock > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error) }
-                            Row { Text("Unit: ", style = MaterialTheme.typography.bodySmall); Text(uiState.unit, style = MaterialTheme.typography.bodySmall) }
-                            Row { Text("Available: ", style = MaterialTheme.typography.bodySmall); Text(if (uiState.isAvailable) "Yes" else "No", style = MaterialTheme.typography.bodySmall) }
+                            Row { Text(stringResource(R.string.label_stock), style = MaterialTheme.typography.bodySmall); Text("${uiState.stock}", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium, color = if (uiState.stock > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error) }
+                            Row { Text(stringResource(R.string.label_unit), style = MaterialTheme.typography.bodySmall); Text(uiState.unit, style = MaterialTheme.typography.bodySmall) }
+                            Row { Text(stringResource(R.string.label_available), style = MaterialTheme.typography.bodySmall); Text(if (uiState.isAvailable) stringResource(R.string.yes) else stringResource(R.string.no), style = MaterialTheme.typography.bodySmall) }
                         }
                     }
                 }
@@ -77,7 +79,7 @@ fun ProductDetailScreen(
                     item {
                         Card(shape = MaterialTheme.shapes.large) {
                             Column(modifier = Modifier.padding(16.dp)) {
-                                Text("Description", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                                Text(stringResource(R.string.description), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(uiState.description, style = MaterialTheme.typography.bodyMedium)
                             }

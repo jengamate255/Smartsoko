@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../models/restaurant.dart';
-import '../../services/restaurant_service.dart';
-import '../../widgets/shimmer_loading.dart';
-import '../../widgets/error_screen.dart';
+import 'package:smartsoko/models/restaurant.dart';
+import 'package:smartsoko/services/restaurant_service.dart';
+import 'package:smartsoko/widgets/shimmer_loading.dart';
+import 'package:smartsoko/widgets/error_screen.dart';
+import 'package:smartsoko/utils/app_localizations.dart';
 import 'restaurant_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -27,7 +28,10 @@ class HomeScreen extends StatelessWidget {
             flexibleSpace: FlexibleSpaceBar(
               title: const Text(
                 'Organic Curator',
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               background: Container(
                 decoration: const BoxDecoration(
@@ -56,21 +60,29 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Curated for You',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+                  Text(
+                    context.tr('curated_for_you'),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF111827),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Fresh organic food from local gardens',
+                    context.tr('fresh_local_food'),
                     style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 24),
-                  _buildCategories(),
+                  _buildCategories(context),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Popular Restaurants',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+                  Text(
+                    context.tr('popular_restaurants'),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF111827),
+                    ),
                   ),
                   const SizedBox(height: 16),
                 ],
@@ -81,21 +93,32 @@ class HomeScreen extends StatelessWidget {
             stream: restaurantService.getAllRestaurants(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
+                return const SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator()),
+                );
               }
               if (snapshot.hasError) {
-                return SliverFillRemaining(child: Center(child: Text('Error: ${snapshot.error}')));
+                return SliverFillRemaining(
+                  child: Center(
+                    child: Text('${context.tr('error')}: ${snapshot.error}'),
+                  ),
+                );
               }
               final restaurants = snapshot.data ?? [];
               if (restaurants.isEmpty) {
-                return const SliverFillRemaining(child: Center(child: Text('No restaurants found')));
+                return SliverFillRemaining(
+                  child: Center(
+                    child: Text(context.tr('no_restaurants_found')),
+                  ),
+                );
               }
 
               return SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) => _RestaurantCard(restaurant: restaurants[index]),
+                    (context, index) =>
+                        _RestaurantCard(restaurant: restaurants[index]),
                     childCount: restaurants.length,
                   ),
                 ),
@@ -108,8 +131,15 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCategories() {
-    final categories = ['All', 'Vegetables', 'Fruits', 'Dairy', 'Bakery', 'Honey'];
+  Widget _buildCategories(BuildContext context) {
+    final categories = [
+      context.tr('category_all'),
+      context.tr('category_vegetables'),
+      context.tr('category_fruits'),
+      context.tr('category_dairy'),
+      context.tr('category_bakery'),
+      context.tr('category_honey'),
+    ];
     return SizedBox(
       height: 44,
       child: ListView.builder(
@@ -121,14 +151,20 @@ class HomeScreen extends StatelessWidget {
             margin: const EdgeInsets.only(right: 12),
             child: Chip(
               label: Text(categories[index]),
-              backgroundColor: isSelected ? const Color(0xFF064E3B) : Colors.white,
+              backgroundColor: isSelected
+                  ? const Color(0xFF064E3B)
+                  : Colors.white,
               labelStyle: TextStyle(
                 color: isSelected ? Colors.white : const Color(0xFF4B5563),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
-                side: BorderSide(color: isSelected ? Colors.transparent : const Color(0xFFE5E7EB)),
+                side: BorderSide(
+                  color: isSelected
+                      ? Colors.transparent
+                      : const Color(0xFFE5E7EB),
+                ),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
@@ -155,14 +191,16 @@ class _RestaurantCard extends StatelessWidget {
             color: Colors.black.withOpacity(0.04),
             blurRadius: 16,
             offset: const Offset(0, 8),
-          )
+          ),
         ],
       ),
       child: InkWell(
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => RestaurantScreen(restaurant: restaurant)),
+            MaterialPageRoute(
+              builder: (_) => RestaurantScreen(restaurant: restaurant),
+            ),
           );
         },
         borderRadius: BorderRadius.circular(24),
@@ -172,39 +210,63 @@ class _RestaurantCard extends StatelessWidget {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(24),
+                  ),
                   child: restaurant.imageUrl.isNotEmpty
                       ? CachedNetworkImage(
                           imageUrl: restaurant.imageUrl,
                           height: 180,
                           width: double.infinity,
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => const ShimmerLoading(width: double.infinity, height: 180),
+                          placeholder: (context, url) => const ShimmerLoading(
+                            width: double.infinity,
+                            height: 180,
+                          ),
                         )
                       : Container(
                           height: 180,
                           width: double.infinity,
                           color: const Color(0xFFF3F4F6),
-                          child: const Icon(Icons.restaurant, size: 48, color: Color(0xFFD1D5DB)),
+                          child: const Icon(
+                            Icons.restaurant,
+                            size: 48,
+                            color: Color(0xFFD1D5DB),
+                          ),
                         ),
                 ),
                 Positioned(
                   top: 16,
                   right: 16,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)],
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                        ),
+                      ],
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.star, color: Color(0xFFF59E0B), size: 16),
+                        const Icon(
+                          Icons.star,
+                          color: Color(0xFFF59E0B),
+                          size: 16,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           restaurant.rating.toStringAsFixed(1),
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
@@ -215,12 +277,19 @@ class _RestaurantCard extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.black.withOpacity(0.5),
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(24),
+                        ),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          'CLOSED',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20, letterSpacing: 2),
+                          context.tr('closed_now'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                            letterSpacing: 2,
+                          ),
                         ),
                       ),
                     ),
@@ -234,7 +303,11 @@ class _RestaurantCard extends StatelessWidget {
                 children: [
                   Text(
                     restaurant.name,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF111827),
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -246,9 +319,17 @@ class _RestaurantCard extends StatelessWidget {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      _buildInfoTag(Icons.access_time_filled, '${restaurant.deliveryTimeMinutes} min', const Color(0xFF064E3B)),
+                      _buildInfoTag(
+                        Icons.access_time_filled,
+                        '${restaurant.deliveryTimeMinutes} ${context.tr('minutes_short')}',
+                        const Color(0xFF064E3B),
+                      ),
                       const SizedBox(width: 12),
-                      _buildInfoTag(Icons.delivery_dining, 'TSh ${restaurant.deliveryFee.toStringAsFixed(0)}', const Color(0xFF059669)),
+                      _buildInfoTag(
+                        Icons.delivery_dining,
+                        'TSh ${restaurant.deliveryFee.toStringAsFixed(0)}',
+                        const Color(0xFF059669),
+                      ),
                     ],
                   ),
                 ],
@@ -273,7 +354,11 @@ class _RestaurantCard extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),

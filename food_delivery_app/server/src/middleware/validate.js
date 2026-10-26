@@ -1,4 +1,5 @@
 const { z } = require('zod');
+const { sendError } = require('../utils/api-messages');
 
 const dealSchema = z.object({
   name: z.string().min(1).max(100),
@@ -106,9 +107,7 @@ const paginationSchema = z.object({
 const validate = (schema) => (req, res, next) => {
   const result = schema.safeParse(req.body);
   if (!result.success) {
-    return res.status(400).json({
-      success: false,
-      error: 'Validation failed',
+    return sendError(res, req, 400, 'VALIDATION_FAILED', {
       details: result.error.flatten().fieldErrors,
       messages: result.error.flatten().formErrors,
     });
@@ -120,9 +119,7 @@ const validate = (schema) => (req, res, next) => {
 const validateQuery = (schema) => (req, res, next) => {
   const result = schema.safeParse(req.query);
   if (!result.success) {
-    return res.status(400).json({
-      success: false,
-      error: 'Invalid query parameters',
+    return sendError(res, req, 400, 'INVALID_QUERY_PARAMS', {
       details: result.error.flatten().fieldErrors,
     });
   }
@@ -133,9 +130,7 @@ const validateQuery = (schema) => (req, res, next) => {
 const validateParams = (schema) => (req, res, next) => {
   const result = schema.safeParse(req.params);
   if (!result.success) {
-    return res.status(400).json({
-      success: false,
-      error: 'Invalid route parameters',
+    return sendError(res, req, 400, 'INVALID_ROUTE_PARAMS', {
       details: result.error.flatten().fieldErrors,
     });
   }

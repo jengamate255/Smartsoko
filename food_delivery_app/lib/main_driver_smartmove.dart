@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'utils/app_localizations.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -18,12 +19,10 @@ void main() async {
     await EnvConfig.load();
   } catch (e) {}
 
-  MapboxOptions.accessToken = AppConfig.mapboxToken;
+  MapboxOptions.setAccessToken(AppConfig.mapboxToken);
 
-  await Supabase.initialize(
-    url: AppConfig.supabaseUrl,
-    anonKey: AppConfig.supabaseAnonKey,
-  );
+  AppConfig.setAppType('driver');
+  await SupabaseService().initialize();
 
   runApp(const SmartMoveDriverApp());
 }
@@ -38,22 +37,28 @@ class SmartMoveDriverApp extends StatelessWidget {
         Provider(create: (_) => AuthService()),
         Provider(create: (_) => LocationService()),
         Provider(create: (_) => SupabaseService()),
+        ChangeNotifierProvider(create: (_) => LanguageService()),
       ],
-      child: MaterialApp(
-        title: 'LuxeRide Driver',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          scaffoldBackgroundColor: const Color(0xFF0b1326),
-          colorScheme: ColorScheme.dark(
-            primary: AppTheme.luxePrimary,
-            secondary: AppTheme.luxeSecondary,
-            surface: AppTheme.luxeSurface,
-            error: AppTheme.luxeError,
-            onSurface: AppTheme.luxeOnSurface,
+      child: Consumer<LanguageService>(
+        builder: (_, language, _) => MaterialApp(
+          title: 'LuxeRide Driver',
+          debugShowCheckedModeBanner: false,
+          locale: Locale(language.currentLanguage),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          theme: ThemeData(
+            scaffoldBackgroundColor: const Color(0xFF0b1326),
+            colorScheme: ColorScheme.dark(
+              primary: AppTheme.luxePrimary,
+              secondary: AppTheme.luxeSecondary,
+              surface: AppTheme.luxeSurface,
+              error: AppTheme.luxeError,
+              onSurface: AppTheme.luxeOnSurface,
+            ),
+            useMaterial3: true,
           ),
-          useMaterial3: true,
+          home: const SmartMoveDriverLoginScreen(),
         ),
-        home: const SmartMoveDriverLoginScreen(),
       ),
     );
   }
